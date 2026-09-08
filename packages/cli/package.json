@@ -1,0 +1,21 @@
+{
+  "name": "@naraframe/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "naraframe": "./dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@naraframe/core": "workspace:*",
+    "@naraframe/renderer-remotion": "workspace:*"
+  }
+}
