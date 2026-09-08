@@ -3,6 +3,7 @@ AGENTS.md
 .agents/
 .codex/
 work/
+.worktrees/
 
 # Dependencies and build output
 node_modules/
