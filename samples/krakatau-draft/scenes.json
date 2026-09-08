@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "scenes": [
+    {
+      "id": "hook",
+      "narrativeRole": "hook",
+      "durationMs": 5000,
+      "visual": {
+        "type": "text",
+        "text": "Satu letusan. Suaranya mengelilingi Bumi."
+      },
+      "beats": [
+        {
+          "id": "reveal-hook",
+          "targetId": "hook",
+          "action": "reveal",
+          "startMs": 200,
+          "durationMs": 800,
+          "params": {
+            "direction": "up",
+            "distance": 32
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      }
+    },
+    {
+      "id": "context",
+      "narrativeRole": "context",
+      "durationMs": 5000,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "map-panel",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "#E8E0D2",
+            "frame": {
+              "x": 44,
+              "y": 180,
+              "width": 452,
+              "height": 420
+            },
+            "opacity": 1,
+            "rotationDeg": -2,
+            "zIndex": 0
+          },
+          {
+            "id": "map-image",
+            "type": "image",
+            "assetId": "krakatau-map",
+            "fit": "contain",
+            "frame": {
+              "x": 70,
+              "y": 210,
+              "width": 400,
+              "height": 300
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "context-copy",
+            "type": "text",
+            "text": "1883 • Selat Sunda\nGelombang tekanan tercatat berulang kali.",
+            "frame": {
+              "x": 44,
+              "y": 650,
+              "width": 452,
+              "height": 160
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 2
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "reveal-map",
+          "targetId": "map-panel",
+          "action": "reveal",
+          "startMs": 200,
+          "durationMs": 700,
+          "params": {
+            "direction": "up",
+            "distance": 24
+          }
+        },
+        {
+          "id": "emphasize-map",
+          "targetId": "map-image",
+          "action": "emphasize",
+          "startMs": 1800,
+          "durationMs": 900,
+          "params": {
+            "scale": 1.08
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      }
+    },
+    {
+      "id": "impact",
+      "narrativeRole": "takeaway",
+      "durationMs": 5000,
+      "visual": {
+        "type": "text",
+        "text": "Dampaknya bukan cuma lokal.\nLaut, atmosfer, dan iklim ikut berubah."
+      },
+      "beats": [
+        {
+          "id": "reveal-impact",
+          "targetId": "impact",
+          "action": "reveal",
+          "startMs": 200,
+          "durationMs": 800,
+          "params": {
+            "direction": "up",
+            "distance": 32
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      }
+    }
+  ]
+}
