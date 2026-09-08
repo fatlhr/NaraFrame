@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { CompiledDraft } from "@naraframe/core";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
+import { VERSION as remotionVersion } from "remotion";
 
 const macChrome =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -49,6 +50,8 @@ export interface RenderedDraft {
   width: number;
   height: number;
   fps: number;
+  browserExecutable: string;
+  remotionVersion: string;
 }
 
 export const renderDraft = async ({
@@ -111,5 +114,7 @@ export const renderDraft = async ({
     width: composition.width,
     height: composition.height,
     fps: composition.fps,
+    browserExecutable,
+    remotionVersion,
   };
 };

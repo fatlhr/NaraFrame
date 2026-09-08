@@ -221,13 +221,13 @@ Add one unit harness test per package, run `rtk pnpm test:unit`, then run typech
 
 **Outcome:** Every successful preview is an immutable review package instead of a loose MP4.
 
-- [ ] Render into `.naraframe/attempts/<id>/` and publish complete builds under `preview/builds/<build-id>/`.
-- [ ] Produce `preview.mp4`, `contact-sheet.png`, `frames.json`, `report.json`, and `manifest.json` under one build ID.
-- [ ] Validate hashes/signatures and promote `preview/current.json` atomically only after every artifact is complete.
-- [ ] Preserve the previous current build on render failure, interruption, corrupt MP4, or incomplete report.
-- [ ] Include runtime versions, source revision, assembly key, draft scope, checked frames, and the silent-draft label in reports.
-- [ ] Manually inject one publication failure and inspect that the previous current build remains selected.
-- [ ] Add focused atomic-publication and artifact-integrity tests after manual failure injection, then run the integration gate.
+- [x] Render into `.naraframe/attempts/<id>/` and publish complete builds under `preview/builds/<build-id>/`.
+- [x] Produce `preview.mp4`, `contact-sheet.png`, `frames.json`, `report.json`, and `manifest.json` under one build ID.
+- [x] Validate hashes/signatures and promote `preview/current.json` atomically only after every artifact is complete.
+- [x] Preserve the previous current build on render failure, interruption, corrupt MP4, or incomplete report.
+- [x] Include runtime versions, source revision, assembly key, draft scope, checked frames, and the silent-draft label in reports.
+- [x] Manually inject one publication failure and inspect that the previous current build remains selected.
+- [x] Add focused atomic-publication and artifact-integrity tests after manual failure injection, then run the integration gate.
 
 **Checkpoint:** Fatih can inspect one directory containing the video and all review evidence for the same build.
 
@@ -433,10 +433,11 @@ Every edit uses the same source transaction and preserves spend/receipts across 
 |---|---|---|
 | Node/pnpm/TypeScript/React/Remotion/Zod/Vitest/Biome | M0.1 verified on 2026-09-08: 24.20.0 / 12.3.4 / 7.0.2 / 19.2.8 / 4.0.521 / 4.5.4 / 5.0.0 / 2.5.12. Install, frozen install, package graph, tests, typecheck, and build passed. M0.2 additionally proved the basic Remotion bundle/select/render path with the pinned stack. | M0.5 hardening |
 | Lockfile | `pnpm-lock.yaml` SHA-256 `047e2a98a570ad9a171b4fdba9d8bf297dedfc357986e9ec8b1de49dd3694b82` | Recheck after dependency changes |
-| Browser and FFmpeg exact paths/versions | Detected on 2026-09-08: Google Chrome `152.0.7977.76` at `/Applications/Google Chrome.app`; FFmpeg/FFprobe `7.1.1` at `/opt/homebrew/bin`. M0.2 rendered and probed the development preview using these binaries. | M0.5 hardening |
+| Browser and FFmpeg exact paths/versions | M0.5 recorded Google Chrome `152.0.7977.83` at `/Applications/Google Chrome.app` and FFmpeg/FFprobe `7.1.1` at `/opt/homebrew/bin` in the immutable build report. | Recheck at M0 exit |
 | M0.2 runnable draft | `pnpm naraframe validate samples/krakatau-draft` compiled 450 frames. `pnpm naraframe preview samples/krakatau-draft --draft` produced `samples/krakatau-draft/preview/dev-preview.mp4`; FFprobe reported H.264, 540 × 960, 30 fps, 15.000000 s. Three sampled scenes and the visible `DRAFT • NO AUDIO` label were inspected through `preview/m0-2-contact-sheet.png`. Unit 3/3, focused integration 4/4, and full 15-second render smoke 1/1 passed after the manual render. | M0.2 complete; rerun at M0 exit |
 | M0.3 project creation/profile lock | `pnpm naraframe create work/m0-3-created-project --profile current-issues` created the four source files plus preview/attempt directories atomically. A scene added directly to JSON validated at 450 frames and rendered to `work/m0-3-created-project/preview/dev-preview.mp4`; FFprobe reported H.264, 540 × 960, 30 fps, 15.000000 s, and `preview/m0-3-contact-sheet.png` was inspected. Focused integration coverage proves repository-profile CLI creation, existing-destination refusal, copied/content-addressed profile assets after deleting the source profile, path/symlink rejection, ready-PNG/profile hash checks, and repeatable source revision. | M0.3 complete; rerun at M0 exit |
 | M0.4 visual and motion capability | `pnpm naraframe validate samples/krakatau-draft` compiled a 540-frame project. Full preview `work/m0-4-reference/full-preview.mp4` is H.264/yuvj420p, 540 × 960, 30 fps, 18.000000 seconds, SHA-256 `d5a06bdd257e3eccc0ba4fe8bc5306ae1d7eaf9d6c6dc27011b0bab2e34c274b`; `preview --draft --scene context` compiled a local 180-frame timeline while retaining source frames 120–300. The inspected `work/m0-4-reference/m0-4-contact-sheet.png` and motion sheet prove ready local PNG, rectangle/circle, group transform, text/media/composition, reveal/emphasize/focus, and the labelled planned-media placeholder. Unit 7/7, integration 18/18, and full render E2E 1/1 passed. | M0.4 complete; rerun at M0 exit |
+| M0.5 atomic immutable preview | Pinned Node `24.20.0` published build `41b6900277c8-87554b19-1be` with all five review artifacts under one directory. Manifest SHA-256 is `c54e2ce8f4eb0bb6602adfa38c9885f8ad4c144afb5a1835c8b27053b1b46b28`; FFprobe reported H.264, 540 × 960, 30 fps, 18.000000 seconds; the 540 × 1228 contact sheet contains 11 recorded representative/semantic-beat frames. Injecting failure after complete-directory publication and before pointer replacement returned exit 2 while `preview/current.json` stayed on the prior build with unchanged SHA-256 `72c48d6d416f7bdf2d5957af8dd4365e9c54a46ccd7b3d063d9ea9c373f78b00`. Focused atomic/integrity tests passed 3/3; full `pnpm verify` passed with unit 7/7 and integration 21/21. | M0.5 complete; rerun at M0 exit |
 | Font/PNG/native-layer baseline | M0.4 proved system-font text, ready local PNG decode, rectangle/circle layout, non-recursive grouping, and planned-PNG placeholder rendering. Bundled local-font behavior remains unproven. | M0 exit |
 | External-egress and explicit-browser behavior | Not run | M0 exit |
 | Deterministic compiled/selected frame hashes | M0.4 early signal passed on the pinned machine: repeated compile assembly keys matched; selected-scene lossless PNG frames 15/60/105/150 matched byte-for-byte across two direct renderer passes. SHA-256: `fa6303bddcd38d0bd08abdde5f23664411539b224eadbc87766ad3506a86966a`, `788e5e3530919e65ba3e501e3b492c8e634c1564ce667b315569051d1e4b31c1`, `edef0ef797b4021185c97f8d61e723ce87c3ab8a81019b9db0ff7b3229e37408`, `c59f4193c659bac02eb79327999b41ff72f108c057de88436f6b1af203588966`. Encoded MP4 bytes are intentionally not the determinism contract. | Repeat at M0 exit and M3 |

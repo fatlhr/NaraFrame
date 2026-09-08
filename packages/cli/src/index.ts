@@ -9,7 +9,8 @@ import {
   type Issue,
   loadPlanProject,
 } from "@naraframe/core";
-import { renderDraft, rendererPackage } from "@naraframe/renderer-remotion";
+import { rendererPackage } from "@naraframe/renderer-remotion";
+import { publishPreviewBuild } from "./preview-build.js";
 
 export const cliPackage = "@naraframe/cli";
 export const cliDependencies = [corePackage, rendererPackage] as const;
@@ -173,9 +174,10 @@ const previewCommand = async (args: readonly string[]): Promise<number> => {
     `Rendering ${loaded.value.source.project.title}${sceneId ? ` / ${sceneId}` : ""} (${compiled.value.totalFrames} frames)...`,
   );
   let lastReported = -1;
-  const rendered = await renderDraft({
+  const published = await publishPreviewBuild({
     draft: compiled.value,
     projectRoot: loaded.value.root,
+    issues: compiled.issues,
     onProgress: (progress) => {
       const percent = Math.floor(progress * 10) * 10;
       if (percent !== lastReported) {
@@ -185,9 +187,10 @@ const previewCommand = async (args: readonly string[]): Promise<number> => {
     },
   });
   process.stderr.write("\n");
-  console.log(`Preview ready: ${rendered.outputPath}`);
+  console.log(`Preview build ready: ${published.buildDirectory}`);
+  console.log(`Current pointer: ${published.currentPointer}`);
   console.log(
-    `${rendered.width}x${rendered.height} @ ${rendered.fps}fps, ${(rendered.durationInFrames / rendered.fps).toFixed(1)}s`,
+    `${published.rendered.width}x${published.rendered.height} @ ${published.rendered.fps}fps, ${(published.rendered.durationInFrames / published.rendered.fps).toFixed(1)}s`,
   );
   return 0;
 };
