@@ -40,15 +40,62 @@ const CompiledVisualSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("composition") }).strict(),
 ]);
 
-const CompiledBeatSchema = z
-  .object({
-    id: IdSchema,
-    targetId: IdSchema,
-    action: z.enum(["reveal", "emphasize", "focus"]),
-    startFrame: NonNegativeIntegerSchema,
-    durationInFrames: PositiveIntegerSchema,
-  })
-  .strict();
+const CompiledBeatBaseShape = {
+  id: IdSchema,
+  targetId: IdSchema,
+  startFrame: NonNegativeIntegerSchema,
+  durationInFrames: PositiveIntegerSchema,
+};
+
+export const CompiledBeatSchema = z.discriminatedUnion("action", [
+  z
+    .object({
+      ...CompiledBeatBaseShape,
+      action: z.literal("reveal"),
+      params: z
+        .object({
+          direction: z.enum(["up", "down", "left", "right"]),
+          distance: z.number().nonnegative(),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...CompiledBeatBaseShape,
+      action: z.literal("emphasize"),
+      params: z.object({ scale: z.number().min(1).max(2) }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...CompiledBeatBaseShape,
+      action: z.literal("focus"),
+      params: z
+        .object({
+          camera: z.enum(["push", "pan", "zoom"]),
+          intensity: z.number().min(0).max(1),
+        })
+        .strict(),
+    })
+    .strict(),
+]);
+
+const CompiledScopeSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("project") }).strict(),
+  z
+    .object({
+      type: z.literal("scene"),
+      sceneId: IdSchema,
+      sourceStartFrame: NonNegativeIntegerSchema,
+      sourceEndFrame: PositiveIntegerSchema,
+    })
+    .strict()
+    .refine((scope) => scope.sourceEndFrame > scope.sourceStartFrame, {
+      message: "sourceEndFrame must be greater than sourceStartFrame",
+      path: ["sourceEndFrame"],
+    }),
+]);
 
 const CompiledSceneSchema = z
   .object({
@@ -73,6 +120,7 @@ export const CompiledDraftSchema = z
     height: z.literal(960),
     fps: z.literal(30),
     totalFrames: PositiveIntegerSchema,
+    scope: CompiledScopeSchema,
     timelineScope: z.enum(["project", "local"]),
     label: z.literal("DRAFT • NO AUDIO"),
     sourceRevision: Sha256Schema,
@@ -101,4 +149,5 @@ export const CompiledDraftSchema = z
   });
 
 export type CompiledAsset = z.infer<typeof CompiledAssetSchema>;
+export type CompiledBeat = z.infer<typeof CompiledBeatSchema>;
 export type CompiledDraft = z.infer<typeof CompiledDraftSchema>;

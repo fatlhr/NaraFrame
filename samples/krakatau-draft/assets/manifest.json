@@ -3,9 +3,20 @@
   "assets": [
     {
       "id": "krakatau-map",
+      "status": "ready",
+      "kind": "png",
+      "path": "assets/krakatau-map.png",
+      "sha256": "ac41a949bdcbaddde2436d35e0725bad0fa4edf01398e999c05491dd14976baa",
+      "origin": {
+        "type": "generated",
+        "source": "NaraFrame M0.4 original fixture"
+      }
+    },
+    {
+      "id": "historic-eruption",
       "status": "planned",
       "kind": "png",
-      "purpose": "Peta posisi Krakatau di Selat Sunda",
+      "purpose": "Ilustrasi arsip letusan Krakatau 1883",
       "intendedOrigin": "generated"
     }
   ]

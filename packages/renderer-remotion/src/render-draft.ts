@@ -54,7 +54,13 @@ export interface RenderedDraft {
 export const renderDraft = async ({
   draft,
   projectRoot,
-  outputPath = resolve(projectRoot, "preview/dev-preview.mp4"),
+  outputPath = resolve(
+    projectRoot,
+    "preview",
+    draft.scope.type === "scene"
+      ? `dev-preview-${draft.scope.sceneId}.mp4`
+      : "dev-preview.mp4",
+  ),
   browserExecutable: requestedBrowser,
   onProgress,
 }: RenderDraftRequest): Promise<RenderedDraft> => {
@@ -65,6 +71,7 @@ export const renderDraft = async ({
   const packageRoot = fileURLToPath(new URL("../", import.meta.url));
   const serveUrl = await bundle({
     entryPoint,
+    publicDir: resolve(projectRoot),
     rootDir: packageRoot,
     webpackOverride: (configuration) => ({
       ...configuration,

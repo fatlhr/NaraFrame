@@ -11,6 +11,7 @@ const fallbackDraft: CompiledDraft = {
   height: 960,
   fps: 30,
   totalFrames: 30,
+  scope: { type: "project" },
   timelineScope: "project",
   label: "DRAFT • NO AUDIO",
   sourceRevision: placeholderHash,

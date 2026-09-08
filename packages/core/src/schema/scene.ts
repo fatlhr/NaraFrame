@@ -225,6 +225,34 @@ export const ScenesSchema = z
         });
       });
 
+      const memberOwners = new Map<string, string>();
+      layers.forEach((layer, layerIndex) => {
+        if (layer.type !== "group") {
+          return;
+        }
+
+        layer.memberIds.forEach((memberId, memberIndex) => {
+          const owner = memberOwners.get(memberId);
+          if (owner) {
+            context.addIssue({
+              code: "custom",
+              message: `Layer already belongs to group ${owner}`,
+              path: [
+                "scenes",
+                sceneIndex,
+                "visual",
+                "layers",
+                layerIndex,
+                "memberIds",
+                memberIndex,
+              ],
+            });
+          } else {
+            memberOwners.set(memberId, layer.id);
+          }
+        });
+      });
+
       const beatIds = new Set<string>();
       scene.beats.forEach((beat, beatIndex) => {
         if (beatIds.has(beat.id)) {

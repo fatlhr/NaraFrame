@@ -1,6 +1,9 @@
 export const corePackage = "@naraframe/core";
 
-export { compileDraft } from "./compiler/compile-draft.js";
+export {
+  compileDraft,
+  type DraftScope,
+} from "./compiler/compile-draft.js";
 export {
   type LoadedPlanProject,
   loadPlanProject,
@@ -21,8 +24,15 @@ export {
   AssetManifestSchema,
   AssetSchema,
 } from "./schema/asset.js";
-export type { CompiledAsset, CompiledDraft } from "./schema/compiled.js";
-export { CompiledDraftSchema } from "./schema/compiled.js";
+export type {
+  CompiledAsset,
+  CompiledBeat,
+  CompiledDraft,
+} from "./schema/compiled.js";
+export {
+  CompiledBeatSchema,
+  CompiledDraftSchema,
+} from "./schema/compiled.js";
 export type { PlanSource } from "./schema/export-schema.js";
 export { exportSchemas, validatePlanSource } from "./schema/export-schema.js";
 export type {
