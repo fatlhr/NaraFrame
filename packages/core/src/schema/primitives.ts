@@ -21,7 +21,7 @@ export const ConfigPathSchema = z
     /^[a-z][A-Za-z0-9]*(?:\.[a-z][A-Za-z0-9]*)+$/,
     "Expected a dotted configuration path",
   );
-export const RelativePngPathSchema = z
+export const SafeRelativePathSchema = z
   .string()
   .superRefine((value, context) => {
     const segments = value.split("/");
@@ -29,7 +29,7 @@ export const RelativePngPathSchema = z
       value.length > 0 &&
       !value.startsWith("/") &&
       !value.includes("\\") &&
-      value.endsWith(".png") &&
+      !/^[A-Za-z][A-Za-z0-9+.-]*:/.test(value) &&
       segments.every(
         (segment) => segment !== "" && segment !== "." && segment !== "..",
       );
@@ -37,7 +37,12 @@ export const RelativePngPathSchema = z
     if (!isSafe) {
       context.addIssue({
         code: "custom",
-        message: "Expected a safe relative POSIX path ending in .png",
+        message: "Expected a safe relative POSIX path",
       });
     }
   });
+
+export const RelativePngPathSchema = SafeRelativePathSchema.refine(
+  (value) => value.toLowerCase().endsWith(".png"),
+  "Expected a path ending in .png",
+);
