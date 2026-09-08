@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "krakatau-draft",
+  "title": "Krakatau: letusan yang terdengar lintas samudra",
+  "profile": {
+    "id": "current-issues",
+    "version": "0.1.0"
+  },
+  "format": {
+    "design": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30
+    },
+    "draft": {
+      "width": 540,
+      "height": 960,
+      "fps": 30
+    }
+  },
+  "safetyMaxDurationMs": 180000
+}

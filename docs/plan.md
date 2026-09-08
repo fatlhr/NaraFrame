@@ -6,13 +6,13 @@
 
 **Architecture:** Interleave skill → CLI/core validation/compilation → Remotion rendering. Keep external production operations outside core/renderer. Start with a short visual draft, then prove narration/revision before expanding visual recipes.
 
-**Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, and build compatibility were verified on 2026-09-08; render compatibility remains Task M0.5 evidence.
+**Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, and the first local H.264 draft render were verified on 2026-09-08; complete renderer hardening remains M0.5/M0.8 evidence.
 
-Status: M0 implementation in progress; Task M0.1 complete, M0.2 is next.
-Revision: 0.6
+Status: M0 implementation in progress; Tasks M0.1–M0.2 complete, M0.3 is next.
+Revision: 0.7
 Date: 2026-09-08
 Inputs: `docs/spec.md` revision 0.3 and `docs/refine-spec.md`.
-Implementation: M0.1 workspace bootstrap verified. Render, usability, cost, and voice-quality tests: not run.
+Implementation: M0.1 workspace bootstrap and M0.2 runnable draft are verified. M0.2 followed feature-driven delivery: runnable draft first, manual acceptance second, focused feature tests before merge. Broader usability, recovery, cost, and voice-quality evidence: not yet complete.
 
 ## 1. Global constraints
 
@@ -71,7 +71,7 @@ Avoid speculative generic workflow engines, broad renderer portability layers, a
 
 This is the implementation plan described by the spec-driven workflow. There is no second or more detailed plan between this document and coding. M0 is expanded because it is the next work unit; M1–M3 remain roadmap-level until evidence from the preceding milestone exists.
 
-Each M0 task records the outcome, owned files, required behavior, test coverage, and completion evidence. TypeScript bodies, full test fixtures, package manifests, and renderer implementation belong to execution. If implementation reveals a material product or architecture change, update the relevant spec/refinement decision before continuing. Ordinary coding details are resolved during the task without starting another planning round.
+M0 uses feature-driven delivery. Each task is a small user-visible feature and must end in behavior Fatih can run or an artifact he can inspect. Within each feature, build the real path first, perform its stated manual check, then add focused automated coverage before merge. M0.8 adds cross-feature E2E, failure-injection, and runtime evidence; it is not the first testing point. TypeScript bodies, fixtures, package manifests, and renderer details belong to execution. If implementation reveals a material product or architecture change, update the relevant spec/refinement decision before continuing.
 
 Create the initial lockfile with an ordinary install, then verify a frozen reinstall. No Git initialization, commit, push, paid generation, or product implementation is part of this documentation edit.
 
@@ -89,7 +89,7 @@ pnpm verify
 pnpm test:e2e
 ```
 
-`verify` covers lint/format checks, typecheck, unit/integration tests, and build. Renderer E2E stays separate because it is slower, but it is mandatory for the M0 gate. These commands are targets only; they have not passed yet.
+`verify` covers lint/format checks, typecheck, unit/integration tests, and build. Renderer E2E stays separate because it is slower, but it is mandatory for the M0 gate. During M0.2–M0.7, run the current suite plus the completed feature's focused tests before merge. M0.8 fills cross-feature E2E, recovery, and runtime-evidence gaps and runs the complete exit gate.
 
 ## 5. M0 — First usable visual draft
 
@@ -169,445 +169,108 @@ Add one unit harness test per package, run `rtk pnpm test:unit`, then run typech
 
 **Checkpoint:** Exact installed versions and lockfile hash are recorded in section 11. Later render compatibility is not yet proven. Git now exists; commit only this task's explicit files.
 
-### Task M0.2: Define minimal source, issue, and compiled contracts
+### Task M0.2: Deliver the first runnable draft vertical slice
 
-**Files:**
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/model/issue.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/schema/profile.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/schema/project.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/schema/scene.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/schema/asset.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/schema/compiled.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/schema/export-schema.ts`
-- Modify: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/index.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/core/test/unit/schema/plan-schema.test.ts`
+**Outcome:** Fatih can build the repository and run one real CLI command against a checked-in Krakatau sample to produce and open a 15-second vertical MP4. This is the first product checkpoint, not a schema-only checkpoint.
 
-**Interfaces:**
-- Consumes: schema version 1 and the M0 capability subset.
-- Produces: `Issue`, `Result<T>`, `ProjectConfigSchema`, `ProfileLockSchema`, `ScenesSchema`, `AssetManifestSchema`, `CompiledDraftSchema`, inferred public types, and `exportSchemas(): Record<string, unknown>`.
+**Primary files:**
+- Core source contracts, loader, and compiler under `packages/core/src/`
+- Minimal Remotion composition and renderer under `packages/renderer-remotion/src/`
+- Runnable `validate` and `preview --draft` commands under `packages/cli/src/`
+- Editable sample under `samples/krakatau-draft/`
 
-- [ ] **Step 1: Write the failing contract tests.**
+- [x] Implement the smallest strict source contracts needed by the sample: project, profile lock, scenes, planned/ready PNG assets, compiled draft, and structured issues.
+- [x] Load the sample from disk and compile known scene durations into 540 × 960, 30 fps draft input.
+- [x] Render text, rectangle/circle shapes, and labelled planned-asset placeholders through one Remotion composition.
+- [x] Implement `naraframe validate <project>` and `naraframe preview <project> --draft`. The preview command may publish a development MP4 directly before atomic build publication exists.
+- [x] Add the 15-second three-scene Krakatau sample with `DRAFT • NO AUDIO` visibly inside the safe zone.
+- [x] Run typecheck/build and the current existing test suite only after the product path is implemented.
+- [x] Manually run the built CLI against the sample and inspect the resulting MP4. Command: `pnpm naraframe preview samples/krakatau-draft --draft`; artifact: `samples/krakatau-draft/preview/dev-preview.mp4`.
+- [x] After the manual path works, add focused tests for this feature's source validation, compilation, CLI contract, and one smoke render; rerun the integration gate.
 
-Cover one valid project using every M0 capability and separate negative cases for unsupported video/SVG, raw keyframes/executable fields, unknown action, duplicate IDs, unresolved beat target, invalid format, and schema version 2. Each negative case must fail for the intended field and assert a stable issue path rather than merely asserting that parsing throws.
+**Checkpoint:** M0.2 completes only when the real CLI produces a watchable MP4 and its focused tests pass. Broader cross-feature and failure-injection coverage remains M0.8.
 
-- [ ] **Step 2: Run the test and confirm the missing-export failure.**
+### Task M0.3: Make project creation and profile locking usable
 
-Run:
+**Outcome:** Fatih can create a new project from a profile instead of copying the sample manually.
 
-```bash
-rtk pnpm test:unit -- packages/core/test/unit/schema/plan-schema.test.ts
-```
+- [ ] Implement `naraframe create <name> --profile <id-or-path>` using atomic staging and rename.
+- [ ] Create `naraframe.json`, `profile.lock.json`, `scenes.json`, `assets/manifest.json`, preview directories, and attempt directories.
+- [ ] Copy/hash render-critical profile assets so the project no longer depends on the source profile.
+- [ ] Implement safe relative-path resolution, ready-PNG hash checks, and deterministic source revision calculation.
+- [ ] Run the built CLI to create a temporary project, add one scene through direct JSON editing, validate it, and produce a draft preview.
+- [ ] Add focused create/profile-lock/path/hash tests after the manual flow works, then run the integration gate.
 
-Expected: FAIL because the schemas are not exported by `@naraframe/core`.
+**Checkpoint:** Keep the created project and preview path long enough for manual inspection, then protect the accepted behavior before merge.
 
-- [ ] **Step 3: Implement the minimal schemas and public model.**
+### Task M0.4: Complete the M0 visual and motion capability set
 
-Use strict Zod schemas and infer the public types from them. IDs use lowercase kebab-case; colors and SHA-256 values have explicit formats; durations are positive integers. M0 supports scene visuals `text`, `media`, and `composition`; layers `text`, local PNG image, rectangle/circle shape, and non-recursive group; actions `reveal`, `emphasize`, and `focus`; transition `cut` only. Groups reference ordered member IDs and apply a group transform without recursive child objects.
+**Outcome:** The runnable draft supports every visual capability promised by M0.
 
-Validate unique scene/layer IDs, group membership, beat targets, 1080 × 1920 design format at 30 fps, 540 × 960 draft format, and the 180-second default safety limit. A profile recommendation outside its preferred duration is a warning; exceeding the safety limit is an error.
+- [ ] Add text, local PNG image, rectangle/circle shape, and non-recursive group layers.
+- [ ] Add scene visual types `text`, `media`, and `composition` plus `cut` transitions.
+- [ ] Add bounded `reveal`, `emphasize`, and `focus` actions using deterministic frame arithmetic.
+- [ ] Resolve full-project and selected-scene draft scope, half-open frame boundaries, and labelled placeholders.
+- [ ] Reject raw keyframes, executable fields, unknown actions, recursive groups, broken references, and unsupported SVG/video.
+- [ ] Manually render the reference frames twice and compare hashes as an early determinism signal.
+- [ ] Add focused layer/action/reference/frame-boundary tests after the visual flow works, then run the integration gate.
 
-Assets are `planned` or a ready local PNG with relative POSIX path and SHA-256. Profile lock contains the exact fields used in the test, strict render tokens, full direction text/hash, and locked/overridable paths. `CompiledDraftSchema` matches the M0 interface map and permits only resolved ready PNG assets or typed labelled placeholders.
+**Checkpoint:** Watch the full video and confirm the explanatory state changes, rather than accepting motion on a title alone.
 
-Implement `exportSchemas()` using Zod 4 JSON Schema conversion and export every public schema/type from `src/index.ts`.
+### Task M0.5: Publish complete preview builds atomically
 
-- [ ] **Step 4: Run schema tests and negative unknown-field cases.**
+**Outcome:** Every successful preview is an immutable review package instead of a loose MP4.
 
-Run:
+- [ ] Render into `.naraframe/attempts/<id>/` and publish complete builds under `preview/builds/<build-id>/`.
+- [ ] Produce `preview.mp4`, `contact-sheet.png`, `frames.json`, `report.json`, and `manifest.json` under one build ID.
+- [ ] Validate hashes/signatures and promote `preview/current.json` atomically only after every artifact is complete.
+- [ ] Preserve the previous current build on render failure, interruption, corrupt MP4, or incomplete report.
+- [ ] Include runtime versions, source revision, assembly key, draft scope, checked frames, and the silent-draft label in reports.
+- [ ] Manually inject one publication failure and inspect that the previous current build remains selected.
+- [ ] Add focused atomic-publication and artifact-integrity tests after manual failure injection, then run the integration gate.
 
-```bash
-rtk pnpm test:unit -- packages/core/test/unit/schema/plan-schema.test.ts
-rtk pnpm typecheck
-```
+**Checkpoint:** Fatih can inspect one directory containing the video and all review evidence for the same build.
 
-Expected: both exit 0; every positive/negative case above resolves to its expected issue code and path.
+### Task M0.6: Finish the operator-facing CLI and NaraFrame skill
 
-**Checkpoint:** Save an exported schema snapshot in the test assertion, not a hand-maintained duplicate under the skill.
+**Outcome:** The same product path works from terminal and from an agent using the skill.
 
-### Task M0.3: Create projects, lock profiles, and load files safely
+- [ ] Complete `doctor`, `schema`, `create`, `validate --stage plan`, `status`, and `preview --draft`.
+- [ ] Support concise human output and exactly one final versioned JSON event on stdout in `--json` mode.
+- [ ] Map usage, source, system, and cancellation failures to exit codes 3, 1, 2, and 130.
+- [ ] Return actionable issues with stable code, artifact, path/entity, responsibility, message, and suggestion.
+- [ ] Add `skills/naraframe/SKILL.md` with the profile-first interleaved flow. The skill calls the public CLI and does not duplicate schemas.
+- [ ] Follow the skill once against the reference sample and confirm it reaches the same preview build as direct CLI use.
+- [ ] Add focused CLI/skill compatibility and exit-code tests after both operator paths work, then run the integration gate.
 
-**Files:**
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/project/create-project.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/project/load-plan-project.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/project/safe-path.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/profile/create-profile-lock.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/project/hash-file.ts`
-- Modify: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/index.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/core/test/unit/project/safe-path.test.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/core/test/integration/project/create-load.test.ts`
+**Checkpoint:** Terminal and skill operation resolve the same project contract and artifact paths.
 
-**Interfaces:**
-- Consumes: Task M0.2 schemas plus an explicit profile directory and project parent.
-- Produces: `createProject`, `loadPlanProject`, `resolveSafeProjectPath`, and the `PlanProject` contract described in the M0 contract map.
+### Task M0.7: Run the owner trial and revise the real workflow
 
-- [ ] **Step 1: Write filesystem and portability tests.**
+**Outcome:** Fatih tries the product before test coverage is frozen around it.
 
-Cover absolute paths, traversal, remote URLs, symlink escape, missing files, invalid JSON, ready-PNG hash mismatch, unknown fields, duplicate IDs, and an existing destination. Create a project from a temporary profile, remove that source profile, then prove the project still loads from its copied profile lock/assets. Expected issue codes include `UNSAFE_PATH`, `UNSAFE_SYMLINK`, `REMOTE_URL`, `FILE_MISSING`, `JSON_INVALID`, `ASSET_HASH_MISMATCH`, `SCHEMA_INVALID`, `ID_DUPLICATE`, and `PROJECT_EXISTS`.
+- [ ] Give Fatih the shortest exact setup and preview commands.
+- [ ] Open the real preview/contact sheet for review.
+- [ ] Have Fatih change one closing line directly in JSON, validate, and preview again without renderer-code edits.
+- [ ] Run one intentionally invalid `bounce` action and assess whether the error identifies the source path and correction clearly.
+- [ ] Fix usability or contract problems found during this trial and add regression tests before merge.
+- [ ] Record active time, render time, assistance needed, source/build IDs, and review notes.
 
-- [ ] **Step 2: Run the tests and confirm missing functions.**
+**Checkpoint:** M0.7 requires Fatih's hands-on confirmation; agent-only inspection is insufficient.
 
-Run:
+### Task M0.8: Add cross-feature coverage, harden failures, and close M0
 
-```bash
-rtk pnpm test:unit -- packages/core/test/unit/project/safe-path.test.ts
-rtk pnpm test:integration -- packages/core/test/integration/project/create-load.test.ts
-```
+**Outcome:** Cross-feature and runtime tests protect the complete workflow that already worked feature-by-feature.
 
-Expected: FAIL because create/load/safe-path exports do not exist.
+- [ ] Add unit tests for source schemas, references, timing/compiler determinism, motion boundaries, and package exports.
+- [ ] Add integration tests for create/load, safe paths, renderer/browser/FFmpeg behavior, external-egress denial with loopback allowance, and atomic preview publication.
+- [ ] Add CLI tests for commands, structured output, exit codes, cancellation, and failure redaction.
+- [ ] Add an E2E test that copies the Krakatau sample, validates it, renders a 15-second silent draft, inspects all review artifacts, edits one line, rerenders, and verifies the invalid-action failure.
+- [ ] Run `pnpm install --frozen-lockfile`, `pnpm verify`, and `pnpm test:e2e` on the pinned runtime.
+- [ ] Record FFprobe output, repeated selected-frame hashes, sandbox evidence, failure-injection evidence, artifact hashes, and owner-review notes in section 11 and `docs/refine-spec.md`.
 
-- [ ] **Step 3: Implement safe path resolution and stable issue conversion.**
+**M0 completion rule:** M0 remains in progress until both the manual owner trial and the final automated/runtime evidence pass. M0.8 closes integration gaps after feature-level tests already exist; it does not replace manual review.
 
-Reject URL schemes, absolute paths, traversal after normalization, and symlinks whose real path escapes the project. Missing ready assets are errors rather than accepted unresolved paths. Convert schema/parser failures to deterministic issues with JSON Pointer-like paths, without exposing unrelated absolute paths or file contents.
-
-- [ ] **Step 4: Implement atomic project creation and loading.**
-
-`createProject()` validates profile JSON and direction before writing. It creates a sibling `.<name>.naraframe-create-<random>`, writes `naraframe.json`, `profile.lock.json`, `scenes.json`, `assets/manifest.json`, and empty `preview/builds`/`.naraframe/attempts`, fsyncs files where supported, then renames the staging directory to the requested destination. A pre-existing destination returns `PROJECT_EXISTS` without mutation.
-
-The initial `scenes.json` is schema-valid with `scenes: []`; readiness remains incomplete until a scene exists. `profile.lock.json` stores the full normalized `directionText`, SHA-256, resolved render config and profile assets copied under `assets/profile/`. It must not require the source profile after creation.
-
-`loadPlanProject()` reads only the four M0 source files, parses them with Task M0.2 schemas, validates ready PNG paths/hashes through `resolveSafeProjectPath()`, and returns all issues in deterministic path/code order. Compute `sourceRevision` from canonical contents of those source files plus ready asset hashes; exclude timestamps, build output, and absolute project path.
-
-- [ ] **Step 5: Run focused and package checks.**
-
-Run:
-
-```bash
-rtk pnpm test:unit -- packages/core/test/unit/project/safe-path.test.ts
-rtk pnpm test:integration -- packages/core/test/integration/project/create-load.test.ts
-rtk pnpm typecheck
-```
-
-Expected: exit 0. Inspect the temporary fixture to confirm the lock contains direction text and no source-profile absolute path is required to reload.
-
-### Task M0.4: Compile deterministic draft timing and render inputs
-
-**Files:**
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/project/canonical-json.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/compiler/compile-draft.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/compiler/compile-scene.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/compiler/resolve-placeholder.ts`
-- Modify: `/Users/fatih/Code/Playground/NaraFrame/packages/core/src/index.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/core/test/unit/compiler/compile-draft.test.ts`
-
-**Interfaces:**
-- Consumes: `PlanProject`, `DraftScope`, validated M0 scenes/assets.
-- Produces: `canonicalJson(value: unknown): string`, `sha256Canonical(value: unknown): string`, and `compileDraft(project, scope): Result<CompiledDraft>`.
-
-`CompiledScene` has `id`, `startFrame`, `endFrame` (exclusive), `visual`, resolved layers, and beats with `startFrame`/`durationInFrames`. `CompiledAsset` is either `{kind: "png", publicPath, sha256}` or `{kind: "placeholder", assetId, label}`.
-
-- [ ] **Step 1: Write deterministic compiler tests.**
-
-Prove shared half-open frame boundaries, stable repeat compilation, visible planned-asset placeholders, full-project and selected-scene draft scope, and exact rejection of empty projects, zero-frame scenes, out-of-bounds beats, or missing scene IDs. The reference timing assertion is 5000 ms + 2500 ms → `[0,150)` and `[150,225)` at 30 fps.
-
-- [ ] **Step 2: Run the test and see the missing compiler failure.**
-
-Run `rtk pnpm test:unit -- packages/core/test/unit/compiler/compile-draft.test.ts`.
-
-Expected: FAIL because `compileDraft` and test support builder are absent.
-
-- [ ] **Step 3: Implement canonical serialization and shared boundaries.**
-
-Canonicalize object keys recursively while preserving array order. Calculate cumulative millisecond boundaries once, convert each shared boundary to 30 fps, and reject zero-frame intervals. Resolve beats relative to their scene and ensure they stay inside it. Filter a selected scene only after project timing is resolved so its known project offset is retained.
-
-Scale design coordinates from 1080 × 1920 to 540 × 960 once in compiled layers. Planned assets become visible typed placeholders; ready assets use content-hash-addressed public paths. Set `assemblyKey = sha256Canonical()` over compiled profile render tokens, selected scenes, assets, dimensions, fps, mode, and renderer contract version `"m0-remotion-v1"`; exclude sourceRevision, absolute paths, and wall clock.
-
-- [ ] **Step 4: Add determinism and invalidation assertions.**
-
-Add tests proving reordered JSON object keys retain the same canonical hash; text/accent/duration/asset-hash changes alter the relevant key; profile direction text changes sourceRevision without changing assemblyKey when render tokens are unchanged. Run the same compile under `TZ=UTC LANG=C` and `TZ=Asia/Jakarta LANG=id_ID.UTF-8`; expect equal compiled JSON/hash.
-
-- [ ] **Step 5: Run focused checks.**
-
-```bash
-rtk pnpm test:unit -- packages/core/test/unit/compiler/compile-draft.test.ts
-rtk pnpm typecheck
-```
-
-Expected: exit 0 with exact ranges `[0,150)` and `[150,225)`. Store no compiled output in the source folder during this unit test.
-
-### Task M0.5: Prove the renderer and implement the minimal motion composition
-
-**Files:**
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/composition/index.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/composition/Root.tsx`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/composition/NaraFrameDraft.tsx`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/composition/Scene.tsx`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/layers/Layer.tsx`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/motion/resolve-motion.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/runtime/browser.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/runtime/render-draft.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/runtime/render-stills.ts`
-- Modify: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/index.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/test/unit/motion/resolve-motion.test.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/test/integration/render-draft.test.ts`
-- Test fixture: `/Users/fatih/Code/Playground/NaraFrame/test-fixtures/media/minimal.png`
-- Test policy: `/Users/fatih/Code/Playground/NaraFrame/test-fixtures/network/macos-render.sb`
-
-**Interfaces:**
-- Consumes: `CompiledDraft`, a project root, explicit absolute browser executable, and an attempt directory.
-- Produces: `resolveBrowserExecutable`, `renderDraft`, and `RenderedAttempt` containing preview/still paths, checked frames, runtime versions, and render duration.
-
-- [ ] **Step 1: Write frame-state unit tests before React components.**
-
-Assert reveal, emphasize, and focus at start, midpoint, end, and immediately outside their half-open ranges. Motion resolution must use clamped pure arithmetic without wall clock, unseeded randomness, CSS keyframes, default springs, or locale-dependent values.
-
-- [ ] **Step 2: Implement one Remotion composition from compiled JSON.**
-
-Register only `NaraFrameDraft`. Render compiled scenes at their resolved ranges and support text, local PNG, rectangle/circle, and group transforms. Stage verified project assets into the attempt's Remotion public directory before bundling; the composition receives content-addressed local paths only. Apply motion with scene-local frames and keep `DRAFT • NO AUDIO` inside the safe zone. Load the copied profile font explicitly and fail on font-load errors instead of silently falling back.
-
-- [ ] **Step 3: Write the integration test and local media fixture.**
-
-Generate a deterministic PNG once:
-
-```bash
-rtk ffmpeg -f lavfi -i color=c=0xFF6B35:s=320x180 -frames:v 1 test-fixtures/media/minimal.png
-```
-
-Test `renderDraft()` with a 90-frame compiled fixture. Assert MP4 exists and is nonempty, render three PNG stills at frames 0/45/89, and run:
-
-```bash
-rtk ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -show_entries format=duration -of json <actual-attempt-preview-path>
-```
-
-Expected: H.264, 540 × 960, 30/1 fps, 3.0 seconds within one-frame duration tolerance, no audio stream. Use the actual path returned by the test; never leave angle-bracket text in an executable test.
-
-- [ ] **Step 4: Implement explicit browser and cancellation behavior.**
-
-`resolveBrowserExecutable()` checks an explicit CLI/config value first, then known user-installed Chrome/Chromium locations on the supported macOS reference host. It verifies executable access and returns `BROWSER_NOT_PROVISIONED` with the separate networked setup command `pnpm exec remotion browser ensure`; preview/render never calls ensure. Pass the absolute path to both `selectComposition()` and `renderMedia()`.
-
-Bridge `AbortSignal` to Remotion's `makeCancelSignal()`; SIGINT handling stays in CLI. Use `codec: "h264"`, `pixelFormat: "yuv420p"`, `muted: true`, `concurrency: 1`, and `overwrite: false` for the M0 proof. Exact CRF/final settings wait for M1; record actual renderer/browser/FFmpeg versions.
-
-- [ ] **Step 5: Prove external-egress denial and local-loopback allowance on macOS.**
-
-The M0 reference test runs its render subprocess under a checked-in `sandbox-exec` profile that permits filesystem access to the project/temp/browser dependencies and network access only to loopback. The test fixture deliberately includes one `https://example.invalid/sentinel.png` attempt in a negative unsafe-input test; the core must reject it before renderer launch. Run the valid local composition under the sandbox and assert render success.
-
-```bash
-rtk sandbox-exec -f test-fixtures/network/macos-render.sb pnpm test:integration -- packages/renderer-remotion/test/integration/render-draft.test.ts
-```
-
-Expected: valid render succeeds using loopback/local assets; remote asset input fails with `REMOTE_URL`; no implicit browser download occurs. If `sandbox-exec` is unavailable or the allowlist cannot support Remotion 4.0.521, stop M0 and revise the enforcement mechanism/spec claim before continuing. Do not substitute “we used local URLs” for an egress-denial proof. Other operating systems remain unverified.
-
-- [ ] **Step 6: Prove selected-frame determinism.**
-
-Render frames 0/45/89 twice into separate attempt directories. Decode as PNG and compare SHA-256 hashes; expect three exact matches on the same pinned host/runtime. Record browser rendering backend and flags. Add a static test rejecting `Math.random(`, `Date.now(`, `new Date(`, and remote font/asset strings in renderer source. This does not claim cross-machine pixel identity or byte-identical MP4.
-
-Run:
-
-```bash
-rtk pnpm test:unit -- packages/renderer-remotion/test/unit
-rtk pnpm test:integration -- packages/renderer-remotion/test/integration/render-draft.test.ts
-rtk pnpm typecheck
-```
-
-Expected: exit 0 with actual MP4/still paths retained for the M0 checkpoint.
-
-
-### Task M0.6: Implement the M0 CLI contract
-
-**Files:**
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/run-cli.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/parse-command.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/output/write-result.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/commands/doctor.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/commands/schema.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/commands/create.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/commands/validate.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/commands/status.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/commands/preview.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/services.ts`
-- Modify: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/index.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/test/unit/parse-command.test.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/test/integration/commands.test.ts`
-
-**Interfaces:**
-- Consumes: core Task M0.3/M0.4 and renderer Task M0.5 public functions.
-- Produces: `parseCommand`, `runCli`, the exported `M0_COMMANDS` list, injectable IO/services for tests, and exit codes 0/1/2/3/130.
-
-- [ ] **Step 1: Write parsing and output tests.**
-
-Cover every M0 command, explicit/default project paths, JSON/human output, selected-scene draft, missing `--draft`, unavailable future stages/commands, cancellation, and injected service failures. JSON mode must emit exactly one final parseable result to stdout; progress belongs on stderr.
-
-- [ ] **Step 2: Run the tests and confirm missing CLI exports.**
-
-Run `rtk pnpm test:unit -- packages/cli/test/unit/parse-command.test.ts`.
-
-Expected: FAIL because `parseCommand` and `runCli` are not exported.
-
-- [ ] **Step 3: Implement parsing with Node's built-in parser.**
-
-Use `node:util` `parseArgs()`; do not add a CLI framework. Require explicit `--draft` for M0 preview. Project path defaults to `process.cwd()` only for validate/status/preview; create always receives a name and optional `--parent` defaulting to the current directory. Unsupported future commands return code 3 with a stable usage issue.
-
-Keep `src/index.ts` limited to process IO, signal handling, and the `runCli` call. `services.ts` wires public core/renderer functions and passes one AbortSignal through the operation. Business logic stays in commands/services that can be tested without spawning the executable.
-
-- [ ] **Step 4: Implement command semantics and exit mapping.**
-
-`doctor` checks exact Node `24.20.x`, package versions, writable project/temp filesystem, `ffmpeg -version`, `ffprobe -version`, local font file and `resolveBrowserExecutable()`. It returns `system-unavailable` plus code 2 for missing system dependencies. It never checks or claims external TTS/image capability in M0.
-
-`schema` prints `exportSchemas()`. `create` calls `createProject()`. `validate --stage plan` loads/validates and returns code 1 on source failure. `status` reports plan validity and any current preview pointer matching sourceRevision. `preview --draft` loads, compiles, renders, and publishes. Map incorrect usage to 3, source/validation failure to 1, system/renderer failure to 2, abort to 130, and success with warnings to 0.
-
-Human output is concise on stdout; diagnostic progress goes to stderr. JSON mode writes versioned progress to stderr and exactly one final `CommandResultEvent` to stdout. Catch unexpected errors at the command boundary, redact project-root parent paths and secrets, and emit `UNEXPECTED_SYSTEM_ERROR` without a stack unless `NARAFRAME_DEBUG=1`.
-
-- [ ] **Step 5: Test real command integration without rendering.**
-
-Use temporary project/profile directories and injected renderer services. Assert every command's final event fields, output channel, explicit/default path, issue code, and exit code. Inject abort before/after load and ensure 130. Assert `schema --json` output parses and that skill-visible command names match the exported `M0_COMMANDS` constant.
-
-Run:
-
-```bash
-rtk pnpm test:unit -- packages/cli/test/unit
-rtk pnpm test:integration -- packages/cli/test/integration/commands.test.ts
-rtk pnpm typecheck
-```
-
-Expected: exit 0. Do not call a provider, networked browser setup, or final render in these tests.
-
-### Task M0.7: Publish complete preview builds and contact sheets atomically
-
-**Files:**
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/preview/select-frames.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/preview/make-contact-sheet.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/preview/build-manifest.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/runtime/attempt-manager.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/runtime/publish-preview-build.ts`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/runtime/render-and-publish-draft.ts`
-- Modify: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/src/index.ts`
-- Modify: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/src/services.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/renderer-remotion/test/unit/preview/select-frames.test.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/test/integration/atomic-preview.test.ts`
-
-**Interfaces:**
-- Consumes: compiled draft, renderer attempt artifacts, project-local same-filesystem directories.
-- Produces: `selectReviewFrames`, `makeContactSheet`, `publishPreviewBuild`, and `renderAndPublishDraft`. Publication returns the `DraftBuild` contract from the M0 contract map.
-
-- [ ] **Step 1: Write deterministic frame-selection tests.**
-
-Select each scene's start/midpoint/end-minus-one and each beat's start/end-minus-one. Deduplicate and sort frames while preserving every reason in `frames.json`. Cap the contact sheet at 24 tiles using the deterministic priority: scene midpoint, beat boundary, scene boundary.
-
-- [ ] **Step 2: Generate a PNG contact sheet without another application dependency.**
-
-`makeContactSheet(frameFiles, outputPath)` calls the explicitly detected FFmpeg binary using `spawnFile`/argument arrays, never shell interpolation. Scale each still to 270 × 480, pad labels in the rendered still itself, and tile four columns with enough rows. Return `FFMPEG_CONTACT_SHEET_FAILED` with sanitized stderr on nonzero exit. Assert PNG signature, nonzero dimensions via FFprobe, and that every selected frame is listed in `frames.json`.
-
-- [ ] **Step 3: Write atomic-publication failure tests.**
-
-Inject failure before build-directory promotion, during current-pointer promotion, on cancellation, with a corrupt/zero-byte MP4, and with a missing report. None may replace the previous `current.json` or mutate its build. A successful publication must resolve every artifact through one build ID.
-
-- [ ] **Step 4: Implement immutable build publication.**
-
-Create attempts under `<project>/.naraframe/attempts/<uuid>/`. Renderer writes `preview.mp4` and stills there; orchestration writes `contact-sheet.png`, `frames.json`, `report.json`, and `manifest.json`. The manifest contains schemaVersion, buildId, sourceRevision, assemblyKey, mode/scope, relative artifact paths/hashes, checked frames, exact runtime versions, start/end timestamps, and success status. Wall clock and buildId stay out of assemblyKey.
-
-Validate required files by hash, PNG/MP4 signature and FFprobe before publication. Rename the complete attempt build to `preview/builds/<build-id>`, write `preview/.current.<uuid>.json`, fsync where supported, then rename the pointer to `preview/current.json`. A build moved successfully but not pointed to is unreferenced and may be cleaned later; never modify it in place. Convenience `preview/preview.mp4` is omitted in M0 to avoid a second potentially stale authority; CLI returns the build artifact path.
-
-- [ ] **Step 5: Run build-integrity checks.**
-
-```bash
-rtk pnpm test:unit -- packages/renderer-remotion/test/unit/preview
-rtk pnpm test:integration -- packages/cli/test/integration/atomic-preview.test.ts
-rtk pnpm typecheck
-```
-
-Expected: exit 0; all injected failures retain the old pointer and old build hashes.
-
-### Task M0.8: Add the reference profile, operating skill, and end-to-end draft
-
-**Files:**
-- Create: `/Users/fatih/Code/Playground/NaraFrame/profiles/current-issues/profile.json`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/profiles/current-issues/direction.md`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/profiles/current-issues/assets/fonts/InterVariable.ttf`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/profiles/current-issues/assets/fonts/LICENSE.txt`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/skills/naraframe/SKILL.md`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/README.md`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/test-fixtures/project-m0-draft/naraframe.json`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/test-fixtures/project-m0-draft/profile.lock.json`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/test-fixtures/project-m0-draft/scenes.json`
-- Create: `/Users/fatih/Code/Playground/NaraFrame/test-fixtures/project-m0-draft/assets/manifest.json`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/test/unit/skill-contract.test.ts`
-- Test: `/Users/fatih/Code/Playground/NaraFrame/packages/cli/test/e2e/m0-draft.e2e.test.ts`
-- Modify after evidence: `/Users/fatih/Code/Playground/NaraFrame/docs/refine-spec.md`
-- Modify after evidence: `/Users/fatih/Code/Playground/NaraFrame/docs/plan.md`, section 11
-
-**Interfaces:**
-- Consumes: M0 commands, exported schemas, current-issues direction, and no external production capability.
-- Produces: one skill loop, reference profile/fixture, quickstart, real 15-second draft build, and M0 evidence entries.
-
-- [ ] **Step 1: Write the skill contract test first.**
-
-Verify that the skill uses every shipped M0 command, includes plan validation and explicit draft mode, treats `profile.lock.json` as the project identity snapshot, never writes `.naraframe/compiled.json`, and does not advertise M1/M2 commands. Run it first and expect failure because the skill does not exist.
-
-- [ ] **Step 2: Create the current-issues profile and licensed local font.**
-
-Use profile ID `current-issues`, version `1.0.0`, a dark navy/warm white/orange palette, Inter as the local font, locked output format/fps, and overridable accent color. `direction.md` requires Indonesian general-audience explanations, one viewer question, dated sources for current claims, separation of reported facts/history/general effects, and factual review before expensive generation. It recommends 60–90 seconds for real profile output while allowing the 15-second technical fixture.
-
-Pin the unmodified Inter v4.1 variable TTF from the [official release](https://github.com/rsms/inter/releases/tag/v4.1), retain its [SIL Open Font License](https://github.com/rsms/inter/blob/v4.1/LICENSE.txt) beside the font, and record source URL/version/hash in the profile metadata. Rendering must use the copied local asset offline. If its license/file verification fails during execution, stop this task and replace the choice in the plan before bundling another font.
-
-- [ ] **Step 3: Write the M0 skill procedure.**
-
-The procedure uses `doctor`, `schema`, `create`, `validate --stage plan`, `status`, and `preview --draft` (optionally `--scene`). It reads the selected profile direction, edits only source artifacts, fixes actionable issues, inspects returned artifacts, and iterates in the same project. It must label M0 output as silent draft-only and must not call providers or claim narrated/final readiness. Concise examples are allowed, but copied schemas and future commands are not.
-
-- [ ] **Step 4: Build the 15-second fixture through public commands.**
-
-Use three scenes with exact durations 3000, 7000, and 5000 ms:
-
-1. Hook text: `Mengapa Krakatau penting dipahami?`
-2. Composition: chamber circle plus `Tekanan meningkat`, with reveal at 0 ms/600 ms, emphasize at 2000 ms/900 ms, and focus at 4500 ms/1000 ms.
-3. Closing text: `Sejarah membantu membaca dampaknya.`
-
-Use no narration/caption/music/SFX. The build must visibly carry `DRAFT • NO AUDIO`. The second scene must change explanatory state; a moving title alone fails human review. The fixture lock is generated from the real profile through `create`, then source JSON is edited and validated; do not handcraft a lock that bypasses profile resolution.
-
-- [ ] **Step 5: Write and run the real E2E test.**
-
-The E2E test copies the fixture to a fresh temporary project, resolves the explicit browser, and invokes public CLI boundaries. Assert:
-
-- `doctor --json` returns 0 and exact runtime paths/versions;
-- plan validation returns `plan-valid`;
-- draft preview returns 0, `draft-only`, a nonnull sourceRevision/buildId, and five existing artifacts under one build directory;
-- MP4 probes as 540 × 960, 30 fps, 15 seconds within one frame, H.264, no audio;
-- contact sheet is PNG and `frames.json` includes all scenes plus the three semantic beats;
-- report and video state `DRAFT • NO AUDIO`;
-- current pointer references the same manifest/build;
-- the network-denied wrapper and repeated selected-frame hashes from M0.5 pass.
-
-Then change only the closing text through direct JSON editing, run validate/preview again, and assert sourceRevision/assemblyKey/buildId change while the first build remains intact. Introduce an invalid `bounce` action and assert exit 1 with `SCHEMA_INVALID`, file/entity location and corrective suggestion; the second valid current build remains selected.
-
-Run:
-
-```bash
-rtk pnpm verify
-rtk pnpm test:e2e -- packages/cli/test/e2e/m0-draft.e2e.test.ts
-```
-
-Expected: all commands exit 0 except the intentionally invalid preview, which is asserted as exit 1 inside the passing E2E test.
-
-- [ ] **Step 6: Perform Fatih's mixed-route review and record evidence.**
-
-Follow the README once through the skill. Open the actual preview/contact sheet. Edit the closing visual text in `scenes.json` from terminal, validate/preview with CLI, then return to the skill to inspect results. Record assistance needed, issue quality, elapsed active time, preview time, exact build/source IDs and whether renderer code was untouched.
-
-Review frames/video for 9:16 layout, safe zone, local font, legibility, placeholder/watermark, meaningful chamber progression, motion boundaries, and obvious flicker/clipping. Sampled stills prove only their frames; watch the video for between-sample failures.
-
-- [ ] **Step 7: Close M0 with fresh evidence.**
-
-Update section 11 and `docs/refine-spec.md` with commands, dates, exact artifact paths/hashes, runtime versions and observed outcomes. Mark only the requirements actually evidenced. Keep voice/caption/cost/edit-undo/profile-apply AR items unverified for M1/M2.
-
-**M0 completion command:**
-
-```bash
-rtk pnpm install --frozen-lockfile
-rtk pnpm verify
-rtk pnpm test:e2e
-```
-
-Expected: zero unhandled failures. Also retain FFprobe output, three repeated pixel-hash pairs, egress-sandbox result, failure-injection result, current manifest and human review notes. If any required evidence is absent, M0 remains in progress.
-
-### M0 execution order and stop conditions
-
-Execute Tasks M0.1 through M0.8 in order. A task ends only after its focused tests, typecheck, and stated artifact inspection pass. Stop and revise this plan/spec when:
-
-- the pinned version set cannot install or render together;
-- browser setup cannot be separated from offline rendering;
-- the macOS reference run cannot enforce external-egress denial while allowing Remotion loopback;
-- local font/PNG output or repeated selected frames is unstable;
-- schema/compiled contracts need a breaking change not described here;
-- atomic current-build failure injection loses the previous complete build;
-- the 15-second scene cannot show meaningful explanatory progression with the M0 primitives.
-
-No provider call, Git initialization/commit, final render, or M1 implementation is part of this plan. After M0 passes, use its evidence to detail M1 in this same `docs/plan.md`.
 
 ## 6. M1 — Narrated pilot and affordable revision
 
@@ -768,10 +431,11 @@ Every edit uses the same source transaction and preserves spend/receipts across 
 
 | Decision / measurement | Current status | Required before |
 |---|---|---|
-| Node/pnpm/TypeScript/React/Remotion/Zod/Vitest/Biome | M0.1 verified on 2026-09-08: 24.20.0 / 12.3.4 / 7.0.2 / 19.2.8 / 4.0.521 / 4.5.4 / 5.0.0 / 2.5.12. Install, frozen install, package graph, tests, typecheck, and build passed. Render compatibility remains unproven. | M0.5 |
+| Node/pnpm/TypeScript/React/Remotion/Zod/Vitest/Biome | M0.1 verified on 2026-09-08: 24.20.0 / 12.3.4 / 7.0.2 / 19.2.8 / 4.0.521 / 4.5.4 / 5.0.0 / 2.5.12. Install, frozen install, package graph, tests, typecheck, and build passed. M0.2 additionally proved the basic Remotion bundle/select/render path with the pinned stack. | M0.5 hardening |
 | Lockfile | `pnpm-lock.yaml` SHA-256 `047e2a98a570ad9a171b4fdba9d8bf297dedfc357986e9ec8b1de49dd3694b82` | Recheck after dependency changes |
-| Browser and FFmpeg exact paths/versions | Detected on 2026-09-08: Google Chrome `152.0.7977.76` at `/Applications/Google Chrome.app`; FFmpeg/FFprobe `7.1.1` at `/opt/homebrew/bin`. Rendering with these binaries is not yet proven. | M0.5 |
-| Font/PNG/native-layer baseline | Not run | M0 exit |
+| Browser and FFmpeg exact paths/versions | Detected on 2026-09-08: Google Chrome `152.0.7977.76` at `/Applications/Google Chrome.app`; FFmpeg/FFprobe `7.1.1` at `/opt/homebrew/bin`. M0.2 rendered and probed the development preview using these binaries. | M0.5 hardening |
+| M0.2 runnable draft | `pnpm naraframe validate samples/krakatau-draft` compiled 450 frames. `pnpm naraframe preview samples/krakatau-draft --draft` produced `samples/krakatau-draft/preview/dev-preview.mp4`; FFprobe reported H.264, 540 × 960, 30 fps, 15.000000 s. Three sampled scenes and the visible `DRAFT • NO AUDIO` label were inspected through `preview/m0-2-contact-sheet.png`. Unit 3/3, focused integration 4/4, and full 15-second render smoke 1/1 passed after the manual render. | M0.2 complete; rerun at M0 exit |
+| Font/PNG/native-layer baseline | M0.2 proved system-font text, rectangle/native layout, and planned-PNG placeholder rendering. Local font and ready-PNG decoding remain unproven. | M0 exit |
 | External-egress and explicit-browser behavior | Not run | M0 exit |
 | Deterministic compiled/selected frame hashes | Not run | M0 exit; repeated at M3 |
 | Additional SVG/video/audio/font formats | Not enabled until respective tests pass | Feature enablement M1/M2 |

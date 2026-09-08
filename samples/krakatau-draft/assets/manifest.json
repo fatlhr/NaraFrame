@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "krakatau-map",
+      "status": "planned",
+      "kind": "png",
+      "purpose": "Peta posisi Krakatau di Selat Sunda",
+      "intendedOrigin": "generated"
+    }
+  ]
+}
