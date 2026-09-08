@@ -1,5 +1,4 @@
 # Local agent/runtime state
-AGENTS.md
 .agents/
 .codex/
 work/
@@ -7,6 +6,7 @@ work/
 
 # Dependencies and build output
 node_modules/
+.pnpm-store/
 dist/
 coverage/
 *.log

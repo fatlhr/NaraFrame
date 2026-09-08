@@ -6,13 +6,13 @@
 
 **Architecture:** Interleave skill → CLI/core validation/compilation → Remotion rendering. Keep external production operations outside core/renderer. Start with a short visual draft, then prove narration/revision before expanding visual recipes.
 
-**Tech Stack:** Candidate pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Registry availability was checked on 2026-09-07. Local FFmpeg/browser versions and full compatibility remain Task M0.1 evidence.
+**Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, and build compatibility were verified on 2026-09-08; render compatibility remains Task M0.5 evidence.
 
-Status: M0 implementation plan ready for execution; implementation not started.
-Revision: 0.5
-Date: 2026-09-07
+Status: M0 implementation in progress; Task M0.1 complete, M0.2 is next.
+Revision: 0.6
+Date: 2026-09-08
 Inputs: `docs/spec.md` revision 0.3 and `docs/refine-spec.md`.
-Implementation: Not started. Runtime, usability, cost, and voice-quality tests: not run.
+Implementation: M0.1 workspace bootstrap verified. Render, usability, cost, and voice-quality tests: not run.
 
 ## 1. Global constraints
 
@@ -139,17 +139,17 @@ Core remains renderer-independent. Renderer consumes only compiled data. CLI coo
 - Consumes: Node 24.20.0 LTS and registry packages available on 2026-09-07.
 - Produces: three private workspace packages, explicit test discovery, exact dependency pins, `pnpm naraframe`, and a lockfile used by all later tasks.
 
-- [ ] **Step 1: Create the workspace manifest and package boundaries.**
+- [x] **Step 1: Create the workspace manifest and package boundaries.**
 
 Create a private ESM pnpm workspace with `packages/*`. Pin the candidate versions recorded in the document header without ranges and keep every Remotion package on exactly the same patch. The dependency direction is CLI → core/renderer and renderer → core; core has no renderer dependency. Package exports must resolve built `dist` files, while the test configuration resolves package names to source so tests cannot accidentally use stale builds.
 
 Expose root commands for build, typecheck, lint, format, unit, integration, E2E, verify, and the local CLI. The local CLI runs built output; development tests may execute TypeScript through the test runner.
 
-- [ ] **Step 2: Configure strict TypeScript, Biome, and explicit Vitest projects.**
+- [x] **Step 2: Configure strict TypeScript, Biome, and explicit Vitest projects.**
 
 Use strict NodeNext TypeScript with project references and separate source/build directories. Configure three explicit Vitest projects named `unit`, `integration`, and `e2e`, including the corresponding package test directories and source aliases. Configure Biome recommended checks and exclude dependencies, build outputs, generated project state, previews, and final outputs.
 
-- [ ] **Step 3: Install once to create the lockfile, then verify the frozen path.**
+- [x] **Step 3: Install once to create the lockfile, then verify the frozen path.**
 
 Run:
 
@@ -158,16 +158,16 @@ rtk corepack prepare pnpm@12.3.4 --activate
 rtk pnpm install
 rtk pnpm install --frozen-lockfile
 rtk pnpm exec tsc --version
-rtk pnpm exec remotion --version
+rtk pnpm --filter @naraframe/renderer-remotion exec remotion versions
 ```
 
 Expected: both installs exit 0; TypeScript prints `Version 7.0.2`; Remotion prints `4.0.521`. If Node 24.20.0 plus these pins do not install, stop M0. Record the actual conflict and select a mutually compatible stable set in this section before editing product code. Never mix Remotion patch versions.
 
-- [ ] **Step 4: Prove test discovery and built-package resolution.**
+- [x] **Step 4: Prove test discovery and built-package resolution.**
 
 Add one unit harness test per package, run `rtk pnpm test:unit`, then run typecheck/build and a smoke import from each built package. Expected: every test project is discovered, built exports resolve from `dist`, and no package imports source TypeScript at runtime.
 
-**Checkpoint:** Record exact installed versions and lockfile hash in section 11. Do not mark later runtime compatibility proven yet. This workspace has no Git repository, so do not invent commit steps; if the user later initializes Git, commit only this task's explicit files.
+**Checkpoint:** Exact installed versions and lockfile hash are recorded in section 11. Later render compatibility is not yet proven. Git now exists; commit only this task's explicit files.
 
 ### Task M0.2: Define minimal source, issue, and compiled contracts
 
@@ -768,8 +768,9 @@ Every edit uses the same source transaction and preserves spend/receipts across 
 
 | Decision / measurement | Current status | Required before |
 |---|---|---|
-| Node/pnpm/TypeScript/React/Remotion/Zod/Vitest/Biome | Candidate pins selected in header; install/build/render compatibility not proven | M0.1 and M0.5 |
-| Browser and FFmpeg exact paths/versions | Not detected or proven | M0.1 and M0.5 |
+| Node/pnpm/TypeScript/React/Remotion/Zod/Vitest/Biome | M0.1 verified on 2026-09-08: 24.20.0 / 12.3.4 / 7.0.2 / 19.2.8 / 4.0.521 / 4.5.4 / 5.0.0 / 2.5.12. Install, frozen install, package graph, tests, typecheck, and build passed. Render compatibility remains unproven. | M0.5 |
+| Lockfile | `pnpm-lock.yaml` SHA-256 `047e2a98a570ad9a171b4fdba9d8bf297dedfc357986e9ec8b1de49dd3694b82` | Recheck after dependency changes |
+| Browser and FFmpeg exact paths/versions | Detected on 2026-09-08: Google Chrome `152.0.7977.76` at `/Applications/Google Chrome.app`; FFmpeg/FFprobe `7.1.1` at `/opt/homebrew/bin`. Rendering with these binaries is not yet proven. | M0.5 |
 | Font/PNG/native-layer baseline | Not run | M0 exit |
 | External-egress and explicit-browser behavior | Not run | M0 exit |
 | Deterministic compiled/selected frame hashes | Not run | M0 exit; repeated at M3 |

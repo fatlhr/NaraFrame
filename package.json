@@ -1,0 +1,30 @@
+{
+  "name": "naraframe",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": "24.20.x"
+  },
+  "scripts": {
+    "build": "tsc -b packages/core packages/renderer-remotion packages/cli",
+    "typecheck": "tsc -b packages/core packages/renderer-remotion packages/cli --pretty false",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration --passWithNoTests",
+    "test:e2e": "vitest run --project e2e --passWithNoTests",
+    "verify": "biome check . && tsc -b packages/core packages/renderer-remotion packages/cli --pretty false && vitest run --project unit && vitest run --project integration --passWithNoTests && tsc -b packages/core packages/renderer-remotion packages/cli",
+    "naraframe": "node packages/cli/dist/index.js"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.12",
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vitest": "5.0.0"
+  }
+}
