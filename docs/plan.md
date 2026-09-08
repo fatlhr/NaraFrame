@@ -8,11 +8,11 @@
 
 **Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, and the first local H.264 draft render were verified on 2026-09-08; complete renderer hardening remains M0.5/M0.8 evidence.
 
-Status: M0 implementation in progress; Tasks M0.1–M0.2 complete, M0.3 is next.
-Revision: 0.7
+Status: M0 implementation in progress; Tasks M0.1–M0.3 complete, M0.4 is next.
+Revision: 0.8
 Date: 2026-09-08
 Inputs: `docs/spec.md` revision 0.3 and `docs/refine-spec.md`.
-Implementation: M0.1 workspace bootstrap and M0.2 runnable draft are verified. M0.2 followed feature-driven delivery: runnable draft first, manual acceptance second, focused feature tests before merge. Broader usability, recovery, cost, and voice-quality evidence: not yet complete.
+Implementation: M0.1 workspace bootstrap, M0.2 runnable draft, and M0.3 atomic project creation/profile locking are verified. Feature work follows runnable behavior first, manual acceptance second, and focused tests before merge. Broader usability, recovery, cost, and voice-quality evidence: not yet complete.
 
 ## 1. Global constraints
 
@@ -194,12 +194,12 @@ Add one unit harness test per package, run `rtk pnpm test:unit`, then run typech
 
 **Outcome:** Fatih can create a new project from a profile instead of copying the sample manually.
 
-- [ ] Implement `naraframe create <name> --profile <id-or-path>` using atomic staging and rename.
-- [ ] Create `naraframe.json`, `profile.lock.json`, `scenes.json`, `assets/manifest.json`, preview directories, and attempt directories.
-- [ ] Copy/hash render-critical profile assets so the project no longer depends on the source profile.
-- [ ] Implement safe relative-path resolution, ready-PNG hash checks, and deterministic source revision calculation.
-- [ ] Run the built CLI to create a temporary project, add one scene through direct JSON editing, validate it, and produce a draft preview.
-- [ ] Add focused create/profile-lock/path/hash tests after the manual flow works, then run the integration gate.
+- [x] Implement `naraframe create <name> --profile <id-or-path>` using atomic staging and rename.
+- [x] Create `naraframe.json`, `profile.lock.json`, `scenes.json`, `assets/manifest.json`, preview directories, and attempt directories.
+- [x] Copy/hash render-critical profile assets so the project no longer depends on the source profile.
+- [x] Implement safe relative-path resolution, ready-PNG hash checks, and deterministic source revision calculation.
+- [x] Run the built CLI to create a temporary project, add one scene through direct JSON editing, validate it, and produce a draft preview.
+- [x] Add focused create/profile-lock/path/hash tests after the manual flow works, then run the integration gate.
 
 **Checkpoint:** Keep the created project and preview path long enough for manual inspection, then protect the accepted behavior before merge.
 
@@ -435,6 +435,7 @@ Every edit uses the same source transaction and preserves spend/receipts across 
 | Lockfile | `pnpm-lock.yaml` SHA-256 `047e2a98a570ad9a171b4fdba9d8bf297dedfc357986e9ec8b1de49dd3694b82` | Recheck after dependency changes |
 | Browser and FFmpeg exact paths/versions | Detected on 2026-09-08: Google Chrome `152.0.7977.76` at `/Applications/Google Chrome.app`; FFmpeg/FFprobe `7.1.1` at `/opt/homebrew/bin`. M0.2 rendered and probed the development preview using these binaries. | M0.5 hardening |
 | M0.2 runnable draft | `pnpm naraframe validate samples/krakatau-draft` compiled 450 frames. `pnpm naraframe preview samples/krakatau-draft --draft` produced `samples/krakatau-draft/preview/dev-preview.mp4`; FFprobe reported H.264, 540 × 960, 30 fps, 15.000000 s. Three sampled scenes and the visible `DRAFT • NO AUDIO` label were inspected through `preview/m0-2-contact-sheet.png`. Unit 3/3, focused integration 4/4, and full 15-second render smoke 1/1 passed after the manual render. | M0.2 complete; rerun at M0 exit |
+| M0.3 project creation/profile lock | `pnpm naraframe create work/m0-3-created-project --profile current-issues` created the four source files plus preview/attempt directories atomically. A scene added directly to JSON validated at 450 frames and rendered to `work/m0-3-created-project/preview/dev-preview.mp4`; FFprobe reported H.264, 540 × 960, 30 fps, 15.000000 s, and `preview/m0-3-contact-sheet.png` was inspected. Focused integration coverage proves repository-profile CLI creation, existing-destination refusal, copied/content-addressed profile assets after deleting the source profile, path/symlink rejection, ready-PNG/profile hash checks, and repeatable source revision. | M0.3 complete; rerun at M0 exit |
 | Font/PNG/native-layer baseline | M0.2 proved system-font text, rectangle/native layout, and planned-PNG placeholder rendering. Local font and ready-PNG decoding remain unproven. | M0 exit |
 | External-egress and explicit-browser behavior | Not run | M0 exit |
 | Deterministic compiled/selected frame hashes | Not run | M0 exit; repeated at M3 |

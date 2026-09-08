@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "current-issues",
+  "version": "0.1.0",
+  "render": {
+    "palette": {
+      "background": "#11130F",
+      "surface": "#E8E0D2",
+      "text": "#F5F1E8",
+      "accent": "#FF5A36"
+    },
+    "typography": {
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "headingWeight": 800,
+      "bodyWeight": 500
+    },
+    "safeZone": {
+      "top": 80,
+      "right": 44,
+      "bottom": 100,
+      "left": 44
+    },
+    "spacingUnit": 8,
+    "motion": {
+      "revealDurationMs": 500,
+      "emphasizeScale": 1.08,
+      "focusScale": 1.06
+    }
+  },
+  "production": {
+    "voiceStyleSignature": "id-editorial-grounded-v1",
+    "illustrationStyleSignature": "paper-map-editorial-v1",
+    "timing": {
+      "wordLevelRequired": false
+    },
+    "assetPolicy": {
+      "allowPlannedInDraft": true
+    }
+  },
+  "duration": {
+    "preferredMinMs": 15000,
+    "preferredMaxMs": 30000
+  },
+  "lockedPaths": ["format.design", "format.draft", "render.safeZone"],
+  "overridablePaths": ["render.palette", "render.motion"],
+  "assets": []
+}
