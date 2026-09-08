@@ -4,10 +4,10 @@
     {
       "id": "hook",
       "narrativeRole": "hook",
-      "durationMs": 5000,
+      "durationMs": 4000,
       "visual": {
         "type": "text",
-        "text": "Satu letusan. Suaranya mengelilingi Bumi."
+        "text": "Satu letusan.\nSuaranya mengelilingi Bumi."
       },
       "beats": [
         {
@@ -18,7 +18,7 @@
           "durationMs": 800,
           "params": {
             "direction": "up",
-            "distance": 32
+            "distance": 64
           }
         }
       ],
@@ -29,7 +29,7 @@
     {
       "id": "context",
       "narrativeRole": "context",
-      "durationMs": 5000,
+      "durationMs": 6000,
       "visual": {
         "type": "composition",
         "layers": [
@@ -39,10 +39,10 @@
             "shape": "rectangle",
             "fill": "#E8E0D2",
             "frame": {
-              "x": 44,
-              "y": 180,
-              "width": 452,
-              "height": 420
+              "x": 88,
+              "y": 280,
+              "width": 904,
+              "height": 1040
             },
             "opacity": 1,
             "rotationDeg": -2,
@@ -52,53 +52,146 @@
             "id": "map-image",
             "type": "image",
             "assetId": "krakatau-map",
-            "fit": "contain",
+            "fit": "cover",
             "frame": {
-              "x": 70,
-              "y": 210,
-              "width": 400,
-              "height": 300
+              "x": 130,
+              "y": 360,
+              "width": 820,
+              "height": 615
             },
             "opacity": 1,
             "rotationDeg": 0,
             "zIndex": 1
           },
           {
-            "id": "context-copy",
-            "type": "text",
-            "text": "1883 • Selat Sunda\nGelombang tekanan tercatat berulang kali.",
+            "id": "eruption-ring",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "#FF5A36",
             "frame": {
-              "x": 44,
-              "y": 650,
-              "width": 452,
-              "height": 160
+              "x": 480,
+              "y": 760,
+              "width": 120,
+              "height": 120
+            },
+            "opacity": 0.28,
+            "rotationDeg": 0,
+            "zIndex": 0
+          },
+          {
+            "id": "eruption-core",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "#FF5A36",
+            "frame": {
+              "x": 515,
+              "y": 795,
+              "width": 50,
+              "height": 50
             },
             "opacity": 1,
             "rotationDeg": 0,
-            "zIndex": 2
+            "zIndex": 1
+          },
+          {
+            "id": "eruption-marker",
+            "type": "group",
+            "memberIds": ["eruption-ring", "eruption-core"],
+            "transform": {
+              "x": 0,
+              "y": 0,
+              "scale": 1,
+              "rotationDeg": 0,
+              "opacity": 1
+            },
+            "zIndex": 2,
+            "slot": "map-marker"
+          },
+          {
+            "id": "context-copy",
+            "type": "text",
+            "text": "1883 • SELAT SUNDA\nGelombang tekanan tercatat berulang kali mengitari Bumi.",
+            "frame": {
+              "x": 88,
+              "y": 1350,
+              "width": 904,
+              "height": 300
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 4,
+            "slot": "evidence-copy"
           }
         ]
       },
       "beats": [
         {
-          "id": "reveal-map",
+          "id": "reveal-panel",
           "targetId": "map-panel",
           "action": "reveal",
-          "startMs": 200,
-          "durationMs": 700,
+          "startMs": 100,
+          "durationMs": 600,
           "params": {
             "direction": "up",
-            "distance": 24
+            "distance": 48
           }
         },
         {
-          "id": "emphasize-map",
+          "id": "reveal-map",
           "targetId": "map-image",
+          "action": "reveal",
+          "startMs": 300,
+          "durationMs": 800,
+          "params": {
+            "direction": "left",
+            "distance": 64
+          }
+        },
+        {
+          "id": "pulse-marker",
+          "targetId": "eruption-marker",
           "action": "emphasize",
           "startMs": 1800,
           "durationMs": 900,
           "params": {
-            "scale": 1.08
+            "scale": 1.16
+          }
+        },
+        {
+          "id": "focus-map",
+          "targetId": "map-image",
+          "action": "focus",
+          "startMs": 3000,
+          "durationMs": 1200,
+          "params": {
+            "camera": "push",
+            "intensity": 0.7
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      }
+    },
+    {
+      "id": "evidence",
+      "narrativeRole": "evidence",
+      "durationMs": 4000,
+      "visual": {
+        "type": "media",
+        "assetId": "historic-eruption",
+        "fit": "contain"
+      },
+      "beats": [
+        {
+          "id": "reveal-evidence",
+          "targetId": "evidence",
+          "action": "reveal",
+          "startMs": 200,
+          "durationMs": 700,
+          "params": {
+            "direction": "right",
+            "distance": 56
           }
         }
       ],
@@ -109,21 +202,21 @@
     {
       "id": "impact",
       "narrativeRole": "takeaway",
-      "durationMs": 5000,
+      "durationMs": 4000,
       "visual": {
         "type": "text",
         "text": "Dampaknya bukan cuma lokal.\nLaut, atmosfer, dan iklim ikut berubah."
       },
       "beats": [
         {
-          "id": "reveal-impact",
+          "id": "focus-impact",
           "targetId": "impact",
-          "action": "reveal",
+          "action": "focus",
           "startMs": 200,
-          "durationMs": 800,
+          "durationMs": 900,
           "params": {
-            "direction": "up",
-            "distance": 32
+            "camera": "zoom",
+            "intensity": 0.5
           }
         }
       ],

@@ -27,13 +27,25 @@ describe("validate command", () => {
     const exitCode = await runCli(["validate", sampleRoot]);
 
     expect(exitCode).toBe(0);
-    expect(log).toHaveBeenCalledWith("Draft: 540x960 @ 30fps, 450 frames");
+    expect(log).toHaveBeenCalledWith("Draft: 540x960 @ 30fps, 540 frames");
   });
 
   it("returns usage failure when the project argument is absent", async () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expect(runCli(["validate"])).resolves.toBe(3);
+  });
+
+  it("rejects a missing or unknown selected-scene value before rendering", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => undefined);
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(
+      runCli(["preview", sampleRoot, "--draft", "--scene"]),
+    ).resolves.toBe(3);
+    await expect(
+      runCli(["preview", sampleRoot, "--draft", "--scene", "missing-scene"]),
+    ).resolves.toBe(1);
   });
 
   it("creates a project from a repository profile through the public CLI path", async () => {

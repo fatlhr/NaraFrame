@@ -11,7 +11,7 @@ const sampleRoot = fileURLToPath(
 );
 
 describe("draft render", () => {
-  it("renders the 15-second sample to a real MP4", async () => {
+  it("renders the 18-second sample to a real MP4", async () => {
     const loaded = await loadPlanProject(sampleRoot);
     expect(loaded.ok).toBe(true);
     if (!loaded.ok) {
@@ -35,7 +35,7 @@ describe("draft render", () => {
     await expect(access(outputPath)).resolves.toBeUndefined();
     expect(rendered).toMatchObject({
       outputPath,
-      durationInFrames: 450,
+      durationInFrames: 540,
       width: 540,
       height: 960,
       fps: 30,

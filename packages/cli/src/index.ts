@@ -19,7 +19,7 @@ const usage = `NaraFrame
 Usage:
   naraframe create <name> --profile <id-or-path>
   naraframe validate <project>
-  naraframe preview <project> --draft
+  naraframe preview <project> --draft [--scene <scene-id>]
 
 Example:
   pnpm naraframe create work/krakatau --profile current-issues`;
@@ -37,14 +37,18 @@ const printIssues = (issues: readonly Issue[]) => {
 };
 
 const projectArgument = (args: readonly string[]): string | undefined =>
-  args.find((argument) => !argument.startsWith("--"));
+  args.find(
+    (argument, index) =>
+      !argument.startsWith("--") && args[index - 1] !== "--scene",
+  );
 
 const optionValue = (
   args: readonly string[],
   option: string,
 ): string | undefined => {
   const index = args.indexOf(option);
-  return index >= 0 ? args[index + 1] : undefined;
+  const value = index >= 0 ? args[index + 1] : undefined;
+  return value && !value.startsWith("--") ? value : undefined;
 };
 
 const projectIdFromPath = (projectPath: string): string =>
@@ -151,14 +155,22 @@ const previewCommand = async (args: readonly string[]): Promise<number> => {
     return 1;
   }
 
-  const compiled = compileDraft(loaded.value.source);
+  const sceneId = optionValue(args, "--scene");
+  if (args.includes("--scene") && !sceneId) {
+    console.error(usage);
+    return 3;
+  }
+  const compiled = compileDraft(
+    loaded.value.source,
+    sceneId ? { type: "scene", sceneId } : { type: "project" },
+  );
   printIssues(compiled.issues);
   if (!compiled.ok) {
     return 1;
   }
 
   console.log(
-    `Rendering ${loaded.value.source.project.title} (${compiled.value.totalFrames} frames)...`,
+    `Rendering ${loaded.value.source.project.title}${sceneId ? ` / ${sceneId}` : ""} (${compiled.value.totalFrames} frames)...`,
   );
   let lastReported = -1;
   const rendered = await renderDraft({

@@ -15,10 +15,10 @@
       "bodyWeight": 500
     },
     "safeZone": {
-      "top": 80,
-      "right": 44,
-      "bottom": 100,
-      "left": 44
+      "top": 160,
+      "right": 88,
+      "bottom": 200,
+      "left": 88
     },
     "spacingUnit": 8,
     "motion": {

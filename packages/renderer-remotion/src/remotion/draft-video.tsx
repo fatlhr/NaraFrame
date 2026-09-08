@@ -1,5 +1,5 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
 import {
   AbsoluteFill,
   Easing,
@@ -14,6 +14,9 @@ const clamp = {
   extrapolateLeft: "clamp" as const,
   extrapolateRight: "clamp" as const,
 };
+
+const combineTransforms = (...transforms: Array<string | undefined>): string =>
+  transforms.filter((transform) => transform).join(" ");
 
 const motionFor = (
   draft: CompiledDraft,
@@ -34,20 +37,33 @@ const motionFor = (
 
     if (beat.action === "reveal") {
       opacity *= progress;
-      transforms.push(`translateY(${(1 - progress) * 28}px)`);
+      const offset = (1 - progress) * beat.params.distance;
+      const translation = {
+        up: `translateY(${offset}px)`,
+        down: `translateY(${-offset}px)`,
+        left: `translateX(${offset}px)`,
+        right: `translateX(${-offset}px)`,
+      }[beat.params.direction];
+      transforms.push(translation);
     }
 
     if (beat.action === "emphasize") {
       const pulse = Math.sin(progress * Math.PI);
-      transforms.push(
-        `scale(${1 + pulse * (draft.profile.render.motion.emphasizeScale - 1)})`,
-      );
+      transforms.push(`scale(${1 + pulse * (beat.params.scale - 1)})`);
     }
 
     if (beat.action === "focus") {
-      transforms.push(
-        `scale(${1 + progress * (draft.profile.render.motion.focusScale - 1)})`,
-      );
+      const strength = progress * beat.params.intensity;
+      const distance = draft.profile.render.spacingUnit * 6 * strength;
+      const scale = 1 + strength * (draft.profile.render.motion.focusScale - 1);
+
+      if (beat.params.camera === "pan") {
+        transforms.push(`translateX(${-distance}px)`);
+      } else if (beat.params.camera === "push") {
+        transforms.push(`translateY(${-distance / 2}px) scale(${scale})`);
+      } else {
+        transforms.push(`scale(${scale})`);
+      }
     }
   }
 
@@ -85,22 +101,51 @@ const Placeholder = ({ label }: { label: string }) => (
   </div>
 );
 
+const AssetView = ({
+  draft,
+  assetId,
+  fit,
+}: {
+  draft: CompiledDraft;
+  assetId: string;
+  fit: "cover" | "contain";
+}) => {
+  const asset = draft.assets[assetId];
+  return asset?.kind === "png" ? (
+    <Img
+      src={staticFile(asset.publicPath)}
+      style={{ width: "100%", height: "100%", objectFit: fit }}
+    />
+  ) : (
+    <Placeholder label={asset?.label ?? assetId} />
+  );
+};
+
 const LayerView = ({
   draft,
   layer,
+  localFrame,
+  scene,
 }: {
   draft: CompiledDraft;
-  layer: Layer;
+  layer: Exclude<Layer, { type: "group" }>;
+  localFrame: number;
+  scene: CompiledDraft["scenes"][number];
 }) => {
+  const motion = motionFor(draft, scene, layer.id, localFrame);
   const baseStyle: CSSProperties = {
     position: "absolute",
-    left: "frame" in layer ? layer.frame.x : 0,
-    top: "frame" in layer ? layer.frame.y : 0,
-    width: "frame" in layer ? layer.frame.width : undefined,
-    height: "frame" in layer ? layer.frame.height : undefined,
-    opacity: "opacity" in layer ? layer.opacity : layer.transform.opacity,
-    transform: `rotate(${"rotationDeg" in layer ? layer.rotationDeg : layer.transform.rotationDeg}deg)`,
+    left: layer.frame.x,
+    top: layer.frame.y,
+    width: layer.frame.width,
+    height: layer.frame.height,
+    opacity: layer.opacity * Number(motion.opacity ?? 1),
+    transform: combineTransforms(
+      `rotate(${layer.rotationDeg}deg)`,
+      motion.transform,
+    ),
     zIndex: layer.zIndex,
+    transformOrigin: "center center",
   };
 
   if (layer.type === "text") {
@@ -134,43 +179,80 @@ const LayerView = ({
     );
   }
 
-  if (layer.type === "image") {
-    const asset = draft.assets[layer.assetId];
-    return (
-      <div style={baseStyle}>
-        {asset?.kind === "png" ? (
-          <Img
-            src={staticFile(asset.publicPath)}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: layer.fit,
-            }}
-          />
-        ) : (
-          <Placeholder label={asset?.label ?? layer.assetId} />
-        )}
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div style={{ ...baseStyle, overflow: "hidden" }}>
+      <AssetView draft={draft} assetId={layer.assetId} fit={layer.fit} />
+    </div>
+  );
 };
 
-const AnimatedTarget = ({
-  children,
+const GroupView = ({
   draft,
+  group,
+  layersById,
+  localFrame,
   scene,
-  targetId,
 }: {
-  children: ReactNode;
   draft: CompiledDraft;
+  group: Extract<Layer, { type: "group" }>;
+  layersById: Map<string, Layer>;
+  localFrame: number;
   scene: CompiledDraft["scenes"][number];
-  targetId: string;
 }) => {
-  const localFrame = useCurrentFrame();
+  const motion = motionFor(draft, scene, group.id, localFrame);
+  const members = group.memberIds.flatMap((memberId) => {
+    const member = layersById.get(memberId);
+    return member && member.type !== "group" ? [member] : [];
+  });
+  if (members.length === 0) {
+    return null;
+  }
+  const left = Math.min(...members.map((member) => member.frame.x));
+  const top = Math.min(...members.map((member) => member.frame.y));
+  const right = Math.max(
+    ...members.map((member) => member.frame.x + member.frame.width),
+  );
+  const bottom = Math.max(
+    ...members.map((member) => member.frame.y + member.frame.height),
+  );
+
   return (
-    <div style={motionFor(draft, scene, targetId, localFrame)}>{children}</div>
+    <div
+      style={{
+        position: "absolute",
+        left,
+        top,
+        width: right - left,
+        height: bottom - top,
+        opacity: group.transform.opacity * Number(motion.opacity ?? 1),
+        transform: combineTransforms(
+          `translate(${group.transform.x}px, ${group.transform.y}px) scale(${group.transform.scale}) rotate(${group.transform.rotationDeg}deg)`,
+          motion.transform,
+        ),
+        transformOrigin: "center center",
+        zIndex: group.zIndex,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: -left,
+          top: -top,
+          width: draft.width,
+          height: draft.height,
+        }}
+      >
+        {members.map((member) => (
+          <LayerView
+            draft={draft}
+            key={member.id}
+            layer={member}
+            localFrame={localFrame}
+            scene={scene}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -181,69 +263,93 @@ const SceneView = ({
   draft: CompiledDraft;
   scene: CompiledDraft["scenes"][number];
 }) => {
+  const localFrame = useCurrentFrame();
   const safeZone = draft.profile.render.safeZone;
+  const sceneMotion = motionFor(draft, scene, scene.id, localFrame);
 
   if (scene.visual.type === "text") {
     return (
       <AbsoluteFill
         style={{
+          ...sceneMotion,
           justifyContent: "center",
           padding: `${safeZone.top}px ${safeZone.right}px ${safeZone.bottom}px ${safeZone.left}px`,
           boxSizing: "border-box",
         }}
       >
-        <AnimatedTarget draft={draft} scene={scene} targetId={scene.id}>
-          <div
-            style={{
-              color: draft.profile.render.palette.text,
-              fontSize: 64,
-              fontWeight: draft.profile.render.typography.headingWeight,
-              letterSpacing: -2.5,
-              lineHeight: 1.02,
-              whiteSpace: "pre-line",
-            }}
-          >
-            {scene.visual.text}
-          </div>
-          <div
-            style={{
-              marginTop: 30,
-              width: 100,
-              height: 10,
-              backgroundColor: draft.profile.render.palette.accent,
-            }}
-          />
-        </AnimatedTarget>
+        <div
+          style={{
+            color: draft.profile.render.palette.text,
+            fontSize: 64,
+            fontWeight: draft.profile.render.typography.headingWeight,
+            letterSpacing: -2.5,
+            lineHeight: 1.02,
+            whiteSpace: "pre-line",
+          }}
+        >
+          {scene.visual.text}
+        </div>
+        <div
+          style={{
+            marginTop: 30,
+            width: 100,
+            height: 10,
+            backgroundColor: draft.profile.render.palette.accent,
+          }}
+        />
       </AbsoluteFill>
     );
   }
 
   if (scene.visual.type === "media") {
-    const asset = draft.assets[scene.visual.assetId];
     return (
-      <AbsoluteFill style={{ padding: 44, boxSizing: "border-box" }}>
-        <AnimatedTarget draft={draft} scene={scene} targetId={scene.id}>
-          <Placeholder
-            label={
-              asset?.kind === "placeholder" ? asset.label : scene.visual.assetId
-            }
-          />
-        </AnimatedTarget>
+      <AbsoluteFill
+        style={{
+          ...sceneMotion,
+          padding: `${safeZone.top}px ${safeZone.right}px ${safeZone.bottom}px ${safeZone.left}px`,
+          boxSizing: "border-box",
+        }}
+      >
+        <AssetView
+          draft={draft}
+          assetId={scene.visual.assetId}
+          fit={scene.visual.fit}
+        />
       </AbsoluteFill>
     );
   }
 
+  const layersById = new Map(scene.layers.map((layer) => [layer.id, layer]));
+  const groups = scene.layers.filter(
+    (layer): layer is Extract<Layer, { type: "group" }> =>
+      layer.type === "group",
+  );
+  const groupedIds = new Set(groups.flatMap((group) => group.memberIds));
+  const topLevelLayers = scene.layers.filter(
+    (layer): layer is Exclude<Layer, { type: "group" }> =>
+      layer.type !== "group" && !groupedIds.has(layer.id),
+  );
+
   return (
-    <AbsoluteFill>
-      {scene.layers.map((layer) => (
-        <AnimatedTarget
+    <AbsoluteFill style={sceneMotion}>
+      {topLevelLayers.map((layer) => (
+        <LayerView
           draft={draft}
           key={layer.id}
+          layer={layer}
+          localFrame={localFrame}
           scene={scene}
-          targetId={layer.id}
-        >
-          <LayerView draft={draft} layer={layer} />
-        </AnimatedTarget>
+        />
+      ))}
+      {groups.map((group) => (
+        <GroupView
+          draft={draft}
+          group={group}
+          key={group.id}
+          layersById={layersById}
+          localFrame={localFrame}
+          scene={scene}
+        />
       ))}
     </AbsoluteFill>
   );
