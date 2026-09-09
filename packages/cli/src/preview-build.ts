@@ -169,7 +169,7 @@ interface ContactSheetValidationOptions {
   decode?: (path: string) => Promise<void>;
 }
 
-interface OutputRoots {
+export interface PreviewOutputRoots {
   project: string;
   attempts: string;
   preview: string;
@@ -237,6 +237,51 @@ const isContainedPath = (root: string, candidate: string): boolean => {
   );
 };
 
+const validateOutputAncestor = async (
+  realProjectRoot: string,
+  candidate: string,
+  displayPath: string,
+  details: Awaited<ReturnType<typeof lstat>>,
+): Promise<string> => {
+  if (details.isSymbolicLink() || !details.isDirectory()) {
+    throw new Error(
+      `Unsafe output path ${displayPath}: every output ancestor must be a real directory, not a symlink or file.`,
+    );
+  }
+  const resolved = await realpath(candidate);
+  if (!isContainedPath(realProjectRoot, resolved)) {
+    throw new Error(
+      `Unsafe output path ${displayPath}: resolved directory escapes the project root.`,
+    );
+  }
+  return resolved;
+};
+
+const validateExistingOutputAncestors = async (
+  realProjectRoot: string,
+  segments: readonly string[],
+): Promise<void> => {
+  let current = realProjectRoot;
+  for (const segment of segments) {
+    const candidate = join(current, segment);
+    const details = await lstat(candidate).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+      return undefined;
+    });
+    if (!details) {
+      return;
+    }
+    current = await validateOutputAncestor(
+      realProjectRoot,
+      candidate,
+      segments.join("/"),
+      details,
+    );
+  }
+};
+
 const resolveSafeOutputDirectory = async (
   realProjectRoot: string,
   segments: readonly string[],
@@ -244,39 +289,47 @@ const resolveSafeOutputDirectory = async (
   let current = realProjectRoot;
   for (const segment of segments) {
     const candidate = join(current, segment);
-    const details = await lstat(candidate).catch((error: unknown) => {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        throw new Error(
-          `Required output directory ${segments.join("/")} is missing. Recreate the project before previewing.`,
-        );
+    let details = await lstat(candidate).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
       }
-      throw error;
+      return undefined;
     });
-    if (details.isSymbolicLink() || !details.isDirectory()) {
-      throw new Error(
-        `Unsafe output path ${segments.join("/")}: every output ancestor must be a real directory, not a symlink or file.`,
-      );
+    if (!details) {
+      await mkdir(candidate).catch((error: unknown) => {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+          throw error;
+        }
+      });
+      details = await lstat(candidate);
     }
-    const resolved = await realpath(candidate);
-    if (!isContainedPath(realProjectRoot, resolved)) {
-      throw new Error(
-        `Unsafe output path ${segments.join("/")}: resolved directory escapes the project root.`,
-      );
-    }
-    current = resolved;
+    current = await validateOutputAncestor(
+      realProjectRoot,
+      candidate,
+      segments.join("/"),
+      details,
+    );
   }
   return current;
 };
 
-const resolveOutputRoots = async (
+export const preparePreviewOutputRoots = async (
   projectRoot: string,
-): Promise<OutputRoots> => {
+): Promise<PreviewOutputRoots> => {
   const project = await realpath(resolve(projectRoot));
-  const [attempts, preview, builds] = await Promise.all([
-    resolveSafeOutputDirectory(project, [".naraframe", "attempts"]),
-    resolveSafeOutputDirectory(project, ["preview"]),
-    resolveSafeOutputDirectory(project, ["preview", "builds"]),
+  await Promise.all([
+    validateExistingOutputAncestors(project, [".naraframe", "attempts"]),
+    validateExistingOutputAncestors(project, ["preview", "builds"]),
   ]);
+  const attempts = await resolveSafeOutputDirectory(project, [
+    ".naraframe",
+    "attempts",
+  ]);
+  const builds = await resolveSafeOutputDirectory(project, [
+    "preview",
+    "builds",
+  ]);
+  const preview = dirname(builds);
   const [attemptDetails, buildDetails] = await Promise.all([
     stat(attempts),
     stat(builds),
@@ -955,7 +1008,7 @@ export const publishPreviewBuild = async ({
   const startedAt = new Date().toISOString();
   const attemptId = randomUUID();
   const buildId = `${draft.assemblyKey.slice(0, 12)}-${attemptId.slice(0, 12)}`;
-  const outputRoots = await resolveOutputRoots(projectRoot);
+  const outputRoots = await preparePreviewOutputRoots(projectRoot);
   const attemptDirectory = join(outputRoots.attempts, attemptId);
   const stagedBuildDirectory = join(attemptDirectory, "build");
   const previewDirectory = outputRoots.preview;

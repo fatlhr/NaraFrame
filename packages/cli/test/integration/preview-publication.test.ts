@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import {
   access,
+  cp,
   mkdir,
   mkdtemp,
   readdir,
@@ -22,6 +23,7 @@ import {
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import {
   contactSheetLayoutFor,
+  preparePreviewOutputRoots,
   promotePreviewBuild,
   publishPreviewBuild,
   selectCheckedFrames,
@@ -255,6 +257,43 @@ afterEach(async () => {
 });
 
 describe("atomic preview publication", () => {
+  it("creates safe output roots and publishes from a fresh source-only project", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-fresh-"));
+    temporaryRoots.push(root);
+    await Promise.all([
+      cp(join(sampleRoot, "assets"), join(root, "assets"), { recursive: true }),
+      ...["naraframe.json", "profile.lock.json", "scenes.json"].map((file) =>
+        cp(join(sampleRoot, file), join(root, file)),
+      ),
+    ]);
+    await expect(stat(join(root, ".naraframe"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+    await expect(stat(join(root, "preview"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+
+    const outputRoots = await preparePreviewOutputRoots(root);
+    await expect(stat(outputRoots.attempts)).resolves.toMatchObject({});
+    await expect(stat(outputRoots.builds)).resolves.toMatchObject({});
+
+    const buildId = "first-fresh-checkout-build";
+    const published = await promotePreviewBuild({
+      stagedBuildDirectory: await createStagedBuild(root, buildId),
+      previewDirectory: outputRoots.preview,
+      buildId,
+      draft,
+      probe,
+      decode,
+      contactSheetProbe,
+      contactSheetDecode,
+    });
+    await expect(stat(published.buildDirectory)).resolves.toMatchObject({});
+    expect(
+      JSON.parse(await readFile(published.currentPointer, "utf8")),
+    ).toMatchObject({ buildId, manifestSha256: published.manifestSha256 });
+  });
+
   it("promotes one complete directory and leaves the previous pointer selected on interruption", async () => {
     const root = await mkdtemp(join(tmpdir(), "naraframe-preview-publish-"));
     temporaryRoots.push(root);
@@ -492,12 +531,10 @@ describe("atomic preview publication", () => {
       temporaryRoots.push(root, external);
       const sentinel = join(external, "current.json");
       await writeFile(sentinel, "unchanged\n");
-      await mkdir(join(root, ".naraframe"), { recursive: true });
       if (unsafeRoot === "preview") {
-        await mkdir(join(root, ".naraframe", "attempts"));
         await symlink(external, join(root, "preview"));
       } else {
-        await mkdir(join(root, "preview", "builds"), { recursive: true });
+        await mkdir(join(root, ".naraframe"));
         await symlink(external, join(root, ".naraframe", "attempts"));
       }
 
@@ -506,6 +543,9 @@ describe("atomic preview publication", () => {
       ).rejects.toThrow("Unsafe output path");
       expect(await readFile(sentinel, "utf8")).toBe("unchanged\n");
       expect(await readdir(external)).toEqual(["current.json"]);
+      expect(await readdir(root)).toEqual([
+        unsafeRoot === "preview" ? "preview" : ".naraframe",
+      ]);
     }
   });
 
