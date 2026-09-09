@@ -2,16 +2,18 @@ import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import {
   access,
+  lstat,
   mkdir,
   open,
   readFile,
+  realpath,
   rename,
   rm,
   stat,
   writeFile,
 } from "node:fs/promises";
 import { arch, platform, release } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { CompiledDraft, Issue } from "@naraframe/core";
 import { type RenderedDraft, renderDraft } from "@naraframe/renderer-remotion";
 
@@ -76,6 +78,7 @@ interface PreviewMetadata {
     audio: "none";
     muted: true;
   };
+  contactSheet: ContactSheetLayout;
   checkedFrames: CheckedFrame[];
   startedAt: string;
   completedAt: string;
@@ -111,6 +114,8 @@ export interface IntegrityOptions {
   ffprobeExecutable?: string;
   probe?: (path: string) => Promise<Record<string, unknown>>;
   decode?: (path: string) => Promise<void>;
+  contactSheetProbe?: (path: string) => Promise<Record<string, unknown>>;
+  contactSheetDecode?: (path: string) => Promise<void>;
 }
 
 export interface PromotionOptions {
@@ -123,6 +128,8 @@ export interface PromotionOptions {
   ffprobeExecutable?: string;
   probe?: (path: string) => Promise<Record<string, unknown>>;
   decode?: (path: string) => Promise<void>;
+  contactSheetProbe?: (path: string) => Promise<Record<string, unknown>>;
+  contactSheetDecode?: (path: string) => Promise<void>;
 }
 
 export interface MediaValidationOptions {
@@ -132,6 +139,41 @@ export interface MediaValidationOptions {
   ffprobeExecutable?: string;
   probe?: (path: string) => Promise<Record<string, unknown>>;
   decode?: (path: string) => Promise<void>;
+}
+
+export interface ContactSheetLayout {
+  columns: 3;
+  rows: number;
+  cellWidth: 164;
+  cellHeight: 292;
+  padding: 12;
+  margin: 12;
+  width: 540;
+  height: number;
+}
+
+export const withPublishedOutputPath = (
+  rendered: RenderedDraft,
+  buildDirectory: string,
+): RenderedDraft => ({
+  ...rendered,
+  outputPath: join(buildDirectory, "preview.mp4"),
+});
+
+interface ContactSheetValidationOptions {
+  path: string;
+  layout: ContactSheetLayout;
+  ffmpegExecutable?: string;
+  ffprobeExecutable?: string;
+  probe?: (path: string) => Promise<Record<string, unknown>>;
+  decode?: (path: string) => Promise<void>;
+}
+
+interface OutputRoots {
+  project: string;
+  attempts: string;
+  preview: string;
+  builds: string;
 }
 
 const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
@@ -186,6 +228,66 @@ const ffmpegExecutable = (): string =>
 const ffprobeExecutable = (): string =>
   process.env.NARAFRAME_FFPROBE_EXECUTABLE ??
   join(dirname(ffmpegExecutable()), "ffprobe");
+
+const isContainedPath = (root: string, candidate: string): boolean => {
+  const result = relative(root, candidate);
+  return (
+    result === "" ||
+    (!result.startsWith(`..${sep}`) && result !== ".." && !isAbsolute(result))
+  );
+};
+
+const resolveSafeOutputDirectory = async (
+  realProjectRoot: string,
+  segments: readonly string[],
+): Promise<string> => {
+  let current = realProjectRoot;
+  for (const segment of segments) {
+    const candidate = join(current, segment);
+    const details = await lstat(candidate).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        throw new Error(
+          `Required output directory ${segments.join("/")} is missing. Recreate the project before previewing.`,
+        );
+      }
+      throw error;
+    });
+    if (details.isSymbolicLink() || !details.isDirectory()) {
+      throw new Error(
+        `Unsafe output path ${segments.join("/")}: every output ancestor must be a real directory, not a symlink or file.`,
+      );
+    }
+    const resolved = await realpath(candidate);
+    if (!isContainedPath(realProjectRoot, resolved)) {
+      throw new Error(
+        `Unsafe output path ${segments.join("/")}: resolved directory escapes the project root.`,
+      );
+    }
+    current = resolved;
+  }
+  return current;
+};
+
+const resolveOutputRoots = async (
+  projectRoot: string,
+): Promise<OutputRoots> => {
+  const project = await realpath(resolve(projectRoot));
+  const [attempts, preview, builds] = await Promise.all([
+    resolveSafeOutputDirectory(project, [".naraframe", "attempts"]),
+    resolveSafeOutputDirectory(project, ["preview"]),
+    resolveSafeOutputDirectory(project, ["preview", "builds"]),
+  ]);
+  const [attemptDetails, buildDetails] = await Promise.all([
+    stat(attempts),
+    stat(builds),
+  ]);
+  if (attemptDetails.dev !== buildDetails.dev) {
+    throw new Error(
+      "Preview attempts and builds must be directories on the same filesystem.",
+    );
+  }
+  return { project, attempts, preview, builds };
+};
 
 const frameSourceNumber = (draft: CompiledDraft, frame: number): number =>
   draft.scope.type === "scene" ? draft.scope.sourceStartFrame + frame : frame;
@@ -250,19 +352,35 @@ export const selectCheckedFrames = (
     .sort((left, right) => left.frame - right.frame);
 };
 
+export const contactSheetLayoutFor = (
+  frameCount: number,
+): ContactSheetLayout => {
+  const rows = Math.ceil(frameCount / 3);
+  return {
+    columns: 3,
+    rows,
+    cellWidth: 164,
+    cellHeight: 292,
+    padding: 12,
+    margin: 12,
+    width: 540,
+    height: rows * 292 + Math.max(0, rows - 1) * 12 + 24,
+  };
+};
+
 const createContactSheet = async (
   videoPath: string,
   outputPath: string,
   frames: readonly CheckedFrame[],
+  layout: ContactSheetLayout,
   executable: string,
 ): Promise<void> => {
   const selection = frames.map(({ frame }) => `eq(n\\,${frame})`).join("+");
-  const rows = Math.ceil(frames.length / 3);
   const filter = [
     `select='${selection}'`,
-    "scale=164:292:force_original_aspect_ratio=decrease",
-    "pad=164:292:(ow-iw)/2:(oh-ih)/2:color=black",
-    `tile=3x${rows}:padding=12:margin=12:color=0x111111`,
+    `scale=${layout.cellWidth}:${layout.cellHeight}:force_original_aspect_ratio=decrease`,
+    `pad=${layout.cellWidth}:${layout.cellHeight}:(ow-iw)/2:(oh-ih)/2:color=black`,
+    `tile=${layout.columns}x${layout.rows}:padding=${layout.padding}:margin=${layout.margin}:color=0x111111`,
   ].join(",");
   await execute(executable, [
     "-hide_banner",
@@ -334,6 +452,9 @@ const assertCompleteMetadata = (
   const ffmpeg = isObject(runtime) ? runtime.ffmpeg : undefined;
   const render = metadata.render;
   const profile = metadata.profile;
+  const expectedContactSheet = Array.isArray(metadata.checkedFrames)
+    ? contactSheetLayoutFor(metadata.checkedFrames.length)
+    : undefined;
   const scopeMatches =
     JSON.stringify(metadata.scope) === JSON.stringify(draft.scope);
   if (
@@ -373,6 +494,8 @@ const assertCompleteMetadata = (
     render.codec !== "h264" ||
     render.audio !== "none" ||
     render.muted !== true ||
+    JSON.stringify(metadata.contactSheet) !==
+      JSON.stringify(expectedContactSheet) ||
     !Array.isArray(metadata.checkedFrames) ||
     metadata.checkedFrames.length === 0
   ) {
@@ -418,6 +541,42 @@ const decodePreview = async (
     "-map",
     "0:v:0",
     "-an",
+    "-f",
+    "null",
+    "-",
+  ]);
+};
+
+const probeContactSheet = async (
+  path: string,
+  executable: string,
+): Promise<Record<string, unknown>> => {
+  const result = await execute(executable, [
+    "-v",
+    "error",
+    "-show_entries",
+    "stream=index,codec_type,codec_name,width,height",
+    "-of",
+    "json",
+    path,
+  ]);
+  return JSON.parse(result.stdout) as Record<string, unknown>;
+};
+
+const decodeContactSheet = async (
+  path: string,
+  executable: string,
+): Promise<void> => {
+  await execute(executable, [
+    "-v",
+    "error",
+    "-xerror",
+    "-err_detect",
+    "explode",
+    "-i",
+    path,
+    "-map",
+    "0:v:0",
     "-f",
     "null",
     "-",
@@ -490,6 +649,70 @@ export const validatePreviewMedia = async ({
   return verified;
 };
 
+const validateContactSheet = async ({
+  path,
+  layout,
+  ffmpegExecutable: requestedFfmpeg = ffmpegExecutable(),
+  ffprobeExecutable: requestedFfprobe = ffprobeExecutable(),
+  probe,
+  decode,
+}: ContactSheetValidationOptions): Promise<void> => {
+  const png = await readFile(path);
+  if (!hasPngSignature(png)) {
+    throw new Error("contact-sheet.png has an invalid PNG signature.");
+  }
+  const result = probe
+    ? await probe(path)
+    : await probeContactSheet(path, requestedFfprobe);
+  const streams = (Array.isArray(result.streams) ? result.streams : []).filter(
+    isObject,
+  );
+  const stream = streams[0];
+  if (
+    streams.length !== 1 ||
+    stream?.codec_type !== "video" ||
+    stream.codec_name !== "png" ||
+    stream.width !== layout.width ||
+    stream.height !== layout.height
+  ) {
+    throw new Error(
+      "contact-sheet.png does not match the expected PNG layout dimensions.",
+    );
+  }
+  if (decode) {
+    await decode(path);
+  } else {
+    await decodeContactSheet(path, requestedFfmpeg);
+  }
+};
+
+const assertRequiredFrameCoverage = (
+  draft: CompiledDraft,
+  frames: readonly unknown[],
+): void => {
+  const expected = selectCheckedFrames(draft, []);
+  for (const required of expected) {
+    const covered = frames.some((candidate) => {
+      if (!isObject(candidate)) {
+        return false;
+      }
+      const reasons = candidate.reasons;
+      return (
+        candidate.frame === required.frame &&
+        candidate.sourceFrame === required.sourceFrame &&
+        candidate.sceneId === required.sceneId &&
+        Array.isArray(reasons) &&
+        required.reasons.every((reason) => reasons.includes(reason))
+      );
+    });
+    if (!covered) {
+      throw new Error(
+        `frames.json is missing required representative coverage for ${required.sceneId} at frame ${required.frame}: ${required.reasons.join(", ")}.`,
+      );
+    }
+  }
+};
+
 const sharedMetadataKeys = [
   "schemaVersion",
   "buildId",
@@ -502,6 +725,7 @@ const sharedMetadataKeys = [
   "profile",
   "runtime",
   "render",
+  "contactSheet",
   "checkedFrames",
   "startedAt",
   "completedAt",
@@ -530,6 +754,8 @@ export const validatePreviewBuildIntegrity = async ({
   ffprobeExecutable: requestedFfprobe = ffprobeExecutable(),
   probe,
   decode,
+  contactSheetProbe: requestedContactSheetProbe,
+  contactSheetDecode: requestedContactSheetDecode,
 }: IntegrityOptions): Promise<string> => {
   const manifestPath = join(buildDirectory, "manifest.json");
   const manifest = await parseJsonObject(manifestPath);
@@ -551,15 +777,9 @@ export const validatePreviewBuildIntegrity = async ({
     }
   }
 
-  const contactSheet = await readFile(
-    join(buildDirectory, "contact-sheet.png"),
-  );
-  if (!hasPngSignature(contactSheet)) {
-    throw new Error("contact-sheet.png has an invalid PNG signature.");
-  }
-
   const frames = await parseJsonObject(join(buildDirectory, "frames.json"));
   const checkedFrames = Array.isArray(frames.frames) ? frames.frames : [];
+  const expectedContactSheet = contactSheetLayoutFor(checkedFrames.length);
   if (
     frames.schemaVersion !== 1 ||
     frames.buildId !== expectedBuildId ||
@@ -567,6 +787,8 @@ export const validatePreviewBuildIntegrity = async ({
     frames.assemblyKey !== expectedDraft.assemblyKey ||
     JSON.stringify(frames.scope) !== JSON.stringify(expectedDraft.scope) ||
     frames.timelineScope !== expectedDraft.timelineScope ||
+    JSON.stringify(frames.contactSheet) !==
+      JSON.stringify(expectedContactSheet) ||
     checkedFrames.length === 0
   ) {
     throw new Error("frames.json is incomplete or belongs to another build.");
@@ -596,6 +818,7 @@ export const validatePreviewBuildIntegrity = async ({
       throw new Error("frames.json contains an invalid checked frame.");
     }
   }
+  assertRequiredFrameCoverage(expectedDraft, checkedFrames);
 
   const report = await parseJsonObject(join(buildDirectory, "report.json"));
   assertCompleteMetadata(report, expectedBuildId, expectedDraft);
@@ -607,6 +830,18 @@ export const validatePreviewBuildIntegrity = async ({
     throw new Error("report.json is incomplete or belongs to another build.");
   }
 
+  await validateContactSheet({
+    path: join(buildDirectory, "contact-sheet.png"),
+    layout: expectedContactSheet,
+    ffmpegExecutable: requestedFfmpeg,
+    ffprobeExecutable: requestedFfprobe,
+    ...(requestedContactSheetProbe
+      ? { probe: requestedContactSheetProbe }
+      : {}),
+    ...(requestedContactSheetDecode
+      ? { decode: requestedContactSheetDecode }
+      : {}),
+  });
   await validatePreviewMedia({
     path: join(buildDirectory, "preview.mp4"),
     draft: expectedDraft,
@@ -638,6 +873,22 @@ const replacePointerAtomically = async (
   return pointerPath;
 };
 
+const assertBuildDestinationAbsent = async (
+  buildDirectory: string,
+): Promise<void> => {
+  try {
+    await lstat(buildDirectory);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+  throw new Error(
+    `Immutable preview build destination already exists: ${buildDirectory}.`,
+  );
+};
+
 export const promotePreviewBuild = async ({
   stagedBuildDirectory,
   previewDirectory,
@@ -648,6 +899,8 @@ export const promotePreviewBuild = async ({
   ffprobeExecutable: requestedFfprobe,
   probe,
   decode,
+  contactSheetProbe: requestedContactSheetProbe,
+  contactSheetDecode: requestedContactSheetDecode,
 }: PromotionOptions): Promise<{
   buildDirectory: string;
   currentPointer: string;
@@ -655,7 +908,7 @@ export const promotePreviewBuild = async ({
 }> => {
   const buildsDirectory = join(previewDirectory, "builds");
   const buildDirectory = join(buildsDirectory, buildId);
-  await mkdir(buildsDirectory, { recursive: true });
+  await assertBuildDestinationAbsent(buildDirectory);
   const manifestSha256 = await validatePreviewBuildIntegrity({
     buildDirectory: stagedBuildDirectory,
     expectedBuildId: buildId,
@@ -664,6 +917,12 @@ export const promotePreviewBuild = async ({
     ...(requestedFfprobe ? { ffprobeExecutable: requestedFfprobe } : {}),
     ...(probe ? { probe } : {}),
     ...(decode ? { decode } : {}),
+    ...(requestedContactSheetProbe
+      ? { contactSheetProbe: requestedContactSheetProbe }
+      : {}),
+    ...(requestedContactSheetDecode
+      ? { contactSheetDecode: requestedContactSheetDecode }
+      : {}),
   });
   await rename(stagedBuildDirectory, buildDirectory);
 
@@ -696,14 +955,10 @@ export const publishPreviewBuild = async ({
   const startedAt = new Date().toISOString();
   const attemptId = randomUUID();
   const buildId = `${draft.assemblyKey.slice(0, 12)}-${attemptId.slice(0, 12)}`;
-  const attemptDirectory = resolve(
-    projectRoot,
-    ".naraframe",
-    "attempts",
-    attemptId,
-  );
+  const outputRoots = await resolveOutputRoots(projectRoot);
+  const attemptDirectory = join(outputRoots.attempts, attemptId);
   const stagedBuildDirectory = join(attemptDirectory, "build");
-  const previewDirectory = resolve(projectRoot, "preview");
+  const previewDirectory = outputRoots.preview;
   await mkdir(stagedBuildDirectory, { recursive: true });
   await writeFile(join(attemptDirectory, "compiled.json"), json(draft), {
     flag: "wx",
@@ -712,11 +967,12 @@ export const publishPreviewBuild = async ({
   const outputPath = join(stagedBuildDirectory, "preview.mp4");
   const rendered = await renderDraft({
     draft,
-    projectRoot,
+    projectRoot: outputRoots.project,
     outputPath,
     ...(onProgress ? { onProgress } : {}),
   });
   const frames = selectCheckedFrames(draft, issues);
+  const contactSheet = contactSheetLayoutFor(frames.length);
   const ffmpeg = ffmpegExecutable();
   const ffprobe = ffprobeExecutable();
   await access(ffmpeg);
@@ -725,12 +981,19 @@ export const publishPreviewBuild = async ({
     outputPath,
     join(stagedBuildDirectory, "contact-sheet.png"),
     frames,
+    contactSheet,
     ffmpeg,
   );
 
   const verifiedMedia = await validatePreviewMedia({
     path: outputPath,
     draft,
+    ffmpegExecutable: ffmpeg,
+    ffprobeExecutable: ffprobe,
+  });
+  await validateContactSheet({
+    path: join(stagedBuildDirectory, "contact-sheet.png"),
+    layout: contactSheet,
     ffmpegExecutable: ffmpeg,
     ffprobeExecutable: ffprobe,
   });
@@ -756,6 +1019,7 @@ export const publishPreviewBuild = async ({
       assemblyKey: draft.assemblyKey,
       scope: draft.scope,
       timelineScope: draft.timelineScope,
+      contactSheet,
       frames,
     }),
     { flag: "wx" },
@@ -786,6 +1050,7 @@ export const publishPreviewBuild = async ({
       audio: verifiedMedia.audio,
       muted: true,
     },
+    contactSheet,
     checkedFrames: frames,
     startedAt,
     completedAt,
@@ -825,6 +1090,6 @@ export const publishPreviewBuild = async ({
   return {
     buildId,
     ...promoted,
-    rendered,
+    rendered: withPublishedOutputPath(rendered, promoted.buildDirectory),
   };
 };

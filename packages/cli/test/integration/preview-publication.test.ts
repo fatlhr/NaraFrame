@@ -3,14 +3,17 @@ import {
   access,
   mkdir,
   mkdtemp,
+  readdir,
   readFile,
   rm,
   stat,
+  symlink,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { deflateSync } from "node:zlib";
 import {
   type CompiledDraft,
   compileDraft,
@@ -18,8 +21,11 @@ import {
 } from "@naraframe/core";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import {
+  contactSheetLayoutFor,
   promotePreviewBuild,
+  publishPreviewBuild,
   selectCheckedFrames,
+  withPublishedOutputPath,
 } from "../../src/preview-build.js";
 
 const sampleRoot = fileURLToPath(
@@ -31,6 +37,40 @@ let draft: CompiledDraft;
 const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
 const sha256 = (value: Buffer | string): string =>
   createHash("sha256").update(value).digest("hex");
+
+const crc32 = (value: Buffer): number => {
+  let crc = 0xffffffff;
+  for (const byte of value) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+};
+
+const pngChunk = (type: string, data: Buffer): Buffer => {
+  const name = Buffer.from(type, "ascii");
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(data.byteLength);
+  const checksum = Buffer.alloc(4);
+  checksum.writeUInt32BE(crc32(Buffer.concat([name, data])));
+  return Buffer.concat([length, name, data, checksum]);
+};
+
+const validPng = (width: number, height: number): Buffer => {
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
+  header.set([8, 2, 0, 0, 0], 8);
+  const scanlines = Buffer.alloc((width * 3 + 1) * height);
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    pngChunk("IHDR", header),
+    pngChunk("IDAT", deflateSync(scanlines)),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]);
+};
 
 const probe = async (): Promise<Record<string, unknown>> => ({
   streams: [
@@ -45,6 +85,20 @@ const probe = async (): Promise<Record<string, unknown>> => ({
   format: { duration: String(draft.totalFrames / draft.fps) },
 });
 const decode = async (): Promise<void> => undefined;
+const contactSheetProbe = async (): Promise<Record<string, unknown>> => {
+  const layout = contactSheetLayoutFor(selectCheckedFrames(draft, []).length);
+  return {
+    streams: [
+      {
+        codec_type: "video",
+        codec_name: "png",
+        width: layout.width,
+        height: layout.height,
+      },
+    ],
+  };
+};
+const contactSheetDecode = async (): Promise<void> => undefined;
 
 const createStagedBuild = async (
   root: string,
@@ -55,6 +109,8 @@ const createStagedBuild = async (
     | "hash-mismatch"
     | "incomplete-report"
     | "invalid-frame-shape"
+    | "invalid-contact-sheet"
+    | "missing-coverage"
     | "mixed-runtime"
     | "mixed-timestamps" = "valid",
 ): Promise<string> => {
@@ -68,21 +124,21 @@ const createStagedBuild = async (
           Buffer.from("ftyp"),
           Buffer.from("isom"),
         ]);
-  const png = Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    Buffer.from("fixture"),
-  ]);
+  const expectedFrames = selectCheckedFrames(draft, []);
   const checkedFrames =
     variant === "invalid-frame-shape"
       ? [{ frame: 1, reasons: [42] }]
-      : [
-          {
-            frame: 1,
-            sourceFrame: 1,
-            sceneId: draft.scenes[0]?.id ?? "opening",
-            reasons: ["scene-representative"],
-          },
-        ];
+      : variant === "missing-coverage"
+        ? expectedFrames.slice(1)
+        : expectedFrames;
+  const contactSheet = contactSheetLayoutFor(checkedFrames.length);
+  const png =
+    variant === "invalid-contact-sheet"
+      ? Buffer.concat([
+          Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+          Buffer.from("fixture"),
+        ])
+      : validPng(contactSheet.width, contactSheet.height);
   const metadata: Record<string, unknown> = {
     schemaVersion: 1,
     buildId,
@@ -113,6 +169,7 @@ const createStagedBuild = async (
       audio: "none",
       muted: true,
     },
+    contactSheet,
     checkedFrames,
     startedAt: "2026-09-09T00:00:00.000Z",
     completedAt:
@@ -132,6 +189,7 @@ const createStagedBuild = async (
     assemblyKey: draft.assemblyKey,
     scope: draft.scope,
     timelineScope: draft.timelineScope,
+    contactSheet,
     frames: checkedFrames,
   });
   const report = json(metadata);
@@ -215,6 +273,8 @@ describe("atomic preview publication", () => {
       draft,
       probe,
       decode,
+      contactSheetProbe,
+      contactSheetDecode,
     });
     await expect(access(first.buildDirectory)).resolves.toBeUndefined();
     expect(
@@ -235,6 +295,8 @@ describe("atomic preview publication", () => {
         failureInjection: "before-pointer",
         probe,
         decode,
+        contactSheetProbe,
+        contactSheetDecode,
       }),
     ).rejects.toThrow("before pointer promotion");
     expect(await readFile(first.currentPointer)).toEqual(pointerBeforeFailure);
@@ -252,8 +314,30 @@ describe("atomic preview publication", () => {
         draft,
         probe,
         decode,
+        contactSheetProbe,
+        contactSheetDecode,
       }),
     ).rejects.toThrow();
+    expect(await readFile(first.currentPointer)).toEqual(pointerBeforeFailure);
+
+    const emptyBuildId = "existing-empty-build";
+    const emptyBuildDirectory = join(previewDirectory, "builds", emptyBuildId);
+    await mkdir(emptyBuildDirectory);
+    const emptyStaging = await createStagedBuild(root, emptyBuildId);
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: emptyStaging,
+        previewDirectory,
+        buildId: emptyBuildId,
+        draft,
+        probe,
+        decode,
+        contactSheetProbe,
+        contactSheetDecode,
+      }),
+    ).rejects.toThrow("destination already exists");
+    expect(await readdir(emptyBuildDirectory)).toEqual([]);
+    await expect(stat(emptyStaging)).resolves.toMatchObject({});
     expect(await readFile(first.currentPointer)).toEqual(pointerBeforeFailure);
   });
 
@@ -285,6 +369,8 @@ describe("atomic preview publication", () => {
           draft,
           probe,
           decode,
+          contactSheetProbe,
+          contactSheetDecode,
         }),
       ).rejects.toThrow(message);
       expect(
@@ -314,6 +400,8 @@ describe("atomic preview publication", () => {
         decode: async () => {
           throw new Error("synthetic full decode failure");
         },
+        contactSheetProbe,
+        contactSheetDecode,
       }),
     ).rejects.toThrow("full decode failure");
     expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
@@ -337,11 +425,88 @@ describe("atomic preview publication", () => {
           };
         },
         decode,
+        contactSheetProbe,
+        contactSheetDecode,
       }),
     ).rejects.toThrow("contains an audio stream");
     expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
       previousPointer,
     );
+  });
+
+  it("rejects incomplete contact-sheet evidence and missing representative coverage", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-contact-"));
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    const previousPointer = json({ schemaVersion: 1, buildId: "previous" });
+    await writeFile(join(previewDirectory, "current.json"), previousPointer);
+
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(
+          root,
+          "decode-invalid-contact",
+          "invalid-contact-sheet",
+        ),
+        previewDirectory,
+        buildId: "decode-invalid-contact",
+        draft,
+        probe,
+        decode,
+        contactSheetProbe,
+        contactSheetDecode: async () => {
+          throw new Error("synthetic PNG decode failure");
+        },
+      }),
+    ).rejects.toThrow("PNG decode failure");
+
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(
+          root,
+          "missing-coverage",
+          "missing-coverage",
+        ),
+        previewDirectory,
+        buildId: "missing-coverage",
+        draft,
+        probe,
+        decode,
+        contactSheetProbe,
+        contactSheetDecode,
+      }),
+    ).rejects.toThrow("missing required representative coverage");
+
+    expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
+      previousPointer,
+    );
+  });
+
+  it("rejects output symlinks before any render or external write", async () => {
+    for (const unsafeRoot of ["preview", "attempts"] as const) {
+      const root = await mkdtemp(join(tmpdir(), "naraframe-preview-symlink-"));
+      const external = await mkdtemp(
+        join(tmpdir(), "naraframe-preview-external-"),
+      );
+      temporaryRoots.push(root, external);
+      const sentinel = join(external, "current.json");
+      await writeFile(sentinel, "unchanged\n");
+      await mkdir(join(root, ".naraframe"), { recursive: true });
+      if (unsafeRoot === "preview") {
+        await mkdir(join(root, ".naraframe", "attempts"));
+        await symlink(external, join(root, "preview"));
+      } else {
+        await mkdir(join(root, "preview", "builds"), { recursive: true });
+        await symlink(external, join(root, ".naraframe", "attempts"));
+      }
+
+      await expect(
+        publishPreviewBuild({ draft, projectRoot: root, issues: [] }),
+      ).rejects.toThrow("Unsafe output path");
+      expect(await readFile(sentinel, "utf8")).toBe("unchanged\n");
+      expect(await readdir(external)).toEqual(["current.json"]);
+    }
   });
 
   it("selects at least one checked frame per scene and each semantic beat", () => {
@@ -356,5 +521,21 @@ describe("atomic preview publication", () => {
         ).toBe(true);
       }
     }
+
+    const stagingPath = join(tmpdir(), "attempt", "build", "preview.mp4");
+    const publishedDirectory = join(tmpdir(), "preview", "builds", "build-id");
+    const published = withPublishedOutputPath(
+      {
+        outputPath: stagingPath,
+        durationInFrames: draft.totalFrames,
+        width: draft.width,
+        height: draft.height,
+        fps: draft.fps,
+        browserExecutable: "/fixture/chrome",
+        remotionVersion: "4.0.521",
+      },
+      publishedDirectory,
+    );
+    expect(published.outputPath).toBe(join(publishedDirectory, "preview.mp4"));
   });
 });
