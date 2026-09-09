@@ -35,6 +35,7 @@ const sha256 = (value: Buffer | string): string =>
 const probe = async (): Promise<Record<string, unknown>> => ({
   streams: [
     {
+      codec_type: "video",
       codec_name: "h264",
       width: draft.width,
       height: draft.height,
@@ -43,6 +44,7 @@ const probe = async (): Promise<Record<string, unknown>> => ({
   ],
   format: { duration: String(draft.totalFrames / draft.fps) },
 });
+const decode = async (): Promise<void> => undefined;
 
 const createStagedBuild = async (
   root: string,
@@ -51,7 +53,10 @@ const createStagedBuild = async (
     | "valid"
     | "corrupt-mp4"
     | "hash-mismatch"
-    | "incomplete-report" = "valid",
+    | "incomplete-report"
+    | "invalid-frame-shape"
+    | "mixed-runtime"
+    | "mixed-timestamps" = "valid",
 ): Promise<string> => {
   const directory = join(root, `staged-${buildId}`);
   await mkdir(directory, { recursive: true });
@@ -67,14 +72,17 @@ const createStagedBuild = async (
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     Buffer.from("fixture"),
   ]);
-  const checkedFrames = [
-    {
-      frame: 1,
-      sourceFrame: 1,
-      sceneId: draft.scenes[0]?.id ?? "opening",
-      reasons: ["scene-representative"],
-    },
-  ];
+  const checkedFrames =
+    variant === "invalid-frame-shape"
+      ? [{ frame: 1, reasons: [42] }]
+      : [
+          {
+            frame: 1,
+            sourceFrame: 1,
+            sceneId: draft.scenes[0]?.id ?? "opening",
+            reasons: ["scene-representative"],
+          },
+        ];
   const metadata: Record<string, unknown> = {
     schemaVersion: 1,
     buildId,
@@ -89,7 +97,11 @@ const createStagedBuild = async (
       node: "v24.20.0",
       os: { platform: "darwin", release: "fixture", architecture: "arm64" },
       remotion: "4.0.521",
-      browser: { executable: "/fixture/chrome", version: "Chrome fixture" },
+      browser: {
+        executable: "/fixture/chrome",
+        version:
+          variant === "mixed-runtime" ? "Chrome report" : "Chrome fixture",
+      },
       ffmpeg: { executable: "/fixture/ffmpeg", version: "ffmpeg fixture" },
     },
     render: {
@@ -103,7 +115,10 @@ const createStagedBuild = async (
     },
     checkedFrames,
     startedAt: "2026-09-09T00:00:00.000Z",
-    completedAt: "2026-09-09T00:00:01.000Z",
+    completedAt:
+      variant === "mixed-timestamps"
+        ? "2026-09-09T00:00:02.000Z"
+        : "2026-09-09T00:00:01.000Z",
     status: "success",
     failure: null,
   };
@@ -131,6 +146,7 @@ const createStagedBuild = async (
   };
   const manifestMetadata = {
     ...metadata,
+    completedAt: "2026-09-09T00:00:01.000Z",
     runtime: {
       node: "v24.20.0",
       os: { platform: "darwin", release: "fixture", architecture: "arm64" },
@@ -198,6 +214,7 @@ describe("atomic preview publication", () => {
       buildId: firstBuildId,
       draft,
       probe,
+      decode,
     });
     await expect(access(first.buildDirectory)).resolves.toBeUndefined();
     expect(
@@ -217,6 +234,7 @@ describe("atomic preview publication", () => {
         draft,
         failureInjection: "before-pointer",
         probe,
+        decode,
       }),
     ).rejects.toThrow("before pointer promotion");
     expect(await readFile(first.currentPointer)).toEqual(pointerBeforeFailure);
@@ -233,6 +251,7 @@ describe("atomic preview publication", () => {
         buildId: firstBuildId,
         draft,
         probe,
+        decode,
       }),
     ).rejects.toThrow();
     expect(await readFile(first.currentPointer)).toEqual(pointerBeforeFailure);
@@ -250,6 +269,13 @@ describe("atomic preview publication", () => {
       ["corrupt-media", "corrupt-mp4", "invalid file signature"],
       ["hash-mismatch", "hash-mismatch", "size/hash integrity check"],
       ["missing-metadata", "incomplete-report", "Build metadata is incomplete"],
+      ["invalid-frames", "invalid-frame-shape", "invalid checked frame"],
+      ["mixed-runtime", "mixed-runtime", "disagree on shared runtime"],
+      [
+        "mixed-timestamps",
+        "mixed-timestamps",
+        "disagree on shared completedAt",
+      ],
     ] as const) {
       await expect(
         promotePreviewBuild({
@@ -258,6 +284,7 @@ describe("atomic preview publication", () => {
           buildId,
           draft,
           probe,
+          decode,
         }),
       ).rejects.toThrow(message);
       expect(
@@ -267,6 +294,54 @@ describe("atomic preview publication", () => {
         stat(join(previewDirectory, "builds", buildId)),
       ).rejects.toMatchObject({ code: "ENOENT" });
     }
+  });
+
+  it("rejects plausible probed media when full decode fails or audio exists", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-media-gate-"));
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(previewDirectory, { recursive: true });
+    const previousPointer = json({ schemaVersion: 1, buildId: "previous" });
+    await writeFile(join(previewDirectory, "current.json"), previousPointer);
+
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(root, "decode-corrupt"),
+        previewDirectory,
+        buildId: "decode-corrupt",
+        draft,
+        probe,
+        decode: async () => {
+          throw new Error("synthetic full decode failure");
+        },
+      }),
+    ).rejects.toThrow("full decode failure");
+    expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
+      previousPointer,
+    );
+
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(root, "contains-audio"),
+        previewDirectory,
+        buildId: "contains-audio",
+        draft,
+        probe: async () => {
+          const result = await probe();
+          return {
+            ...result,
+            streams: [
+              ...(result.streams as unknown[]),
+              { codec_type: "audio", codec_name: "aac" },
+            ],
+          };
+        },
+        decode,
+      }),
+    ).rejects.toThrow("contains an audio stream");
+    expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
+      previousPointer,
+    );
   });
 
   it("selects at least one checked frame per scene and each semantic beat", () => {

@@ -107,8 +107,10 @@ export interface IntegrityOptions {
   buildDirectory: string;
   expectedBuildId: string;
   expectedDraft: CompiledDraft;
+  ffmpegExecutable?: string;
   ffprobeExecutable?: string;
   probe?: (path: string) => Promise<Record<string, unknown>>;
+  decode?: (path: string) => Promise<void>;
 }
 
 export interface PromotionOptions {
@@ -117,8 +119,19 @@ export interface PromotionOptions {
   buildId: string;
   draft: CompiledDraft;
   failureInjection?: "before-pointer";
+  ffmpegExecutable?: string;
   ffprobeExecutable?: string;
   probe?: (path: string) => Promise<Record<string, unknown>>;
+  decode?: (path: string) => Promise<void>;
+}
+
+export interface MediaValidationOptions {
+  path: string;
+  draft: CompiledDraft;
+  ffmpegExecutable?: string;
+  ffprobeExecutable?: string;
+  probe?: (path: string) => Promise<Record<string, unknown>>;
+  decode?: (path: string) => Promise<void>;
 }
 
 const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
@@ -307,6 +320,9 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 const validTimestamp = (value: unknown): value is string =>
   typeof value === "string" && Number.isFinite(Date.parse(value));
 
+const nonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
 const assertCompleteMetadata = (
   metadata: Record<string, unknown>,
   expectedBuildId: string,
@@ -337,18 +353,18 @@ const assertCompleteMetadata = (
     profile.id !== draft.profile.id ||
     profile.version !== draft.profile.version ||
     !isObject(runtime) ||
-    typeof runtime.node !== "string" ||
-    typeof runtime.remotion !== "string" ||
+    !nonEmptyString(runtime.node) ||
+    !nonEmptyString(runtime.remotion) ||
     !isObject(runtimeOs) ||
-    typeof runtimeOs.platform !== "string" ||
-    typeof runtimeOs.release !== "string" ||
-    typeof runtimeOs.architecture !== "string" ||
+    !nonEmptyString(runtimeOs.platform) ||
+    !nonEmptyString(runtimeOs.release) ||
+    !nonEmptyString(runtimeOs.architecture) ||
     !isObject(browser) ||
-    typeof browser.executable !== "string" ||
-    typeof browser.version !== "string" ||
+    !nonEmptyString(browser.executable) ||
+    !nonEmptyString(browser.version) ||
     !isObject(ffmpeg) ||
-    typeof ffmpeg.executable !== "string" ||
-    typeof ffmpeg.version !== "string" ||
+    !nonEmptyString(ffmpeg.executable) ||
+    !nonEmptyString(ffmpeg.version) ||
     !isObject(render) ||
     render.width !== draft.width ||
     render.height !== draft.height ||
@@ -364,6 +380,9 @@ const assertCompleteMetadata = (
       "Build metadata is incomplete or does not match the compiled draft.",
     );
   }
+  if (Date.parse(metadata.completedAt) < Date.parse(metadata.startedAt)) {
+    throw new Error("Build completion timestamp precedes its start timestamp.");
+  }
 };
 
 const probePreview = async (
@@ -373,10 +392,8 @@ const probePreview = async (
   const result = await execute(executable, [
     "-v",
     "error",
-    "-select_streams",
-    "v:0",
     "-show_entries",
-    "stream=codec_name,width,height,avg_frame_rate",
+    "stream=index,codec_type,codec_name,width,height,avg_frame_rate",
     "-show_entries",
     "format=duration",
     "-of",
@@ -386,13 +403,43 @@ const probePreview = async (
   return JSON.parse(result.stdout) as Record<string, unknown>;
 };
 
+const decodePreview = async (
+  path: string,
+  executable: string,
+): Promise<void> => {
+  await execute(executable, [
+    "-v",
+    "error",
+    "-xerror",
+    "-err_detect",
+    "explode",
+    "-i",
+    path,
+    "-map",
+    "0:v:0",
+    "-an",
+    "-f",
+    "null",
+    "-",
+  ]);
+};
+
 const validateProbe = (
   probe: Record<string, unknown>,
   draft: CompiledDraft,
-): void => {
-  const streams = Array.isArray(probe.streams) ? probe.streams : [];
-  const stream = streams[0] as Record<string, unknown> | undefined;
+): { codec: "h264"; audio: "none" } => {
+  const streams = (Array.isArray(probe.streams) ? probe.streams : []).filter(
+    isObject,
+  );
+  const videoStreams = streams.filter(
+    (stream) => stream.codec_type === "video",
+  );
+  const audioStreams = streams.filter(
+    (stream) => stream.codec_type === "audio",
+  );
+  const stream = videoStreams[0];
   if (
+    videoStreams.length !== 1 ||
     stream?.codec_name !== "h264" ||
     stream.width !== draft.width ||
     stream.height !== draft.height ||
@@ -400,6 +447,11 @@ const validateProbe = (
   ) {
     throw new Error(
       "preview.mp4 does not match the expected H.264 render signature.",
+    );
+  }
+  if (audioStreams.length > 0) {
+    throw new Error(
+      "Silent draft preview.mp4 unexpectedly contains an audio stream.",
     );
   }
   const format = probe.format as Record<string, unknown> | undefined;
@@ -411,14 +463,73 @@ const validateProbe = (
   ) {
     throw new Error("preview.mp4 duration does not match the compiled draft.");
   }
+  return { codec: "h264", audio: "none" };
+};
+
+export const validatePreviewMedia = async ({
+  path,
+  draft,
+  ffmpegExecutable: requestedFfmpeg = ffmpegExecutable(),
+  ffprobeExecutable: requestedFfprobe = ffprobeExecutable(),
+  probe,
+  decode,
+}: MediaValidationOptions): Promise<{ codec: "h264"; audio: "none" }> => {
+  const mp4 = await readFile(path);
+  if (!hasMp4Signature(mp4)) {
+    throw new Error("preview.mp4 has an invalid file signature.");
+  }
+  const verified = validateProbe(
+    probe ? await probe(path) : await probePreview(path, requestedFfprobe),
+    draft,
+  );
+  if (decode) {
+    await decode(path);
+  } else {
+    await decodePreview(path, requestedFfmpeg);
+  }
+  return verified;
+};
+
+const sharedMetadataKeys = [
+  "schemaVersion",
+  "buildId",
+  "sourceRevision",
+  "assemblyKey",
+  "mode",
+  "scope",
+  "timelineScope",
+  "label",
+  "profile",
+  "runtime",
+  "render",
+  "checkedFrames",
+  "startedAt",
+  "completedAt",
+  "status",
+  "failure",
+] as const;
+
+const assertSharedMetadataMatches = (
+  manifest: Record<string, unknown>,
+  report: Record<string, unknown>,
+): void => {
+  for (const key of sharedMetadataKeys) {
+    if (JSON.stringify(manifest[key]) !== JSON.stringify(report[key])) {
+      throw new Error(
+        `report.json and manifest.json disagree on shared ${key}.`,
+      );
+    }
+  }
 };
 
 export const validatePreviewBuildIntegrity = async ({
   buildDirectory,
   expectedBuildId,
   expectedDraft,
+  ffmpegExecutable: requestedFfmpeg = ffmpegExecutable(),
   ffprobeExecutable: requestedFfprobe = ffprobeExecutable(),
   probe,
+  decode,
 }: IntegrityOptions): Promise<string> => {
   const manifestPath = join(buildDirectory, "manifest.json");
   const manifest = await parseJsonObject(manifestPath);
@@ -440,10 +551,6 @@ export const validatePreviewBuildIntegrity = async ({
     }
   }
 
-  const mp4 = await readFile(join(buildDirectory, "preview.mp4"));
-  if (!hasMp4Signature(mp4)) {
-    throw new Error("preview.mp4 has an invalid file signature.");
-  }
   const contactSheet = await readFile(
     join(buildDirectory, "contact-sheet.png"),
   );
@@ -454,6 +561,7 @@ export const validatePreviewBuildIntegrity = async ({
   const frames = await parseJsonObject(join(buildDirectory, "frames.json"));
   const checkedFrames = Array.isArray(frames.frames) ? frames.frames : [];
   if (
+    frames.schemaVersion !== 1 ||
     frames.buildId !== expectedBuildId ||
     frames.sourceRevision !== expectedDraft.sourceRevision ||
     frames.assemblyKey !== expectedDraft.assemblyKey ||
@@ -464,13 +572,26 @@ export const validatePreviewBuildIntegrity = async ({
     throw new Error("frames.json is incomplete or belongs to another build.");
   }
   for (const frame of checkedFrames) {
-    const value = frame as Record<string, unknown>;
+    if (!isObject(frame)) {
+      throw new Error("frames.json contains an invalid checked frame.");
+    }
+    const value = frame;
+    const frameNumber = Number(value.frame);
+    const expectedScene = expectedDraft.scenes.find(
+      (scene) =>
+        frameNumber >= scene.startFrame && frameNumber < scene.endFrame,
+    );
     if (
       !Number.isInteger(value.frame) ||
-      Number(value.frame) < 0 ||
-      Number(value.frame) >= expectedDraft.totalFrames ||
+      frameNumber < 0 ||
+      frameNumber >= expectedDraft.totalFrames ||
+      !Number.isInteger(value.sourceFrame) ||
+      value.sourceFrame !== frameSourceNumber(expectedDraft, frameNumber) ||
+      !nonEmptyString(value.sceneId) ||
+      value.sceneId !== expectedScene?.id ||
       !Array.isArray(value.reasons) ||
-      value.reasons.length === 0
+      value.reasons.length === 0 ||
+      !value.reasons.every(nonEmptyString)
     ) {
       throw new Error("frames.json contains an invalid checked frame.");
     }
@@ -478,6 +599,7 @@ export const validatePreviewBuildIntegrity = async ({
 
   const report = await parseJsonObject(join(buildDirectory, "report.json"));
   assertCompleteMetadata(report, expectedBuildId, expectedDraft);
+  assertSharedMetadataMatches(manifest, report);
   if (
     JSON.stringify(report.checkedFrames) !== JSON.stringify(checkedFrames) ||
     JSON.stringify(manifest.checkedFrames) !== JSON.stringify(checkedFrames)
@@ -485,13 +607,14 @@ export const validatePreviewBuildIntegrity = async ({
     throw new Error("report.json is incomplete or belongs to another build.");
   }
 
-  const previewPath = join(buildDirectory, "preview.mp4");
-  validateProbe(
-    probe
-      ? await probe(previewPath)
-      : await probePreview(previewPath, requestedFfprobe),
-    expectedDraft,
-  );
+  await validatePreviewMedia({
+    path: join(buildDirectory, "preview.mp4"),
+    draft: expectedDraft,
+    ffmpegExecutable: requestedFfmpeg,
+    ffprobeExecutable: requestedFfprobe,
+    ...(probe ? { probe } : {}),
+    ...(decode ? { decode } : {}),
+  });
   return sha256File(manifestPath);
 };
 
@@ -521,8 +644,10 @@ export const promotePreviewBuild = async ({
   buildId,
   draft,
   failureInjection,
+  ffmpegExecutable: requestedFfmpeg,
   ffprobeExecutable: requestedFfprobe,
   probe,
+  decode,
 }: PromotionOptions): Promise<{
   buildDirectory: string;
   currentPointer: string;
@@ -535,8 +660,10 @@ export const promotePreviewBuild = async ({
     buildDirectory: stagedBuildDirectory,
     expectedBuildId: buildId,
     expectedDraft: draft,
+    ...(requestedFfmpeg ? { ffmpegExecutable: requestedFfmpeg } : {}),
     ...(requestedFfprobe ? { ffprobeExecutable: requestedFfprobe } : {}),
     ...(probe ? { probe } : {}),
+    ...(decode ? { decode } : {}),
   });
   await rename(stagedBuildDirectory, buildDirectory);
 
@@ -601,7 +728,12 @@ export const publishPreviewBuild = async ({
     ffmpeg,
   );
 
-  const completedAt = new Date().toISOString();
+  const verifiedMedia = await validatePreviewMedia({
+    path: outputPath,
+    draft,
+    ffmpegExecutable: ffmpeg,
+    ffprobeExecutable: ffprobe,
+  });
   const runtime: RuntimeMetadata = {
     node: process.version,
     os: { platform: platform(), release: release(), architecture: arch() },
@@ -615,6 +747,25 @@ export const publishPreviewBuild = async ({
       version: await commandVersion(ffmpeg, ["-version"]),
     },
   };
+  await writeFile(
+    join(stagedBuildDirectory, "frames.json"),
+    json({
+      schemaVersion: 1,
+      buildId,
+      sourceRevision: draft.sourceRevision,
+      assemblyKey: draft.assemblyKey,
+      scope: draft.scope,
+      timelineScope: draft.timelineScope,
+      frames,
+    }),
+    { flag: "wx" },
+  );
+  const preparedArtifactRecords = await Promise.all([
+    artifactRecord(stagedBuildDirectory, "preview.mp4", "video/mp4"),
+    artifactRecord(stagedBuildDirectory, "contact-sheet.png", "image/png"),
+    artifactRecord(stagedBuildDirectory, "frames.json", "application/json"),
+  ]);
+  const completedAt = new Date().toISOString();
   const metadata: PreviewMetadata = {
     schemaVersion: 1,
     buildId,
@@ -631,8 +782,8 @@ export const publishPreviewBuild = async ({
       height: rendered.height,
       fps: rendered.fps,
       durationInFrames: rendered.durationInFrames,
-      codec: "h264",
-      audio: "none",
+      codec: verifiedMedia.codec,
+      audio: verifiedMedia.audio,
       muted: true,
     },
     checkedFrames: frames,
@@ -641,28 +792,17 @@ export const publishPreviewBuild = async ({
     status: "success",
     failure: null,
   };
-  await writeFile(
-    join(stagedBuildDirectory, "frames.json"),
-    json({
-      schemaVersion: 1,
-      buildId,
-      sourceRevision: draft.sourceRevision,
-      assemblyKey: draft.assemblyKey,
-      scope: draft.scope,
-      timelineScope: draft.timelineScope,
-      frames,
-    }),
-    { flag: "wx" },
-  );
   await writeFile(join(stagedBuildDirectory, "report.json"), json(metadata), {
     flag: "wx",
   });
-  const records = await Promise.all([
-    artifactRecord(stagedBuildDirectory, "preview.mp4", "video/mp4"),
-    artifactRecord(stagedBuildDirectory, "contact-sheet.png", "image/png"),
-    artifactRecord(stagedBuildDirectory, "frames.json", "application/json"),
-    artifactRecord(stagedBuildDirectory, "report.json", "application/json"),
-  ]);
+  const records = [
+    ...preparedArtifactRecords,
+    await artifactRecord(
+      stagedBuildDirectory,
+      "report.json",
+      "application/json",
+    ),
+  ];
   const artifacts = Object.fromEntries(
     records.map((record) => [record.path, record]),
   ) as Record<ArtifactName, ArtifactRecord>;
@@ -677,6 +817,7 @@ export const publishPreviewBuild = async ({
     buildId,
     draft,
     ...(failureInjection ? { failureInjection } : {}),
+    ffmpegExecutable: ffmpeg,
     ffprobeExecutable: ffprobe,
   });
   await rm(attemptDirectory, { recursive: true, force: true });
