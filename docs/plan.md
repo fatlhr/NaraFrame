@@ -6,13 +6,13 @@
 
 **Architecture:** Interleave skill → CLI/core validation/compilation → Remotion rendering. Keep external production operations outside core/renderer. Start with a short visual draft, then prove narration/revision before expanding visual recipes.
 
-**Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, and the first local H.264 draft render were verified on 2026-09-08; M0.5 proved strict silent-media/contact-sheet validation and atomic immutable publication, with only M0.8 broader hardening remaining.
+**Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, and the first local H.264 draft render were verified on 2026-09-08; M0.5 proved strict silent-media/contact-sheet validation and atomic immutable publication, and M0.6 proved the pinned operator CLI/skill route. M0.8 broader hardening remains.
 
-Status: M0 implementation in progress; Tasks M0.1–M0.5 complete, M0.6 is next.
+Status: M0 implementation in progress; Tasks M0.1–M0.6 complete, M0.7 is next.
 Revision: 1.0
 Date: 2026-09-09
 Inputs: `docs/spec.md` revision 0.3 and `docs/refine-spec.md`.
-Implementation: M0.1 workspace bootstrap, M0.2 runnable draft, M0.3 atomic project creation/profile locking, M0.4 visual/motion capability, and M0.5 atomic immutable preview publication are verified. Feature work follows runnable behavior first, manual acceptance second, and focused tests before merge. M0.6+ operator, recovery, cost, and voice-quality evidence remains incomplete.
+Implementation: M0.1 workspace bootstrap, M0.2 runnable draft, M0.3 atomic project creation/profile locking, M0.4 visual/motion capability, M0.5 atomic immutable preview publication, and M0.6 operator CLI/skill are verified. Feature work follows runnable behavior first, manual acceptance second, and focused tests before merge. M0.7+ owner, recovery, cost, and voice-quality evidence remains incomplete.
 
 ## 1. Global constraints
 
@@ -235,13 +235,13 @@ Add one unit harness test per package, run `rtk pnpm test:unit`, then run typech
 
 **Outcome:** The same product path works from terminal and from an agent using the skill.
 
-- [ ] Complete `doctor`, `schema`, `create`, `validate --stage plan`, `status`, and `preview --draft`.
-- [ ] Support concise human output and exactly one final versioned JSON event on stdout in `--json` mode.
-- [ ] Map usage, source, system, and cancellation failures to exit codes 3, 1, 2, and 130.
-- [ ] Return actionable issues with stable code, artifact, path/entity, responsibility, message, and suggestion.
-- [ ] Add `skills/naraframe/SKILL.md` with the profile-first interleaved flow. The skill calls the public CLI and does not duplicate schemas.
-- [ ] Follow the skill once against the reference sample and confirm it reaches the same preview build as direct CLI use.
-- [ ] Add focused CLI/skill compatibility and exit-code tests after both operator paths work, then run the integration gate.
+- [x] Complete `doctor`, `schema`, `create`, `validate --stage plan`, `status`, and `preview --draft`.
+- [x] Support concise human output and exactly one final versioned JSON event on stdout in `--json` mode.
+- [x] Map usage, source, system, and cancellation failures to exit codes 3, 1, 2, and 130.
+- [x] Return actionable issues with stable code, artifact, path/entity, responsibility, message, and suggestion.
+- [x] Add `skills/naraframe/SKILL.md` with the profile-first interleaved flow. The skill calls the public CLI and does not duplicate schemas.
+- [x] Follow the skill once against the reference sample and confirm it reaches the same preview build as direct CLI use.
+- [x] Add focused CLI/skill compatibility and exit-code tests after both operator paths work, then run the integration gate.
 
 **Checkpoint:** Terminal and skill operation resolve the same project contract and artifact paths.
 
@@ -438,6 +438,7 @@ Every edit uses the same source transaction and preserves spend/receipts across 
 | M0.3 project creation/profile lock | `pnpm naraframe create work/m0-3-created-project --profile current-issues` created the four source files plus preview/attempt directories atomically. A scene added directly to JSON validated at 450 frames and rendered to `work/m0-3-created-project/preview/dev-preview.mp4`; FFprobe reported H.264, 540 × 960, 30 fps, 15.000000 s, and `preview/m0-3-contact-sheet.png` was inspected. Focused integration coverage proves repository-profile CLI creation, existing-destination refusal, copied/content-addressed profile assets after deleting the source profile, path/symlink rejection, ready-PNG/profile hash checks, and repeatable source revision. | M0.3 complete; rerun at M0 exit |
 | M0.4 visual and motion capability | `pnpm naraframe validate samples/krakatau-draft` compiled a 540-frame project. Full preview `work/m0-4-reference/full-preview.mp4` is H.264/yuvj420p, 540 × 960, 30 fps, 18.000000 seconds, SHA-256 `d5a06bdd257e3eccc0ba4fe8bc5306ae1d7eaf9d6c6dc27011b0bab2e34c274b`; `preview --draft --scene context` compiled a local 180-frame timeline while retaining source frames 120–300. The inspected `work/m0-4-reference/m0-4-contact-sheet.png` and motion sheet prove ready local PNG, rectangle/circle, group transform, text/media/composition, reveal/emphasize/focus, and the labelled planned-media placeholder. Unit 7/7, integration 18/18, and full render E2E 1/1 passed. | M0.4 complete; rerun at M0 exit |
 | M0.5 atomic immutable preview | Pinned Node `24.20.0` published sample build `41b6900277c8-4cabf063-58d`; manifest SHA-256 `0281993bab6d6ca463ec4281924ed4e40b080c06d7698a4de1dd5654d6045c39`. Its MP4 is H.264, 540 × 960, 30 fps, 18 seconds, no audio, and passed strict full decode. The 540 × 1228 contact sheet covers all 11 required representative/semantic frames and has SHA-256 `0cd7a812e17a1c5eac985294b1cd57aa0b9c0b797bf22401d9685aef474e5b85`. Pre-pointer failure injection preserved the prior pointer. Integrity checks rejected audio-bearing and decode-corrupt MP4s, mixed metadata, invalid PNG, missing semantic coverage, output symlinks, and empty build collisions. A source-only first run created its missing generated roots and published build `41b6900277c8-9bc1c63d-b17`. Focused tests passed 7/7; final controller `pnpm verify` passed with unit 7/7 and integration 25/25. | M0.5 complete; rerun at M0 exit |
+| M0.6 operator CLI and skill | Pinned Node `24.20.0`/pnpm `12.3.4` passed the public CLI route. Review-fix manual evidence: human `create work/m0-6-review-created-human --profile current-issues` and JSON `create work/m0-6-review-created-json --profile current-issues --json` succeeded; a real human full draft preview published current build `41b6900277c8-a2b28188-998`, and JSON `preview --draft --scene hook --json` published `93da18cf5a91-fad10874-1fd` with the returned pointer, MP4, contact sheet, frames, report, and manifest paths. Both report source revision `09b2333daa03081bc485868915d413d09556a22e81fa95a93c84cb48c8e7f531`; project/scoped fingerprints are `41b6900277c8ed8533002fbaadecf8cd9b39a9cae4d758d344d6389f6ec63d7d` and `93da18cf5a91a64feff9909d5b4f62984391d534cdfbb3cc654118d9e0edf7f2`. Review regressions prove cancellation after pointer preparation preserves the prior pointer and cleans its temporary file; public status rejects corrupt pointer hashes, unsafe symlinks, tampered artifacts, and inconsistent manifest/report/frames metadata, while accepting valid scene scope; SIGTERM normalizes to 130. Focused CLI checks passed 3 unit/17 integration tests; final `pnpm verify` passed unit 9/9 and integration 31/31. Skill unchanged. | M0.6 complete; rerun at M0 exit |
 | Font/PNG/native-layer baseline | M0.4 proved system-font text, ready local PNG decode, rectangle/circle layout, non-recursive grouping, and planned-PNG placeholder rendering. Bundled local-font behavior remains unproven. | M0 exit |
 | External-egress and explicit-browser behavior | Not run | M0 exit |
 | Deterministic compiled/selected frame hashes | M0.4 early signal passed on the pinned machine: repeated compile assembly keys matched; selected-scene lossless PNG frames 15/60/105/150 matched byte-for-byte across two direct renderer passes. SHA-256: `fa6303bddcd38d0bd08abdde5f23664411539b224eadbc87766ad3506a86966a`, `788e5e3530919e65ba3e501e3b492c8e634c1564ce667b315569051d1e4b31c1`, `edef0ef797b4021185c97f8d61e723ce87c3ab8a81019b9db0ff7b3229e37408`, `c59f4193c659bac02eb79327999b41ff72f108c057de88436f6b1af203588966`. Encoded MP4 bytes are intentionally not the determinism contract. | Repeat at M0 exit and M3 |

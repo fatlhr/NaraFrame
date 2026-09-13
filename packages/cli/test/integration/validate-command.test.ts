@@ -24,7 +24,7 @@ describe("validate command", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    const exitCode = await runCli(["validate", sampleRoot]);
+    const exitCode = await runCli(["validate", sampleRoot, "--stage", "plan"]);
 
     expect(exitCode).toBe(0);
     expect(log).toHaveBeenCalledWith("Draft: 540x960 @ 30fps, 540 frames");

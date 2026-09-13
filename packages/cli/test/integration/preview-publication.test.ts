@@ -6,6 +6,7 @@ import {
   mkdtemp,
   readdir,
   readFile,
+  rename,
   rm,
   stat,
   symlink,
@@ -20,7 +21,7 @@ import {
   compileDraft,
   loadPlanProject,
 } from "@naraframe/core";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   contactSheetLayoutFor,
   preparePreviewOutputRoots,
@@ -380,6 +381,137 @@ describe("atomic preview publication", () => {
     expect(await readFile(first.currentPointer)).toEqual(pointerBeforeFailure);
   });
 
+  it("does not replace the pointer when cancellation arrives after pointer preparation", async () => {
+    const root = await mkdtemp(
+      join(tmpdir(), "naraframe-preview-pointer-race-"),
+    );
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    const previousPointer = json({ schemaVersion: 1, buildId: "previous" });
+    await writeFile(join(previewDirectory, "current.json"), previousPointer);
+    const controller = new AbortController();
+
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(
+          root,
+          "cancelled-pointer",
+        ),
+        previewDirectory,
+        buildId: "cancelled-pointer",
+        draft,
+        probe,
+        decode,
+        contactSheetProbe,
+        contactSheetDecode,
+        signal: controller.signal,
+        onPointerPrepared: () => controller.abort(),
+      } as Parameters<typeof promotePreviewBuild>[0] & {
+        onPointerPrepared: () => void;
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
+      previousPointer,
+    );
+    expect(
+      (await readdir(previewDirectory)).filter((entry) =>
+        entry.startsWith(".current-"),
+      ),
+    ).toEqual([]);
+  });
+
+  it("closes the pointer handle when cancellation arrives immediately after open", async () => {
+    const root = await mkdtemp(
+      join(tmpdir(), "naraframe-preview-pointer-open-abort-"),
+    );
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    const controller = new AbortController();
+    const close = vi.fn(async () => undefined);
+
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(root, "opened-pointer"),
+        previewDirectory,
+        buildId: "opened-pointer",
+        draft,
+        probe,
+        decode,
+        contactSheetProbe,
+        contactSheetDecode,
+        signal: controller.signal,
+        pointerOpener: async () => {
+          controller.abort();
+          return {
+            sync: async () => undefined,
+            close,
+          } as Awaited<ReturnType<typeof open>>;
+        },
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the pointer successful when a signal arrives while rename is in flight", async () => {
+    const root = await mkdtemp(
+      join(tmpdir(), "naraframe-preview-pointer-commit-"),
+    );
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    const controller = new AbortController();
+    const buildId = "committed-pointer";
+    let releaseRename: (() => void) | undefined;
+    const renameReleased = new Promise<void>((resolvePromise) => {
+      releaseRename = resolvePromise;
+    });
+    let signalRenameStarted: (() => void) | undefined;
+    const renameStarted = new Promise<void>((resolvePromise) => {
+      signalRenameStarted = resolvePromise;
+    });
+
+    const promotion = promotePreviewBuild({
+      stagedBuildDirectory: await createStagedBuild(root, buildId),
+      previewDirectory,
+      buildId,
+      draft,
+      probe,
+      decode,
+      contactSheetProbe,
+      contactSheetDecode,
+      signal: controller.signal,
+      onPointerRenameDispatched: () => controller.abort(),
+      pointerRenamer: async (from: string, to: string) => {
+        signalRenameStarted?.();
+        await renameReleased;
+        await rename(from, to);
+      },
+    });
+
+    const dispatched = await Promise.race([
+      renameStarted.then(() => true),
+      new Promise<boolean>((resolvePromise) => {
+        setTimeout(() => resolvePromise(false), 50);
+      }),
+    ]);
+    expect(dispatched).toBe(true);
+    expect(controller.signal.aborted).toBe(true);
+    releaseRename?.();
+    const promoted = await promotion;
+    expect(
+      JSON.parse(await readFile(promoted.currentPointer, "utf8")),
+    ).toMatchObject({ buildId });
+    expect(
+      (await readdir(previewDirectory)).filter((entry) =>
+        entry.startsWith(".current-"),
+      ),
+    ).toEqual([]);
+  });
+
   it("rejects corrupt media and incomplete reports before publishing or changing current", async () => {
     const root = await mkdtemp(join(tmpdir(), "naraframe-preview-integrity-"));
     temporaryRoots.push(root);
@@ -547,6 +679,28 @@ describe("atomic preview publication", () => {
         unsafeRoot === "preview" ? "preview" : ".naraframe",
       ]);
     }
+  });
+
+  it("cleans attempt staging when rendering fails before publication", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-cleanup-"));
+    temporaryRoots.push(root);
+    const previousBrowser = process.env.NARAFRAME_BROWSER_EXECUTABLE;
+    process.env.NARAFRAME_BROWSER_EXECUTABLE = join(root, "missing-browser");
+
+    try {
+      await expect(
+        publishPreviewBuild({ draft, projectRoot: root, issues: [] }),
+      ).rejects.toThrow("Browser executable not found");
+    } finally {
+      if (previousBrowser === undefined) {
+        delete process.env.NARAFRAME_BROWSER_EXECUTABLE;
+      } else {
+        process.env.NARAFRAME_BROWSER_EXECUTABLE = previousBrowser;
+      }
+    }
+
+    expect(await readdir(join(root, ".naraframe", "attempts"))).toEqual([]);
+    expect(await readdir(join(root, "preview", "builds"))).toEqual([]);
   });
 
   it("selects at least one checked frame per scene and each semantic beat", () => {
