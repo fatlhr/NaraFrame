@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "current-issues",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "render": {
     "palette": {
       "background": "#11130F",
@@ -24,7 +24,7 @@
     "motion": {
       "revealDurationMs": 500,
       "emphasizeScale": 1.08,
-      "focusScale": 1.06
+      "focusScale": 1.14
     }
   },
   "production": {

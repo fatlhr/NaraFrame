@@ -18,7 +18,19 @@ const clamp = {
 const combineTransforms = (...transforms: Array<string | undefined>): string =>
   transforms.filter((transform) => transform).join(" ");
 
-const motionFor = (
+const easingFor = (
+  preset: "linear" | "smooth" | "snappy" | undefined,
+  action: "reveal" | "emphasize" | "focus",
+) => {
+  if (preset === "linear") return Easing.linear;
+  if (preset === "smooth") return Easing.inOut(Easing.cubic);
+  if (preset === "snappy") return Easing.out(Easing.cubic);
+  return action === "focus"
+    ? Easing.inOut(Easing.cubic)
+    : Easing.out(Easing.cubic);
+};
+
+export const motionFor = (
   draft: CompiledDraft,
   scene: CompiledDraft["scenes"][number],
   targetId: string,
@@ -32,7 +44,7 @@ const motionFor = (
       localFrame,
       [beat.startFrame, beat.startFrame + beat.durationInFrames],
       [0, 1],
-      { ...clamp, easing: Easing.out(Easing.cubic) },
+      { ...clamp, easing: easingFor(beat.params.easingPreset, beat.action) },
     );
 
     if (beat.action === "reveal") {
@@ -54,7 +66,7 @@ const motionFor = (
 
     if (beat.action === "focus") {
       const strength = progress * beat.params.intensity;
-      const distance = draft.profile.render.spacingUnit * 6 * strength;
+      const distance = draft.profile.render.spacingUnit * 12 * strength;
       const scale = 1 + strength * (draft.profile.render.motion.focusScale - 1);
 
       if (beat.params.camera === "pan") {

@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "current-issues",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "source": {
     "kind": "repository",
-    "identity": "profiles/current-issues@0.1.0"
+    "identity": "profiles/current-issues@0.2.0"
   },
   "direction": {
-    "text": "Editorial motion graphics: factual, restrained, high-contrast, and optimized for vertical reading.",
-    "sha256": "29a6aa5200dbdfe52af147138e8f7d58f96b029f3e50b55179fe835a21cba964"
+    "text": "# Current Issues\n\nExplain a current event with factual, restrained, high-contrast editorial motion graphics optimized for vertical reading.\n\n- Lead with the immediate event, then add only the historical context needed to understand it.\n- Separate confirmed facts from estimates or developing information.\n- Prefer short Indonesian sentences, strong hierarchy, and one visual idea per scene.\n- Use warm paper surfaces, near-black backgrounds, and orange-red accents sparingly.\n- Choose motion from the scene's meaning: use a sustained focus for maps or photos, stagger related composition layers, and repeat emphasis only where the viewer should look again.\n- Keep movement smooth and readable at normal playback. Vary choreography by context instead of applying one entrance pattern to every scene.\n- Avoid sensational imagery, decorative motion, and claims that cannot be sourced.\n",
+    "sha256": "b3da8e7def0c36767ae8b71ebf6ba017f11f0dea5b24be8dc36d47f779a80eb7"
   },
   "render": {
     "palette": {
@@ -32,7 +32,7 @@
     "motion": {
       "revealDurationMs": 500,
       "emphasizeScale": 1.08,
-      "focusScale": 1.06
+      "focusScale": 1.14
     }
   },
   "production": {

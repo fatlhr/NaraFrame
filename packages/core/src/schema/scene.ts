@@ -113,6 +113,8 @@ const BeatBaseShape = {
   durationMs: PositiveIntegerSchema,
 };
 
+const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);
+
 const RevealBeatSchema = z
   .object({
     ...BeatBaseShape,
@@ -121,6 +123,7 @@ const RevealBeatSchema = z
       .object({
         direction: z.enum(["up", "down", "left", "right"]),
         distance: z.number().nonnegative(),
+        easingPreset: EasingPresetSchema.optional(),
       })
       .strict(),
   })
@@ -130,7 +133,12 @@ const EmphasizeBeatSchema = z
   .object({
     ...BeatBaseShape,
     action: z.literal("emphasize"),
-    params: z.object({ scale: z.number().min(1).max(2) }).strict(),
+    params: z
+      .object({
+        scale: z.number().min(1).max(2),
+        easingPreset: EasingPresetSchema.optional(),
+      })
+      .strict(),
   })
   .strict();
 
@@ -142,6 +150,7 @@ const FocusBeatSchema = z
       .object({
         camera: z.enum(["push", "pan", "zoom"]),
         intensity: z.number().min(0).max(1),
+        easingPreset: EasingPresetSchema.optional(),
       })
       .strict(),
   })
