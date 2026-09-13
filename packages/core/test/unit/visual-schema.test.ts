@@ -68,6 +68,20 @@ describe("visual source schema", () => {
     expect(ScenesSchema.safeParse(sceneDocument()).success).toBe(true);
   });
 
+  it("accepts named easing presets and rejects arbitrary easing code", () => {
+    const smooth = sceneDocument();
+    Object.assign(smooth.scenes[0]?.beats[0]?.params ?? {}, {
+      easingPreset: "smooth",
+    });
+    expect(ScenesSchema.safeParse(smooth).success).toBe(true);
+
+    const arbitrary = sceneDocument();
+    Object.assign(arbitrary.scenes[0]?.beats[0]?.params ?? {}, {
+      easingPreset: "spring(300, 20)",
+    });
+    expect(ScenesSchema.safeParse(arbitrary).success).toBe(false);
+  });
+
   it("rejects unknown actions and raw executable or keyframe fields", () => {
     const unknownAction = sceneDocument();
     Object.assign(unknownAction.scenes[0]?.beats[0] ?? {}, {

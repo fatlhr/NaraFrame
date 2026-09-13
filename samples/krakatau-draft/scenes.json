@@ -18,7 +18,8 @@
           "durationMs": 800,
           "params": {
             "direction": "up",
-            "distance": 64
+            "distance": 64,
+            "easingPreset": "smooth"
           }
         }
       ],
@@ -133,7 +134,8 @@
           "durationMs": 600,
           "params": {
             "direction": "up",
-            "distance": 48
+            "distance": 60,
+            "easingPreset": "smooth"
           }
         },
         {
@@ -141,31 +143,69 @@
           "targetId": "map-image",
           "action": "reveal",
           "startMs": 300,
-          "durationMs": 800,
+          "durationMs": 1000,
           "params": {
             "direction": "left",
-            "distance": 64
+            "distance": 80,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "reveal-marker",
+          "targetId": "eruption-marker",
+          "action": "reveal",
+          "startMs": 900,
+          "durationMs": 600,
+          "params": {
+            "direction": "up",
+            "distance": 40,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "reveal-context-copy",
+          "targetId": "context-copy",
+          "action": "reveal",
+          "startMs": 1200,
+          "durationMs": 900,
+          "params": {
+            "direction": "up",
+            "distance": 48,
+            "easingPreset": "smooth"
           }
         },
         {
           "id": "pulse-marker",
           "targetId": "eruption-marker",
           "action": "emphasize",
-          "startMs": 1800,
+          "startMs": 2100,
           "durationMs": 900,
           "params": {
-            "scale": 1.16
+            "scale": 1.22,
+            "easingPreset": "smooth"
           }
         },
         {
           "id": "focus-map",
           "targetId": "map-image",
           "action": "focus",
-          "startMs": 3000,
-          "durationMs": 1200,
+          "startMs": 1400,
+          "durationMs": 4200,
           "params": {
             "camera": "push",
-            "intensity": 0.7
+            "intensity": 0.85,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "pulse-marker-again",
+          "targetId": "eruption-marker",
+          "action": "emphasize",
+          "startMs": 3600,
+          "durationMs": 900,
+          "params": {
+            "scale": 1.16,
+            "easingPreset": "smooth"
           }
         }
       ],
@@ -191,7 +231,8 @@
           "durationMs": 700,
           "params": {
             "direction": "right",
-            "distance": 56
+            "distance": 56,
+            "easingPreset": "smooth"
           }
         }
       ],
@@ -205,7 +246,7 @@
       "durationMs": 4000,
       "visual": {
         "type": "text",
-        "text": "Dampaknya bukan cuma lokal.\nLaut, atmosfer, dan iklim ikut berubah."
+        "text": "Dampaknya melampaui Selat Sunda.\nLaut, atmosfer, dan iklim dunia ikut berubah."
       },
       "beats": [
         {
@@ -216,7 +257,8 @@
           "durationMs": 900,
           "params": {
             "camera": "zoom",
-            "intensity": 0.5
+            "intensity": 0.35,
+            "easingPreset": "smooth"
           }
         }
       ],

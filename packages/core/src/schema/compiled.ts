@@ -47,6 +47,8 @@ const CompiledBeatBaseShape = {
   durationInFrames: PositiveIntegerSchema,
 };
 
+const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);
+
 export const CompiledBeatSchema = z.discriminatedUnion("action", [
   z
     .object({
@@ -56,6 +58,7 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
         .object({
           direction: z.enum(["up", "down", "left", "right"]),
           distance: z.number().nonnegative(),
+          easingPreset: EasingPresetSchema.optional(),
         })
         .strict(),
     })
@@ -64,7 +67,12 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
     .object({
       ...CompiledBeatBaseShape,
       action: z.literal("emphasize"),
-      params: z.object({ scale: z.number().min(1).max(2) }).strict(),
+      params: z
+        .object({
+          scale: z.number().min(1).max(2),
+          easingPreset: EasingPresetSchema.optional(),
+        })
+        .strict(),
     })
     .strict(),
   z
@@ -75,6 +83,7 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
         .object({
           camera: z.enum(["push", "pan", "zoom"]),
           intensity: z.number().min(0).max(1),
+          easingPreset: EasingPresetSchema.optional(),
         })
         .strict(),
     })

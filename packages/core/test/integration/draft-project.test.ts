@@ -116,16 +116,28 @@ describe("Krakatau draft project", () => {
     expect(reveal).toMatchObject({
       action: "reveal",
       startFrame: 9,
-      durationInFrames: 24,
-      params: { direction: "left", distance: 32 },
+      durationInFrames: 30,
+      params: {
+        direction: "left",
+        distance: 40,
+        easingPreset: "smooth",
+      },
     });
     expect(emphasize).toMatchObject({
       action: "emphasize",
-      params: { scale: 1.16 },
+      startFrame: 63,
+      durationInFrames: 27,
+      params: { scale: 1.22, easingPreset: "smooth" },
     });
     expect(focus).toMatchObject({
       action: "focus",
-      params: { camera: "push", intensity: 0.7 },
+      startFrame: 42,
+      durationInFrames: 126,
+      params: {
+        camera: "push",
+        intensity: 0.85,
+        easingPreset: "smooth",
+      },
     });
   });
 
