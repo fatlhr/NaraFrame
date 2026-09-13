@@ -74,6 +74,37 @@ describe("CLI process interruption", () => {
     expect(emitter.listenerCount("SIGTERM")).toBe(0);
   });
 
+  it("forces the original exit with 130 on a second pre-boundary signal", async () => {
+    const emitter = new EventEmitter();
+    const delegatedExitCodes: Array<number | string | null | undefined> = [];
+    const originalExit = ((code?: number | string | null) => {
+      delegatedExitCodes.push(code);
+      return undefined as never;
+    }) as CliProcessHost["exit"];
+    const host = Object.assign(emitter, {
+      exit: originalExit,
+      exitCode: undefined as number | string | null | undefined,
+    }) as CliProcessHost;
+
+    const execution = runCliProcess([], {
+      host,
+      execute: async (_args, options) => {
+        await new Promise<void>((resolve) => {
+          options.signal?.addEventListener("abort", () => resolve(), {
+            once: true,
+          });
+        });
+        return 130;
+      },
+    });
+
+    emitter.emit("SIGINT");
+    emitter.emit("SIGTERM");
+
+    await expect(execution).resolves.toBe(130);
+    expect(delegatedExitCodes).toEqual([130]);
+  });
+
   it("keeps a preview successful when SIGTERM arrives after rename dispatch", async () => {
     const emitter = new EventEmitter();
     const delegatedExitCodes: Array<number | string | null | undefined> = [];

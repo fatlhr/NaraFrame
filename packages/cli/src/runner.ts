@@ -580,16 +580,25 @@ export const runCommandLine = async (
   const cleanArgs = args.filter((argument) => argument !== "--json");
   const command = knownCommand(cleanArgs[0]);
   let execution: Execution;
+  let previewRenameDispatched = false;
+  const commandOptions: RunCliOptions = {
+    ...options,
+    onPreviewRenameDispatched: () => {
+      previewRenameDispatched = true;
+      options.onPreviewRenameDispatched?.();
+    },
+  };
 
   try {
     execution =
       jsonCount > 1
         ? usageFailure(command, "Option --json may only be provided once.")
-        : await executeCommand(command, cleanArgs.slice(1), options);
+        : await executeCommand(command, cleanArgs.slice(1), commandOptions);
   } catch (error) {
     const interrupted =
-      options.signal?.aborted ||
-      (error instanceof Error && error.name === "AbortError");
+      !previewRenameDispatched &&
+      (options.signal?.aborted ||
+        (error instanceof Error && error.name === "AbortError"));
     execution = {
       exitCode: interrupted ? 130 : 2,
       event: commonEvent(command, {
@@ -597,6 +606,18 @@ export const runCommandLine = async (
         success: false,
         readiness: "not-ready",
         issues: [interrupted ? interruptedIssue() : systemIssue(error)],
+      }),
+    };
+  }
+
+  if (options.signal?.aborted && !previewRenameDispatched) {
+    execution = {
+      exitCode: 130,
+      event: commonEvent(command, {
+        status: "interrupted",
+        success: false,
+        readiness: "not-ready",
+        issues: [interruptedIssue()],
       }),
     };
   }

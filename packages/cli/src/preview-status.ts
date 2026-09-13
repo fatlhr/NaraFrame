@@ -222,6 +222,7 @@ export const readCurrentPreviewStatus = async (
       artifacts,
       data: {
         previewState: state,
+        previewSourceRevision: manifest.sourceRevision,
         currentPointer: safePointer,
         manifestSha256: declaredManifestHash,
         timelineScope: manifest.timelineScope ?? null,

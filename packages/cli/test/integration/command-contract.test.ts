@@ -53,6 +53,38 @@ const captureJsonResult = async (
   };
 };
 
+const captureInterruptedPublicResult = async (
+  args: readonly string[],
+): Promise<{ exitCode: number; events: unknown[] }> => {
+  const emitter = new EventEmitter();
+  const originalExit = ((code?: number | string | null) => {
+    throw new Error(`Unexpected process exit ${code}.`);
+  }) as CliProcessHost["exit"];
+  const host = Object.assign(emitter, {
+    exit: originalExit,
+    exitCode: undefined as number | string | null | undefined,
+  }) as CliProcessHost;
+  const writes: string[] = [];
+  vi.spyOn(process.stdout, "write").mockImplementation(((value: string) => {
+    writes.push(value);
+    return true;
+  }) as typeof process.stdout.write);
+  vi.spyOn(process.stderr, "write").mockImplementation(
+    (() => true) as typeof process.stderr.write,
+  );
+  vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+  const exitCode = await runCliProcess(args, {
+    host,
+    execute: async (commandArgs, options) => {
+      const execution = runCli(commandArgs, options);
+      emitter.emit("SIGINT");
+      return execution;
+    },
+  });
+  return { exitCode, events: writes.map((value) => JSON.parse(value)) };
+};
+
 afterEach(async () => {
   vi.restoreAllMocks();
   await Promise.all(
@@ -141,6 +173,26 @@ describe("public CLI command contract", () => {
       }),
     ]);
   });
+
+  it.each([
+    ["doctor", "--json"],
+    ["status", sampleRoot, "--json"],
+    ["validate", sampleRoot, "--stage", "plan", "--json"],
+  ])(
+    "emits an interrupted public JSON result when SIGINT arrives during %s",
+    async (...args: string[]) => {
+      const interrupted = await captureInterruptedPublicResult(args);
+
+      expect(interrupted.exitCode).toBe(130);
+      expect(interrupted.events).toEqual([
+        expect.objectContaining({
+          status: "interrupted",
+          success: false,
+          issues: [expect.objectContaining({ code: "COMMAND_INTERRUPTED" })],
+        }),
+      ]);
+    },
+  );
 
   it("keeps the public JSON preview event successful after pointer rename dispatch", async () => {
     const emitter = new EventEmitter();
@@ -489,5 +541,44 @@ describe("public CLI command contract", () => {
         }),
       ]);
     }
+  });
+
+  it("retains the published source revision when valid source edits make a preview stale", async () => {
+    const project = await copyPublishedSample();
+    const initial = await captureJsonResult(["status", project, "--json"]);
+    const initialEvent = initial.events[0] as {
+      sourceRevision: string;
+      data: { previewSourceRevision?: string };
+    };
+    expect(initial.exitCode).toBe(0);
+    expect(initialEvent.data.previewSourceRevision).toBe(
+      initialEvent.sourceRevision,
+    );
+
+    const scenesPath = join(project, "scenes.json");
+    const scenes = JSON.parse(await readFile(scenesPath, "utf8")) as {
+      scenes: Array<{ visual: { text?: string } }>;
+    };
+    const firstScene = scenes.scenes.at(0);
+    if (!firstScene) throw new Error("Expected the sample to contain a scene.");
+    firstScene.visual.text = "Satu letusan.\nSuaranya berubah.";
+    await writeFile(scenesPath, `${JSON.stringify(scenes, null, 2)}\n`);
+
+    vi.restoreAllMocks();
+    const stale = await captureJsonResult(["status", project, "--json"]);
+    expect(stale.exitCode).toBe(0);
+    expect(stale.events).toEqual([
+      expect.objectContaining({
+        sourceRevision: expect.any(String),
+        data: expect.objectContaining({
+          previewState: "stale",
+          previewSourceRevision: initialEvent.sourceRevision,
+        }),
+        issues: [expect.objectContaining({ code: "PREVIEW_STALE" })],
+      }),
+    ]);
+    expect(
+      (stale.events[0] as { sourceRevision: string }).sourceRevision,
+    ).not.toBe(initialEvent.sourceRevision);
   });
 });

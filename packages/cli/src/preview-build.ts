@@ -135,6 +135,7 @@ export interface PromotionOptions {
   signal?: AbortSignal;
   onPointerPrepared?: () => void | Promise<void>;
   onPointerRenameDispatched?: () => void;
+  pointerOpener?: typeof open;
   pointerRenamer?: (from: string, to: string) => Promise<void>;
 }
 
@@ -1067,6 +1068,7 @@ const replacePointerAtomically = async (
   signal?: AbortSignal,
   onPointerPrepared?: () => void | Promise<void>,
   onPointerRenameDispatched?: () => void,
+  pointerOpener: typeof open = open,
   pointerRenamer: (from: string, to: string) => Promise<void> = rename,
 ): Promise<string> => {
   const pointerPath = join(previewDirectory, "current.json");
@@ -1077,15 +1079,15 @@ const replacePointerAtomically = async (
   try {
     await writeFile(temporaryPath, json(pointer), { flag: "wx" });
     throwIfAborted(signal);
-    const handle = await open(temporaryPath, "r");
-    throwIfAborted(signal);
+    const handle = await pointerOpener(temporaryPath, "r");
     try {
+      throwIfAborted(signal);
       await handle.sync();
       throwIfAborted(signal);
     } finally {
       await handle.close();
-      throwIfAborted(signal);
     }
+    throwIfAborted(signal);
     await onPointerPrepared?.();
     throwIfAborted(signal);
     onPointerRenameDispatched?.();
@@ -1127,6 +1129,7 @@ export const promotePreviewBuild = async ({
   signal,
   onPointerPrepared,
   onPointerRenameDispatched,
+  pointerOpener,
   pointerRenamer,
 }: PromotionOptions): Promise<{
   buildDirectory: string;
@@ -1178,6 +1181,7 @@ export const promotePreviewBuild = async ({
     signal,
     onPointerPrepared,
     onPointerRenameDispatched,
+    pointerOpener,
     pointerRenamer,
   );
   return { buildDirectory, currentPointer, manifestSha256 };

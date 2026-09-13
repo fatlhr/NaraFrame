@@ -21,7 +21,7 @@ import {
   compileDraft,
   loadPlanProject,
 } from "@naraframe/core";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   contactSheetLayoutFor,
   preparePreviewOutputRoots,
@@ -420,6 +420,40 @@ describe("atomic preview publication", () => {
         entry.startsWith(".current-"),
       ),
     ).toEqual([]);
+  });
+
+  it("closes the pointer handle when cancellation arrives immediately after open", async () => {
+    const root = await mkdtemp(
+      join(tmpdir(), "naraframe-preview-pointer-open-abort-"),
+    );
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    const controller = new AbortController();
+    const close = vi.fn(async () => undefined);
+
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(root, "opened-pointer"),
+        previewDirectory,
+        buildId: "opened-pointer",
+        draft,
+        probe,
+        decode,
+        contactSheetProbe,
+        contactSheetDecode,
+        signal: controller.signal,
+        pointerOpener: async () => {
+          controller.abort();
+          return {
+            sync: async () => undefined,
+            close,
+          } as Awaited<ReturnType<typeof open>>;
+        },
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(close).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the pointer successful when a signal arrives while rename is in flight", async () => {
