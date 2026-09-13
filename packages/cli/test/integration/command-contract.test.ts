@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type CliProcessHost, runCli, runCliProcess } from "@naraframe/cli";
+import { compileDraft, loadPlanProject } from "@naraframe/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as previewBuild from "../../src/preview-build.js";
 
@@ -24,11 +25,136 @@ const temporaryRoots: string[] = [];
 const sha256 = (value: Buffer | string): string =>
   createHash("sha256").update(value).digest("hex");
 
-const copyPublishedSample = async (): Promise<string> => {
+const copyPublishedSample = async (sceneId?: string): Promise<string> => {
   const root = await mkdtemp(join(tmpdir(), "naraframe-status-contract-"));
   temporaryRoots.push(root);
   const project = join(root, "project");
-  await cp(sampleRoot, project, { recursive: true });
+  await mkdir(project, { recursive: true });
+  await Promise.all([
+    cp(join(sampleRoot, "assets"), join(project, "assets"), {
+      recursive: true,
+    }),
+    ...["naraframe.json", "profile.lock.json", "scenes.json"].map((file) =>
+      cp(join(sampleRoot, file), join(project, file)),
+    ),
+  ]);
+
+  const loaded = await loadPlanProject(project);
+  if (!loaded.ok) {
+    throw new Error(
+      `Could not load fixture source: ${JSON.stringify(loaded.issues)}`,
+    );
+  }
+  const compiled = compileDraft(
+    loaded.value.source,
+    sceneId ? { type: "scene", sceneId } : { type: "project" },
+  );
+  if (!compiled.ok) {
+    throw new Error(
+      `Could not compile fixture source: ${JSON.stringify(compiled.issues)}`,
+    );
+  }
+
+  const draft = compiled.value;
+  const buildId = `${draft.assemblyKey.slice(0, 12)}-f1a7e-0001`;
+  const buildDirectory = join(project, "preview", "builds", buildId);
+  await mkdir(buildDirectory, { recursive: true });
+  const checkedFrames = previewBuild.selectCheckedFrames(draft, []);
+  const contactSheet = previewBuild.contactSheetLayoutFor(checkedFrames.length);
+  const metadata = {
+    schemaVersion: 1,
+    buildId,
+    sourceRevision: draft.sourceRevision,
+    assemblyKey: draft.assemblyKey,
+    mode: "draft",
+    scope: draft.scope,
+    timelineScope: draft.timelineScope,
+    label: draft.label,
+    profile: { id: draft.profile.id, version: draft.profile.version },
+    runtime: {
+      node: process.version,
+      os: { platform: "test", release: "test", architecture: "test" },
+      remotion: "test",
+      browser: { executable: "test", version: "test" },
+      ffmpeg: { executable: "test", version: "test" },
+    },
+    render: {
+      width: draft.width,
+      height: draft.height,
+      fps: draft.fps,
+      durationInFrames: draft.totalFrames,
+      codec: "h264",
+      audio: "none",
+      muted: true,
+    },
+    contactSheet,
+    checkedFrames,
+    startedAt: "2026-09-13T00:00:00.000Z",
+    completedAt: "2026-09-13T00:00:01.000Z",
+    status: "success",
+    failure: null,
+  };
+  const frames = `${JSON.stringify(
+    {
+      schemaVersion: 1,
+      buildId,
+      sourceRevision: draft.sourceRevision,
+      assemblyKey: draft.assemblyKey,
+      scope: draft.scope,
+      timelineScope: draft.timelineScope,
+      contactSheet,
+      frames: checkedFrames,
+    },
+    null,
+    2,
+  )}\n`;
+  const report = `${JSON.stringify(metadata, null, 2)}\n`;
+  const preview = "fixture-preview\n";
+  const sheet = "fixture-contact-sheet\n";
+  const artifacts = {
+    "preview.mp4": {
+      path: "preview.mp4",
+      bytes: Buffer.byteLength(preview),
+      sha256: sha256(preview),
+      mediaType: "video/mp4",
+    },
+    "contact-sheet.png": {
+      path: "contact-sheet.png",
+      bytes: Buffer.byteLength(sheet),
+      sha256: sha256(sheet),
+      mediaType: "image/png",
+    },
+    "frames.json": {
+      path: "frames.json",
+      bytes: Buffer.byteLength(frames),
+      sha256: sha256(frames),
+      mediaType: "application/json",
+    },
+    "report.json": {
+      path: "report.json",
+      bytes: Buffer.byteLength(report),
+      sha256: sha256(report),
+      mediaType: "application/json",
+    },
+  };
+  const manifest = `${JSON.stringify({ ...metadata, artifacts }, null, 2)}\n`;
+  await Promise.all([
+    writeFile(join(buildDirectory, "preview.mp4"), preview),
+    writeFile(join(buildDirectory, "contact-sheet.png"), sheet),
+    writeFile(join(buildDirectory, "frames.json"), frames),
+    writeFile(join(buildDirectory, "report.json"), report),
+    writeFile(join(buildDirectory, "manifest.json"), manifest),
+  ]);
+  await writeFile(
+    join(project, "preview", "current.json"),
+    `${JSON.stringify({
+      schemaVersion: 1,
+      buildId,
+      manifest: `builds/${buildId}/manifest.json`,
+      manifestSha256: sha256(manifest),
+      promotedAt: "2026-09-13T00:00:01.000Z",
+    })}\n`,
+  );
   return project;
 };
 
@@ -374,29 +500,14 @@ describe("public CLI command contract", () => {
   });
 
   it("rejects corrupt preview publication data before returning authoritative paths", async () => {
-    const scopedProject = await copyPublishedSample();
-    const scopedPointerPath = join(scopedProject, "preview", "current.json");
-    const scopedBuildId = "a22c2924f0ff-db361629-f95";
-    const scopedManifest = await readFile(
-      join(scopedProject, "preview", "builds", scopedBuildId, "manifest.json"),
-    );
-    await writeFile(
-      scopedPointerPath,
-      `${JSON.stringify({
-        schemaVersion: 1,
-        buildId: scopedBuildId,
-        manifest: `builds/${scopedBuildId}/manifest.json`,
-        manifestSha256: sha256(scopedManifest),
-        promotedAt: "2026-09-13T00:00:00.000Z",
-      })}\n`,
-    );
-    const scopedStatus = await captureJsonResult([
+    const publishedProject = await copyPublishedSample("context");
+    const publishedStatus = await captureJsonResult([
       "status",
-      scopedProject,
+      publishedProject,
       "--json",
     ]);
-    expect(scopedStatus.exitCode).toBe(0);
-    expect(scopedStatus.events).toEqual([
+    expect(publishedStatus.exitCode).toBe(0);
+    expect(publishedStatus.events).toEqual([
       expect.objectContaining({
         success: true,
         scope: {
