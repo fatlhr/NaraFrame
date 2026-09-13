@@ -421,6 +421,42 @@ describe("atomic preview publication", () => {
     ).toEqual([]);
   });
 
+  it("keeps the committed pointer successful when a signal arrives during cleanup", async () => {
+    const root = await mkdtemp(
+      join(tmpdir(), "naraframe-preview-pointer-commit-"),
+    );
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    const controller = new AbortController();
+    const buildId = "committed-pointer";
+
+    const promoted = await promotePreviewBuild({
+      stagedBuildDirectory: await createStagedBuild(root, buildId),
+      previewDirectory,
+      buildId,
+      draft,
+      probe,
+      decode,
+      contactSheetProbe,
+      contactSheetDecode,
+      signal: controller.signal,
+      onPointerCommitted: () => controller.abort(),
+    } as Parameters<typeof promotePreviewBuild>[0] & {
+      onPointerCommitted: () => void;
+    });
+
+    expect(controller.signal.aborted).toBe(true);
+    expect(
+      JSON.parse(await readFile(promoted.currentPointer, "utf8")),
+    ).toMatchObject({ buildId });
+    expect(
+      (await readdir(previewDirectory)).filter((entry) =>
+        entry.startsWith(".current-"),
+      ),
+    ).toEqual([]);
+  });
+
   it("rejects corrupt media and incomplete reports before publishing or changing current", async () => {
     const root = await mkdtemp(join(tmpdir(), "naraframe-preview-integrity-"));
     temporaryRoots.push(root);

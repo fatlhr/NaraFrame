@@ -73,4 +73,42 @@ describe("CLI process interruption", () => {
     expect(host.exit).toBe(originalExit);
     expect(emitter.listenerCount("SIGTERM")).toBe(0);
   });
+
+  it("keeps a committed preview successful when SIGTERM arrives during cleanup", async () => {
+    const emitter = new EventEmitter();
+    const delegatedExitCodes: Array<number | string | null | undefined> = [];
+    const originalExit = ((code?: number | string | null) => {
+      delegatedExitCodes.push(code);
+      throw new Error("The original exit must not run after preview commit.");
+    }) as CliProcessHost["exit"];
+    const host = Object.assign(emitter, {
+      exit: originalExit,
+      exitCode: undefined as number | string | null | undefined,
+    }) as CliProcessHost;
+    let observedSignal: AbortSignal | undefined;
+
+    const execution = runCliProcess([], {
+      host,
+      execute: async (_args, options) => {
+        observedSignal = options.signal;
+        const commit = (
+          options as typeof options & {
+            onPreviewCommitted?: () => void;
+          }
+        ).onPreviewCommitted;
+        if (!commit)
+          throw new Error("Preview commit callback was not provided.");
+        commit();
+        emitter.emit("SIGTERM");
+        expect(options.signal?.aborted).toBe(false);
+        return 0;
+      },
+    });
+
+    await expect(execution).resolves.toBe(0);
+    expect(observedSignal?.aborted).toBe(false);
+    expect(host.exitCode).toBeUndefined();
+    expect(delegatedExitCodes).toEqual([]);
+    expect(host.exit).toBe(originalExit);
+  });
 });

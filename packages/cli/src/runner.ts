@@ -21,6 +21,7 @@ import { readCurrentPreviewStatus } from "./preview-status.js";
 
 export interface RunCliOptions {
   signal?: AbortSignal;
+  onPreviewCommitted?: () => void;
 }
 
 interface Execution {
@@ -437,8 +438,9 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
 
 const previewCommand = async (
   args: readonly string[],
-  signal?: AbortSignal,
+  options: RunCliOptions,
 ): Promise<Execution> => {
+  const { signal, onPreviewCommitted } = options;
   const parsed = parseArguments(args, ["--draft"], ["--scene"]);
   if (
     parsed.error ||
@@ -498,6 +500,7 @@ const previewCommand = async (
     projectRoot: loaded.value.root,
     issues,
     ...(signal ? { signal } : {}),
+    ...(onPreviewCommitted ? { onPointerCommitted: onPreviewCommitted } : {}),
     onProgress: (progress) => {
       const percent = Math.floor(progress * 10) * 10;
       if (percent !== lastReported) {
@@ -554,14 +557,14 @@ const knownCommand = (value: string | undefined): CommandName =>
 const executeCommand = async (
   command: CommandName,
   args: readonly string[],
-  signal?: AbortSignal,
+  options: RunCliOptions,
 ): Promise<Execution> => {
   if (command === "doctor") return doctorCommand(args);
   if (command === "schema") return schemaCommand(args);
   if (command === "create") return createCommand(args);
   if (command === "validate") return validateCommand(args);
   if (command === "status") return statusCommand(args);
-  if (command === "preview") return previewCommand(args, signal);
+  if (command === "preview") return previewCommand(args, options);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 
@@ -580,7 +583,7 @@ export const runCommandLine = async (
     execution =
       jsonCount > 1
         ? usageFailure(command, "Option --json may only be provided once.")
-        : await executeCommand(command, cleanArgs.slice(1), options.signal);
+        : await executeCommand(command, cleanArgs.slice(1), options);
   } catch (error) {
     const interrupted =
       options.signal?.aborted ||

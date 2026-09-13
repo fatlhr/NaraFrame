@@ -105,6 +105,7 @@ export interface PreviewBuildOptions {
   onProgress?: (progress: number) => void;
   failureInjection?: "before-pointer";
   signal?: AbortSignal;
+  onPointerCommitted?: () => void;
 }
 
 export interface IntegrityOptions {
@@ -133,6 +134,7 @@ export interface PromotionOptions {
   contactSheetDecode?: (path: string) => Promise<void>;
   signal?: AbortSignal;
   onPointerPrepared?: () => void | Promise<void>;
+  onPointerCommitted?: () => void;
 }
 
 export interface MediaValidationOptions {
@@ -1063,6 +1065,7 @@ const replacePointerAtomically = async (
   pointer: Record<string, unknown>,
   signal?: AbortSignal,
   onPointerPrepared?: () => void | Promise<void>,
+  onPointerCommitted?: () => void,
 ): Promise<string> => {
   const pointerPath = join(previewDirectory, "current.json");
   const temporaryPath = join(
@@ -1084,6 +1087,7 @@ const replacePointerAtomically = async (
     await onPointerPrepared?.();
     throwIfAborted(signal);
     await rename(temporaryPath, pointerPath);
+    onPointerCommitted?.();
     return pointerPath;
   } finally {
     await rm(temporaryPath, { force: true });
@@ -1120,6 +1124,7 @@ export const promotePreviewBuild = async ({
   contactSheetDecode: requestedContactSheetDecode,
   signal,
   onPointerPrepared,
+  onPointerCommitted,
 }: PromotionOptions): Promise<{
   buildDirectory: string;
   currentPointer: string;
@@ -1169,6 +1174,7 @@ export const promotePreviewBuild = async ({
     },
     signal,
     onPointerPrepared,
+    onPointerCommitted,
   );
   return { buildDirectory, currentPointer, manifestSha256 };
 };
@@ -1180,6 +1186,7 @@ export const publishPreviewBuild = async ({
   onProgress,
   failureInjection,
   signal,
+  onPointerCommitted,
 }: PreviewBuildOptions): Promise<PublishedPreviewBuild> => {
   throwIfAborted(signal);
   const startedAt = new Date().toISOString();
@@ -1325,6 +1332,7 @@ export const publishPreviewBuild = async ({
       ffmpegExecutable: ffmpeg,
       ffprobeExecutable: ffprobe,
       ...(signal ? { signal } : {}),
+      ...(onPointerCommitted ? { onPointerCommitted } : {}),
     });
 
     return {

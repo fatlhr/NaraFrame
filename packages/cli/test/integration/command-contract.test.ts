@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { EventEmitter } from "node:events";
 import {
   cp,
   mkdir,
@@ -11,8 +12,9 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { runCli } from "@naraframe/cli";
+import { type CliProcessHost, runCli, runCliProcess } from "@naraframe/cli";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import * as previewBuild from "../../src/preview-build.js";
 
 const sampleRoot = fileURLToPath(
   new URL("../../../../samples/krakatau-draft", import.meta.url),
@@ -136,6 +138,69 @@ describe("public CLI command contract", () => {
         status: "interrupted",
         success: false,
         issues: [expect.objectContaining({ code: "COMMAND_INTERRUPTED" })],
+      }),
+    ]);
+  });
+
+  it("keeps the public JSON preview event successful after the pointer commits", async () => {
+    const emitter = new EventEmitter();
+    const delegatedExitCodes: Array<number | string | null | undefined> = [];
+    const originalExit = ((code?: number | string | null) => {
+      delegatedExitCodes.push(code);
+      throw new Error("The original exit must not run after preview commit.");
+    }) as CliProcessHost["exit"];
+    const host = Object.assign(emitter, {
+      exit: originalExit,
+      exitCode: undefined as number | string | null | undefined,
+    }) as CliProcessHost;
+    const writes: string[] = [];
+    vi.spyOn(process.stdout, "write").mockImplementation(((value: string) => {
+      writes.push(value);
+      return true;
+    }) as typeof process.stdout.write);
+    vi.spyOn(process.stderr, "write").mockImplementation(
+      (() => true) as typeof process.stderr.write,
+    );
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.spyOn(previewBuild, "publishPreviewBuild").mockImplementation(
+      async (options) => {
+        if (!options.onPointerCommitted) {
+          throw new Error("Preview commit callback was not forwarded.");
+        }
+        options.onPointerCommitted();
+        emitter.emit("SIGTERM");
+        return {
+          buildId: "committed-preview",
+          buildDirectory: "/fixture/preview/builds/committed-preview",
+          currentPointer: "/fixture/preview/current.json",
+          manifestSha256: "a".repeat(64),
+          rendered: {
+            outputPath: "/fixture/preview/builds/committed-preview/preview.mp4",
+            durationInFrames: options.draft.totalFrames,
+            width: options.draft.width,
+            height: options.draft.height,
+            fps: options.draft.fps,
+            browserExecutable: "/fixture/chrome",
+            remotionVersion: "4.0.521",
+          },
+        };
+      },
+    );
+
+    const exitCode = await runCliProcess(
+      ["preview", sampleRoot, "--draft", "--json"],
+      { host },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(delegatedExitCodes).toEqual([]);
+    expect(host.exitCode).toBeUndefined();
+    expect(writes.map((value) => JSON.parse(value))).toEqual([
+      expect.objectContaining({
+        command: "preview",
+        status: "completed",
+        success: true,
+        buildId: "committed-preview",
       }),
     ]);
   });

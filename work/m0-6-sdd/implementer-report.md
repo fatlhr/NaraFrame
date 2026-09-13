@@ -118,3 +118,18 @@ Status: complete pending focused review-fix commit.
 - `work/m0-6-sdd/implementer-report.md`
 
 The NaraFrame skill was unchanged, so its official validator was not rerun. No M0.7+ behavior was implemented.
+
+## Review Fix Report — Commit Boundary Follow-up
+
+### Root cause and RED evidence
+
+- `replacePointerAtomically()` returned only after `await rm(temporaryPath)` in `finally`. A SIGINT/SIGTERM in that cleanup window reached `runCliProcess()`, which had no publication-commit state and therefore aborted the signal and returned 130 even after `rename(current.json)` had committed.
+- Deterministic RED publication regression: `rtk /opt/homebrew/Cellar/node@24/24.20.0/bin/node /opt/homebrew/Cellar/node@24/24.20.0/lib/node_modules/corepack/dist/corepack.js pnpm exec vitest run --project integration packages/cli/test/integration/preview-publication.test.ts` failed because the post-rename callback was absent and its controller remained un-aborted.
+- Deterministic RED process regression: `rtk /opt/homebrew/Cellar/node@24/24.20.0/bin/node /opt/homebrew/Cellar/node@24/24.20.0/lib/node_modules/corepack/dist/corepack.js pnpm exec vitest run --project unit packages/cli/test/unit/process-interruption.test.ts` failed because `RunCliOptions` supplied no preview-commit callback.
+
+### Commit-boundary fix and GREEN evidence
+
+- `replacePointerAtomically()` invokes a synchronous `onPointerCommitted` immediately after successful `rename` and before its cleanup await. `promotePreviewBuild()` and `publishPreviewBuild()` propagate that boundary; runner options forward it from preview publication to `runCliProcess()`.
+- `runCliProcess()` records that irreversible state. Before it, SIGINT/SIGTERM still aborts and resolves 130. After it, a late signal does not abort the controller; late renderer exits 130/143 are suppressed with exit code 0, and the successful command result remains authoritative.
+- Publication integration now aborts a controller at the post-rename boundary and proves promotion resolves successfully, the new pointer names the committed build, and no temporary pointer remains. Process-interruption coverage proves late SIGTERM returns 0 without aborting the command. Public command-contract coverage mocks the committed publication boundary, emits SIGTERM during its cleanup window, and proves exactly one successful JSON `command-result` with exit 0.
+- Exact Node 24.20.0 focused checks: unit CLI suite passed 4/4; integration CLI suite passed 19/19. `rtk /opt/homebrew/Cellar/node@24/24.20.0/bin/node /opt/homebrew/Cellar/node@24/24.20.0/lib/node_modules/corepack/dist/corepack.js pnpm verify` passed Biome, TypeScript, unit 10/10, and integration 33/33.
