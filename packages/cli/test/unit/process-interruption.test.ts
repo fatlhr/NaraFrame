@@ -39,4 +39,38 @@ describe("CLI process interruption", () => {
     expect(emitter.listenerCount("SIGINT")).toBe(0);
     expect(emitter.listenerCount("SIGTERM")).toBe(0);
   });
+
+  it("normalizes SIGTERM interruption and renderer exit to 130", async () => {
+    const emitter = new EventEmitter();
+    const delegatedExitCodes: Array<number | string | null | undefined> = [];
+    const originalExit = ((code?: number | string | null) => {
+      delegatedExitCodes.push(code);
+      throw new Error("The original exit must not run for handled SIGTERM.");
+    }) as CliProcessHost["exit"];
+    const host = Object.assign(emitter, {
+      exit: originalExit,
+      exitCode: undefined as number | string | null | undefined,
+    }) as CliProcessHost;
+
+    const execution = runCliProcess([], {
+      host,
+      execute: async (_args, options) => {
+        await new Promise<void>((resolve) => {
+          options.signal?.addEventListener("abort", () => resolve(), {
+            once: true,
+          });
+        });
+        host.exit(143);
+        return 143;
+      },
+    });
+
+    emitter.emit("SIGTERM");
+
+    await expect(execution).resolves.toBe(130);
+    expect(host.exitCode).toBe(130);
+    expect(delegatedExitCodes).toEqual([]);
+    expect(host.exit).toBe(originalExit);
+    expect(emitter.listenerCount("SIGTERM")).toBe(0);
+  });
 });

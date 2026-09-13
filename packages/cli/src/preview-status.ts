@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { lstat, readFile, realpath, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { CompiledDraft, Issue } from "@naraframe/core";
+import { validatePublishedPreviewMetadata } from "./preview-build.js";
 
 const artifactNames = [
   "preview.mp4",
@@ -144,6 +145,20 @@ export const readCurrentPreviewStatus = async (
     }
 
     const buildDirectory = join(root, "preview", "builds", buildId);
+    const safeFrames = await safeGeneratedFile(
+      root,
+      join(buildDirectory, "frames.json"),
+    );
+    const safeReport = await safeGeneratedFile(
+      root,
+      join(buildDirectory, "report.json"),
+    );
+    validatePublishedPreviewMetadata({
+      manifest,
+      report: await readObject(safeReport),
+      frames: await readObject(safeFrames),
+      expectedBuildId: buildId,
+    });
     const artifacts: Record<string, string> = {
       current: safePointer,
       manifestJson: safeManifest,

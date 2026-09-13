@@ -1,4 +1,13 @@
-import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import {
+  cp,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,6 +18,17 @@ const sampleRoot = fileURLToPath(
   new URL("../../../../samples/krakatau-draft", import.meta.url),
 );
 const temporaryRoots: string[] = [];
+
+const sha256 = (value: Buffer | string): string =>
+  createHash("sha256").update(value).digest("hex");
+
+const copyPublishedSample = async (): Promise<string> => {
+  const root = await mkdtemp(join(tmpdir(), "naraframe-status-contract-"));
+  temporaryRoots.push(root);
+  const project = join(root, "project");
+  await cp(sampleRoot, project, { recursive: true });
+  return project;
+};
 
 const captureJsonResult = async (
   args: readonly string[],
@@ -178,5 +198,175 @@ describe("public CLI command contract", () => {
         issues: [expect.objectContaining({ code: "PREVIEW_METADATA_INVALID" })],
       }),
     ]);
+  });
+
+  it("rejects corrupt preview publication data before returning authoritative paths", async () => {
+    const scopedProject = await copyPublishedSample();
+    const scopedPointerPath = join(scopedProject, "preview", "current.json");
+    const scopedBuildId = "a22c2924f0ff-db361629-f95";
+    const scopedManifest = await readFile(
+      join(scopedProject, "preview", "builds", scopedBuildId, "manifest.json"),
+    );
+    await writeFile(
+      scopedPointerPath,
+      `${JSON.stringify({
+        schemaVersion: 1,
+        buildId: scopedBuildId,
+        manifest: `builds/${scopedBuildId}/manifest.json`,
+        manifestSha256: sha256(scopedManifest),
+        promotedAt: "2026-09-13T00:00:00.000Z",
+      })}\n`,
+    );
+    const scopedStatus = await captureJsonResult([
+      "status",
+      scopedProject,
+      "--json",
+    ]);
+    expect(scopedStatus.exitCode).toBe(0);
+    expect(scopedStatus.events).toEqual([
+      expect.objectContaining({
+        success: true,
+        scope: {
+          type: "scene",
+          sceneId: "context",
+          sourceStartFrame: 120,
+          sourceEndFrame: 300,
+        },
+        artifacts: expect.objectContaining({ previewMp4: expect.any(String) }),
+      }),
+    ]);
+
+    vi.restoreAllMocks();
+    const pointerHashProject = await copyPublishedSample();
+    const pointerPath = join(pointerHashProject, "preview", "current.json");
+    const pointer = JSON.parse(await readFile(pointerPath, "utf8")) as Record<
+      string,
+      unknown
+    >;
+    await writeFile(
+      pointerPath,
+      `${JSON.stringify({ ...pointer, manifestSha256: "0".repeat(64) })}\n`,
+    );
+    const pointerHash = await captureJsonResult([
+      "status",
+      pointerHashProject,
+      "--json",
+    ]);
+
+    const invalidScopeProject = await copyPublishedSample();
+    const invalidScopePointerPath = join(
+      invalidScopeProject,
+      "preview",
+      "current.json",
+    );
+    const invalidScopePointer = JSON.parse(
+      await readFile(invalidScopePointerPath, "utf8"),
+    ) as { manifest: string } & Record<string, unknown>;
+    const invalidScopeManifestPath = join(
+      invalidScopeProject,
+      "preview",
+      invalidScopePointer.manifest,
+    );
+    const invalidScopeManifest = JSON.parse(
+      await readFile(invalidScopeManifestPath, "utf8"),
+    ) as Record<string, unknown>;
+    const reportPath = join(
+      invalidScopeProject,
+      "preview",
+      "builds",
+      String(invalidScopeManifest.buildId),
+      "report.json",
+    );
+    const report = JSON.parse(await readFile(reportPath, "utf8")) as Record<
+      string,
+      unknown
+    >;
+    const invalidScope = { type: "not-a-preview-scope" };
+    const updatedReport = `${JSON.stringify({ ...report, scope: invalidScope }, null, 2)}\n`;
+    await writeFile(reportPath, updatedReport);
+    const artifacts = invalidScopeManifest.artifacts as Record<
+      string,
+      Record<string, unknown>
+    >;
+    artifacts["report.json"] = {
+      ...artifacts["report.json"],
+      bytes: Buffer.byteLength(updatedReport),
+      sha256: sha256(updatedReport),
+    };
+    const updatedManifest = `${JSON.stringify(
+      { ...invalidScopeManifest, scope: invalidScope, artifacts },
+      null,
+      2,
+    )}\n`;
+    await writeFile(invalidScopeManifestPath, updatedManifest);
+    await writeFile(
+      invalidScopePointerPath,
+      `${JSON.stringify({
+        ...invalidScopePointer,
+        manifestSha256: sha256(updatedManifest),
+      })}\n`,
+    );
+    vi.restoreAllMocks();
+    const invalidScopeResult = await captureJsonResult([
+      "status",
+      invalidScopeProject,
+      "--json",
+    ]);
+
+    const symlinkProject = await copyPublishedSample();
+    const symlinkPointer = join(symlinkProject, "preview", "current.json");
+    const external = await mkdtemp(
+      join(tmpdir(), "naraframe-status-external-"),
+    );
+    temporaryRoots.push(external);
+    await writeFile(join(external, "current.json"), "{}\n");
+    await rm(symlinkPointer);
+    await symlink(join(external, "current.json"), symlinkPointer);
+    vi.restoreAllMocks();
+    const symlinkResult = await captureJsonResult([
+      "status",
+      symlinkProject,
+      "--json",
+    ]);
+
+    const artifactProject = await copyPublishedSample();
+    const artifactPointer = JSON.parse(
+      await readFile(join(artifactProject, "preview", "current.json"), "utf8"),
+    ) as { buildId: string };
+    await writeFile(
+      join(
+        artifactProject,
+        "preview",
+        "builds",
+        artifactPointer.buildId,
+        "frames.json",
+      ),
+      "tampered\n",
+    );
+    vi.restoreAllMocks();
+    const artifactResult = await captureJsonResult([
+      "status",
+      artifactProject,
+      "--json",
+    ]);
+
+    for (const result of [
+      pointerHash,
+      invalidScopeResult,
+      symlinkResult,
+      artifactResult,
+    ]) {
+      expect(result.exitCode).toBe(2);
+      expect(result.events).toEqual([
+        expect.objectContaining({
+          command: "status",
+          success: false,
+          artifacts: {},
+          issues: [
+            expect.objectContaining({ code: "PREVIEW_METADATA_INVALID" }),
+          ],
+        }),
+      ]);
+    }
   });
 });

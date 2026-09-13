@@ -380,6 +380,47 @@ describe("atomic preview publication", () => {
     expect(await readFile(first.currentPointer)).toEqual(pointerBeforeFailure);
   });
 
+  it("does not replace the pointer when cancellation arrives after pointer preparation", async () => {
+    const root = await mkdtemp(
+      join(tmpdir(), "naraframe-preview-pointer-race-"),
+    );
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    const previousPointer = json({ schemaVersion: 1, buildId: "previous" });
+    await writeFile(join(previewDirectory, "current.json"), previousPointer);
+    const controller = new AbortController();
+
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(
+          root,
+          "cancelled-pointer",
+        ),
+        previewDirectory,
+        buildId: "cancelled-pointer",
+        draft,
+        probe,
+        decode,
+        contactSheetProbe,
+        contactSheetDecode,
+        signal: controller.signal,
+        onPointerPrepared: () => controller.abort(),
+      } as Parameters<typeof promotePreviewBuild>[0] & {
+        onPointerPrepared: () => void;
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
+      previousPointer,
+    );
+    expect(
+      (await readdir(previewDirectory)).filter((entry) =>
+        entry.startsWith(".current-"),
+      ),
+    ).toEqual([]);
+  });
+
   it("rejects corrupt media and incomplete reports before publishing or changing current", async () => {
     const root = await mkdtemp(join(tmpdir(), "naraframe-preview-integrity-"));
     temporaryRoots.push(root);

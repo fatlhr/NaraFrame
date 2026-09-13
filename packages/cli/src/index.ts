@@ -34,22 +34,22 @@ export const runCliProcess = async (
   const execute = options.execute ?? runCli;
   const controller = new AbortController();
   const originalExit = host.exit;
-  let interruptExitCode: 130 | 143 | null = null;
+  let interrupted = false;
   let interruptionCount = 0;
-  const interrupt = (exitCode: 130 | 143) => {
+  const interrupt = () => {
     interruptionCount += 1;
     if (interruptionCount > 1) {
-      return originalExit.call(host, exitCode);
+      return originalExit.call(host, 130);
     }
-    interruptExitCode = exitCode;
+    interrupted = true;
     controller.abort();
   };
-  const onSigint = () => interrupt(130);
-  const onSigterm = () => interrupt(143);
+  const onSigint = () => interrupt();
+  const onSigterm = () => interrupt();
   const interceptedExit: CliProcessHost["exit"] = (code) => {
     const normalized = typeof code === "string" ? Number(code) : code;
-    if (interruptExitCode !== null && normalized === interruptExitCode) {
-      host.exitCode = interruptExitCode;
+    if (interrupted && (normalized === 130 || normalized === 143)) {
+      host.exitCode = 130;
       return undefined as never;
     }
     return originalExit.call(host, code);
@@ -59,7 +59,8 @@ export const runCliProcess = async (
   host.prependListener("SIGINT", onSigint);
   host.prependListener("SIGTERM", onSigterm);
   try {
-    return await execute(args, { signal: controller.signal });
+    const exitCode = await execute(args, { signal: controller.signal });
+    return interrupted ? 130 : exitCode;
   } finally {
     host.removeListener("SIGINT", onSigint);
     host.removeListener("SIGTERM", onSigterm);

@@ -132,6 +132,7 @@ export interface PromotionOptions {
   contactSheetProbe?: (path: string) => Promise<Record<string, unknown>>;
   contactSheetDecode?: (path: string) => Promise<void>;
   signal?: AbortSignal;
+  onPointerPrepared?: () => void | Promise<void>;
 }
 
 export interface MediaValidationOptions {
@@ -504,10 +505,30 @@ const validTimestamp = (value: unknown): value is string =>
 const nonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
-const assertCompleteMetadata = (
+const isSha256 = (value: unknown): value is string =>
+  typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+
+const isValidPreviewScope = (
+  scope: unknown,
+): scope is Record<string, unknown> => {
+  if (!isObject(scope)) return false;
+  if (scope.type === "project") {
+    return Object.keys(scope).length === 1;
+  }
+  return (
+    scope.type === "scene" &&
+    Object.keys(scope).length === 4 &&
+    nonEmptyString(scope.sceneId) &&
+    Number.isInteger(scope.sourceStartFrame) &&
+    (scope.sourceStartFrame as number) >= 0 &&
+    Number.isInteger(scope.sourceEndFrame) &&
+    (scope.sourceEndFrame as number) > (scope.sourceStartFrame as number)
+  );
+};
+
+const assertMetadataShape = (
   metadata: Record<string, unknown>,
   expectedBuildId: string,
-  draft: CompiledDraft,
 ): void => {
   const runtime = metadata.runtime;
   const runtimeOs = isObject(runtime) ? runtime.os : undefined;
@@ -515,6 +536,73 @@ const assertCompleteMetadata = (
   const ffmpeg = isObject(runtime) ? runtime.ffmpeg : undefined;
   const render = metadata.render;
   const profile = metadata.profile;
+  const checkedFrames = metadata.checkedFrames;
+  const expectedContactSheet = Array.isArray(checkedFrames)
+    ? contactSheetLayoutFor(checkedFrames.length)
+    : undefined;
+  if (
+    metadata.schemaVersion !== 1 ||
+    metadata.buildId !== expectedBuildId ||
+    !isSha256(metadata.sourceRevision) ||
+    !isSha256(metadata.assemblyKey) ||
+    metadata.mode !== "draft" ||
+    !isValidPreviewScope(metadata.scope) ||
+    (metadata.scope.type === "project"
+      ? metadata.timelineScope !== "project"
+      : metadata.timelineScope !== "local") ||
+    metadata.label !== "DRAFT • NO AUDIO" ||
+    metadata.status !== "success" ||
+    metadata.failure !== null ||
+    !validTimestamp(metadata.startedAt) ||
+    !validTimestamp(metadata.completedAt) ||
+    !isObject(profile) ||
+    !nonEmptyString(profile.id) ||
+    !nonEmptyString(profile.version) ||
+    !isObject(runtime) ||
+    !nonEmptyString(runtime.node) ||
+    !nonEmptyString(runtime.remotion) ||
+    !isObject(runtimeOs) ||
+    !nonEmptyString(runtimeOs.platform) ||
+    !nonEmptyString(runtimeOs.release) ||
+    !nonEmptyString(runtimeOs.architecture) ||
+    !isObject(browser) ||
+    !nonEmptyString(browser.executable) ||
+    !nonEmptyString(browser.version) ||
+    !isObject(ffmpeg) ||
+    !nonEmptyString(ffmpeg.executable) ||
+    !nonEmptyString(ffmpeg.version) ||
+    !isObject(render) ||
+    !Number.isInteger(render.width) ||
+    (render.width as number) <= 0 ||
+    !Number.isInteger(render.height) ||
+    (render.height as number) <= 0 ||
+    !Number.isInteger(render.fps) ||
+    (render.fps as number) <= 0 ||
+    !Number.isInteger(render.durationInFrames) ||
+    (render.durationInFrames as number) <= 0 ||
+    render.codec !== "h264" ||
+    render.audio !== "none" ||
+    render.muted !== true ||
+    JSON.stringify(metadata.contactSheet) !==
+      JSON.stringify(expectedContactSheet) ||
+    !Array.isArray(checkedFrames) ||
+    checkedFrames.length === 0
+  ) {
+    throw new Error(
+      "Build metadata is incomplete or has an invalid draft shape.",
+    );
+  }
+  if (Date.parse(metadata.completedAt) < Date.parse(metadata.startedAt)) {
+    throw new Error("Build completion timestamp precedes its start timestamp.");
+  }
+};
+
+const assertCompleteMetadata = (
+  metadata: Record<string, unknown>,
+  expectedBuildId: string,
+  draft: CompiledDraft,
+): void => {
+  assertMetadataShape(metadata, expectedBuildId);
   const expectedContactSheet = Array.isArray(metadata.checkedFrames)
     ? contactSheetLayoutFor(metadata.checkedFrames.length)
     : undefined;
@@ -531,32 +619,14 @@ const assertCompleteMetadata = (
     metadata.label !== draft.label ||
     metadata.status !== "success" ||
     metadata.failure !== null ||
-    !validTimestamp(metadata.startedAt) ||
-    !validTimestamp(metadata.completedAt) ||
-    !isObject(profile) ||
-    profile.id !== draft.profile.id ||
-    profile.version !== draft.profile.version ||
-    !isObject(runtime) ||
-    !nonEmptyString(runtime.node) ||
-    !nonEmptyString(runtime.remotion) ||
-    !isObject(runtimeOs) ||
-    !nonEmptyString(runtimeOs.platform) ||
-    !nonEmptyString(runtimeOs.release) ||
-    !nonEmptyString(runtimeOs.architecture) ||
-    !isObject(browser) ||
-    !nonEmptyString(browser.executable) ||
-    !nonEmptyString(browser.version) ||
-    !isObject(ffmpeg) ||
-    !nonEmptyString(ffmpeg.executable) ||
-    !nonEmptyString(ffmpeg.version) ||
-    !isObject(render) ||
-    render.width !== draft.width ||
-    render.height !== draft.height ||
-    render.fps !== draft.fps ||
-    render.durationInFrames !== draft.totalFrames ||
-    render.codec !== "h264" ||
-    render.audio !== "none" ||
-    render.muted !== true ||
+    (metadata.profile as Record<string, unknown>).id !== draft.profile.id ||
+    (metadata.profile as Record<string, unknown>).version !==
+      draft.profile.version ||
+    (metadata.render as Record<string, unknown>).width !== draft.width ||
+    (metadata.render as Record<string, unknown>).height !== draft.height ||
+    (metadata.render as Record<string, unknown>).fps !== draft.fps ||
+    (metadata.render as Record<string, unknown>).durationInFrames !==
+      draft.totalFrames ||
     JSON.stringify(metadata.contactSheet) !==
       JSON.stringify(expectedContactSheet) ||
     !Array.isArray(metadata.checkedFrames) ||
@@ -565,9 +635,6 @@ const assertCompleteMetadata = (
     throw new Error(
       "Build metadata is incomplete or does not match the compiled draft.",
     );
-  }
-  if (Date.parse(metadata.completedAt) < Date.parse(metadata.startedAt)) {
-    throw new Error("Build completion timestamp precedes its start timestamp.");
   }
 };
 
@@ -809,6 +876,77 @@ const assertSharedMetadataMatches = (
   }
 };
 
+const assertCheckedFrameShape = (frame: unknown): void => {
+  if (!isObject(frame)) {
+    throw new Error("frames.json contains an invalid checked frame.");
+  }
+  if (
+    !Number.isInteger(frame.frame) ||
+    (frame.frame as number) < 0 ||
+    !Number.isInteger(frame.sourceFrame) ||
+    (frame.sourceFrame as number) < 0 ||
+    !nonEmptyString(frame.sceneId) ||
+    !Array.isArray(frame.reasons) ||
+    frame.reasons.length === 0 ||
+    !frame.reasons.every(nonEmptyString)
+  ) {
+    throw new Error("frames.json contains an invalid checked frame.");
+  }
+};
+
+const assertArtifactRecords = (manifest: Record<string, unknown>): void => {
+  if (!isObject(manifest.artifacts)) {
+    throw new Error("manifest.json is missing artifact metadata.");
+  }
+  for (const name of artifactNames) {
+    const record = manifest.artifacts[name];
+    if (
+      !isObject(record) ||
+      record.path !== name ||
+      !Number.isInteger(record.bytes) ||
+      (record.bytes as number) <= 0 ||
+      !isSha256(record.sha256) ||
+      !nonEmptyString(record.mediaType)
+    ) {
+      throw new Error(`manifest.json is missing a complete ${name} record.`);
+    }
+  }
+};
+
+export const validatePublishedPreviewMetadata = ({
+  manifest,
+  report,
+  frames,
+  expectedBuildId,
+}: {
+  manifest: Record<string, unknown>;
+  report: Record<string, unknown>;
+  frames: Record<string, unknown>;
+  expectedBuildId: string;
+}): void => {
+  assertMetadataShape(manifest, expectedBuildId);
+  assertArtifactRecords(manifest);
+  assertMetadataShape(report, expectedBuildId);
+  assertSharedMetadataMatches(manifest, report);
+
+  const checkedFrames = Array.isArray(frames.frames) ? frames.frames : [];
+  if (
+    frames.schemaVersion !== 1 ||
+    frames.buildId !== expectedBuildId ||
+    frames.sourceRevision !== manifest.sourceRevision ||
+    frames.assemblyKey !== manifest.assemblyKey ||
+    JSON.stringify(frames.scope) !== JSON.stringify(manifest.scope) ||
+    frames.timelineScope !== manifest.timelineScope ||
+    JSON.stringify(frames.contactSheet) !==
+      JSON.stringify(manifest.contactSheet) ||
+    JSON.stringify(checkedFrames) !== JSON.stringify(manifest.checkedFrames) ||
+    checkedFrames.length === 0
+  ) {
+    throw new Error("frames.json is incomplete or belongs to another build.");
+  }
+  for (const frame of checkedFrames) assertCheckedFrameShape(frame);
+};
+
 export const validatePreviewBuildIntegrity = async ({
   buildDirectory,
   expectedBuildId,
@@ -822,7 +960,6 @@ export const validatePreviewBuildIntegrity = async ({
 }: IntegrityOptions): Promise<string> => {
   const manifestPath = join(buildDirectory, "manifest.json");
   const manifest = await parseJsonObject(manifestPath);
-  assertCompleteMetadata(manifest, expectedBuildId, expectedDraft);
 
   const artifacts = manifest.artifacts as
     | Record<string, ArtifactRecord>
@@ -842,6 +979,15 @@ export const validatePreviewBuildIntegrity = async ({
 
   const frames = await parseJsonObject(join(buildDirectory, "frames.json"));
   const checkedFrames = Array.isArray(frames.frames) ? frames.frames : [];
+  const report = await parseJsonObject(join(buildDirectory, "report.json"));
+  validatePublishedPreviewMetadata({
+    manifest,
+    report,
+    frames,
+    expectedBuildId,
+  });
+  assertCompleteMetadata(manifest, expectedBuildId, expectedDraft);
+  assertCompleteMetadata(report, expectedBuildId, expectedDraft);
   const expectedContactSheet = contactSheetLayoutFor(checkedFrames.length);
   if (
     frames.schemaVersion !== 1 ||
@@ -856,11 +1002,10 @@ export const validatePreviewBuildIntegrity = async ({
   ) {
     throw new Error("frames.json is incomplete or belongs to another build.");
   }
-  for (const frame of checkedFrames) {
-    if (!isObject(frame)) {
+  for (const value of checkedFrames) {
+    if (!isObject(value)) {
       throw new Error("frames.json contains an invalid checked frame.");
     }
-    const value = frame;
     const frameNumber = Number(value.frame);
     const expectedScene = expectedDraft.scenes.find(
       (scene) =>
@@ -883,9 +1028,6 @@ export const validatePreviewBuildIntegrity = async ({
   }
   assertRequiredFrameCoverage(expectedDraft, checkedFrames);
 
-  const report = await parseJsonObject(join(buildDirectory, "report.json"));
-  assertCompleteMetadata(report, expectedBuildId, expectedDraft);
-  assertSharedMetadataMatches(manifest, report);
   if (
     JSON.stringify(report.checkedFrames) !== JSON.stringify(checkedFrames) ||
     JSON.stringify(manifest.checkedFrames) !== JSON.stringify(checkedFrames)
@@ -919,21 +1061,33 @@ export const validatePreviewBuildIntegrity = async ({
 const replacePointerAtomically = async (
   previewDirectory: string,
   pointer: Record<string, unknown>,
+  signal?: AbortSignal,
+  onPointerPrepared?: () => void | Promise<void>,
 ): Promise<string> => {
   const pointerPath = join(previewDirectory, "current.json");
   const temporaryPath = join(
     previewDirectory,
     `.current-${randomUUID()}.json.tmp`,
   );
-  await writeFile(temporaryPath, json(pointer), { flag: "wx" });
-  const handle = await open(temporaryPath, "r");
   try {
-    await handle.sync();
+    await writeFile(temporaryPath, json(pointer), { flag: "wx" });
+    throwIfAborted(signal);
+    const handle = await open(temporaryPath, "r");
+    throwIfAborted(signal);
+    try {
+      await handle.sync();
+      throwIfAborted(signal);
+    } finally {
+      await handle.close();
+      throwIfAborted(signal);
+    }
+    await onPointerPrepared?.();
+    throwIfAborted(signal);
+    await rename(temporaryPath, pointerPath);
+    return pointerPath;
   } finally {
-    await handle.close();
+    await rm(temporaryPath, { force: true });
   }
-  await rename(temporaryPath, pointerPath);
-  return pointerPath;
 };
 
 const assertBuildDestinationAbsent = async (
@@ -965,6 +1119,7 @@ export const promotePreviewBuild = async ({
   contactSheetProbe: requestedContactSheetProbe,
   contactSheetDecode: requestedContactSheetDecode,
   signal,
+  onPointerPrepared,
 }: PromotionOptions): Promise<{
   buildDirectory: string;
   currentPointer: string;
@@ -1003,13 +1158,18 @@ export const promotePreviewBuild = async ({
 
   throwIfAborted(signal);
 
-  const currentPointer = await replacePointerAtomically(previewDirectory, {
-    schemaVersion: 1,
-    buildId,
-    manifest: `builds/${buildId}/manifest.json`,
-    manifestSha256,
-    promotedAt: new Date().toISOString(),
-  });
+  const currentPointer = await replacePointerAtomically(
+    previewDirectory,
+    {
+      schemaVersion: 1,
+      buildId,
+      manifest: `builds/${buildId}/manifest.json`,
+      manifestSha256,
+      promotedAt: new Date().toISOString(),
+    },
+    signal,
+    onPointerPrepared,
+  );
   return { buildDirectory, currentPointer, manifestSha256 };
 };
 
