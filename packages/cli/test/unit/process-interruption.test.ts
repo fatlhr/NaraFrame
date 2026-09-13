@@ -74,7 +74,7 @@ describe("CLI process interruption", () => {
     expect(emitter.listenerCount("SIGTERM")).toBe(0);
   });
 
-  it("keeps a committed preview successful when SIGTERM arrives during cleanup", async () => {
+  it("keeps a preview successful when SIGTERM arrives after rename dispatch", async () => {
     const emitter = new EventEmitter();
     const delegatedExitCodes: Array<number | string | null | undefined> = [];
     const originalExit = ((code?: number | string | null) => {
@@ -91,13 +91,9 @@ describe("CLI process interruption", () => {
       host,
       execute: async (_args, options) => {
         observedSignal = options.signal;
-        const commit = (
-          options as typeof options & {
-            onPreviewCommitted?: () => void;
-          }
-        ).onPreviewCommitted;
+        const commit = options.onPreviewRenameDispatched;
         if (!commit)
-          throw new Error("Preview commit callback was not provided.");
+          throw new Error("Preview rename callback was not provided.");
         commit();
         emitter.emit("SIGTERM");
         expect(options.signal?.aborted).toBe(false);

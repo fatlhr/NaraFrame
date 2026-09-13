@@ -142,7 +142,7 @@ describe("public CLI command contract", () => {
     ]);
   });
 
-  it("keeps the public JSON preview event successful after the pointer commits", async () => {
+  it("keeps the public JSON preview event successful after pointer rename dispatch", async () => {
     const emitter = new EventEmitter();
     const delegatedExitCodes: Array<number | string | null | undefined> = [];
     const originalExit = ((code?: number | string | null) => {
@@ -154,6 +154,14 @@ describe("public CLI command contract", () => {
       exitCode: undefined as number | string | null | undefined,
     }) as CliProcessHost;
     const writes: string[] = [];
+    let releaseRename: (() => void) | undefined;
+    const renameReleased = new Promise<void>((resolvePromise) => {
+      releaseRename = resolvePromise;
+    });
+    let signalRenameStarted: (() => void) | undefined;
+    const renameStarted = new Promise<void>((resolvePromise) => {
+      signalRenameStarted = resolvePromise;
+    });
     vi.spyOn(process.stdout, "write").mockImplementation(((value: string) => {
       writes.push(value);
       return true;
@@ -164,11 +172,14 @@ describe("public CLI command contract", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     vi.spyOn(previewBuild, "publishPreviewBuild").mockImplementation(
       async (options) => {
-        if (!options.onPointerCommitted) {
-          throw new Error("Preview commit callback was not forwarded.");
+        const { onPointerRenameDispatched } = options;
+        if (!onPointerRenameDispatched) {
+          throw new Error("Preview rename callback was not forwarded.");
         }
-        options.onPointerCommitted();
+        onPointerRenameDispatched();
+        signalRenameStarted?.();
         emitter.emit("SIGTERM");
+        await renameReleased;
         return {
           buildId: "committed-preview",
           buildDirectory: "/fixture/preview/builds/committed-preview",
@@ -187,10 +198,13 @@ describe("public CLI command contract", () => {
       },
     );
 
-    const exitCode = await runCliProcess(
+    const execution = runCliProcess(
       ["preview", sampleRoot, "--draft", "--json"],
       { host },
     );
+    await renameStarted;
+    releaseRename?.();
+    const exitCode = await execution;
 
     expect(exitCode).toBe(0);
     expect(delegatedExitCodes).toEqual([]);
@@ -201,6 +215,48 @@ describe("public CLI command contract", () => {
         status: "completed",
         success: true,
         buildId: "committed-preview",
+      }),
+    ]);
+  });
+
+  it("reports a pointer rename failure after the dispatch boundary as a system failure", async () => {
+    const emitter = new EventEmitter();
+    const originalExit = ((code?: number | string | null) => {
+      throw new Error(`Unexpected process exit ${code}.`);
+    }) as CliProcessHost["exit"];
+    const host = Object.assign(emitter, {
+      exit: originalExit,
+      exitCode: undefined as number | string | null | undefined,
+    }) as CliProcessHost;
+    const writes: string[] = [];
+    vi.spyOn(process.stdout, "write").mockImplementation(((value: string) => {
+      writes.push(value);
+      return true;
+    }) as typeof process.stdout.write);
+    vi.spyOn(process.stderr, "write").mockImplementation(
+      (() => true) as typeof process.stderr.write,
+    );
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.spyOn(previewBuild, "publishPreviewBuild").mockImplementation(
+      async ({ onPointerRenameDispatched }) => {
+        if (!onPointerRenameDispatched) {
+          throw new Error("Preview rename callback was not forwarded.");
+        }
+        onPointerRenameDispatched();
+        emitter.emit("SIGINT");
+        throw new Error("Synthetic pointer rename failure.");
+      },
+    );
+
+    await expect(
+      runCliProcess(["preview", sampleRoot, "--draft", "--json"], { host }),
+    ).resolves.toBe(2);
+    expect(writes.map((value) => JSON.parse(value))).toEqual([
+      expect.objectContaining({
+        command: "preview",
+        status: "failed",
+        success: false,
+        issues: [expect.objectContaining({ code: "SYSTEM_ERROR" })],
       }),
     ]);
   });

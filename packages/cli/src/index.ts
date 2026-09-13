@@ -34,11 +34,11 @@ export const runCliProcess = async (
   const execute = options.execute ?? runCli;
   const controller = new AbortController();
   const originalExit = host.exit;
-  let previewCommitted = false;
+  let previewRenameDispatched = false;
   let interrupted = false;
   let interruptionCount = 0;
   const interrupt = () => {
-    if (previewCommitted) return;
+    if (previewRenameDispatched) return;
     interruptionCount += 1;
     if (interruptionCount > 1) {
       return originalExit.call(host, 130);
@@ -51,7 +51,7 @@ export const runCliProcess = async (
   const interceptedExit: CliProcessHost["exit"] = (code) => {
     const normalized = typeof code === "string" ? Number(code) : code;
     if (
-      (interrupted || previewCommitted) &&
+      (interrupted || previewRenameDispatched) &&
       (normalized === 130 || normalized === 143)
     ) {
       host.exitCode = interrupted ? 130 : 0;
@@ -66,8 +66,8 @@ export const runCliProcess = async (
   try {
     const exitCode = await execute(args, {
       signal: controller.signal,
-      onPreviewCommitted: () => {
-        previewCommitted = true;
+      onPreviewRenameDispatched: () => {
+        previewRenameDispatched = true;
       },
     });
     return interrupted ? 130 : exitCode;

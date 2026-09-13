@@ -21,7 +21,7 @@ import { readCurrentPreviewStatus } from "./preview-status.js";
 
 export interface RunCliOptions {
   signal?: AbortSignal;
-  onPreviewCommitted?: () => void;
+  onPreviewRenameDispatched?: () => void;
 }
 
 interface Execution {
@@ -440,7 +440,7 @@ const previewCommand = async (
   args: readonly string[],
   options: RunCliOptions,
 ): Promise<Execution> => {
-  const { signal, onPreviewCommitted } = options;
+  const { signal, onPreviewRenameDispatched } = options;
   const parsed = parseArguments(args, ["--draft"], ["--scene"]);
   if (
     parsed.error ||
@@ -500,7 +500,9 @@ const previewCommand = async (
     projectRoot: loaded.value.root,
     issues,
     ...(signal ? { signal } : {}),
-    ...(onPreviewCommitted ? { onPointerCommitted: onPreviewCommitted } : {}),
+    ...(onPreviewRenameDispatched
+      ? { onPointerRenameDispatched: onPreviewRenameDispatched }
+      : {}),
     onProgress: (progress) => {
       const percent = Math.floor(progress * 10) * 10;
       if (percent !== lastReported) {

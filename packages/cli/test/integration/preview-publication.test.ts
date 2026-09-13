@@ -6,6 +6,7 @@ import {
   mkdtemp,
   readdir,
   readFile,
+  rename,
   rm,
   stat,
   symlink,
@@ -421,7 +422,7 @@ describe("atomic preview publication", () => {
     ).toEqual([]);
   });
 
-  it("keeps the committed pointer successful when a signal arrives during cleanup", async () => {
+  it("keeps the pointer successful when a signal arrives while rename is in flight", async () => {
     const root = await mkdtemp(
       join(tmpdir(), "naraframe-preview-pointer-commit-"),
     );
@@ -430,8 +431,16 @@ describe("atomic preview publication", () => {
     await mkdir(join(previewDirectory, "builds"), { recursive: true });
     const controller = new AbortController();
     const buildId = "committed-pointer";
+    let releaseRename: (() => void) | undefined;
+    const renameReleased = new Promise<void>((resolvePromise) => {
+      releaseRename = resolvePromise;
+    });
+    let signalRenameStarted: (() => void) | undefined;
+    const renameStarted = new Promise<void>((resolvePromise) => {
+      signalRenameStarted = resolvePromise;
+    });
 
-    const promoted = await promotePreviewBuild({
+    const promotion = promotePreviewBuild({
       stagedBuildDirectory: await createStagedBuild(root, buildId),
       previewDirectory,
       buildId,
@@ -441,12 +450,24 @@ describe("atomic preview publication", () => {
       contactSheetProbe,
       contactSheetDecode,
       signal: controller.signal,
-      onPointerCommitted: () => controller.abort(),
-    } as Parameters<typeof promotePreviewBuild>[0] & {
-      onPointerCommitted: () => void;
+      onPointerRenameDispatched: () => controller.abort(),
+      pointerRenamer: async (from: string, to: string) => {
+        signalRenameStarted?.();
+        await renameReleased;
+        await rename(from, to);
+      },
     });
 
+    const dispatched = await Promise.race([
+      renameStarted.then(() => true),
+      new Promise<boolean>((resolvePromise) => {
+        setTimeout(() => resolvePromise(false), 50);
+      }),
+    ]);
+    expect(dispatched).toBe(true);
     expect(controller.signal.aborted).toBe(true);
+    releaseRename?.();
+    const promoted = await promotion;
     expect(
       JSON.parse(await readFile(promoted.currentPointer, "utf8")),
     ).toMatchObject({ buildId });
