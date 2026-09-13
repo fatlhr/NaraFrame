@@ -3,7 +3,11 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { CompiledDraft } from "@naraframe/core";
 import { bundle } from "@remotion/bundler";
-import { renderMedia, selectComposition } from "@remotion/renderer";
+import {
+  makeCancelSignal,
+  renderMedia,
+  selectComposition,
+} from "@remotion/renderer";
 import { VERSION as remotionVersion } from "remotion";
 
 const macChrome =
@@ -42,6 +46,7 @@ export interface RenderDraftRequest {
   outputPath?: string;
   browserExecutable?: string;
   onProgress?: (progress: number) => void;
+  signal?: AbortSignal;
 }
 
 export interface RenderedDraft {
@@ -66,7 +71,16 @@ export const renderDraft = async ({
   ),
   browserExecutable: requestedBrowser,
   onProgress,
+  signal,
 }: RenderDraftRequest): Promise<RenderedDraft> => {
+  const interrupted = (): Error => {
+    const error = new Error("Draft rendering was interrupted.");
+    error.name = "AbortError";
+    return error;
+  };
+  if (signal?.aborted) {
+    throw interrupted();
+  }
   const browserExecutable = await resolveBrowserExecutable(requestedBrowser);
   await mkdir(dirname(outputPath), { recursive: true });
 
@@ -95,18 +109,34 @@ export const renderDraft = async ({
     logLevel: "warn",
   });
 
-  await renderMedia({
-    serveUrl,
-    composition,
-    inputProps: draft,
-    outputLocation: outputPath,
-    browserExecutable,
-    codec: "h264",
-    muted: true,
-    overwrite: true,
-    logLevel: "warn",
-    onProgress: ({ progress }) => onProgress?.(progress),
-  });
+  if (signal?.aborted) {
+    throw interrupted();
+  }
+  const cancellation = makeCancelSignal();
+  const onAbort = () => cancellation.cancel();
+  signal?.addEventListener("abort", onAbort, { once: true });
+  try {
+    await renderMedia({
+      serveUrl,
+      composition,
+      inputProps: draft,
+      outputLocation: outputPath,
+      browserExecutable,
+      codec: "h264",
+      muted: true,
+      overwrite: true,
+      logLevel: "warn",
+      cancelSignal: cancellation.cancelSignal,
+      onProgress: ({ progress }) => onProgress?.(progress),
+    });
+  } catch (error) {
+    if (signal?.aborted) {
+      throw interrupted();
+    }
+    throw error;
+  } finally {
+    signal?.removeEventListener("abort", onAbort);
+  }
 
   return {
     outputPath,

@@ -549,6 +549,28 @@ describe("atomic preview publication", () => {
     }
   });
 
+  it("cleans attempt staging when rendering fails before publication", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-cleanup-"));
+    temporaryRoots.push(root);
+    const previousBrowser = process.env.NARAFRAME_BROWSER_EXECUTABLE;
+    process.env.NARAFRAME_BROWSER_EXECUTABLE = join(root, "missing-browser");
+
+    try {
+      await expect(
+        publishPreviewBuild({ draft, projectRoot: root, issues: [] }),
+      ).rejects.toThrow("Browser executable not found");
+    } finally {
+      if (previousBrowser === undefined) {
+        delete process.env.NARAFRAME_BROWSER_EXECUTABLE;
+      } else {
+        process.env.NARAFRAME_BROWSER_EXECUTABLE = previousBrowser;
+      }
+    }
+
+    expect(await readdir(join(root, ".naraframe", "attempts"))).toEqual([]);
+    expect(await readdir(join(root, "preview", "builds"))).toEqual([]);
+  });
+
   it("selects at least one checked frame per scene and each semantic beat", () => {
     const frames = selectCheckedFrames(draft, []);
     for (const scene of draft.scenes) {

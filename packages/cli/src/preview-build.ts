@@ -104,6 +104,7 @@ export interface PreviewBuildOptions {
   issues: readonly Issue[];
   onProgress?: (progress: number) => void;
   failureInjection?: "before-pointer";
+  signal?: AbortSignal;
 }
 
 export interface IntegrityOptions {
@@ -130,6 +131,7 @@ export interface PromotionOptions {
   decode?: (path: string) => Promise<void>;
   contactSheetProbe?: (path: string) => Promise<Record<string, unknown>>;
   contactSheetDecode?: (path: string) => Promise<void>;
+  signal?: AbortSignal;
 }
 
 export interface MediaValidationOptions {
@@ -177,6 +179,14 @@ export interface PreviewOutputRoots {
 }
 
 const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
+
+const throwIfAborted = (signal?: AbortSignal): void => {
+  if (signal?.aborted) {
+    const error = new Error("Preview publication was interrupted.");
+    error.name = "AbortError";
+    throw error;
+  }
+};
 
 const sha256Buffer = (value: Buffer | string): string =>
   createHash("sha256").update(value).digest("hex");
@@ -954,11 +964,13 @@ export const promotePreviewBuild = async ({
   decode,
   contactSheetProbe: requestedContactSheetProbe,
   contactSheetDecode: requestedContactSheetDecode,
+  signal,
 }: PromotionOptions): Promise<{
   buildDirectory: string;
   currentPointer: string;
   manifestSha256: string;
 }> => {
+  throwIfAborted(signal);
   const buildsDirectory = join(previewDirectory, "builds");
   const buildDirectory = join(buildsDirectory, buildId);
   await assertBuildDestinationAbsent(buildDirectory);
@@ -977,6 +989,7 @@ export const promotePreviewBuild = async ({
       ? { contactSheetDecode: requestedContactSheetDecode }
       : {}),
   });
+  throwIfAborted(signal);
   await rename(stagedBuildDirectory, buildDirectory);
 
   if (
@@ -987,6 +1000,8 @@ export const promotePreviewBuild = async ({
       "Injected preview publication failure before pointer promotion.",
     );
   }
+
+  throwIfAborted(signal);
 
   const currentPointer = await replacePointerAtomically(previewDirectory, {
     schemaVersion: 1,
@@ -1004,7 +1019,9 @@ export const publishPreviewBuild = async ({
   issues,
   onProgress,
   failureInjection,
+  signal,
 }: PreviewBuildOptions): Promise<PublishedPreviewBuild> => {
+  throwIfAborted(signal);
   const startedAt = new Date().toISOString();
   const attemptId = randomUUID();
   const buildId = `${draft.assemblyKey.slice(0, 12)}-${attemptId.slice(0, 12)}`;
@@ -1013,136 +1030,149 @@ export const publishPreviewBuild = async ({
   const stagedBuildDirectory = join(attemptDirectory, "build");
   const previewDirectory = outputRoots.preview;
   await mkdir(stagedBuildDirectory, { recursive: true });
-  await writeFile(join(attemptDirectory, "compiled.json"), json(draft), {
-    flag: "wx",
-  });
+  try {
+    await writeFile(join(attemptDirectory, "compiled.json"), json(draft), {
+      flag: "wx",
+    });
 
-  const outputPath = join(stagedBuildDirectory, "preview.mp4");
-  const rendered = await renderDraft({
-    draft,
-    projectRoot: outputRoots.project,
-    outputPath,
-    ...(onProgress ? { onProgress } : {}),
-  });
-  const frames = selectCheckedFrames(draft, issues);
-  const contactSheet = contactSheetLayoutFor(frames.length);
-  const ffmpeg = ffmpegExecutable();
-  const ffprobe = ffprobeExecutable();
-  await access(ffmpeg);
-  await access(ffprobe);
-  await createContactSheet(
-    outputPath,
-    join(stagedBuildDirectory, "contact-sheet.png"),
-    frames,
-    contactSheet,
-    ffmpeg,
-  );
+    const outputPath = join(stagedBuildDirectory, "preview.mp4");
+    const rendered = await renderDraft({
+      draft,
+      projectRoot: outputRoots.project,
+      outputPath,
+      ...(onProgress ? { onProgress } : {}),
+      ...(signal ? { signal } : {}),
+    });
+    throwIfAborted(signal);
+    const frames = selectCheckedFrames(draft, issues);
+    const contactSheet = contactSheetLayoutFor(frames.length);
+    const ffmpeg = ffmpegExecutable();
+    const ffprobe = ffprobeExecutable();
+    await access(ffmpeg);
+    await access(ffprobe);
+    await createContactSheet(
+      outputPath,
+      join(stagedBuildDirectory, "contact-sheet.png"),
+      frames,
+      contactSheet,
+      ffmpeg,
+    );
+    throwIfAborted(signal);
 
-  const verifiedMedia = await validatePreviewMedia({
-    path: outputPath,
-    draft,
-    ffmpegExecutable: ffmpeg,
-    ffprobeExecutable: ffprobe,
-  });
-  await validateContactSheet({
-    path: join(stagedBuildDirectory, "contact-sheet.png"),
-    layout: contactSheet,
-    ffmpegExecutable: ffmpeg,
-    ffprobeExecutable: ffprobe,
-  });
-  const runtime: RuntimeMetadata = {
-    node: process.version,
-    os: { platform: platform(), release: release(), architecture: arch() },
-    remotion: rendered.remotionVersion,
-    browser: {
-      executable: rendered.browserExecutable,
-      version: await commandVersion(rendered.browserExecutable, ["--version"]),
-    },
-    ffmpeg: {
-      executable: ffmpeg,
-      version: await commandVersion(ffmpeg, ["-version"]),
-    },
-  };
-  await writeFile(
-    join(stagedBuildDirectory, "frames.json"),
-    json({
+    const verifiedMedia = await validatePreviewMedia({
+      path: outputPath,
+      draft,
+      ffmpegExecutable: ffmpeg,
+      ffprobeExecutable: ffprobe,
+    });
+    await validateContactSheet({
+      path: join(stagedBuildDirectory, "contact-sheet.png"),
+      layout: contactSheet,
+      ffmpegExecutable: ffmpeg,
+      ffprobeExecutable: ffprobe,
+    });
+    const runtime: RuntimeMetadata = {
+      node: process.version,
+      os: { platform: platform(), release: release(), architecture: arch() },
+      remotion: rendered.remotionVersion,
+      browser: {
+        executable: rendered.browserExecutable,
+        version: await commandVersion(rendered.browserExecutable, [
+          "--version",
+        ]),
+      },
+      ffmpeg: {
+        executable: ffmpeg,
+        version: await commandVersion(ffmpeg, ["-version"]),
+      },
+    };
+    await writeFile(
+      join(stagedBuildDirectory, "frames.json"),
+      json({
+        schemaVersion: 1,
+        buildId,
+        sourceRevision: draft.sourceRevision,
+        assemblyKey: draft.assemblyKey,
+        scope: draft.scope,
+        timelineScope: draft.timelineScope,
+        contactSheet,
+        frames,
+      }),
+      { flag: "wx" },
+    );
+    const preparedArtifactRecords = await Promise.all([
+      artifactRecord(stagedBuildDirectory, "preview.mp4", "video/mp4"),
+      artifactRecord(stagedBuildDirectory, "contact-sheet.png", "image/png"),
+      artifactRecord(stagedBuildDirectory, "frames.json", "application/json"),
+    ]);
+    const completedAt = new Date().toISOString();
+    const metadata: PreviewMetadata = {
       schemaVersion: 1,
       buildId,
       sourceRevision: draft.sourceRevision,
       assemblyKey: draft.assemblyKey,
+      mode: "draft",
       scope: draft.scope,
       timelineScope: draft.timelineScope,
+      label: draft.label,
+      profile: { id: draft.profile.id, version: draft.profile.version },
+      runtime,
+      render: {
+        width: rendered.width,
+        height: rendered.height,
+        fps: rendered.fps,
+        durationInFrames: rendered.durationInFrames,
+        codec: verifiedMedia.codec,
+        audio: verifiedMedia.audio,
+        muted: true,
+      },
       contactSheet,
-      frames,
-    }),
-    { flag: "wx" },
-  );
-  const preparedArtifactRecords = await Promise.all([
-    artifactRecord(stagedBuildDirectory, "preview.mp4", "video/mp4"),
-    artifactRecord(stagedBuildDirectory, "contact-sheet.png", "image/png"),
-    artifactRecord(stagedBuildDirectory, "frames.json", "application/json"),
-  ]);
-  const completedAt = new Date().toISOString();
-  const metadata: PreviewMetadata = {
-    schemaVersion: 1,
-    buildId,
-    sourceRevision: draft.sourceRevision,
-    assemblyKey: draft.assemblyKey,
-    mode: "draft",
-    scope: draft.scope,
-    timelineScope: draft.timelineScope,
-    label: draft.label,
-    profile: { id: draft.profile.id, version: draft.profile.version },
-    runtime,
-    render: {
-      width: rendered.width,
-      height: rendered.height,
-      fps: rendered.fps,
-      durationInFrames: rendered.durationInFrames,
-      codec: verifiedMedia.codec,
-      audio: verifiedMedia.audio,
-      muted: true,
-    },
-    contactSheet,
-    checkedFrames: frames,
-    startedAt,
-    completedAt,
-    status: "success",
-    failure: null,
-  };
-  await writeFile(join(stagedBuildDirectory, "report.json"), json(metadata), {
-    flag: "wx",
-  });
-  const records = [
-    ...preparedArtifactRecords,
-    await artifactRecord(
+      checkedFrames: frames,
+      startedAt,
+      completedAt,
+      status: "success",
+      failure: null,
+    };
+    await writeFile(join(stagedBuildDirectory, "report.json"), json(metadata), {
+      flag: "wx",
+    });
+    const records = [
+      ...preparedArtifactRecords,
+      await artifactRecord(
+        stagedBuildDirectory,
+        "report.json",
+        "application/json",
+      ),
+    ];
+    const artifacts = Object.fromEntries(
+      records.map((record) => [record.path, record]),
+    ) as Record<ArtifactName, ArtifactRecord>;
+    const manifest: PreviewManifest = { ...metadata, artifacts };
+    await writeFile(
+      join(stagedBuildDirectory, "manifest.json"),
+      json(manifest),
+      {
+        flag: "wx",
+      },
+    );
+
+    const promoted = await promotePreviewBuild({
       stagedBuildDirectory,
-      "report.json",
-      "application/json",
-    ),
-  ];
-  const artifacts = Object.fromEntries(
-    records.map((record) => [record.path, record]),
-  ) as Record<ArtifactName, ArtifactRecord>;
-  const manifest: PreviewManifest = { ...metadata, artifacts };
-  await writeFile(join(stagedBuildDirectory, "manifest.json"), json(manifest), {
-    flag: "wx",
-  });
+      previewDirectory,
+      buildId,
+      draft,
+      ...(failureInjection ? { failureInjection } : {}),
+      ffmpegExecutable: ffmpeg,
+      ffprobeExecutable: ffprobe,
+      ...(signal ? { signal } : {}),
+    });
 
-  const promoted = await promotePreviewBuild({
-    stagedBuildDirectory,
-    previewDirectory,
-    buildId,
-    draft,
-    ...(failureInjection ? { failureInjection } : {}),
-    ffmpegExecutable: ffmpeg,
-    ffprobeExecutable: ffprobe,
-  });
-  await rm(attemptDirectory, { recursive: true, force: true });
-
-  return {
-    buildId,
-    ...promoted,
-    rendered: withPublishedOutputPath(rendered, promoted.buildDirectory),
-  };
+    return {
+      buildId,
+      ...promoted,
+      rendered: withPublishedOutputPath(rendered, promoted.buildDirectory),
+    };
+  } finally {
+    await rm(attemptDirectory, { recursive: true, force: true });
+  }
 };
