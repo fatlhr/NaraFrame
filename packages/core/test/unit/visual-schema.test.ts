@@ -82,6 +82,66 @@ describe("visual source schema", () => {
     expect(ScenesSchema.safeParse(arbitrary).success).toBe(false);
   });
 
+  it("accepts bounded appearance, typography, layout, and camera anchors", () => {
+    const document = sceneDocument();
+    const copy = firstScene(document).visual.layers[0];
+    if (copy?.type !== "text") throw new Error("Expected text fixture.");
+    Object.assign(copy, {
+      role: "heading",
+      fontSize: 72,
+      lineHeight: 0.98,
+      padding: { top: 12, right: 16, bottom: 12, left: 16 },
+      maxLines: 2,
+      overflowPolicy: "shrink",
+    });
+    const group = fixtureGroup(document);
+    Object.assign(group, {
+      frame: { x: 80, y: 80, width: 600, height: 320 },
+      layout: {
+        type: "stack",
+        direction: "vertical",
+        gap: 24,
+        padding: { top: 16, right: 16, bottom: 16, left: 16 },
+        align: "start",
+      },
+    });
+    Object.assign(firstScene(document).beats[0] ?? {}, {
+      action: "focus",
+      params: {
+        camera: "zoom",
+        intensity: 0.8,
+        anchor: { x: 0.25, y: 0.75 },
+      },
+    });
+
+    expect(ScenesSchema.safeParse(document).success).toBe(true);
+  });
+
+  it("rejects unbounded appearance and layout values", () => {
+    const invalidRadius = sceneDocument();
+    Object.assign(firstScene(invalidRadius).visual.layers[0] ?? {}, {
+      fontSize: 5000,
+    });
+    expect(ScenesSchema.safeParse(invalidRadius).success).toBe(false);
+
+    const missingLayoutFrame = sceneDocument();
+    Object.assign(fixtureGroup(missingLayoutFrame), {
+      layout: { type: "grid", columns: 2, gap: 20 },
+    });
+    expect(ScenesSchema.safeParse(missingLayoutFrame).success).toBe(false);
+
+    const invalidAnchor = sceneDocument();
+    Object.assign(firstScene(invalidAnchor).beats[0] ?? {}, {
+      action: "focus",
+      params: {
+        camera: "zoom",
+        intensity: 0.8,
+        anchor: { x: 1.4, y: 0.5 },
+      },
+    });
+    expect(ScenesSchema.safeParse(invalidAnchor).success).toBe(false);
+  });
+
   it("rejects unknown actions and raw executable or keyframe fields", () => {
     const unknownAction = sceneDocument();
     Object.assign(unknownAction.scenes[0]?.beats[0] ?? {}, {

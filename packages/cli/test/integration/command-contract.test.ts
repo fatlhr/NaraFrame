@@ -439,6 +439,7 @@ describe("public CLI command contract", () => {
           buildDirectory: "/fixture/preview/builds/committed-preview",
           currentPointer: "/fixture/preview/current.json",
           manifestSha256: "a".repeat(64),
+          issues: [],
           rendered: {
             outputPath: "/fixture/preview/builds/committed-preview/preview.mp4",
             durationInFrames: options.draft.totalFrames,
@@ -447,6 +448,7 @@ describe("public CLI command contract", () => {
             fps: options.draft.fps,
             browserExecutable: "/fixture/chrome",
             remotionVersion: "4.0.521",
+            visualPreflight: { checkedFrames: [], issues: [] },
           },
         };
       },

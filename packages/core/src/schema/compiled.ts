@@ -9,7 +9,7 @@ import {
   VersionSchema,
 } from "./primitives.js";
 import { RenderTokensSchema } from "./profile.js";
-import { LayerSchema } from "./scene.js";
+import { FocalPointSchema, LayerSchema } from "./scene.js";
 
 const CompiledAssetSchema = z.discriminatedUnion("kind", [
   z
@@ -83,6 +83,7 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
         .object({
           camera: z.enum(["push", "pan", "zoom"]),
           intensity: z.number().min(0).max(1),
+          anchor: FocalPointSchema.optional(),
           easingPreset: EasingPresetSchema.optional(),
         })
         .strict(),

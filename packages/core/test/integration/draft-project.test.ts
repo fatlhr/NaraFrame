@@ -107,11 +107,18 @@ describe("Krakatau draft project", () => {
 
     const scene = compiled.value.scenes[0];
     const map = scene?.layers.find((layer) => layer.id === "map-image");
+    const copy = scene?.layers.find((layer) => layer.id === "context-copy");
     const reveal = scene?.beats.find((beat) => beat.id === "reveal-map");
     const emphasize = scene?.beats.find((beat) => beat.id === "pulse-marker");
     const focus = scene?.beats.find((beat) => beat.id === "focus-map");
     expect(map).toMatchObject({
       frame: { x: 65, y: 180, width: 410, height: 307.5 },
+    });
+    expect(copy).toMatchObject({
+      type: "text",
+      fontSize: 34,
+      lineHeight: 1.15,
+      overflowPolicy: "shrink",
     });
     expect(reveal).toMatchObject({
       action: "reveal",

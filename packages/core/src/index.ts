@@ -51,17 +51,27 @@ export type { ProjectConfig } from "./schema/project.js";
 export { ProjectConfigSchema } from "./schema/project.js";
 export type {
   Beat,
+  FocalPoint,
   Frame,
+  Insets,
   Layer,
   Scene,
   Scenes,
   SceneVisual,
+  Shadow,
+  Stroke,
+  TypographyRole,
 } from "./schema/scene.js";
 export {
   BeatSchema,
+  FocalPointSchema,
   FrameSchema,
+  InsetsSchema,
   LayerSchema,
   SceneSchema,
   ScenesSchema,
   SceneVisualSchema,
+  ShadowSchema,
+  StrokeSchema,
+  TypographyRoleSchema,
 } from "./schema/scene.js";

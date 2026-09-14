@@ -1,22 +1,11 @@
 import { fileURLToPath } from "node:url";
 import { compileDraft, loadPlanProject } from "@naraframe/core";
 import { describe, expect, it } from "vitest";
-import { motionFor } from "../../src/remotion/draft-video.js";
+import { motionStateFor } from "../../src/remotion/motion.js";
 
 const sampleRoot = fileURLToPath(
   new URL("../../../../samples/krakatau-draft", import.meta.url),
 );
-
-const scaleFrom = (transform: string | undefined) => {
-  const match = transform?.match(/scale\(([^)]+)\)/);
-  if (!match?.[1]) throw new Error("Expected a scale transform.");
-  return Number(match[1]);
-};
-
-const scalesFrom = (transform: string | undefined) =>
-  [...(transform?.matchAll(/scale\(([^)]+)\)/g) ?? [])].map((match) =>
-    Number(match[1]),
-  );
 
 describe("renderer test discovery", () => {
   it("loads renderer and core source aliases", async () => {
@@ -46,16 +35,16 @@ describe("renderer test discovery", () => {
     const scene = compiled.value.scenes[0];
     if (!scene) throw new Error("Expected the compiled context scene.");
 
-    const start = motionFor(compiled.value, scene, "map-image", 42);
-    const middle = motionFor(compiled.value, scene, "map-image", 105);
-    const end = motionFor(compiled.value, scene, "map-image", 168);
+    const start = motionStateFor(compiled.value, scene, "map-image", 42);
+    const middle = motionStateFor(compiled.value, scene, "map-image", 105);
+    const end = motionStateFor(compiled.value, scene, "map-image", 168);
 
     expect(start.opacity).toBe(1);
-    expect(scaleFrom(start.transform)).toBeCloseTo(1);
-    expect(scaleFrom(middle.transform)).toBeCloseTo(1.0595);
-    expect(middle.transform).toContain("translateY(-10.2px)");
-    expect(scaleFrom(end.transform)).toBeCloseTo(1.119);
-    expect(end.transform).toContain("translateY(-20.4px)");
+    expect(start.scale).toBeCloseTo(1);
+    expect(middle.scale).toBeCloseTo(1.0595);
+    expect(middle.translateY).toBeCloseTo(-10.2);
+    expect(end.scale).toBeCloseTo(1.119);
+    expect(end.translateY).toBeCloseTo(-20.4);
   });
 
   it("clamps reveal and emphasis motion at their half-open boundaries", async () => {
@@ -72,24 +61,33 @@ describe("renderer test discovery", () => {
     const scene = compiled.value.scenes[0];
     if (!scene) throw new Error("Expected the compiled context scene.");
 
-    const revealStart = motionFor(compiled.value, scene, "map-image", 9);
-    const revealEnd = motionFor(compiled.value, scene, "map-image", 39);
+    const revealStart = motionStateFor(compiled.value, scene, "map-image", 9);
+    const revealEnd = motionStateFor(compiled.value, scene, "map-image", 39);
     expect(revealStart.opacity).toBe(0);
-    expect(revealStart.transform).toContain("translateX(40px)");
+    expect(revealStart.translateX).toBe(40);
     expect(revealEnd.opacity).toBe(1);
-    expect(revealEnd.transform).toContain("translateX(0px)");
+    expect(revealEnd.translateX).toBe(0);
 
-    const pulseStart = scalesFrom(
-      motionFor(compiled.value, scene, "eruption-marker", 63).transform,
+    const pulseStart = motionStateFor(
+      compiled.value,
+      scene,
+      "eruption-marker",
+      63,
     );
-    const pulseMiddle = scalesFrom(
-      motionFor(compiled.value, scene, "eruption-marker", 77).transform,
+    const pulseMiddle = motionStateFor(
+      compiled.value,
+      scene,
+      "eruption-marker",
+      77,
     );
-    const pulseEnd = scalesFrom(
-      motionFor(compiled.value, scene, "eruption-marker", 90).transform,
+    const pulseEnd = motionStateFor(
+      compiled.value,
+      scene,
+      "eruption-marker",
+      90,
     );
-    expect(pulseStart[0]).toBeCloseTo(1);
-    expect(pulseMiddle[0]).toBeGreaterThan(1.2);
-    expect(pulseEnd[0]).toBeCloseTo(1);
+    expect(pulseStart.scale).toBeCloseTo(1);
+    expect(pulseMiddle.scale).toBeGreaterThan(1.2);
+    expect(pulseEnd.scale).toBeCloseTo(1);
   });
 });

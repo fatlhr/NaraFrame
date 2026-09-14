@@ -1,0 +1,500 @@
+import type { CompiledDraft, Issue, Layer } from "@naraframe/core";
+import { measureText } from "@remotion/layout-utils";
+import {
+  type GroupTransform,
+  groupScreenTransformFor,
+  motionStateFor,
+} from "./motion.js";
+
+export const visualPreflightProperty = "__naraframeVisualPreflight";
+
+export interface VisualPreflightFrame {
+  frame: number;
+  sceneId: string;
+  reasons: string[];
+}
+
+export interface VisualPreflightReport {
+  issues: Issue[];
+  frames: VisualPreflightFrame[];
+}
+
+export type DraftWithVisualPreflight = CompiledDraft & {
+  [visualPreflightProperty]?: VisualPreflightReport;
+};
+
+interface TextMetrics {
+  fontSize: number;
+  lines: string[];
+  contentHeight: number;
+  overflow: boolean;
+}
+
+interface Rectangle {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const issueFor = (
+  code: string,
+  sceneIndex: number,
+  layerIndex: number,
+  layerId: string,
+  message: string,
+  suggestion: string,
+): Issue => ({
+  code,
+  severity: "error",
+  responsible: "agent",
+  artifact: "scenes.json",
+  path: `/scenes/${sceneIndex}/visual/layers/${layerIndex}`,
+  entityId: layerId,
+  message,
+  suggestion,
+});
+
+const textStyle = (layer: Extract<Layer, { type: "text" }>) => ({
+  fontSize: layer.fontSize ?? 34,
+  fontWeight: layer.fontWeight ?? 700,
+  lineHeight: layer.lineHeight ?? 1.15,
+  letterSpacing: layer.letterSpacing ?? 0,
+  padding: layer.padding ?? { top: 0, right: 0, bottom: 0, left: 0 },
+  maxLines: layer.maxLines ?? 20,
+  overflowPolicy: layer.overflowPolicy ?? "error",
+});
+
+const measureWidth = (
+  text: string,
+  draft: CompiledDraft,
+  layer: Extract<Layer, { type: "text" }>,
+  fontSize: number,
+): number =>
+  measureText({
+    text,
+    fontFamily: draft.profile.render.typography.fontFamily,
+    fontSize,
+    fontWeight: layer.fontWeight ?? 700,
+    letterSpacing: `${layer.letterSpacing ?? 0}px`,
+  }).width;
+
+const wrapText = (
+  text: string,
+  withinWidth: number,
+  draft: CompiledDraft,
+  layer: Extract<Layer, { type: "text" }>,
+  fontSize: number,
+): { lines: string[]; unbreakableOverflow: boolean } => {
+  const lines: string[] = [];
+  let unbreakableOverflow = false;
+  for (const paragraph of text.split("\n")) {
+    if (paragraph.length === 0) {
+      lines.push("");
+      continue;
+    }
+    const words = paragraph.trim().split(/\s+/u);
+    let line = "";
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (measureWidth(candidate, draft, layer, fontSize) <= withinWidth) {
+        line = candidate;
+        continue;
+      }
+      if (line) lines.push(line);
+      if (measureWidth(word, draft, layer, fontSize) > withinWidth) {
+        unbreakableOverflow = true;
+      }
+      line = word;
+    }
+    if (line) lines.push(line);
+  }
+  return { lines, unbreakableOverflow };
+};
+
+const metricsAt = (
+  draft: CompiledDraft,
+  layer: Extract<Layer, { type: "text" }>,
+  fontSize: number,
+): TextMetrics => {
+  const style = textStyle(layer);
+  const width = layer.frame.width - style.padding.left - style.padding.right;
+  const height = layer.frame.height - style.padding.top - style.padding.bottom;
+  if (width <= 0 || height <= 0) {
+    return { fontSize, lines: [], contentHeight: 0, overflow: true };
+  }
+  const wrapped = wrapText(layer.text, width, draft, layer, fontSize);
+  const contentHeight = wrapped.lines.length * fontSize * style.lineHeight;
+  return {
+    fontSize,
+    lines: wrapped.lines,
+    contentHeight,
+    overflow:
+      wrapped.unbreakableOverflow ||
+      wrapped.lines.length > style.maxLines ||
+      contentHeight > height + 0.5,
+  };
+};
+
+const fitText = (
+  draft: CompiledDraft,
+  layer: Extract<Layer, { type: "text" }>,
+): TextMetrics => {
+  const style = textStyle(layer);
+  const minimum = draft.profile.render.typography.minimumFontSize ?? 14;
+  const first = metricsAt(draft, layer, style.fontSize);
+  if (!first.overflow || style.overflowPolicy === "error") return first;
+  for (let size = Math.floor(style.fontSize - 1); size >= minimum; size -= 1) {
+    const candidate = metricsAt(draft, layer, size);
+    if (!candidate.overflow) return candidate;
+  }
+  return metricsAt(draft, layer, minimum);
+};
+
+const textRectangle = (
+  layer: Extract<Layer, { type: "text" }>,
+  metrics: TextMetrics,
+): Rectangle => {
+  const padding = textStyle(layer).padding;
+  const availableHeight = layer.frame.height - padding.top - padding.bottom;
+  const verticalOffset = {
+    top: 0,
+    center: Math.max(0, (availableHeight - metrics.contentHeight) / 2),
+    bottom: Math.max(0, availableHeight - metrics.contentHeight),
+  }[layer.verticalAlign ?? "center"];
+  return {
+    x: layer.frame.x + padding.left,
+    y: layer.frame.y + padding.top + verticalOffset,
+    width: layer.frame.width - padding.left - padding.right,
+    height: Math.min(availableHeight, metrics.contentHeight),
+  };
+};
+
+const transformedRectangle = (
+  rectangle: Rectangle,
+  state: ReturnType<typeof motionStateFor>,
+): Rectangle => ({
+  x:
+    rectangle.x +
+    state.translateX -
+    rectangle.width * (state.scale - 1) * state.anchor.x,
+  y:
+    rectangle.y +
+    state.translateY -
+    rectangle.height * (state.scale - 1) * state.anchor.y,
+  width: rectangle.width * state.scale,
+  height: rectangle.height * state.scale,
+});
+
+const intersects = (left: Rectangle, right: Rectangle): boolean =>
+  left.x < right.x + right.width &&
+  left.x + left.width > right.x &&
+  left.y < right.y + right.height &&
+  left.y + left.height > right.y;
+
+/**
+ * Mirrors `GroupView`'s member-bounding-box math (draft-video.tsx) so the
+ * transform-origin used here matches what the renderer actually applies.
+ */
+const groupBoundsFor = (
+  scene: CompiledDraft["scenes"][number],
+  group: Extract<Layer, { type: "group" }>,
+): Rectangle => {
+  const layersById = new Map(scene.layers.map((layer) => [layer.id, layer]));
+  const members = group.memberIds.flatMap((memberId) => {
+    const member = layersById.get(memberId);
+    return member && member.type !== "group" ? [member] : [];
+  });
+  if (members.length === 0) {
+    return { x: 0, y: 0, width: 0, height: 0 };
+  }
+  const left = Math.min(...members.map((member) => member.frame.x));
+  const top = Math.min(...members.map((member) => member.frame.y));
+  const right = Math.max(
+    ...members.map((member) => member.frame.x + member.frame.width),
+  );
+  const bottom = Math.max(
+    ...members.map((member) => member.frame.y + member.frame.height),
+  );
+  return { x: left, y: top, width: right - left, height: bottom - top };
+};
+
+/**
+ * Folds a parent group's static transform + beat motion into a member's
+ * already-transformed rectangle, so collision checks happen at the position
+ * the layer actually renders at (see VF/M0.9.7 group-transform fix). Rotation
+ * is handled by taking the axis-aligned bounding box of the rotated corners,
+ * which never under-reports a real collision.
+ */
+const applyGroupTransform = (
+  rectangle: Rectangle,
+  transform: GroupTransform,
+  bounds: Rectangle,
+): Rectangle => {
+  const originX = bounds.x + transform.anchorX * bounds.width;
+  const originY = bounds.y + transform.anchorY * bounds.height;
+  const radians = (transform.rotationDeg * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const corners: Array<[number, number]> = [
+    [rectangle.x, rectangle.y],
+    [rectangle.x + rectangle.width, rectangle.y],
+    [rectangle.x, rectangle.y + rectangle.height],
+    [rectangle.x + rectangle.width, rectangle.y + rectangle.height],
+  ];
+  const points = corners.map(([pointX, pointY]) => {
+    const localX = (pointX - originX) * transform.scale;
+    const localY = (pointY - originY) * transform.scale;
+    const rotatedX = localX * cos - localY * sin;
+    const rotatedY = localX * sin + localY * cos;
+    return [
+      originX + rotatedX + transform.translateX,
+      originY + rotatedY + transform.translateY,
+    ] as const;
+  });
+  const xs = points.map((point) => point[0]);
+  const ys = points.map((point) => point[1]);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  return {
+    x: minX,
+    y: minY,
+    width: Math.max(...xs) - minX,
+    height: Math.max(...ys) - minY,
+  };
+};
+
+const framesForScene = (
+  scene: CompiledDraft["scenes"][number],
+): VisualPreflightFrame[] => {
+  const local = new Map<number, string[]>();
+  const add = (frame: number, reason: string) => {
+    const bounded = Math.max(
+      0,
+      Math.min(scene.endFrame - scene.startFrame - 1, frame),
+    );
+    const reasons = local.get(bounded) ?? [];
+    if (!reasons.includes(reason)) reasons.push(reason);
+    local.set(bounded, reasons);
+  };
+  const duration = scene.endFrame - scene.startFrame;
+  add(0, "scene-entry");
+  add(Math.floor(duration * 0.25), "scene-settled");
+  add(duration - 1, "scene-final");
+  scene.beats.forEach((beat) => {
+    add(
+      beat.startFrame + Math.floor(beat.durationInFrames / 2),
+      `beat-peak:${beat.id}`,
+    );
+    add(beat.startFrame + beat.durationInFrames, `beat-settled:${beat.id}`);
+  });
+  return [...local.entries()].map(([frame, reasons]) => ({
+    frame: scene.startFrame + frame,
+    sceneId: scene.id,
+    reasons: reasons.sort(),
+  }));
+};
+
+export const resolveVisualPreflight = (
+  input: CompiledDraft,
+): { draft: CompiledDraft; report: VisualPreflightReport } => {
+  const draft = structuredClone(input);
+  const issues: Issue[] = [];
+  const frames = draft.scenes.flatMap(framesForScene);
+
+  draft.scenes.forEach((scene, sceneIndex) => {
+    const textMetrics = new Map<string, TextMetrics>();
+    scene.layers.forEach((layer, layerIndex) => {
+      if (layer.type === "image") {
+        const radius = layer.cornerRadius ?? 0;
+        if (radius > Math.min(layer.frame.width, layer.frame.height) / 2) {
+          issues.push(
+            issueFor(
+              "IMAGE_MASK_INVALID",
+              sceneIndex,
+              layerIndex,
+              layer.id,
+              `Image ${layer.id} corner radius exceeds half of its shortest edge.`,
+              "Reduce cornerRadius so the rendered mask matches the declared geometry.",
+            ),
+          );
+        }
+        return;
+      }
+      if (layer.type !== "text") return;
+
+      const fontSize = layer.fontSize ?? 34;
+      const fontLoaded = document.fonts.check(
+        `${fontSize}px ${draft.profile.render.typography.fontFamily}`,
+      );
+      if (!fontLoaded) {
+        issues.push(
+          issueFor(
+            "FONT_NOT_LOADED",
+            sceneIndex,
+            layerIndex,
+            layer.id,
+            `The font for text layer ${layer.id} was not loaded before measurement.`,
+            "Provision the profile font locally and wait for it before previewing.",
+          ),
+        );
+        return;
+      }
+
+      const metrics = fitText(draft, layer);
+      textMetrics.set(layer.id, metrics);
+      if (!metrics.overflow && metrics.fontSize !== fontSize) {
+        layer.fontSize = metrics.fontSize;
+      }
+      if (!metrics.overflow) return;
+
+      const minimum = draft.profile.render.typography.minimumFontSize ?? 14;
+      const code =
+        layer.overflowPolicy === "shrink" && metrics.fontSize <= minimum
+          ? "MIN_FONT_SIZE_VIOLATION"
+          : "TEXT_OVERFLOW";
+      issues.push(
+        issueFor(
+          code,
+          sceneIndex,
+          layerIndex,
+          layer.id,
+          `Text layer ${layer.id} does not fit its ${layer.frame.width}x${layer.frame.height} box within ${layer.maxLines ?? 20} lines.`,
+          code === "TEXT_OVERFLOW"
+            ? "Shorten the copy, enlarge its box, increase maxLines, or explicitly use bounded shrink."
+            : `Shorten the copy or enlarge its box; the profile minimum is ${minimum}px.`,
+        ),
+      );
+    });
+
+    const textLayers = scene.layers.filter(
+      (layer): layer is Extract<Layer, { type: "text" }> =>
+        layer.type === "text" && textMetrics.has(layer.id),
+    );
+    const groups = scene.layers.filter(
+      (layer): layer is Extract<Layer, { type: "group" }> =>
+        layer.type === "group",
+    );
+    const parentGroupOf = new Map<string, Extract<Layer, { type: "group" }>>();
+    groups.forEach((group) => {
+      group.memberIds.forEach((memberId) => {
+        parentGroupOf.set(memberId, group);
+      });
+    });
+    const groupBoundsById = new Map(
+      groups.map((group) => [group.id, groupBoundsFor(scene, group)]),
+    );
+    const rectangleOnScreen = (
+      layerId: string,
+      rectangle: Rectangle,
+      localFrame: number,
+    ): Rectangle => {
+      const group = parentGroupOf.get(layerId);
+      if (!group) return rectangle;
+      const transform = groupScreenTransformFor(
+        draft,
+        scene,
+        group,
+        localFrame,
+      );
+      const bounds = groupBoundsById.get(group.id);
+      if (!bounds) return rectangle;
+      return applyGroupTransform(rectangle, transform, bounds);
+    };
+    const opacityOnScreen = (
+      layerId: string,
+      ownOpacity: number,
+      localFrame: number,
+    ): number => {
+      const group = parentGroupOf.get(layerId);
+      if (!group) return ownOpacity;
+      return (
+        ownOpacity *
+        groupScreenTransformFor(draft, scene, group, localFrame).opacity
+      );
+    };
+    const checkedPairs = new Set<string>();
+    for (const frame of frames.filter((item) => item.sceneId === scene.id)) {
+      const localFrame = frame.frame - scene.startFrame;
+      textLayers.forEach((left, leftIndex) => {
+        const leftMetrics = textMetrics.get(left.id);
+        if (!leftMetrics || leftMetrics.overflow) return;
+        const leftState = motionStateFor(draft, scene, left.id, localFrame);
+        if (
+          opacityOnScreen(
+            left.id,
+            left.opacity * leftState.opacity,
+            localFrame,
+          ) < 0.9
+        )
+          return;
+        const leftRectangle = rectangleOnScreen(
+          left.id,
+          transformedRectangle(textRectangle(left, leftMetrics), leftState),
+          localFrame,
+        );
+
+        const targets = new Set([
+          ...textLayers.slice(leftIndex + 1).map((layer) => layer.id),
+          ...(left.avoidLayerIds ?? []),
+        ]);
+        targets.forEach((targetId) => {
+          const target = scene.layers.find((layer) => layer.id === targetId);
+          if (!target || target.type === "group") return;
+          const pair = [left.id, target.id].sort().join(":");
+          if (checkedPairs.has(pair)) return;
+          const targetState = motionStateFor(
+            draft,
+            scene,
+            target.id,
+            localFrame,
+          );
+          if (
+            opacityOnScreen(
+              target.id,
+              target.opacity * targetState.opacity,
+              localFrame,
+            ) < 0.9
+          )
+            return;
+          const targetMetrics =
+            target.type === "text" ? textMetrics.get(target.id) : undefined;
+          const targetRectangle = rectangleOnScreen(
+            target.id,
+            transformedRectangle(
+              target.type === "text" && targetMetrics
+                ? textRectangle(target, targetMetrics)
+                : target.frame,
+              targetState,
+            ),
+            localFrame,
+          );
+          if (!intersects(leftRectangle, targetRectangle)) return;
+          checkedPairs.add(pair);
+          issues.push(
+            issueFor(
+              "TEXT_COLLISION",
+              sceneIndex,
+              scene.layers.findIndex((layer) => layer.id === left.id),
+              left.id,
+              `Text layer ${left.id} collides with ${target.id} at frame ${frame.frame}.`,
+              "Adjust the declared layout, copy length, padding, or avoid targets and preview again.",
+            ),
+          );
+        });
+      });
+    }
+  });
+
+  return {
+    draft,
+    report: {
+      issues: issues.sort(
+        (left, right) =>
+          left.path.localeCompare(right.path) ||
+          left.code.localeCompare(right.code),
+      ),
+      frames: frames.sort((left, right) => left.frame - right.frame),
+    },
+  };
+};

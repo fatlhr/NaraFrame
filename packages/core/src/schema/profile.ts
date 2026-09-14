@@ -9,6 +9,36 @@ import {
   Sha256Schema,
   VersionSchema,
 } from "./primitives.js";
+import { ShadowSchema, StrokeSchema } from "./scene.js";
+
+const TypographyRoleTokenSchema = z
+  .object({
+    fontSize: z.number().min(12).max(320),
+    fontWeight: z.number().int().min(100).max(900),
+    lineHeight: z.number().min(0.8).max(2),
+    letterSpacing: z.number().min(-20).max(40),
+  })
+  .strict();
+
+const AppearanceTokensSchema = z
+  .object({
+    radius: z
+      .object({
+        small: z.number().min(0).max(960),
+        medium: z.number().min(0).max(960),
+        large: z.number().min(0).max(960),
+      })
+      .strict(),
+    stroke: StrokeSchema,
+    shadow: ShadowSchema,
+    media: z
+      .object({
+        fit: z.enum(["cover", "contain"]),
+        cornerRadius: z.number().min(0).max(960),
+      })
+      .strict(),
+  })
+  .strict();
 
 export const RenderTokensSchema = z
   .object({
@@ -25,8 +55,19 @@ export const RenderTokensSchema = z
         fontFamily: z.string().trim().min(1),
         headingWeight: z.number().int().min(100).max(900),
         bodyWeight: z.number().int().min(100).max(900),
+        minimumFontSize: z.number().min(12).max(160).optional(),
+        roles: z
+          .object({
+            display: TypographyRoleTokenSchema,
+            heading: TypographyRoleTokenSchema,
+            body: TypographyRoleTokenSchema,
+            label: TypographyRoleTokenSchema,
+          })
+          .strict()
+          .optional(),
       })
       .strict(),
+    appearance: AppearanceTokensSchema.optional(),
     safeZone: z
       .object({
         top: z.number().int().nonnegative(),

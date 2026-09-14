@@ -4,7 +4,7 @@ import type { CompiledAsset, CompiledDraft } from "../schema/compiled.js";
 import { CompiledDraftSchema } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
 import type { RenderTokens } from "../schema/profile.js";
-import type { Beat, Frame, Layer, Scene } from "../schema/scene.js";
+import type { Beat, Frame, Insets, Layer, Scene } from "../schema/scene.js";
 
 export type DraftScope =
   | { type: "project" }
@@ -78,10 +78,56 @@ const scaleFrame = (frame: Frame, scaleX: number, scaleY: number): Frame => ({
   height: frame.height * scaleY,
 });
 
+const scaleInsets = (
+  insets: Insets,
+  scaleX: number,
+  scaleY: number,
+): Insets => ({
+  top: insets.top * scaleY,
+  right: insets.right * scaleX,
+  bottom: insets.bottom * scaleY,
+  left: insets.left * scaleX,
+});
+
+const scaleShadow = (
+  shadow: NonNullable<Extract<Layer, { type: "shape" }>["shadow"]>,
+  scaleX: number,
+  scaleY: number,
+) => ({
+  ...shadow,
+  offsetX: shadow.offsetX * scaleX,
+  offsetY: shadow.offsetY * scaleY,
+  blur: shadow.blur * Math.min(scaleX, scaleY),
+});
+
 const scaleLayer = (layer: Layer, scaleX: number, scaleY: number): Layer => {
   if (layer.type === "group") {
     return {
       ...layer,
+      ...(layer.frame
+        ? { frame: scaleFrame(layer.frame, scaleX, scaleY) }
+        : {}),
+      ...(layer.layout && layer.layout.type !== "absolute"
+        ? {
+            layout:
+              layer.layout.type === "stack"
+                ? {
+                    ...layer.layout,
+                    gap:
+                      layer.layout.gap *
+                      (layer.layout.direction === "horizontal"
+                        ? scaleX
+                        : scaleY),
+                    padding: scaleInsets(layer.layout.padding, scaleX, scaleY),
+                  }
+                : {
+                    ...layer.layout,
+                    columnGap: layer.layout.columnGap * scaleX,
+                    rowGap: layer.layout.rowGap * scaleY,
+                    padding: scaleInsets(layer.layout.padding, scaleX, scaleY),
+                  },
+          }
+        : {}),
       transform: {
         ...layer.transform,
         x: layer.transform.x * scaleX,
@@ -90,7 +136,239 @@ const scaleLayer = (layer: Layer, scaleX: number, scaleY: number): Layer => {
     };
   }
 
-  return { ...layer, frame: scaleFrame(layer.frame, scaleX, scaleY) };
+  if (layer.type === "text") {
+    return {
+      ...layer,
+      frame: scaleFrame(layer.frame, scaleX, scaleY),
+      ...(layer.fontSize ? { fontSize: layer.fontSize * scaleY } : {}),
+      ...(layer.letterSpacing !== undefined
+        ? { letterSpacing: layer.letterSpacing * scaleX }
+        : {}),
+      ...(layer.padding
+        ? { padding: scaleInsets(layer.padding, scaleX, scaleY) }
+        : {}),
+    };
+  }
+
+  return {
+    ...layer,
+    frame: scaleFrame(layer.frame, scaleX, scaleY),
+    ...(layer.cornerRadius !== undefined
+      ? { cornerRadius: layer.cornerRadius * Math.min(scaleX, scaleY) }
+      : {}),
+    ...(layer.stroke
+      ? {
+          stroke: {
+            ...layer.stroke,
+            width: layer.stroke.width * Math.min(scaleX, scaleY),
+          },
+        }
+      : {}),
+    ...(layer.shadow
+      ? { shadow: scaleShadow(layer.shadow, scaleX, scaleY) }
+      : {}),
+  };
+};
+
+const zeroInsets: Insets = { top: 0, right: 0, bottom: 0, left: 0 };
+
+const resolveLayerAppearance = (layer: Layer, render: RenderTokens): Layer => {
+  if (layer.type === "text") {
+    const role = layer.role ?? "heading";
+    const roleDefaults = render.typography.roles?.[role];
+    // Schema-v1 profiles created before typography roles rendered every layer
+    // at 34px in draft space (68px in the 1080x1920 design space).
+    const legacyFontSize = 68;
+    const legacyLineHeight = 1.15;
+    return {
+      ...layer,
+      role,
+      fontSize: layer.fontSize ?? roleDefaults?.fontSize ?? legacyFontSize,
+      fontWeight:
+        layer.fontWeight ??
+        roleDefaults?.fontWeight ??
+        (role === "body"
+          ? render.typography.bodyWeight
+          : render.typography.headingWeight),
+      lineHeight:
+        layer.lineHeight ?? roleDefaults?.lineHeight ?? legacyLineHeight,
+      letterSpacing: layer.letterSpacing ?? roleDefaults?.letterSpacing ?? 0,
+      color: layer.color ?? render.palette.text,
+      textAlign: layer.textAlign ?? "left",
+      verticalAlign: layer.verticalAlign ?? "center",
+      padding: layer.padding ?? zeroInsets,
+      maxLines: layer.maxLines ?? 20,
+      overflowPolicy:
+        layer.overflowPolicy ?? (render.typography.roles ? "error" : "shrink"),
+    };
+  }
+
+  if (layer.type === "image") {
+    return {
+      ...layer,
+      focalPoint: layer.focalPoint ?? { x: 0.5, y: 0.5 },
+      cornerRadius:
+        layer.cornerRadius ?? render.appearance?.media.cornerRadius ?? 0,
+    };
+  }
+
+  if (layer.type === "shape") {
+    return {
+      ...layer,
+      cornerRadius:
+        layer.shape === "circle"
+          ? Math.min(layer.frame.width, layer.frame.height) / 2
+          : (layer.cornerRadius ?? render.appearance?.radius.medium ?? 44),
+    };
+  }
+
+  return { ...layer, layout: layer.layout ?? { type: "absolute" } };
+};
+
+const alignedOffset = (
+  available: number,
+  size: number,
+  align: "start" | "center" | "end" | "stretch",
+): number => {
+  if (align === "center") return (available - size) / 2;
+  if (align === "end") return available - size;
+  return 0;
+};
+
+const resolveGroupLayouts = (
+  layers: Layer[],
+  sceneIndex: number,
+): { layers: Layer[]; issues: Issue[] } => {
+  const resolved = layers.map((layer) => structuredClone(layer));
+  const byId = new Map(resolved.map((layer) => [layer.id, layer]));
+  const issues: Issue[] = [];
+
+  for (const group of resolved) {
+    if (
+      group.type !== "group" ||
+      !group.frame ||
+      !group.layout ||
+      group.layout.type === "absolute"
+    ) {
+      continue;
+    }
+    const layout = group.layout;
+    const members = group.memberIds.flatMap((id) => {
+      const member = byId.get(id);
+      return member && member.type !== "group" ? [member] : [];
+    });
+    const { padding } = layout;
+    const inner = {
+      x: group.frame.x + padding.left,
+      y: group.frame.y + padding.top,
+      width: group.frame.width - padding.left - padding.right,
+      height: group.frame.height - padding.top - padding.bottom,
+    };
+    if (inner.width <= 0 || inner.height <= 0) {
+      issues.push(
+        compileIssue(
+          "GROUP_LAYOUT_INVALID",
+          `/scenes/${sceneIndex}/visual/layers/${layers.findIndex((layer) => layer.id === group.id)}/layout/padding`,
+          `Group ${group.id} padding leaves no usable layout area.`,
+        ),
+      );
+      continue;
+    }
+
+    if (layout.type === "stack") {
+      const horizontal = layout.direction === "horizontal";
+      const availableMain = horizontal ? inner.width : inner.height;
+      const usedMain =
+        members.reduce(
+          (total, member) =>
+            total + (horizontal ? member.frame.width : member.frame.height),
+          0,
+        ) +
+        Math.max(0, members.length - 1) * layout.gap;
+      if (usedMain > availableMain) {
+        issues.push(
+          compileIssue(
+            "GROUP_LAYOUT_OVERFLOW",
+            `/scenes/${sceneIndex}/visual/layers/${layers.findIndex((layer) => layer.id === group.id)}/frame`,
+            `Group ${group.id} stack needs ${usedMain}px but only ${availableMain}px is available.`,
+          ),
+        );
+        continue;
+      }
+      let cursor = horizontal ? inner.x : inner.y;
+      for (const member of members) {
+        const crossAvailable = horizontal ? inner.height : inner.width;
+        const crossSize = horizontal ? member.frame.height : member.frame.width;
+        const crossOffset = alignedOffset(
+          crossAvailable,
+          crossSize,
+          layout.align,
+        );
+        member.frame = horizontal
+          ? {
+              x: cursor,
+              y: inner.y + crossOffset,
+              width: member.frame.width,
+              height:
+                layout.align === "stretch" ? inner.height : member.frame.height,
+            }
+          : {
+              x: inner.x + crossOffset,
+              y: cursor,
+              width:
+                layout.align === "stretch" ? inner.width : member.frame.width,
+              height: member.frame.height,
+            };
+        cursor +=
+          (horizontal ? member.frame.width : member.frame.height) + layout.gap;
+      }
+      continue;
+    }
+
+    const rows = Math.ceil(members.length / layout.columns);
+    const cellWidth =
+      (inner.width - Math.max(0, layout.columns - 1) * layout.columnGap) /
+      layout.columns;
+    const cellHeight =
+      (inner.height - Math.max(0, rows - 1) * layout.rowGap) /
+      Math.max(1, rows);
+    if (cellWidth <= 0 || cellHeight <= 0) {
+      issues.push(
+        compileIssue(
+          "GROUP_LAYOUT_OVERFLOW",
+          `/scenes/${sceneIndex}/visual/layers/${layers.findIndex((layer) => layer.id === group.id)}/frame`,
+          `Group ${group.id} grid gaps leave no usable cell area.`,
+        ),
+      );
+      continue;
+    }
+    members.forEach((member, index) => {
+      const column = index % layout.columns;
+      const row = Math.floor(index / layout.columns);
+      const width =
+        layout.align === "stretch"
+          ? cellWidth
+          : Math.min(member.frame.width, cellWidth);
+      const height =
+        layout.align === "stretch"
+          ? cellHeight
+          : Math.min(member.frame.height, cellHeight);
+      member.frame = {
+        x:
+          inner.x +
+          column * (cellWidth + layout.columnGap) +
+          alignedOffset(cellWidth, width, layout.align),
+        y:
+          inner.y +
+          row * (cellHeight + layout.rowGap) +
+          alignedOffset(cellHeight, height, layout.align),
+        width,
+        height,
+      };
+    });
+  }
+
+  return { layers: resolved, issues };
 };
 
 const scaleBeat = (
@@ -142,6 +420,47 @@ const scaleRenderTokens = (
     left: Math.round(render.safeZone.left * scaleX),
   },
   spacingUnit: Math.max(1, Math.round(render.spacingUnit * scaleX)),
+  typography: {
+    ...render.typography,
+    ...(render.typography.minimumFontSize !== undefined
+      ? { minimumFontSize: render.typography.minimumFontSize * scaleY }
+      : {}),
+    ...(render.typography.roles
+      ? {
+          roles: Object.fromEntries(
+            Object.entries(render.typography.roles).map(([role, token]) => [
+              role,
+              {
+                ...token,
+                fontSize: token.fontSize * scaleY,
+                letterSpacing: token.letterSpacing * scaleX,
+              },
+            ]),
+          ) as NonNullable<RenderTokens["typography"]["roles"]>,
+        }
+      : {}),
+  },
+  ...(render.appearance
+    ? {
+        appearance: {
+          radius: {
+            small: render.appearance.radius.small * Math.min(scaleX, scaleY),
+            medium: render.appearance.radius.medium * Math.min(scaleX, scaleY),
+            large: render.appearance.radius.large * Math.min(scaleX, scaleY),
+          },
+          stroke: {
+            ...render.appearance.stroke,
+            width: render.appearance.stroke.width * Math.min(scaleX, scaleY),
+          },
+          shadow: scaleShadow(render.appearance.shadow, scaleX, scaleY),
+          media: {
+            ...render.appearance.media,
+            cornerRadius:
+              render.appearance.media.cornerRadius * Math.min(scaleX, scaleY),
+          },
+        },
+      }
+    : {}),
 });
 
 const validateLayerFrames = (
@@ -158,19 +477,12 @@ const validateLayerFrames = (
   const safeZone = source.profile.render.safeZone;
 
   scene.visual.layers.forEach((layer, layerIndex) => {
-    if (layer.type === "group") {
-      return;
-    }
-
     const framePath = `/scenes/${sceneIndex}/visual/layers/${layerIndex}/frame`;
-    const right = layer.frame.x + layer.frame.width;
-    const bottom = layer.frame.y + layer.frame.height;
-    if (
-      layer.frame.x < 0 ||
-      layer.frame.y < 0 ||
-      right > width ||
-      bottom > height
-    ) {
+    const frame = layer.frame;
+    if (!frame) return;
+    const right = frame.x + frame.width;
+    const bottom = frame.y + frame.height;
+    if (frame.x < 0 || frame.y < 0 || right > width || bottom > height) {
       issues.push(
         compileIssue(
           "LAYER_OUTSIDE_CANVAS",
@@ -184,8 +496,8 @@ const validateLayerFrames = (
 
     if (
       layer.type === "text" &&
-      (layer.frame.x < safeZone.left ||
-        layer.frame.y < safeZone.top ||
+      (frame.x < safeZone.left ||
+        frame.y < safeZone.top ||
         right > width - safeZone.right ||
         bottom > height - safeZone.bottom)
     ) {
@@ -250,6 +562,16 @@ export const compileDraft = (
     const endFrame = startFrame + durationInFrames;
     renderCursor = endFrame;
     issues.push(...validateLayerFrames(scene, sceneIndex, source));
+    const layout =
+      scene.visual.type === "composition"
+        ? resolveGroupLayouts(
+            scene.visual.layers.map((layer) =>
+              resolveLayerAppearance(layer, source.profile.render),
+            ),
+            sceneIndex,
+          )
+        : { layers: [], issues: [] };
+    issues.push(...layout.issues);
 
     const beats = scene.beats.map((beat, beatIndex) => {
       const beatStartFrame = msToFrameOffset(beat.startMs, fps);
@@ -285,9 +607,7 @@ export const compileDraft = (
           : scene.visual,
       layers:
         scene.visual.type === "composition"
-          ? scene.visual.layers.map((layer) =>
-              scaleLayer(layer, scaleX, scaleY),
-            )
+          ? layout.layers.map((layer) => scaleLayer(layer, scaleX, scaleY))
           : [],
       beats,
     };
@@ -323,7 +643,7 @@ export const compileDraft = (
     sourceRevision,
     assemblyKey: hashValue({
       sourceRevision,
-      renderer: "m0.4",
+      renderer: "m0.9",
       scope: compiledScope,
     }),
     profile: {

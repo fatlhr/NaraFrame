@@ -1,6 +1,10 @@
 import type { CompiledDraft } from "@naraframe/core";
 import { Composition } from "remotion";
 import { DraftVideo } from "./draft-video.js";
+import {
+  resolveVisualPreflight,
+  visualPreflightProperty,
+} from "./visual-preflight.js";
 
 const placeholderHash = "0".repeat(64);
 
@@ -62,11 +66,19 @@ export const RemotionRoot = () => (
     width={fallbackDraft.width}
     height={fallbackDraft.height}
     defaultProps={fallbackDraft}
-    calculateMetadata={({ props }) => ({
-      durationInFrames: props.totalFrames,
-      fps: props.fps,
-      width: props.width,
-      height: props.height,
-    })}
+    calculateMetadata={async ({ props }) => {
+      await document.fonts.ready;
+      const preflight = resolveVisualPreflight(props);
+      return {
+        durationInFrames: props.totalFrames,
+        fps: props.fps,
+        width: props.width,
+        height: props.height,
+        props: {
+          ...preflight.draft,
+          [visualPreflightProperty]: preflight.report,
+        },
+      };
+    }}
   />
 );
