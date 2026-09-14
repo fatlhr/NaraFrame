@@ -45,6 +45,31 @@ const AppearanceTokensSchema = z
  * VARIETY_DEFAULTS in the compiler; `severity` decides whether a repetition
  * finding blocks publication or only reports.
  */
+/**
+ * A profile-declared vocabulary of permitted choices — the menu bang-motion
+ * enforces through advisory prompt rules, made checkable instead: a scene
+ * whose reveal direction, transition type, or focus camera falls outside
+ * the declared set is a compile-time error, not a style opinion an agent
+ * may ignore. Absent (the default) means unrestricted, so existing
+ * profiles are unaffected until they opt in.
+ */
+const ChoiceMenuSchema = z
+  .object({
+    entryDirections: z
+      .array(z.enum(["up", "down", "left", "right"]))
+      .min(1)
+      .optional(),
+    transitionTypes: z
+      .array(z.enum(["cut", "push-through", "mask-reveal", "match-cut"]))
+      .min(1)
+      .optional(),
+    focusCameras: z
+      .array(z.enum(["push", "pan", "zoom"]))
+      .min(1)
+      .optional(),
+  })
+  .strict();
+
 const VarietyPolicySchema = z
   .object({
     maxConsecutiveSameEntry: z.number().int().min(1).max(20).optional(),
@@ -52,6 +77,7 @@ const VarietyPolicySchema = z
     requireMultipleTransitionTypes: z.boolean().optional(),
     requireMultipleTypeRoles: z.boolean().optional(),
     severity: z.enum(["warning", "error"]).optional(),
+    menu: ChoiceMenuSchema.optional(),
   })
   .strict();
 

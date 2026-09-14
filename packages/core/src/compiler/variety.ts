@@ -191,5 +191,63 @@ export const checkVariety = (
     }
   }
 
+  const menu = configured?.menu;
+  if (menu) {
+    entries.forEach(({ scene, sceneIndex }) => {
+      const earliest = scene.beats.reduce<Scene["beats"][number] | undefined>(
+        (best, beat) => (!best || beat.startMs < best.startMs ? beat : best),
+        undefined,
+      );
+      if (
+        earliest?.action === "reveal" &&
+        menu.entryDirections &&
+        !menu.entryDirections.includes(earliest.params.direction)
+      ) {
+        issues.push(
+          varietyIssue(
+            "ENTRY_STYLE_NOT_PERMITTED",
+            `/scenes/${sceneIndex}/beats`,
+            `Scene ${scene.id} enters with direction "${earliest.params.direction}", which is outside the profile's permitted entry directions (${menu.entryDirections.join(", ")}).`,
+            "Use one of the profile's permitted entry directions, or extend the profile menu.",
+            severity,
+          ),
+        );
+      }
+
+      if (
+        menu.transitionTypes &&
+        !menu.transitionTypes.includes(scene.transition.type)
+      ) {
+        issues.push(
+          varietyIssue(
+            "TRANSITION_NOT_PERMITTED",
+            `/scenes/${sceneIndex}/transition`,
+            `Scene ${scene.id} uses transition "${scene.transition.type}", which is outside the profile's permitted transitions (${menu.transitionTypes.join(", ")}).`,
+            "Use one of the profile's permitted transitions, or extend the profile menu.",
+            severity,
+          ),
+        );
+      }
+
+      scene.beats.forEach((beat) => {
+        if (
+          beat.action === "focus" &&
+          menu.focusCameras &&
+          !menu.focusCameras.includes(beat.params.camera)
+        ) {
+          issues.push(
+            varietyIssue(
+              "FOCUS_STYLE_NOT_PERMITTED",
+              `/scenes/${sceneIndex}/beats`,
+              `Scene ${scene.id}'s focus beat "${beat.id}" uses camera "${beat.params.camera}", which is outside the profile's permitted focus treatments (${menu.focusCameras.join(", ")}).`,
+              "Use one of the profile's permitted focus treatments, or extend the profile menu.",
+              severity,
+            ),
+          );
+        }
+      });
+    });
+  }
+
   return issues;
 };
