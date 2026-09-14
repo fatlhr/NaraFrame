@@ -53,6 +53,7 @@ const fallbackDraft: CompiledDraft = {
       visual: { type: "text", text: "NaraFrame" },
       layers: [],
       beats: [],
+      transitionOut: { type: "cut" },
     },
   ],
 };

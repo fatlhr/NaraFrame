@@ -28,10 +28,12 @@ export type {
   CompiledAsset,
   CompiledBeat,
   CompiledDraft,
+  CompiledTransition,
 } from "./schema/compiled.js";
 export {
   CompiledBeatSchema,
   CompiledDraftSchema,
+  CompiledTransitionSchema,
 } from "./schema/compiled.js";
 export type { PlanSource } from "./schema/export-schema.js";
 export { exportSchemas, validatePlanSource } from "./schema/export-schema.js";
@@ -60,6 +62,7 @@ export type {
   SceneVisual,
   Shadow,
   Stroke,
+  Transition,
   TypographyRole,
 } from "./schema/scene.js";
 export {
@@ -73,5 +76,6 @@ export {
   SceneVisualSchema,
   ShadowSchema,
   StrokeSchema,
+  TransitionSchema,
   TypographyRoleSchema,
 } from "./schema/scene.js";

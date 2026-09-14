@@ -250,6 +250,41 @@ export const BeatSchema = z.discriminatedUnion("action", [
   FocusBeatSchema,
 ]);
 
+const TransitionDurationSchema = z.number().int().min(200).max(1200);
+
+/**
+ * Declares how THIS scene exits into the next one. The first scene's value
+ * has no predecessor to affect; the last scene's value has no successor to
+ * carry it into, and the compiler reports that as a warning rather than
+ * silently dropping it. `cut` remains the zero-effect default — every
+ * primitive beyond it needs a bounded duration that must fit inside both
+ * neighbouring scenes' own runtime (see TRANSITION_DURATION_EXCEEDS_SCENE).
+ */
+export const TransitionSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("cut") }).strict(),
+  z
+    .object({
+      type: z.literal("push-through"),
+      durationMs: TransitionDurationSchema,
+      direction: z.enum(["up", "down", "left", "right"]),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("mask-reveal"),
+      durationMs: TransitionDurationSchema,
+      shape: z.enum(["circle", "rectangle"]),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("match-cut"),
+      durationMs: TransitionDurationSchema,
+      anchor: FocalPointSchema.optional(),
+    })
+    .strict(),
+]);
+
 export const SceneSchema = z
   .object({
     id: IdSchema,
@@ -257,7 +292,7 @@ export const SceneSchema = z
     durationMs: PositiveIntegerSchema,
     visual: SceneVisualSchema,
     beats: z.array(BeatSchema),
-    transition: z.object({ type: z.literal("cut") }).strict(),
+    transition: TransitionSchema,
   })
   .strict();
 
@@ -412,6 +447,7 @@ export type Shadow = z.infer<typeof ShadowSchema>;
 export type TypographyRole = z.infer<typeof TypographyRoleSchema>;
 export type Layer = z.infer<typeof LayerSchema>;
 export type Beat = z.infer<typeof BeatSchema>;
+export type Transition = z.infer<typeof TransitionSchema>;
 export type SceneVisual = z.infer<typeof SceneVisualSchema>;
 export type Scene = z.infer<typeof SceneSchema>;
 export type Scenes = z.infer<typeof ScenesSchema>;

@@ -4,6 +4,8 @@ import {
   type GroupTransform,
   groupScreenTransformFor,
   motionStateFor,
+  type SceneTransitionState,
+  sceneTransitionStateFor,
 } from "./motion.js";
 
 export const visualPreflightProperty = "__naraframeVisualPreflight";
@@ -264,6 +266,35 @@ const applyGroupTransform = (
   };
 };
 
+/**
+ * Folds a scene-boundary transition (M0.10.2) into a rectangle the same way
+ * `applyGroupTransform` folds a group's transform: the transition scales the
+ * whole scene around an anchor fraction of the full canvas, so any layer's
+ * rectangle checked during an active transition window must move with it.
+ * `clipPath` (mask-reveal) is deliberately not folded — it clips paint, not
+ * layout, so it cannot hide a real collision from this geometry check.
+ */
+const applySceneTransition = (
+  rectangle: Rectangle,
+  state: SceneTransitionState,
+  width: number,
+  height: number,
+): Rectangle => {
+  if (state.scale === 1 && state.translateX === 0 && state.translateY === 0) {
+    return rectangle;
+  }
+  const originX = state.anchor.x * width;
+  const originY = state.anchor.y * height;
+  const x = originX + (rectangle.x - originX) * state.scale + state.translateX;
+  const y = originY + (rectangle.y - originY) * state.scale + state.translateY;
+  return {
+    x,
+    y,
+    width: rectangle.width * state.scale,
+    height: rectangle.height * state.scale,
+  };
+};
+
 const framesForScene = (
   scene: CompiledDraft["scenes"][number],
 ): VisualPreflightFrame[] => {
@@ -390,16 +421,25 @@ export const resolveVisualPreflight = (
       localFrame: number,
     ): Rectangle => {
       const group = parentGroupOf.get(layerId);
-      if (!group) return rectangle;
-      const transform = groupScreenTransformFor(
-        draft,
-        scene,
-        group,
-        localFrame,
+      const withGroup = (() => {
+        if (!group) return rectangle;
+        const transform = groupScreenTransformFor(
+          draft,
+          scene,
+          group,
+          localFrame,
+        );
+        const bounds = groupBoundsById.get(group.id);
+        if (!bounds) return rectangle;
+        return applyGroupTransform(rectangle, transform, bounds);
+      })();
+      const sceneState = sceneTransitionStateFor(draft, sceneIndex, localFrame);
+      return applySceneTransition(
+        withGroup,
+        sceneState,
+        draft.width,
+        draft.height,
       );
-      const bounds = groupBoundsById.get(group.id);
-      if (!bounds) return rectangle;
-      return applyGroupTransform(rectangle, transform, bounds);
     };
     const opacityOnScreen = (
       layerId: string,
@@ -407,11 +447,12 @@ export const resolveVisualPreflight = (
       localFrame: number,
     ): number => {
       const group = parentGroupOf.get(layerId);
-      if (!group) return ownOpacity;
-      return (
-        ownOpacity *
-        groupScreenTransformFor(draft, scene, group, localFrame).opacity
-      );
+      const withGroup = group
+        ? ownOpacity *
+          groupScreenTransformFor(draft, scene, group, localFrame).opacity
+        : ownOpacity;
+      const sceneState = sceneTransitionStateFor(draft, sceneIndex, localFrame);
+      return withGroup * sceneState.opacity;
     };
     const checkedPairs = new Set<string>();
     for (const frame of frames.filter((item) => item.sceneId === scene.id)) {

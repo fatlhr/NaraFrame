@@ -1,5 +1,5 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   AbsoluteFill,
   Img,
@@ -11,6 +11,7 @@ import {
   groupScreenTransformFor,
   motionStateFor,
   motionStyleFor,
+  sceneTransitionStateFor,
 } from "./motion.js";
 
 const rgba = (hex: string, opacity: number): string => {
@@ -362,6 +363,32 @@ const SceneView = ({
   );
 };
 
+const TransitionFrame = ({
+  draft,
+  sceneIndex,
+  children,
+}: {
+  draft: CompiledDraft;
+  sceneIndex: number;
+  children: ReactNode;
+}) => {
+  const localFrame = useCurrentFrame();
+  const state = sceneTransitionStateFor(draft, sceneIndex, localFrame);
+  return (
+    <AbsoluteFill
+      style={{
+        opacity: state.opacity,
+        translate: `${state.translateX}px ${state.translateY}px`,
+        scale: state.scale,
+        transformOrigin: `${state.anchor.x * 100}% ${state.anchor.y * 100}%`,
+        ...(state.clipPath ? { clipPath: state.clipPath } : {}),
+      }}
+    >
+      {children}
+    </AbsoluteFill>
+  );
+};
+
 export const DraftVideo = (draft: CompiledDraft) => (
   <AbsoluteFill
     style={{
@@ -370,14 +397,16 @@ export const DraftVideo = (draft: CompiledDraft) => (
       overflow: "hidden",
     }}
   >
-    {draft.scenes.map((scene) => (
+    {draft.scenes.map((scene, sceneIndex) => (
       <Sequence
         durationInFrames={scene.endFrame - scene.startFrame}
         from={scene.startFrame}
         key={scene.id}
         name={scene.id}
       >
-        <SceneView draft={draft} scene={scene} />
+        <TransitionFrame draft={draft} sceneIndex={sceneIndex}>
+          <SceneView draft={draft} scene={scene} />
+        </TransitionFrame>
       </Sequence>
     ))}
     <div

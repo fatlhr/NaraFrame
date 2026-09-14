@@ -52,6 +52,7 @@ const draftWithScene = (
       visual: { type: "composition" },
       layers,
       beats,
+      transitionOut: { type: "cut" },
     },
   ],
 });

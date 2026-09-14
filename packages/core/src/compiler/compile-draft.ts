@@ -4,7 +4,14 @@ import type { CompiledAsset, CompiledDraft } from "../schema/compiled.js";
 import { CompiledDraftSchema } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
 import type { RenderTokens } from "../schema/profile.js";
-import type { Beat, Frame, Insets, Layer, Scene } from "../schema/scene.js";
+import type {
+  Beat,
+  Frame,
+  Insets,
+  Layer,
+  Scene,
+  Transition,
+} from "../schema/scene.js";
 import { checkVariety, type VarietyScene } from "./variety.js";
 
 export type DraftScope =
@@ -408,6 +415,16 @@ const scaleBeat = (
   return { ...common, action: beat.action, params: beat.params };
 };
 
+/** Duration-in-ms → duration-in-frames only; transitions have no x/y geometry. */
+const compileTransition = (
+  transition: Transition,
+  fps: number,
+): CompiledDraft["scenes"][number]["transitionOut"] => {
+  if (transition.type === "cut") return { type: "cut" };
+  const { durationMs, ...rest } = transition;
+  return { ...rest, durationInFrames: msToDurationFrames(durationMs, fps) };
+};
+
 const scaleRenderTokens = (
   render: RenderTokens,
   scaleX: number,
@@ -536,6 +553,76 @@ export const compileDraft = (
 
     return { scene, sceneIndex, sourceStartFrame, sourceEndFrame };
   });
+  // Frames a scene's own (playable) outgoing transition consumes from its
+  // tail; null if it declares cut, is the last scene, or failed the
+  // per-neighbour check below (so it does not also trigger an overlap error).
+  const outgoingTransitionFrames: Array<number | null> = sourceScenes.map(
+    () => null,
+  );
+  sourceScenes.forEach(
+    ({ scene, sceneIndex, sourceStartFrame, sourceEndFrame }) => {
+      if (scene.transition.type === "cut") return;
+      const ownDurationInFrames = sourceEndFrame - sourceStartFrame;
+      const transitionFrames = msToDurationFrames(
+        scene.transition.durationMs,
+        fps,
+      );
+      const next = sourceScenes[sceneIndex + 1];
+      if (!next) {
+        issues.push(
+          compileIssue(
+            "TRANSITION_ON_FINAL_SCENE_IGNORED",
+            `/scenes/${sceneIndex}/transition`,
+            `Scene ${scene.id} declares a "${scene.transition.type}" transition but is the last scene, so it never plays.`,
+            "warning",
+            'Set the final scene\'s transition to "cut" or move the content that should transition earlier.',
+          ),
+        );
+        return;
+      }
+      const nextDurationInFrames = next.sourceEndFrame - next.sourceStartFrame;
+      if (
+        transitionFrames >= ownDurationInFrames ||
+        transitionFrames >= nextDurationInFrames
+      ) {
+        issues.push(
+          compileIssue(
+            "TRANSITION_DURATION_EXCEEDS_SCENE",
+            `/scenes/${sceneIndex}/transition/durationMs`,
+            `Scene ${scene.id}'s "${scene.transition.type}" transition (${scene.transition.durationMs}ms) does not fit inside both its own duration and scene ${next.scene.id}'s duration.`,
+            "error",
+            "Shorten the transition or lengthen the shorter of the two neighbouring scenes.",
+          ),
+        );
+        return;
+      }
+      outgoingTransitionFrames[sceneIndex] = transitionFrames;
+    },
+  );
+
+  // A short scene can pass both per-neighbour checks above and still not
+  // have room for both halves at once (its own incoming entry plus its own
+  // outgoing exit).
+  sourceScenes.forEach(
+    ({ scene, sceneIndex, sourceStartFrame, sourceEndFrame }) => {
+      const ownDurationInFrames = sourceEndFrame - sourceStartFrame;
+      const incoming =
+        sceneIndex > 0 ? (outgoingTransitionFrames[sceneIndex - 1] ?? 0) : 0;
+      const outgoing = outgoingTransitionFrames[sceneIndex] ?? 0;
+      if (incoming + outgoing > ownDurationInFrames) {
+        issues.push(
+          compileIssue(
+            "TRANSITION_OVERLAP_WITHIN_SCENE",
+            `/scenes/${sceneIndex}`,
+            `Scene ${scene.id}'s incoming and outgoing transitions together need ${incoming + outgoing} frames, more than its own ${ownDurationInFrames}-frame duration.`,
+            "error",
+            "Shorten one of the two transitions or lengthen this scene.",
+          ),
+        );
+      }
+    },
+  );
+
   const selectedSources =
     requestedScope.type === "project"
       ? sourceScenes
@@ -613,6 +700,7 @@ export const compileDraft = (
           ? layout.layers.map((layer) => scaleLayer(layer, scaleX, scaleY))
           : [],
       beats,
+      transitionOut: compileTransition(scene.transition, fps),
     };
   });
 
