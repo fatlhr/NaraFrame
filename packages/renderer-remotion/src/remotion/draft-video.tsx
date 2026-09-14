@@ -13,6 +13,7 @@ import {
   motionStyleFor,
   sceneTransitionStateFor,
 } from "./motion.js";
+import { fontFamilyForRole } from "./typography.js";
 
 const rgba = (hex: string, opacity: number): string => {
   const channels = [1, 3, 5].map((start) =>
@@ -124,6 +125,7 @@ const LayerView = ({
           whiteSpace: "pre-wrap",
           overflowWrap: "normal",
           color: layer.color ?? draft.profile.render.palette.text,
+          fontFamily: fontFamilyForRole(draft.profile.render, layer.role),
           fontSize: layer.fontSize ?? 34,
           fontWeight:
             layer.fontWeight ?? draft.profile.render.typography.headingWeight,
@@ -276,6 +278,7 @@ const SceneView = ({
         <div
           style={{
             color: draft.profile.render.palette.text,
+            fontFamily: fontFamilyForRole(draft.profile.render, "display"),
             fontSize: display?.fontSize ?? 64,
             fontWeight:
               display?.fontWeight ??

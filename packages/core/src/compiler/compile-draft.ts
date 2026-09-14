@@ -79,6 +79,21 @@ const compiledAssets = (source: PlanSource): Record<string, CompiledAsset> =>
     ]),
   );
 
+/**
+ * Profile font assets are already copied, hashed, and locked into
+ * profile.lock.json by `createProject` (kind-agnostic since M0.3); this is
+ * the first place that actually exposes them to the renderer.
+ */
+const compiledFonts = (source: PlanSource): CompiledDraft["fonts"] =>
+  source.profile.assets
+    .filter((asset) => asset.kind === "font")
+    .map((asset) => ({
+      family: asset.family ?? asset.id,
+      weight: asset.weight ?? source.profile.render.typography.headingWeight,
+      publicPath: asset.path,
+      sha256: asset.sha256,
+    }));
+
 const scaleFrame = (frame: Frame, scaleX: number, scaleY: number): Frame => ({
   x: frame.x * scaleX,
   y: frame.y * scaleY,
@@ -545,6 +560,24 @@ export const compileDraft = (
     source.project.format.draft.height / source.project.format.design.height;
   let sourceCursor = 0;
   const issues: Issue[] = [];
+
+  const displayFontFamily = source.profile.render.typography.displayFontFamily;
+  if (
+    displayFontFamily &&
+    !compiledFonts(source).some((font) => font.family === displayFontFamily)
+  ) {
+    issues.push({
+      code: "DISPLAY_FONT_NOT_DECLARED",
+      severity: "error",
+      responsible: "agent",
+      artifact: "profile.lock.json",
+      path: "/render/typography/displayFontFamily",
+      message: `render.typography.displayFontFamily "${displayFontFamily}" does not match any locked font asset's family.`,
+      suggestion:
+        'Declare a profile asset of kind "font" with a matching family, or remove displayFontFamily.',
+    });
+  }
+
   const sourceScenes = source.scenes.scenes.map((scene, sceneIndex) => {
     const durationInFrames = msToDurationFrames(scene.durationMs, fps);
     const sourceStartFrame = sourceCursor;
@@ -747,6 +780,7 @@ export const compileDraft = (
       render: scaleRenderTokens(source.profile.render, scaleX, scaleY),
     },
     assets: compiledAssets(source),
+    fonts: compiledFonts(source),
     scenes,
   };
   const parsed = CompiledDraftSchema.safeParse(draftCandidate);

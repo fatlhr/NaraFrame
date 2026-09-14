@@ -3,6 +3,7 @@ import {
   IdSchema,
   NonNegativeIntegerSchema,
   PositiveIntegerSchema,
+  RelativeFontPathSchema,
   RelativePngPathSchema,
   SchemaVersionSchema,
   Sha256Schema,
@@ -10,6 +11,16 @@ import {
 } from "./primitives.js";
 import { RenderTokensSchema } from "./profile.js";
 import { FocalPointSchema, LayerSchema } from "./scene.js";
+
+/** A bundled profile font ready to register before measurement/preflight. */
+export const CompiledFontSchema = z
+  .object({
+    family: z.string().trim().min(1),
+    weight: z.number().int().min(100).max(900),
+    publicPath: RelativeFontPathSchema,
+    sha256: Sha256Schema,
+  })
+  .strict();
 
 /**
  * Frame-space counterpart of `TransitionSchema`: `durationMs` becomes
@@ -174,6 +185,7 @@ export const CompiledDraftSchema = z
       })
       .strict(),
     assets: z.record(IdSchema, CompiledAssetSchema),
+    fonts: z.array(CompiledFontSchema),
     scenes: z.array(CompiledSceneSchema).min(1),
   })
   .strict()
@@ -191,5 +203,6 @@ export const CompiledDraftSchema = z
 
 export type CompiledAsset = z.infer<typeof CompiledAssetSchema>;
 export type CompiledBeat = z.infer<typeof CompiledBeatSchema>;
+export type CompiledFont = z.infer<typeof CompiledFontSchema>;
 export type CompiledTransition = z.infer<typeof CompiledTransitionSchema>;
 export type CompiledDraft = z.infer<typeof CompiledDraftSchema>;

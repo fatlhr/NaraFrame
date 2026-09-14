@@ -68,6 +68,12 @@ export const RenderTokensSchema = z
     typography: z
       .object({
         fontFamily: z.string().trim().min(1),
+        /** Applied to `role: "display"` text (and scene-level "text"
+         * visuals) only, so a project can use one distinct display face
+         * without touching body/heading/label. Must match a bundled
+         * `assets[].family` of `kind: "font"`, or a real collision/overflow
+         * check can never load it and FONT_NOT_LOADED fires honestly. */
+        displayFontFamily: z.string().trim().min(1).optional(),
         headingWeight: z.number().int().min(100).max(900),
         bodyWeight: z.number().int().min(100).max(900),
         minimumFontSize: z.number().min(12).max(160).optional(),
@@ -129,6 +135,10 @@ const ProfileAssetBaseSchema = z
     kind: z.enum(["font", "png"]),
     path: SafeRelativePathSchema,
     sha256: Sha256Schema.optional(),
+    /** Font-only: the CSS family name the renderer registers this face
+     * under. Required for `kind: "font"`, forbidden otherwise. */
+    family: z.string().trim().min(1).optional(),
+    weight: z.number().int().min(100).max(900).optional(),
   })
   .strict()
   .superRefine((asset, context) => {
@@ -148,6 +158,21 @@ const ProfileAssetBaseSchema = z
             ? "PNG profile assets must end in .png"
             : "Font profile assets must end in .ttf, .otf, or .woff2",
         path: ["path"],
+      });
+    }
+
+    if (asset.kind === "font" && !asset.family) {
+      context.addIssue({
+        code: "custom",
+        message: "Font profile assets must declare a family name",
+        path: ["family"],
+      });
+    }
+    if (asset.kind === "png" && (asset.family || asset.weight !== undefined)) {
+      context.addIssue({
+        code: "custom",
+        message: "PNG profile assets cannot declare family or weight",
+        path: ["family"],
       });
     }
   });

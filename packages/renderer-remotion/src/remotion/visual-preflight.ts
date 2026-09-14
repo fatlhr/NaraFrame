@@ -7,6 +7,7 @@ import {
   type SceneTransitionState,
   sceneTransitionStateFor,
 } from "./motion.js";
+import { fontFamilyForRole } from "./typography.js";
 
 export const visualPreflightProperty = "__naraframeVisualPreflight";
 
@@ -75,7 +76,7 @@ const measureWidth = (
 ): number =>
   measureText({
     text,
-    fontFamily: draft.profile.render.typography.fontFamily,
+    fontFamily: fontFamilyForRole(draft.profile.render, layer.role),
     fontSize,
     fontWeight: layer.fontWeight ?? 700,
     letterSpacing: `${layer.letterSpacing ?? 0}px`,
@@ -328,6 +329,7 @@ const framesForScene = (
 
 export const resolveVisualPreflight = (
   input: CompiledDraft,
+  loadedFontFamilies: ReadonlySet<string> = new Set(),
 ): { draft: CompiledDraft; report: VisualPreflightReport } => {
   const draft = structuredClone(input);
   const issues: Issue[] = [];
@@ -355,9 +357,15 @@ export const resolveVisualPreflight = (
       if (layer.type !== "text") return;
 
       const fontSize = layer.fontSize ?? 34;
-      const fontLoaded = document.fonts.check(
-        `${fontSize}px ${draft.profile.render.typography.fontFamily}`,
+      const fontFamily = fontFamilyForRole(draft.profile.render, layer.role);
+      const isBundledFamily = draft.fonts.some(
+        (font) => font.family === fontFamily,
       );
+      const bundledFontLoaded =
+        !isBundledFamily || loadedFontFamilies.has(fontFamily);
+      const fontLoaded =
+        bundledFontLoaded &&
+        document.fonts.check(`${fontSize}px ${fontFamily}`);
       if (!fontLoaded) {
         issues.push(
           issueFor(

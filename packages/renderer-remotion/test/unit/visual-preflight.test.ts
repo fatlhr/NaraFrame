@@ -44,6 +44,7 @@ const draftWithScene = (
   assemblyKey: "b".repeat(64),
   profile: { id: "test-profile", version: "0.1.0", render: baseRender },
   assets: {},
+  fonts: [],
   scenes: [
     {
       id: "probe",

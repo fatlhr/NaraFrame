@@ -1,6 +1,7 @@
 import type { CompiledDraft } from "@naraframe/core";
 import { Composition } from "remotion";
 import { DraftVideo } from "./draft-video.js";
+import { loadBundledFonts } from "./typography.js";
 import {
   resolveVisualPreflight,
   visualPreflightProperty,
@@ -45,6 +46,7 @@ const fallbackDraft: CompiledDraft = {
     },
   },
   assets: {},
+  fonts: [],
   scenes: [
     {
       id: "fallback",
@@ -68,8 +70,9 @@ export const RemotionRoot = () => (
     height={fallbackDraft.height}
     defaultProps={fallbackDraft}
     calculateMetadata={async ({ props }) => {
+      const loadedFontFamilies = await loadBundledFonts(props.fonts);
       await document.fonts.ready;
-      const preflight = resolveVisualPreflight(props);
+      const preflight = resolveVisualPreflight(props, loadedFontFamilies);
       return {
         durationInFrames: props.totalFrames,
         fps: props.fps,

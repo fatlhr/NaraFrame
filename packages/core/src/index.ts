@@ -28,11 +28,13 @@ export type {
   CompiledAsset,
   CompiledBeat,
   CompiledDraft,
+  CompiledFont,
   CompiledTransition,
 } from "./schema/compiled.js";
 export {
   CompiledBeatSchema,
   CompiledDraftSchema,
+  CompiledFontSchema,
   CompiledTransitionSchema,
 } from "./schema/compiled.js";
 export type { PlanSource } from "./schema/export-schema.js";
