@@ -1,18 +1,18 @@
 # NaraFrame MVP Implementation Plan
 
-> **For execution:** implement M0 task-by-task in this workspace, with a review checkpoint after each task. The plan defines intent, boundaries, contracts, and proof; implementation details belong to the work stage.
+> **For execution:** implement the active numbered task in this workspace, with a review checkpoint after each task. The plan defines intent, boundaries, contracts, and proof; implementation details belong to the work stage.
 
 **Goal:** Deliver a usable local motion-video workflow for Fatih, with direct JSON/CLI control, agent orchestration, controlled generation cost, and localized reversible revisions.
 
-**Architecture:** Interleave skill → CLI/core validation/compilation → Remotion rendering. Keep external production operations outside core/renderer. Start with a short visual draft, then prove narration/revision before expanding visual recipes.
+**Architecture:** Interleave skill → CLI/core validation/compilation → Remotion rendering. Keep external production operations outside core/renderer. The approved M0.9 correction strengthens the declarative layer/profile contract and renderer preflight before narration work begins; it does not introduce per-project TSX.
 
 **Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, the local H.264 draft renderer, atomic publication, operator CLI/skill route, offline sandbox, and cross-feature E2E are verified.
 
-Status: M0 complete; Tasks M0.1–M0.8 are verified. M1.1 is next.
-Revision: 1.0
-Date: 2026-09-09
-Inputs: `docs/spec.md` revision 0.3 and `docs/refine-spec.md`.
-Implementation: M0.1 workspace bootstrap, M0.2 runnable draft, M0.3 atomic project creation/profile locking, M0.4 visual/motion capability, M0.5 atomic immutable preview publication, M0.6 operator CLI/skill, M0.7 owner trial, and M0.8 hardening are verified. Fatih accepted the revised context-driven motion on 2026-09-14. Owner active time was not instrumented and is recorded as unavailable rather than estimated. M0.8 started from `c41f662`; the final pinned frozen install reused 279 packages with zero downloads, `pnpm verify` passed unit 16/16 plus integration 41/41, and the final serial `pnpm test:e2e` passed 2/2 in 180.37 seconds. Feature work follows runnable behavior first, manual acceptance second, and focused tests before merge. Cost and voice-quality evidence remain outside M0.
+Status: M0 complete for its original draft scope; M0.9.2–M0.9.6 are implemented and verified. M0.9.7 awaits Fatih's visual acceptance; M1.1 remains paused.
+Revision: 1.1
+Date: 2026-09-14
+Inputs: `docs/spec.md` revision 0.4 and `docs/refine-spec.md`.
+Implementation: M0.1–M0.8 remain verified for their stated technical draft scope. M0.9 adds profile-driven typography/appearance, bounded layout, exact masked primitives, loaded-font visual preflight, shared motion geometry, and a corrected LBC benchmark. Automated/runtime gates pass; only the required owner visual acceptance remains open.
 
 ## 1. Global constraints
 
@@ -35,13 +35,14 @@ The old Phase 0–9 / 41-task sequence is superseded. It placed CLI and skill la
 | Gate | Usable outcome | Main risk being tested |
 |---|---|---|
 | M0 | One 15–30s visual draft through skill + CLI/core | Can the local runtime and declarative motion loop actually work? |
+| M0.9 | LBC draft with reliable typography, masks, layout, and stronger shot continuity | Can declarative output approach direct Remotion without per-project TSX? |
 | M1 | Narrated pilot, caption, budget, edit/undo | Can one spoken section be revised economically and sound natural? |
 | M2 | Two independent projects + one profile-switch variant | Do styles, partial preview, recipes, and audio remain coherent? |
 | M3 | Owner dogfooding and release evidence | Is the workflow repeatable and recoverable on the reference setup? |
 
-AR-01 was withdrawn after target-user clarification. The other 13 findings are accepted-for-spec, not implemented/verified. Their evidence and disposition are in `docs/refine-spec.md`.
+AR-01 was withdrawn after target-user clarification. AR-02–AR-14 have mixed implementation states recorded in `docs/refine-spec.md`; the M0 portions are no longer described as unimplemented. New VF-01–VF-07 findings are accepted-for-spec and not implemented/verified until M0.9 runs.
 
-M0 is a draft milestone, not an excuse to count a silent video as narrated-MVP completion. Missing TTS can produce an actionable fallback, but M1 cannot pass without a verified Indonesian narration/timing recipe.
+M0 is a draft milestone, not an excuse to count a silent video as narrated-MVP completion. M0.9 is a corrective visual gate, not a retroactive failure of M0's runtime/CLI deliverables. Missing TTS can produce an actionable fallback, but M1 cannot begin until M0.9 passes and cannot pass without a verified Indonesian narration/timing recipe.
 
 ## 3. File ownership and growth boundaries
 
@@ -69,7 +70,7 @@ Avoid speculative generic workflow engines, broad renderer portability layers, a
 
 ## 4. How to use this plan
 
-This is the implementation plan described by the spec-driven workflow. There is no second or more detailed plan between this document and coding. M0 is expanded because it is the next work unit; M1–M3 remain roadmap-level until evidence from the preceding milestone exists.
+This is the implementation plan described by the spec-driven workflow. There is no second or more detailed plan between this document and coding. M0.9 is expanded because it is the next work unit; M1–M3 remain roadmap-level until evidence from the preceding milestone exists.
 
 M0 uses feature-driven delivery. Each task is a small user-visible feature and must end in behavior Fatih can run or an artifact he can inspect. Within each feature, build the real path first, perform its stated manual check, then add focused automated coverage before merge. M0.8 adds cross-feature E2E, failure-injection, and runtime evidence; it is not the first testing point. TypeScript bodies, fixtures, package manifests, and renderer details belong to execution. If implementation reveals a material product or architecture change, update the relevant spec/refinement decision before continuing.
 
@@ -266,6 +267,8 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
+Current step: **M0.9.7 — owner visual acceptance pending**.
+
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
 - [x] **M0.8.3 — Runtime boundary hardening:** explicit browser/FFmpeg failures and no-download behavior pass; the owner-flow render succeeds with loopback allowed and external egress denied; existing atomic failure-injection coverage remains green.
@@ -283,12 +286,45 @@ Live execution tracker:
 
 **M0 completion rule:** M0 remains in progress until both the manual owner trial and the final automated/runtime evidence pass. M0.8 closes integration gaps after feature-level tests already exist; it does not replace manual review.
 
+### Task M0.9: Correct visual fidelity before narration work
+
+**Outcome:** The same LBC source intent and local assets render through NaraFrame with reliable rounded media, non-overlapping text, clear type hierarchy, revision-tolerant layout, and context-appropriate motion—without project-specific React/TSX.
+
+**Why this interrupts M1:** The original M0 gate proved the runtime, compiler, renderer, CLI/skill loop, publication safety, and context-driven motion. The later side-by-side LBC trial exposed that box coordinates alone are not a sufficient visual contract. Starting narration now would protect audio work on top of a layout system that still corrupts real content.
+
+**Expected source areas:** modify `packages/core/src/schema/scene.ts`, `packages/core/src/schema/profile.ts`, `packages/core/src/schema/compiled.ts`, and `packages/core/src/compiler/compile-draft.ts`; split focused layer/layout/preflight responsibilities out of `packages/renderer-remotion/src/remotion/draft-video.tsx` when implementation begins; update corresponding core/renderer/CLI tests, `skills/naraframe/SKILL.md`, and the `current-issues` profile. Exact file decomposition is an implementation decision, not a reason to create another plan.
+
+Live execution tracker:
+
+- [x] **M0.9.1 — Freeze the defect benchmark:** retained `work/lbc-benchmark/engine/`, direct-Remotion source, both 30-second 540 × 960 silent outputs, comparison sheet, hashes, and review notes for seconds 8/15/21/27. VF-01–VF-07 classify the defects across schema, profile, renderer, preflight, layout, choreography, and roadmap order. Result: a repeatable failing baseline, not a visual pass.
+- [x] **M0.9.2 — Add the layer appearance contract:** optional schema-version-1 typography, image crop/focal point, radius/stroke/shadow, and bounded group layout compile through profile/default resolution. Existing Krakatau remains render-compatible through explicit legacy defaults; bounded contract regressions pass.
+- [x] **M0.9.3 — Strengthen profile typography and visual tokens:** `current-issues` 0.3 and the LBC profile lock now define role scale, minimum size, radius, stroke/shadow, and media defaults. Profile direction and the NaraFrame skill require a shot rundown, one dominant statement, bounded layout, and visual state review.
+- [x] **M0.9.4 — Render exact primitives:** resolved type, padding/alignment, crop/focal point, radius, stroke, and shadow are applied by dedicated layer branches. Media and its motion are clipped by the declared mask; the corrected LBC frames visibly preserve rounded geometry.
+- [x] **M0.9.5 — Add measured layout and visual preflight:** exact `@remotion/layout-utils@4.0.521` measurement runs after fonts load, bounded shrink updates render input, and stable visual issues block publication. The deliberate LBC collision exited 1 with `TEXT_COLLISION`; the corrected project published with zero issues. A follow-up review found collision rectangles for members of a transformed/animated group were checked at their untransformed local position, not the position `GroupView` actually renders — group transform/beat motion is now folded into both the collision rectangle and visibility-opacity check (`groupScreenTransformFor` shared between `draft-video.tsx` and `visual-preflight.ts`), with a regression test for a collision that only exists after the group's static transform is applied.
+- [x] **M0.9.6 — Improve shot continuity without exposing keyframes:** reveal/emphasize/focus use one shared numeric motion model and focus accepts bounded anchors. The benchmark did not require another transition primitive, so cut timing remains stable and no speculative wipe was added.
+- [ ] **M0.9.7 — Rerender and accept LBC parity:** after the M0.9.5 group-transform preflight fix, rerendered build `16abeb583bc2-086fdfc0-b9f` (same source revision/assembly key as the earlier build; the LBC engine's own groups use identity transforms with no beats, so the fix does not change its pixels, but the build is re-attested against the corrected code rather than carried forward unverified), its 93-state contact sheet, four-moment comparison, targeted regressions (including the new group-transform unit tests), `pnpm verify`, and `pnpm test:e2e` all pass. Technical work is complete; Fatih's full-video/frame acceptance remains required before checking this item and unpausing M1.1.
+
+Primary operator proof:
+
+```bash
+pnpm naraframe validate work/lbc-benchmark/engine --stage plan --json
+pnpm naraframe preview work/lbc-benchmark/engine --draft --json
+pnpm test:unit
+pnpm test:integration
+pnpm verify
+pnpm test:e2e
+```
+
+The first two commands must return the same source/build contract used by normal projects; the corrected preview must not depend on `work/lbc-benchmark/direct-remotion/src/`. Tests are added after each manual feature path works, then the full gates run at M0.9.7.
+
+**M0.9 exit gate:** declared rounded images are visibly rounded; required text has no collision, unintended clipping, or out-of-frame content; typography has clear roles; representative copy-length changes reflow or fail explicitly; the full 30-second silent LBC engine video and frames around seconds 8, 15, 21, and 27 are accepted by Fatih. Until then, M1.1 remains paused. Passing schema/tests without visual acceptance is insufficient.
+
 
 ## 6. M1 — Narrated pilot and affordable revision
 
 **Goal:** One topic becomes a narrated explainer, then one spoken section is corrected without replacing valid unrelated audio.
 
-**Consumes:** Tested M0 runtime/CLI/skill, source schemas, asset hashes, production policy, provisioned external capabilities.
+**Consumes:** Tested M0 runtime/CLI/skill plus the accepted M0.9 visual contract/preflight, source schemas, asset hashes, production policy, and provisioned external capabilities.
 **Produces:** Story blocks and local phrase timing, one verified voice recipe, ledger/limits, captions, full preview/final export, source snapshots/edit/undo.
 
 ### M1.1 — Production readiness and accounting before generation
@@ -337,8 +373,8 @@ Live execution tracker:
 - [ ] Implement profile inspect/dry-run/apply using the M1 transaction system. Diff render/production/editorial effects and existing overrides; preserve allowed overrides, block unresolved conflicts, never silently reset locked values.
 - [ ] Permit schema-valid apply as needs-production when voice/assets become stale. Final remains blocked until replacements are ready. Undo restores the old profile/media while retaining any incurred cost.
 - [ ] Direct profile editing/clone supports future defaults; project overrides affect the current project. No new profile GUI is needed.
-- [ ] Add map/timeline/stat/list/comparison/diagram as composition recipes first. Dedicated visual components need demonstrated recipe limitations, not an upfront nine-renderer checklist.
-- [ ] Add required enter/exit/deemphasize/draw/flow/count and push/mask transitions with compatibility/boundary tests. Enable SVG/video/additional image/audio/font formats only after their safety/decode tests pass.
+- [ ] Extend the M0.9 typography/layout/media/camera foundation with map/timeline/stat/list/comparison/diagram domain recipes. Dedicated visual components need demonstrated recipe limitations, not an upfront nine-renderer checklist.
+- [ ] Add required enter/exit/deemphasize/draw/flow/count and remaining push/mask transition recipes with compatibility/boundary tests. Do not reimplement the M0.9 baseline. Enable SVG/video/additional image/audio/font formats only after their safety/decode tests pass.
 - [ ] Add one optional music track plus SFX, volume/loop/trim/fades/ducking; verify decode, intelligibility, and no timeline-duration changes from transitions.
 
 ### M2.3 — Two source projects and one variant
@@ -376,7 +412,7 @@ Live execution tracker:
 - [ ] Record compile/preflight/scoped-preview/full-preview/final times, active manual steps, failures, attempted generation, reused assets, and estimated/observed/unknown cash/quota usage for each scenario.
 - [ ] Record peak resource observations if available. Do not invent performance/cost thresholds or treat local compute as zero total cost.
 - [ ] Update README operating guidance and the evidence/status sections in these existing docs. Keep runtime decisions and measured formats here; do not create redundant plan/review documents.
-- [ ] Account for NF-AC-01 through NF-AC-14 with evidence. Any unmet High finding requires a corrected implementation/design or explicit scoped deferral; accepted wording alone is not closure.
+- [ ] Account for NF-AC-01 through NF-AC-15 with evidence. Any unmet High finding requires a corrected implementation/design or explicit scoped deferral; accepted wording alone is not closure.
 
 **Exit gate:** All applicable acceptance criteria have passing evidence and Fatih has reviewed the outputs. Known limits/deferred items are explicit. MVP completion cannot be declared from static checks alone.
 
@@ -384,15 +420,15 @@ Live execution tracker:
 
 | Requirement area | Delivery / proof |
 |---|---|
-| NF-PR-01–07 principles | M0.2–M0.7 boundaries; M1–M3 preserve them |
+| NF-PR-01–08 principles | M0.2–M0.8 boundaries, M0.9 layout safety; M1–M3 preserve them |
 | NF-UX-01/02 and NF-AC-10 | M0.6 CLI, M0.8 skill/manual loop; M3.2 full mixed-route dogfooding |
 | NF-FL-01/02/04 | M0.3 project creation and M0.8 draft loop; M2.1 scoped production preview |
 | NF-FL-03/05 and NF-CAP-01 | M1.1/2/3 verified narration and approved final |
 | NF-CO-01 and NF-AC-11 | M1.1 ledger/capability tests; M3.3 measured costs |
 | NF-PJ-01/02 | M0.2 schemas, M0.3 source revision, M0.6 readiness; M1.3 durable revisions |
-| NF-PF-01/02/03/05 | M0.2 profile schema, M0.3 portable lock, M0.8 real profile; M2.2 extended checks |
+| NF-PF-01/02/03/05 | M0.2 profile schema, M0.3 portable lock, M0.8 real profile, M0.9 typography/appearance tokens; M2.2 extended checks |
 | NF-PF-04 and NF-AC-08 | M2.2 transactional profile apply |
-| Scene/layer/action/transition model | M0.2 contracts, M0.4 compiler, M0.5 renderer; M2.2 recipe growth |
+| Scene/layer/action/transition model | M0.2 contracts, M0.4 compiler, M0.5 renderer, M0.9 appearance/layout/camera correction; M2.2 domain-recipe growth |
 | NF-TL-01–05 and NF-REV-01 | M1.2 block compiler; M2.1 local scoped offsets |
 | NF-CAPTION-01 and audio | M1.2 captions/voice; M2.2 music/SFX |
 | NF-AS-01–03 | M0.2 schema, M0.3 path/hash safety, M0.5 offline renderer; M1.1/2 provenance; M2.2 formats |
@@ -401,11 +437,12 @@ Live execution tracker:
 | NF-REV-02 and NF-AC-14 | M1.3 source transactions; M2.2 apply/undo |
 | NF-CL-01–04 and NF-AC-09 | M0.6 command contract; M1/M2 new commands; M3.1 acceptance |
 | NF-PV-01 and NF-AC-13 | M0.4 draft scope, M0.5 render, M0.7 artifacts; M2.1 production scope; M3.2 sampled QA |
-| NF-QA-01–05 | M0.5 renderer, M0.7 review artifacts, M0.8 review; M1.3 final; M3.1/2 full checks |
+| NF-QA-01–05 | M0.5 renderer, M0.7 review artifacts, M0.8 runtime review, M0.9 visual preflight/parity; M1.3 final; M3.1/2 full checks |
 | NF-AC-01/02 | M1.3 offline final and actual narrated path; M3.1 repeat |
 | NF-AC-03 | M2.3 two source projects + derived variant |
 | NF-AC-04/05/06/07 | M1.2/3 edits/failures; M3.1/2 determinism and visual QA |
 | NF-AC-12 | M1.2 partial voice and continuity evidence |
+| NF-AC-15 | M0.9 LBC visual-fidelity parity gate |
 
 | Finding | Adopted change | Delivery gate |
 |---|---|---|
@@ -423,6 +460,11 @@ Live execution tracker:
 | AR-12 | Caption display corrections without unwanted retakes | M1.2 |
 | AR-13 | External-egress rule, atomic build set, sampled QA limits | M0.5/M0.7/M0.8; M3.2 |
 | AR-14 | Separate accepted design from verified evidence | Every gate; refine-spec status register |
+| VF-01/02 | Declarative appearance plus exact renderer primitives | M0.9.2/M0.9.4 |
+| VF-03 | Loaded-font measurement, collision checks, and stable issues | M0.9.5 |
+| VF-04/05 | Bounded layout plus profile typography/appearance tokens | M0.9.2/M0.9.3/M0.9.5 |
+| VF-06 | Semantic scene/group camera continuity | M0.9.6 |
+| VF-07 | Visual foundation moved ahead of narration | M0.9 exit gate before M1.1 |
 
 ## 10. Revision acceptance matrix
 
@@ -453,6 +495,7 @@ Every edit uses the same source transaction and preserves spend/receipts across 
 | M0.6 operator CLI and skill | Pinned Node `24.20.0`/pnpm `12.3.4` passed the public CLI route. Review-fix manual evidence: human `create work/m0-6-review-created-human --profile current-issues` and JSON `create work/m0-6-review-created-json --profile current-issues --json` succeeded; a real human full draft preview published current build `41b6900277c8-a2b28188-998`, and JSON `preview --draft --scene hook --json` published `93da18cf5a91-fad10874-1fd` with the returned pointer, MP4, contact sheet, frames, report, and manifest paths. Both report source revision `09b2333daa03081bc485868915d413d09556a22e81fa95a93c84cb48c8e7f531`; project/scoped fingerprints are `41b6900277c8ed8533002fbaadecf8cd9b39a9cae4d758d344d6389f6ec63d7d` and `93da18cf5a91a64feff9909d5b4f62984391d534cdfbb3cc654118d9e0edf7f2`. Review regressions prove cancellation after pointer preparation preserves the prior pointer and cleans its temporary file; public status rejects corrupt pointer hashes, unsafe symlinks, tampered artifacts, and inconsistent manifest/report/frames metadata, while accepting valid scene scope; SIGTERM normalizes to 130. Focused CLI checks passed 3 unit/17 integration tests; final `pnpm verify` passed unit 9/9 and integration 31/31. Skill unchanged. | M0.6 complete; rerun at M0 exit |
 | M0.7 owner trial | Complete on 2026-09-14. Baseline build `41b6900277c8-5a908e88-4e1`, direct owner copy edit, stale detection, rerender `0654538e7ce0-2b154c13-273`, and invalid `bounce` recovery passed. Owner rejected the baseline motion as too subtle. Generic bounded easing and stronger smooth focus travel plus `current-issues` 0.2 context guidance now support context-driven choreography; Krakatau-specific staging remains sample data. Fatih accepted revised current build `96b57423d8ff-16e8cc76-28a`, which uses revision `f256ab60b4ff34fff5e260c20a51a7b02466d180927eb3a575d6d4357581993d`, renders H.264 540 × 960 at 30 fps for 18 seconds with no audio, and has a 14-frame contact sheet. CLI/report/wall timing was 37.019/37.019/51.88 seconds. Focused unit/integration passed 7/7 each; full `pnpm verify` passed unit 13/13 and integration 39/39. Owner active time was not timed and is recorded as unavailable; start timing before the next trial. | M0.7 complete |
 | M0.8 cross-feature owner flow | On 2026-09-14, the E2E copied the sample, shortened it to 450 frames/15 seconds, validated, rendered, inspected all five build files, detected a one-line edit as stale, rerendered, rejected `bounce` at `/scenes/0/beats/0/action`, and recovered after restoring `reveal`. Sandboxed builds `db7809686cd3-02a70a72-5ef` and `db7809686cd3-982301b0-1c0` share source revision `9558ace64d515f54b555304c507578cbbe9cedbdfae7984ddd07c3013b038af2`; revised build `80ade327b801-2b226e0e-f84` uses `9c01f5438dc0faa52127b7de6d967a2b661cb23679ae2c3e9f9e7d7ac19b216e`. FFprobe reports H.264, 540 × 960, 30 fps, 15 seconds, no audio; full decode passed. First manifest SHA-256 is `dc4dfabd795cf15e776beb2aa2f9e269f1e4f8790b193e6402b5462664707069`; MP4/contact-sheet/frames/report hashes are `55128ab2f766f978d9ed299ec1f3b732a0b4bc21217fcf6fc1cda841bf57e597`, `25cff7f026fc6aa1854ade712848b0eb28e3da40d1727040edd871e5441d3dc2`, `750bdd3b54325ad5823e09b1b83c4cad75bcf2c36bf41a9a3da1b09065cd2e38`, and `ee4f9c81b2c97be13c2187c795e71511cc7354614f9c301ba2a8e52f1f3e6d7f`. Local evidence is under `work/m0-8-exit-Wn5gv8/`. Final gates: frozen install reused 279 packages with zero downloads, `pnpm verify` passed unit 16/16 plus integration 41/41, the evidence-producing serial E2E passed 2/2 in 177.27 seconds, and the post-review cleanup-verification E2E passed 2/2 in 180.37 seconds. | M0.8 complete |
+| LBC visual-fidelity benchmark | The original failing engine artifact is retained unchanged. A post-M0.9.5 review found `visual-preflight.ts` checked members of a transformed/animated group at their untransformed local position instead of where `GroupView` actually renders them — a real collision-detection gap, confirmed with a manual before/after probe (pre-fix: a group-shifted collision published with zero issues; post-fix: the same layout correctly exited 1 with `TEXT_COLLISION`) and closed with a shared `groupScreenTransformFor` helper plus two new regression tests in `packages/renderer-remotion/test/unit/visual-preflight.test.ts`. The LBC engine's own two groups (`progress-copy-stack`, `cta-copy-stack`) use identity transforms with no beats, so this defect did not change their prior pixels, but the build was rerendered against the corrected code rather than carried forward unverified: build `16abeb583bc2-086fdfc0-b9f` (same source revision `fe3b2b74936a5bab2ed855ce21ce3ddb94a86dbb03b9e70b64a56f95be62998f` and assembly key `16abeb583bc299b7215e3a96a3c7f034bc7c3dddc96f611f12a8c203b4db0209` as before) published a 30-second 540 × 960, 30 fps, silent H.264 preview with zero visual-preflight issues. `work/lbc-benchmark/output/lbc-naraframe-engine-m0-9-7.mp4` has SHA-256 `4ea68e17e88e7c910ec48126bde03fcfc99686b04295bde17f04de5d1620e741`; its 93-state contact sheet `naraframe-contact-sheet-m0-9-7.png` is `4707636701ff4c1847d4d73542142323231bafd410d31a6db34eb4dbde15ef6a` (the prior register entry's contact-sheet hash, `a5bac85f...`, did not match any file on disk and is superseded by this measured value); the four-moment `comparison-m0-9-7.png` (seconds 8/15/21/27, direct Remotion on top and the corrected NaraFrame engine below) is `60355315ad683607801e12bab038bd40c80efba1690354d58fde34e65be81057`. A dedicated overlap probe (`work/lbc-benchmark/overlap-probe/`, a copy of the engine with `hook-label` deliberately placed on `hook-title`'s frame — the earlier claimed title/copy overlap sits inside a bounded stack-layout group and instead correctly raises `GROUP_LAYOUT_OVERFLOW` before it can collide) exited 1 in 2.65 seconds with structured `TEXT_COLLISION`; both the raw CLI output and the parsed JSON report are retained at `work/lbc-benchmark/output/overlap-probe-cli-output.json` and `overlap-probe-report.json`. `pnpm verify` passed lint/format clean, typecheck clean, unit 25/25, integration 41/41, and build clean; `pnpm test:e2e` passed 2/2 in 179.12 seconds. Direct Remotion remains the art-direction reference, not a pixel-identity requirement. | M0.9.2–M0.9.6 verified, including the group-transform preflight fix; M0.9.7 awaits Fatih visual acceptance |
 | Font/PNG/native-layer baseline | M0.4 proved system-font text, ready local PNG decode, rectangle/circle layout, non-recursive grouping, and planned-PNG placeholder rendering. Bundled local-font behavior remains unproven and is not enabled in M0. | M0 complete for the enabled system-font path; test before bundled-font enablement |
 | External-egress and explicit-browser behavior | M0.8 passes. `doctor --json` reports configured missing browser/FFmpeg/FFprobe paths with exit 2, stable issue codes, and no download/render. The macOS sandbox probe allowed `127.0.0.1` loopback and returned `EPERM` for non-loopback outbound IP; unrelated socket errors fail the test. The same profile rendered both deterministic 15-second previews successfully. An initial profile that also denied inbound networking blocked Chrome's local `SingletonSocket`; removing that overbroad inbound rule fixed the acceptance environment without changing source or renderer code. | Repeat when runtime/browser changes |
 | Deterministic compiled/selected frame hashes | M0.4 early signal passed on the pinned machine. M0.8 additionally proved object-key-order-independent source/assembly hashes and repeated full renders in the same sandboxed reference environment. Lossless frames 18/180/405 matched with SHA-256 `0e2c5c78660a182bb5816256c1f48848676e64cee54190c46b9e52ce5690f2d5`, `42307d79cfaae3ea28002163c7498c1e5aa6b02ad5bee8c654d244463e0ac2d1`, and `eaf4b5086e9c9c42c8705d67259c397168c4abce260383f698f5bd539b5ffde0`. A sandboxed-versus-unsandboxed comparison produced a different transformed-image frame and was rejected because it did not hold the reference environment constant. Encoded MP4 bytes are intentionally not the determinism contract. Sampled frames do not prove that every frame is aesthetically safe. | Repeat at M3 and after runtime/render changes |

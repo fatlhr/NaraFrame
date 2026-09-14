@@ -1,9 +1,9 @@
 # NaraFrame MVP — Adversarial Spec Refinement
 
-Status: Inline reviews consolidated; design changes accepted, implementation not started
+Status: M0 runtime path verified; M0.9 corrective runtime and automated gates pass; owner visual acceptance pending
 
-Date: 2026-09-07
-Reviewed artifacts: `docs/spec.md` revisions 0.1 and 0.2; active baseline is revision 0.3.
+Date: 2026-09-14
+Reviewed artifacts: `docs/spec.md` revisions 0.1–0.3 plus the LBC engine/direct-Remotion benchmark; active baseline is revision 0.4.
 
 The user approved the AR follow-up changes after clarifying the initial technical-user target. AR-01 is withdrawn; AR-02–14 are accepted-for-spec. No runtime, usability, voice-quality, or cost test is marked passed by this document update. The temporary dated review/revision-plan files were absorbed into spec/refinement/plan/discovery and removed; this file retains their finding IDs and rationale.
 
@@ -354,7 +354,7 @@ Spec update required: add measurement requirement, no hard threshold.
 
 ## 5. RF disposition after revision 0.3
 
-The historical RF review contained 6 High, 9 Medium, and 2 Low findings. None is verified by runtime evidence yet.
+The historical RF review contained 6 High, 9 Medium, and 2 Low findings. The table records their design disposition at revision 0.3; later implementation status is consolidated in sections 7, 9, and 11.
 
 | Finding | Current design disposition | Delivery proof required |
 |---|---|---|
@@ -376,7 +376,7 @@ The historical RF review contained 6 High, 9 Medium, and 2 Low findings. None is
 | RF-16 | Accepted: narrow compiled-input renderer boundary | M0.2, dependency boundary test |
 | RF-17 | Accepted: measurements without invented pass threshold | M3.3 |
 
-All rows above: implementation not started; verification not run. Superseded historical wording is not an active defect obligation when the replacement contract addresses its original risk.
+At the revision-0.3 documentation checkpoint, implementation had not started and verification had not run. That sentence is historical, not the current project status. Superseded wording is not an active defect obligation when the replacement contract addresses its original risk.
 
 ## 6. Blocking evidence by current milestone
 
@@ -396,7 +396,7 @@ If a required gate fails, stop the affected milestone and resolve it or explicit
 
 The accepted design preserves one interleaved skill/core pipeline plus direct CLI/JSON use for Fatih. The former novice-target criticism was a reviewer scope error, not a product flaw. Remaining revisions target affordable local edits, earlier previews, production readiness, source recovery, and a working slice before a large visual registry.
 
-Spec 0.3 is the approved design baseline. `docs/plan.md` contains the M0–M3 roadmap and the verified M0 implementation record; there is no second planning layer. M0.1–M0.8 are implemented. M0.7's baseline render, direct owner JSON edit, stale detection, rerender, invalid-action recovery, motion revision, regression protection, and owner re-review passed. M0.8 then closed cross-feature, failure, offline, determinism, and runtime-evidence gaps. Owner active time was not instrumented and is explicitly recorded as unavailable. Narration, usage/cost, durable source transactions, and final workflow evidence remain future milestones.
+Spec 0.4 is the approved design baseline. `docs/plan.md` contains the M0–M3 roadmap, the verified M0 implementation record, and the expanded M0.9 corrective task; there is no second planning layer. M0.1–M0.8 are implemented. M0.9 now implements and verifies the declarative appearance/layout contract, profile visual tokens, exact masked primitives, loaded-font preflight, and shared semantic motion geometry. The corrected LBC preview and automated gates pass; M0.9 still blocks M1.1 until Fatih accepts the full video and the four previously rejected moments. Owner active time was not instrumented and is explicitly recorded as unavailable. Narration, usage/cost, durable source transactions, and final workflow evidence remain future milestones.
 
 M0.6 evidence: the exact Node 24.20.0/pnpm 12.3.4 runtime passed public `doctor`, `schema`, `create`, `validate --stage plan`, `status`, and `preview --draft` contracts. In the review-fix rerun, human and JSON `create` commands succeeded in `work/m0-6-review-created-human` and `work/m0-6-review-created-json`; a real human full preview published current immutable build `41b6900277c8-a2b28188-998`, while JSON scoped `preview --draft --scene hook --json` published `93da18cf5a91-fad10874-1fd`. Both use source revision `09b2333daa03081bc485868915d413d09556a22e81fa95a93c84cb48c8e7f531`; their project/scoped fingerprints are `41b6900277c8ed8533002fbaadecf8cd9b39a9cae4d758d344d6389f6ec63d7d` and `93da18cf5a91a64feff9909d5b4f62984391d534cdfbb3cc654118d9e0edf7f2`. The review proves cancellation after durable pointer preparation cannot replace the pointer and cleans its temporary file. Public status now rejects corrupt pointer hashes, unsafe symlinks, tampered artifact content, invalid scope unions, and inconsistent manifest/report/frames metadata before returning paths; valid scene scopes remain supported. SIGTERM and SIGINT interruption both resolve to 130. Focused CLI checks passed 3 unit/17 integration tests; final verification passed unit 9/9 and integration 31/31. The skill was unchanged in the review.
 
@@ -525,21 +525,21 @@ Lifecycle: proposed → accepted-for-spec → implemented → verified, or defer
 | Finding | Severity | Design status | Implementation | Verification |
 |---|---|---|---|---|
 | AR-01 | Withdrawn | User-target assumption retracted | Not applicable | No novice gate |
-| AR-02 | High | Accepted-for-spec | Not started | Not run |
-| AR-03 | High | Accepted-for-spec | Not started | Not run |
-| AR-04 | High | Accepted-for-spec | Not started | Not run |
-| AR-05 | High | Accepted-for-spec | Not started | Not run |
+| AR-02 | High | Accepted-for-spec | M0 production-policy shell exists; ledger pending M1 | M0 policy path verified; budget cases not run |
+| AR-03 | High | Accepted-for-spec | Silent fallback implemented; narrated route pending M1 | Fallback verified; real voice/timing not run |
+| AR-04 | High | Accepted-for-spec | Pending M1 | Not run |
+| AR-05 | High | Accepted-for-spec | Draft/full-project scope implemented; production dependency closure pending M2 | M0 draft scope verified |
 | AR-06 | High | Accepted-for-spec | Not started | Not run |
-| AR-07 | High | Accepted roadmap sequence | Product not started | Workflow pilot not run |
-| AR-08 | High | Accepted milestone-authoring gate | M0 plan ready; product code not started | Not run |
-| AR-09 | Medium | Accepted-for-spec | Not started | Not run |
+| AR-07 | High | Accepted roadmap sequence | M0 vertical slice implemented | M0 CLI/skill/runtime path verified; narration pending |
+| AR-08 | High | Accepted milestone-authoring gate | M0 executed; M0.9 corrective implementation complete | M0.9 technical evidence passes; owner visual acceptance pending |
+| AR-09 | Medium | Accepted-for-spec | Source/assembly keys implemented; remaining keys pending M1/M2 | M0 determinism/key coverage verified |
 | AR-10 | Medium | Accepted-for-spec | Not started | Not run |
 | AR-11 | Medium | Accepted-for-spec | Not started | Not run |
 | AR-12 | Medium | Accepted-for-spec | Not started | Not run |
-| AR-13 | Medium | Accepted-for-spec | Not started | Not run |
-| AR-14 | Medium | Accepted; document consistency corrected | Product not started | Runtime evidence not run |
+| AR-13 | Medium | Accepted-for-spec | External-egress/build atomicity/sampled QA implemented for M0 | M0 runtime and failure injection verified; later audio scope pending |
+| AR-14 | Medium | Accepted; document consistency corrected | Milestone/evidence lifecycle in active use | M0 runtime evidence recorded; later milestones pending |
 
-Each active finding above has its requirement/scenario and milestone under section 8 and plan.md section 9. Record exact commands, source/build IDs, output hashes/paths, test dates, and human review notes when execution supplies evidence. None currently exists for a completed NaraFrame video or measured per-video cost.
+Each active finding above has its requirement/scenario and milestone under section 8 and `docs/plan.md` section 9. Exact commands, source/build IDs, output hashes/paths, test dates, and human review notes are recorded as execution supplies evidence. M0 has verified silent-draft evidence; narrated-video and measured per-video cost evidence do not yet exist.
 
 ## 10. Documentation consolidation check — 2026-09-07
 
@@ -548,3 +548,38 @@ Each active finding above has its requirement/scenario and milestone under secti
 - Markdown fence pairing and embedded JSON parsing passed; no references remain to the removed files or obsolete active single-master/three-project rules.
 - Arithmetic examples checked: block starts 0/2700 ms, total 4500 ms; changed first clip moves the next start to 3300 ms; 1000 ms equals 30 frames; 40 spent + 40 reserved + 30 requested exceeds a 100-unit budget.
 - These checks validate document structure and example arithmetic only. No NaraFrame code, automated product test, generated video, provider bill, or usability result was produced by this update. Git is still not initialized.
+
+## 11. LBC visual-fidelity benchmark and corrective decision — 2026-09-14
+
+This is a new evidence pass, not a reinterpretation of the original greenfield review. Both variants use the same LBC intent and local assets, run for 30 seconds at 540 × 960 and 30 fps, and omit audio. The engine output proves the generic path runs; the direct-Remotion output demonstrates the quality currently possible when layout and styling are expressed per element.
+
+### 11.1 Evidence and observed failure
+
+- Engine: `work/lbc-benchmark/output/lbc-naraframe-engine.mp4`, SHA-256 `f614260e0c137a64c39c6df8073e77885007eb52dc6c374ad3af6b06f5e0a74f`.
+- Direct Remotion: `work/lbc-benchmark/output/lbc-remotion-full.mp4`, SHA-256 `69903934a00ae59272205c7f11007d18db6b3c0701f1478710b13cd49c2bba31`.
+- Side-by-side sheet: `work/lbc-benchmark/output/comparison.png`, SHA-256 `9b42b4a571be31c72416debf1b88128578d4fd7ecd7b4fe09f660f1040b1d1de`.
+- Fatih rejected the engine fidelity. Around second 8, image pixels remain square inside a rotated rounded card. Around seconds 15 and 21, rendered text exceeds its intended cards/rows and collides vertically. The CTA around second 27 remains readable but lacks the direct version's typography hierarchy and precise spacing.
+
+The evidence is a failing visual baseline. Existing schema, deterministic-frame, publication, and offline checks remain valid for their technical scope; none proves that rendered content fits its declared visual intent.
+
+### 11.2 Root-cause findings
+
+| Finding | Severity | Evidence | Accepted correction | Delivery |
+|---|---|---|---|---|
+| VF-01 | High | Scene schema exposes frames and a few transforms but cannot express typography hierarchy, line limits, radius, stroke/shadow, or focal crop. | Add optional declarative appearance fields with profile/default resolution; keep schema-version-1 source readable. | M0.9.2 |
+| VF-02 | High | Renderer applies one hard-coded text size/line-height/alignment and a fixed rectangle radius. Image wrappers do not inherit declared rounded geometry. | Resolve dedicated text/image/shape/group primitives from compiled appearance; clip media and motion to the declared mask. | M0.9.4 |
+| VF-03 | High | Compiler validates declared boxes/safe zones, not loaded-font text dimensions or collisions. | Add renderer preflight and stable visual issue codes; fail instead of silently clipping or shrinking below profile minimum. | M0.9.5 |
+| VF-04 | Medium | Absolute-only composition makes routine copy revisions fragile. | Add bounded stack/grid group layout with padding, gap, and alignment; retain absolute mode for art-directed cases. | M0.9.2/5 |
+| VF-05 | Medium | Profile contains one font family and weights but no reusable display/heading/body/label scale or minimum-readable policy. | Put typography and appearance tokens in the profile, before engine rendering, so identity switching remains real. | M0.9.3 |
+| VF-06 | Medium | Layer-local reveals/focus can still read as independent slide elements. | Permit semantic whole-scene/group focus with a focal anchor and one bounded transition addition only if benchmark evidence requires it. | M0.9.6 |
+| VF-07 | Medium | The old roadmap deferred most visual growth to M2, after narration/accounting. | Insert M0.9 as a blocking visual foundation; M2 extends domain recipes instead of repairing baseline layout. | M0.9 gate |
+
+### 11.3 External-reference disposition
+
+The Remotion reference confirms that text fitting/measurement and transition sequencing can remain inside the existing renderer architecture. Use exact-version-matched `@remotion/layout-utils`; do not duplicate browser text metrics in core. Bang Motion's pinned snapshot `0f1bd1103835890354496d009af62885fe0a05d5` contributes composition practices—style brief before coding, shot rundown, one shot/one dominant statement, camera/world continuity, and keyframe screenshot review. Its HTML/GSAP/CDN runtime is not adopted because it conflicts with NaraFrame's offline, deterministic, declarative Remotion boundary.
+
+### 11.4 Approved decision and proof boundary
+
+Fatih approved the M0.9 corrective direction on 2026-09-14. The accepted approach is to expand the declarative profile/layer/layout contract and renderer preflight. A renderer-only patch was rejected as too brittle, while a custom TSX escape hatch was rejected because it would make revisions and agent operation project-specific.
+
+Design status is accepted-for-spec and the original failing baseline remains immutable. Corrective build `16abeb583bc2-f524eec1-914` now has real rounded image masks, no required-text overlap/clipping/out-of-frame content at the sampled states, clear typography roles, bounded copy reflow/failure behavior, and a structured `TEXT_COLLISION` failure probe. Its output/hash/runtime and gate evidence are recorded in `docs/plan.md`. M0.9 passes only after Fatih accepts the full video plus frames around seconds 8, 15, 21, and 27. Direct Remotion is a reference target, not a requirement for pixel identity.
