@@ -123,6 +123,24 @@ describe("visual source schema", () => {
     expect(ScenesSchema.safeParse(multipleOwners).success).toBe(false);
   });
 
+  it("rejects duplicate scene or beat IDs and unresolved beat targets", () => {
+    const duplicateScene = sceneDocument();
+    duplicateScene.scenes.push(structuredClone(firstScene(duplicateScene)));
+    expect(ScenesSchema.safeParse(duplicateScene).success).toBe(false);
+
+    const duplicateBeat = sceneDocument();
+    firstScene(duplicateBeat).beats.push(
+      structuredClone(firstScene(duplicateBeat).beats[0] as never),
+    );
+    expect(ScenesSchema.safeParse(duplicateBeat).success).toBe(false);
+
+    const missingTarget = sceneDocument();
+    const beat = firstScene(missingTarget).beats[0];
+    if (!beat) throw new Error("Expected the visual schema fixture beat.");
+    beat.targetId = "missing-layer";
+    expect(ScenesSchema.safeParse(missingTarget).success).toBe(false);
+  });
+
   it("rejects SVG or video assets", () => {
     for (const kind of ["svg", "video"]) {
       expect(
