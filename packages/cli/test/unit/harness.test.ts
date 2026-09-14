@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 
 describe("CLI test discovery", () => {
   it("loads CLI and dependency source aliases", async () => {
-    const { cliDependencies, cliPackage } = await import("@naraframe/cli");
+    const cli = await import("@naraframe/cli");
 
-    expect(cliPackage).toBe("@naraframe/cli");
-    expect(cliDependencies).toEqual([
+    expect(cli.cliPackage).toBe("@naraframe/cli");
+    expect(cli.cliDependencies).toEqual([
       "@naraframe/core",
       "@naraframe/renderer-remotion",
     ]);
+    expect(cli.runCli).toEqual(expect.any(Function));
+    expect(cli.runCliProcess).toEqual(expect.any(Function));
   });
 });

@@ -161,21 +161,26 @@ const copyPublishedSample = async (sceneId?: string): Promise<string> => {
 const captureJsonResult = async (
   args: readonly string[],
   options?: { signal?: AbortSignal },
-): Promise<{ exitCode: number; events: unknown[] }> => {
+): Promise<{ exitCode: number; events: unknown[]; stderr: string[] }> => {
   const writes: string[] = [];
+  const stderr: string[] = [];
   vi.spyOn(process.stdout, "write").mockImplementation(((value: string) => {
     writes.push(value);
     return true;
   }) as typeof process.stdout.write);
-  vi.spyOn(process.stderr, "write").mockImplementation(
-    (() => true) as typeof process.stderr.write,
-  );
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
+  vi.spyOn(process.stderr, "write").mockImplementation(((value: string) => {
+    stderr.push(value);
+    return true;
+  }) as typeof process.stderr.write);
+  vi.spyOn(console, "error").mockImplementation((...values: unknown[]) => {
+    stderr.push(values.map(String).join(" "));
+  });
 
   const exitCode = await runCli(args, options);
   return {
     exitCode,
     events: writes.map((value) => JSON.parse(value)),
+    stderr,
   };
 };
 
@@ -213,6 +218,7 @@ const captureInterruptedPublicResult = async (
 
 afterEach(async () => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
   await Promise.all(
     temporaryRoots
       .splice(0)
@@ -221,6 +227,76 @@ afterEach(async () => {
 });
 
 describe("public CLI command contract", () => {
+  it("reports missing browser and FFmpeg tools without attempting downloads", async () => {
+    vi.stubEnv(
+      "NARAFRAME_BROWSER_EXECUTABLE",
+      "/definitely-missing/naraframe-browser",
+    );
+    vi.stubEnv(
+      "NARAFRAME_FFMPEG_EXECUTABLE",
+      "/definitely-missing/naraframe-ffmpeg",
+    );
+    vi.stubEnv(
+      "NARAFRAME_FFPROBE_EXECUTABLE",
+      "/definitely-missing/naraframe-ffprobe",
+    );
+
+    const result = await captureJsonResult(["doctor", "--json"]);
+
+    expect(result.exitCode).toBe(2);
+    expect(result.events).toEqual([
+      expect.objectContaining({
+        command: "doctor",
+        status: "failed",
+        success: false,
+        readiness: "not-ready",
+        issues: expect.arrayContaining([
+          expect.objectContaining({ code: "BROWSER_NOT_PROVISIONED" }),
+          expect.objectContaining({ code: "FFMPEG_NOT_AVAILABLE" }),
+        ]),
+        data: expect.objectContaining({
+          downloadsPerformed: false,
+          renderPerformed: false,
+        }),
+      }),
+    ]);
+  });
+
+  it("redacts unexpected renderer details from JSON and stderr failures", async () => {
+    const secret = "nf-secret-token-value";
+    vi.spyOn(previewBuild, "publishPreviewBuild").mockRejectedValue(
+      new Error(`Renderer failed with ${secret} at /private/owner/path`),
+    );
+
+    const result = await captureJsonResult([
+      "preview",
+      sampleRoot,
+      "--draft",
+      "--json",
+    ]);
+    const publicOutput = JSON.stringify({
+      events: result.events,
+      stderr: result.stderr,
+    });
+
+    expect(result.exitCode).toBe(2);
+    expect(result.events).toEqual([
+      expect.objectContaining({
+        command: "preview",
+        status: "failed",
+        success: false,
+        issues: [
+          expect.objectContaining({
+            code: "SYSTEM_ERROR",
+            details: { errorName: "Error" },
+          }),
+        ],
+      }),
+    ]);
+    expect(publicOutput).not.toContain(secret);
+    expect(publicOutput).not.toContain("/private/owner/path");
+  });
+
   it("writes exactly one versioned result event for schema and plan validation", async () => {
     const schema = await captureJsonResult(["schema", "--json"]);
     expect(schema.exitCode).toBe(0);
