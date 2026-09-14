@@ -4,6 +4,14 @@ export {
   compileDraft,
   type DraftScope,
 } from "./compiler/compile-draft.js";
+export { contrastRatio, contrastThresholdFor } from "./compiler/contrast.js";
+export {
+  type ContrastSample,
+  computeReadabilityMetrics,
+  computeVarietyMetrics,
+  type ReadabilityMetrics,
+  type VarietyMetrics,
+} from "./compiler/qa-report.js";
 export {
   type LoadedPlanProject,
   loadPlanProject,

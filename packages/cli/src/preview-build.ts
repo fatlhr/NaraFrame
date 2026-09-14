@@ -14,7 +14,14 @@ import {
 } from "node:fs/promises";
 import { arch, platform, release } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import type { CompiledDraft, Issue } from "@naraframe/core";
+import {
+  type CompiledDraft,
+  computeReadabilityMetrics,
+  computeVarietyMetrics,
+  type Issue,
+  type ReadabilityMetrics,
+  type VarietyMetrics,
+} from "@naraframe/core";
 import { type RenderedDraft, renderDraft } from "@naraframe/renderer-remotion";
 
 const artifactNames = [
@@ -88,6 +95,10 @@ interface PreviewMetadata {
       reasons: string[];
     }>;
   };
+  /** M0.10.5: the reviewable evidence a build is safe to publish, measured
+   * from the final compiled draft rather than a screenshot. */
+  varietyMetrics: VarietyMetrics;
+  readability: ReadabilityMetrics;
   startedAt: string;
   completedAt: string;
   status: "success";
@@ -1329,6 +1340,8 @@ export const publishPreviewBuild = async ({
         issues: rendered.visualPreflight.issues,
         checkedFrames: rendered.visualPreflight.frames,
       },
+      varietyMetrics: computeVarietyMetrics(draft),
+      readability: computeReadabilityMetrics(draft),
       startedAt,
       completedAt,
       status: "success",

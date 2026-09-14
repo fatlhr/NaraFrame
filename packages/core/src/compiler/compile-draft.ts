@@ -12,6 +12,7 @@ import type {
   Scene,
   Transition,
 } from "../schema/scene.js";
+import { checkContrast } from "./contrast.js";
 import { checkVariety, type VarietyScene } from "./variety.js";
 
 export type DraftScope =
@@ -740,6 +741,7 @@ export const compileDraft = (
   if (requestedScope.type === "project") {
     issues.push(...checkVariety(varietyEntries, source.profile.render));
   }
+  issues.push(...checkContrast(varietyEntries, source.profile.render));
 
   if (issues.some((issue) => issue.severity === "error")) {
     return { ok: false, issues: sortIssues(issues) };
