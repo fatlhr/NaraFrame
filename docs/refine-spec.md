@@ -1,6 +1,6 @@
 # NaraFrame MVP — Adversarial Spec Refinement
 
-Status: M0 runtime path verified; M0.9 corrective runtime and automated gates pass; owner visual acceptance pending
+Status: M0 complete. M0.9 corrective runtime/automated gates pass and Fatih accepted the rerendered LBC build on 2026-09-14; M1.1 is unpaused.
 
 Date: 2026-09-14
 Reviewed artifacts: `docs/spec.md` revisions 0.1–0.3 plus the LBC engine/direct-Remotion benchmark; active baseline is revision 0.4.
@@ -531,7 +531,7 @@ Lifecycle: proposed → accepted-for-spec → implemented → verified, or defer
 | AR-05 | High | Accepted-for-spec | Draft/full-project scope implemented; production dependency closure pending M2 | M0 draft scope verified |
 | AR-06 | High | Accepted-for-spec | Not started | Not run |
 | AR-07 | High | Accepted roadmap sequence | M0 vertical slice implemented | M0 CLI/skill/runtime path verified; narration pending |
-| AR-08 | High | Accepted milestone-authoring gate | M0 executed; M0.9 corrective implementation complete | M0.9 technical evidence passes; owner visual acceptance pending |
+| AR-08 | High | Accepted milestone-authoring gate | M0 executed; M0.9 corrective implementation complete | M0.9 technical evidence and owner visual acceptance both pass; M0 complete |
 | AR-09 | Medium | Accepted-for-spec | Source/assembly keys implemented; remaining keys pending M1/M2 | M0 determinism/key coverage verified |
 | AR-10 | Medium | Accepted-for-spec | Not started | Not run |
 | AR-11 | Medium | Accepted-for-spec | Not started | Not run |
