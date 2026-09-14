@@ -5,6 +5,7 @@ import { CompiledDraftSchema } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
 import type { RenderTokens } from "../schema/profile.js";
 import type { Beat, Frame, Insets, Layer, Scene } from "../schema/scene.js";
+import { checkVariety, type VarietyScene } from "./variety.js";
 
 export type DraftScope =
   | { type: "project" }
@@ -556,6 +557,7 @@ export const compileDraft = (
   }
 
   let renderCursor = 0;
+  const varietyEntries: VarietyScene[] = [];
   const scenes = selectedSources.map(({ scene, sceneIndex }) => {
     const durationInFrames = msToDurationFrames(scene.durationMs, fps);
     const startFrame = renderCursor;
@@ -572,6 +574,7 @@ export const compileDraft = (
           )
         : { layers: [], issues: [] };
     issues.push(...layout.issues);
+    varietyEntries.push({ scene, sceneIndex, resolvedLayers: layout.layers });
 
     const beats = scene.beats.map((beat, beatIndex) => {
       const beatStartFrame = msToFrameOffset(beat.startMs, fps);
@@ -612,6 +615,10 @@ export const compileDraft = (
       beats,
     };
   });
+
+  if (requestedScope.type === "project") {
+    issues.push(...checkVariety(varietyEntries, source.profile.render));
+  }
 
   if (issues.some((issue) => issue.severity === "error")) {
     return { ok: false, issues: sortIssues(issues) };

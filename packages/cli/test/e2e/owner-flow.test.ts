@@ -401,9 +401,11 @@ describe("M0 owner flow", () => {
     const stale = await runCli(project, ["status"]);
     expect(stale.result.code, stale.result.stderr).toBe(0);
     expect(stale.event.data).toMatchObject({ previewState: "stale" });
-    expect(stale.event.issues).toEqual([
-      expect.objectContaining({ code: "PREVIEW_STALE" }),
-    ]);
+    expect(stale.event.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "PREVIEW_STALE" }),
+      ]),
+    );
 
     const revisedPreview = await runCli(project, ["preview", "--draft"]);
     expect(revisedPreview.result.code, revisedPreview.result.stderr).toBe(0);

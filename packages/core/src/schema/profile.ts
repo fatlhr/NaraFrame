@@ -40,6 +40,21 @@ const AppearanceTokensSchema = z
   })
   .strict();
 
+/**
+ * Bounds on how much a project may repeat itself. Absent fields fall back to
+ * VARIETY_DEFAULTS in the compiler; `severity` decides whether a repetition
+ * finding blocks publication or only reports.
+ */
+const VarietyPolicySchema = z
+  .object({
+    maxConsecutiveSameEntry: z.number().int().min(1).max(20).optional(),
+    maxScenesWithoutViewpointChange: z.number().int().min(1).max(20).optional(),
+    requireMultipleTransitionTypes: z.boolean().optional(),
+    requireMultipleTypeRoles: z.boolean().optional(),
+    severity: z.enum(["warning", "error"]).optional(),
+  })
+  .strict();
+
 export const RenderTokensSchema = z
   .object({
     palette: z
@@ -68,6 +83,7 @@ export const RenderTokensSchema = z
       })
       .strict(),
     appearance: AppearanceTokensSchema.optional(),
+    variety: VarietyPolicySchema.optional(),
     safeZone: z
       .object({
         top: z.number().int().nonnegative(),

@@ -572,7 +572,9 @@ describe("public CLI command contract", () => {
       expect.objectContaining({
         command: "status",
         success: false,
-        issues: [expect.objectContaining({ code: "PREVIEW_METADATA_INVALID" })],
+        issues: expect.arrayContaining([
+          expect.objectContaining({ code: "PREVIEW_METADATA_INVALID" }),
+        ]),
       }),
     ]);
   });
@@ -724,9 +726,9 @@ describe("public CLI command contract", () => {
           command: "status",
           success: false,
           artifacts: {},
-          issues: [
+          issues: expect.arrayContaining([
             expect.objectContaining({ code: "PREVIEW_METADATA_INVALID" }),
-          ],
+          ]),
         }),
       ]);
     }
@@ -763,7 +765,9 @@ describe("public CLI command contract", () => {
           previewState: "stale",
           previewSourceRevision: initialEvent.sourceRevision,
         }),
-        issues: [expect.objectContaining({ code: "PREVIEW_STALE" })],
+        issues: expect.arrayContaining([
+          expect.objectContaining({ code: "PREVIEW_STALE" }),
+        ]),
       }),
     ]);
     expect(

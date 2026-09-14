@@ -324,4 +324,38 @@ describe("Krakatau draft project", () => {
       "ASSET_HASH_MISMATCH",
     );
   });
+
+  it("reports project-wide variety issues as non-blocking warnings", async () => {
+    const loaded = await loadPlanProject(sampleRoot);
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+
+    const compiled = compileDraft(loaded.value.source);
+
+    expect(compiled.ok).toBe(true);
+    if (!compiled.ok) return;
+    expect(compiled.issues).toContainEqual(
+      expect.objectContaining({
+        code: "SINGLE_TRANSITION_TYPE",
+        severity: "warning",
+      }),
+    );
+  });
+
+  it("does not run project-wide variety checks against a single scene", async () => {
+    const loaded = await loadPlanProject(sampleRoot);
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+
+    const compiled = compileDraft(loaded.value.source, {
+      type: "scene",
+      sceneId: "context",
+    });
+
+    expect(compiled.ok).toBe(true);
+    if (!compiled.ok) return;
+    expect(compiled.issues).not.toContainEqual(
+      expect.objectContaining({ code: "SINGLE_TRANSITION_TYPE" }),
+    );
+  });
 });
