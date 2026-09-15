@@ -325,7 +325,7 @@ describe("Krakatau draft project", () => {
     );
   });
 
-  it("reports project-wide variety issues as non-blocking warnings", async () => {
+  it("stays free of M0.10 variety warnings at project scope after its transition migration", async () => {
     const loaded = await loadPlanProject(sampleRoot);
     expect(loaded.ok).toBe(true);
     if (!loaded.ok) return;
@@ -334,11 +334,8 @@ describe("Krakatau draft project", () => {
 
     expect(compiled.ok).toBe(true);
     if (!compiled.ok) return;
-    expect(compiled.issues).toContainEqual(
-      expect.objectContaining({
-        code: "SINGLE_TRANSITION_TYPE",
-        severity: "warning",
-      }),
+    expect(compiled.issues.map((issue) => issue.code)).not.toContain(
+      "SINGLE_TRANSITION_TYPE",
     );
   });
 

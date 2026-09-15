@@ -24,7 +24,9 @@
         }
       ],
       "transition": {
-        "type": "cut"
+        "type": "push-through",
+        "durationMs": 450,
+        "direction": "up"
       }
     },
     {
@@ -111,7 +113,7 @@
           {
             "id": "context-copy",
             "type": "text",
-            "text": "1883 • SELAT SUNDA\nGelombang tekanan tercatat berulang kali mengitari Bumi.",
+            "text": "1883 \u2022 SELAT SUNDA\nGelombang tekanan tercatat berulang kali mengitari Bumi.",
             "frame": {
               "x": 88,
               "y": 1350,
@@ -210,7 +212,9 @@
         }
       ],
       "transition": {
-        "type": "cut"
+        "type": "mask-reveal",
+        "durationMs": 450,
+        "shape": "circle"
       }
     },
     {
