@@ -19,7 +19,9 @@ const scene = (overrides: {
   id: string;
   entryDirection?: "up" | "down" | "left" | "right";
   focus?: boolean;
+  focusCamera?: "push" | "pan" | "zoom";
   transitionType?: "cut";
+  transition?: Scene["transition"];
 }): Scene => ({
   id: overrides.id,
   narrativeRole: "context",
@@ -38,7 +40,7 @@ const scene = (overrides: {
           },
         ]
       : []),
-    ...(overrides.focus
+    ...(overrides.focus || overrides.focusCamera
       ? [
           {
             id: `${overrides.id}-focus`,
@@ -46,12 +48,17 @@ const scene = (overrides: {
             action: "focus" as const,
             startMs: 600,
             durationMs: 900,
-            params: { camera: "zoom" as const, intensity: 0.3 },
+            params: {
+              camera: overrides.focusCamera ?? ("zoom" as const),
+              intensity: 0.3,
+            },
           },
         ]
       : []),
   ],
-  transition: { type: overrides.transitionType ?? "cut" },
+  transition: overrides.transition ?? {
+    type: overrides.transitionType ?? "cut",
+  },
 });
 
 const textLayer = (fontSize: number): Extract<Layer, { type: "text" }> => ({
@@ -193,5 +200,145 @@ describe("checkVariety", () => {
     });
 
     expect(issues.map((i) => i.code)).not.toContain("MOTION_REPETITION");
+  });
+});
+
+describe("checkVariety — M0.10.4 profile choice menu", () => {
+  it("flags an entry direction outside the permitted menu", () => {
+    const scenes = [scene({ id: "a", entryDirection: "left" })];
+
+    const issues = checkVariety(entries(scenes), {
+      ...baseRender,
+      variety: { menu: { entryDirections: ["up", "down"] } },
+    });
+
+    expect(issues).toContainEqual(
+      expect.objectContaining({ code: "ENTRY_STYLE_NOT_PERMITTED" }),
+    );
+  });
+
+  it("does not flag an entry direction inside the permitted menu", () => {
+    const scenes = [scene({ id: "a", entryDirection: "up" })];
+
+    const issues = checkVariety(entries(scenes), {
+      ...baseRender,
+      variety: { menu: { entryDirections: ["up", "down"] } },
+    });
+
+    expect(issues.map((i) => i.code)).not.toContain(
+      "ENTRY_STYLE_NOT_PERMITTED",
+    );
+  });
+
+  it("flags a transition type outside the permitted menu", () => {
+    const scenes = [
+      scene({
+        id: "a",
+        transition: {
+          type: "push-through",
+          durationMs: 500,
+          direction: "left",
+        },
+      }),
+    ];
+
+    const issues = checkVariety(entries(scenes), {
+      ...baseRender,
+      variety: { menu: { transitionTypes: ["cut", "mask-reveal"] } },
+    });
+
+    expect(issues).toContainEqual(
+      expect.objectContaining({ code: "TRANSITION_NOT_PERMITTED" }),
+    );
+  });
+
+  it("does not flag a transition type inside the permitted menu", () => {
+    const scenes = [scene({ id: "a", transition: { type: "cut" } })];
+
+    const issues = checkVariety(entries(scenes), {
+      ...baseRender,
+      variety: { menu: { transitionTypes: ["cut", "mask-reveal"] } },
+    });
+
+    expect(issues.map((i) => i.code)).not.toContain("TRANSITION_NOT_PERMITTED");
+  });
+
+  it("flags a focus camera outside the permitted menu", () => {
+    const scenes = [scene({ id: "a", focusCamera: "pan" })];
+
+    const issues = checkVariety(entries(scenes), {
+      ...baseRender,
+      variety: { menu: { focusCameras: ["zoom"] } },
+    });
+
+    expect(issues).toContainEqual(
+      expect.objectContaining({ code: "FOCUS_STYLE_NOT_PERMITTED" }),
+    );
+  });
+
+  it("does not flag a focus camera inside the permitted menu", () => {
+    const scenes = [scene({ id: "a", focusCamera: "zoom" })];
+
+    const issues = checkVariety(entries(scenes), {
+      ...baseRender,
+      variety: { menu: { focusCameras: ["zoom"] } },
+    });
+
+    expect(issues.map((i) => i.code)).not.toContain(
+      "FOCUS_STYLE_NOT_PERMITTED",
+    );
+  });
+
+  it("does not enforce any menu dimension left undeclared", () => {
+    const scenes = [
+      scene({
+        id: "a",
+        entryDirection: "left",
+        focusCamera: "pan",
+        transition: {
+          type: "push-through",
+          durationMs: 500,
+          direction: "left",
+        },
+      }),
+    ];
+
+    // Only transitionTypes is declared; direction/camera stay unrestricted.
+    const issues = checkVariety(entries(scenes), {
+      ...baseRender,
+      variety: { menu: { transitionTypes: ["push-through"] } },
+    });
+
+    expect(issues.map((i) => i.code)).not.toContain(
+      "ENTRY_STYLE_NOT_PERMITTED",
+    );
+    expect(issues.map((i) => i.code)).not.toContain(
+      "FOCUS_STYLE_NOT_PERMITTED",
+    );
+  });
+
+  it("does not enforce a menu at all when none is declared", () => {
+    const scenes = [
+      scene({
+        id: "a",
+        entryDirection: "left",
+        focusCamera: "pan",
+        transition: {
+          type: "push-through",
+          durationMs: 500,
+          direction: "left",
+        },
+      }),
+    ];
+
+    const issues = checkVariety(entries(scenes), baseRender);
+
+    expect(issues.map((i) => i.code)).not.toContain(
+      "ENTRY_STYLE_NOT_PERMITTED",
+    );
+    expect(issues.map((i) => i.code)).not.toContain("TRANSITION_NOT_PERMITTED");
+    expect(issues.map((i) => i.code)).not.toContain(
+      "FOCUS_STYLE_NOT_PERMITTED",
+    );
   });
 });

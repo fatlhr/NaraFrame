@@ -140,6 +140,162 @@ describe("resolveVisualPreflight — group transform folding", () => {
   });
 });
 
+const draftWithScenes = (
+  scenes: Array<{
+    layers: Layer[];
+    beats?: CompiledDraft["scenes"][number]["beats"];
+    transitionOut?: CompiledDraft["scenes"][number]["transitionOut"];
+    startFrame: number;
+    endFrame: number;
+  }>,
+): CompiledDraft => ({
+  schemaVersion: 1,
+  mode: "draft",
+  width: 540,
+  height: 960,
+  fps: 30,
+  totalFrames: scenes.at(-1)?.endFrame ?? 0,
+  scope: { type: "project" },
+  timelineScope: "project",
+  label: "DRAFT • NO AUDIO",
+  sourceRevision: "a".repeat(64),
+  assemblyKey: "b".repeat(64),
+  profile: { id: "test-profile", version: "0.1.0", render: baseRender },
+  assets: {},
+  fonts: [],
+  scenes: scenes.map((entry, index) => ({
+    id: `scene-${index}`,
+    startFrame: entry.startFrame,
+    endFrame: entry.endFrame,
+    visual: { type: "composition" },
+    layers: entry.layers,
+    beats: entry.beats ?? [],
+    transitionOut: entry.transitionOut ?? { type: "cut" },
+  })),
+});
+
+describe("resolveVisualPreflight — scene-transition folding", () => {
+  it("still flags a real collision even while a later exit transition will eventually fade it", () => {
+    const overlapping: Layer[] = [
+      text({
+        id: "label-a",
+        text: "AAAA",
+        frame: { x: 100, y: 400, width: 300, height: 80 },
+      }),
+      text({
+        id: "label-b",
+        text: "BBBB",
+        frame: { x: 150, y: 400, width: 300, height: 80 },
+      }),
+    ];
+    const draft = draftWithScenes([
+      {
+        layers: overlapping,
+        startFrame: 0,
+        endFrame: 30,
+        // A short exit window near the tail leaves "scene-entry" (frame 0)
+        // and "scene-settled" (frame ~7) fully outside it and fully opaque.
+        transitionOut: {
+          type: "push-through",
+          durationInFrames: 5,
+          direction: "left",
+        },
+      },
+      { layers: [], startFrame: 30, endFrame: 60 },
+    ]);
+
+    const { report } = resolveVisualPreflight(draft);
+
+    expect(report.issues.map((issue) => issue.code)).toContain(
+      "TEXT_COLLISION",
+    );
+  });
+
+  it("folds the exit transition's fade into visibility, suppressing a collision that is only ever on-screen at low opacity", () => {
+    // Each layer reveals in fully by frame 25 (own opacity reaches 1 well
+    // before the checked "scene-settled" frame ~7 is even reached in
+    // progress terms — it stays below the 0.9 gate on its own until then),
+    // then the scene's own push-through exit (window [15,30)) fades the
+    // whole scene back down through the "scene-final" checkpoint (29). If
+    // that scene-level fade were not folded into the opacity gate, this
+    // pair would read as fully opaque and colliding at frame 29.
+    const revealBeat = (targetId: string) => ({
+      id: `${targetId}-reveal`,
+      targetId,
+      action: "reveal" as const,
+      startFrame: 0,
+      durationInFrames: 25,
+      params: { direction: "up" as const, distance: 0 },
+    });
+    const overlapping: Layer[] = [
+      text({
+        id: "label-a",
+        text: "AAAA",
+        frame: { x: 100, y: 400, width: 300, height: 80 },
+      }),
+      text({
+        id: "label-b",
+        text: "BBBB",
+        frame: { x: 150, y: 400, width: 300, height: 80 },
+      }),
+    ];
+    const draft = draftWithScenes([
+      {
+        layers: overlapping,
+        beats: [revealBeat("label-a"), revealBeat("label-b")],
+        startFrame: 0,
+        endFrame: 30,
+        transitionOut: {
+          type: "push-through",
+          durationInFrames: 15,
+          direction: "left",
+        },
+      },
+      { layers: [], startFrame: 30, endFrame: 60 },
+    ]);
+
+    const { report } = resolveVisualPreflight(draft);
+
+    expect(report.issues.map((issue) => issue.code)).not.toContain(
+      "TEXT_COLLISION",
+    );
+  });
+
+  it("does not introduce a false collision between separated layers during an active entry transition", () => {
+    const separated: Layer[] = [
+      text({
+        id: "label-a",
+        text: "AAAA",
+        frame: { x: 40, y: 400, width: 200, height: 80 },
+      }),
+      text({
+        id: "label-b",
+        text: "BBBB",
+        frame: { x: 300, y: 400, width: 200, height: 80 },
+      }),
+    ];
+    const draft = draftWithScenes([
+      {
+        layers: [],
+        startFrame: 0,
+        endFrame: 30,
+        transitionOut: {
+          type: "match-cut",
+          durationInFrames: 15,
+          anchor: { x: 0.5, y: 0.5 },
+        },
+      },
+      { layers: separated, startFrame: 30, endFrame: 60 },
+    ]);
+
+    const { report } = resolveVisualPreflight(draft);
+
+    expect(report.issues.map((issue) => issue.code)).not.toContain(
+      "TEXT_COLLISION",
+    );
+  });
+});
+
 describe("resolveVisualPreflight — layer issue codes", () => {
   it("flags overlapping ungrouped text layers as TEXT_COLLISION", () => {
     const layers: Layer[] = [
