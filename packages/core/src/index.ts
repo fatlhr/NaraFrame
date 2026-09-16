@@ -22,6 +22,7 @@ export type {
   IssueSeverity,
   Result,
 } from "./model/issue.js";
+export { createFakeTtsProvider } from "./production/fake-tts-provider.js";
 export {
   computeLedgerTotals,
   escalateReceipt,
@@ -34,6 +35,22 @@ export {
   settleReceipt,
   settleUnknown,
 } from "./production/ledger.js";
+export {
+  type ProductionRoute,
+  type ProductionRouteInput,
+  resolveProductionRoute,
+} from "./production/route.js";
+export {
+  type SynthesizeNarrationOutcome,
+  type SynthesizeNarrationRequest,
+  synthesizeNarration,
+} from "./production/synthesize-narration.js";
+export type {
+  TtsPhrase,
+  TtsProvider,
+  TtsSynthesisRequest,
+  TtsSynthesisResult,
+} from "./production/tts-provider.js";
 export {
   type CreatedProject,
   type CreateProjectOptions,
