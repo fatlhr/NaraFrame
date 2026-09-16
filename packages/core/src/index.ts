@@ -22,6 +22,10 @@ export type {
   IssueSeverity,
   Result,
 } from "./model/issue.js";
+export {
+  type CostReport,
+  computeCostReport,
+} from "./production/cost-report.js";
 export { createFakeTtsProvider } from "./production/fake-tts-provider.js";
 export {
   computeLedgerTotals,
