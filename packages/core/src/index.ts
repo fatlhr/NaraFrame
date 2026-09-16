@@ -23,6 +23,18 @@ export type {
   Result,
 } from "./model/issue.js";
 export {
+  computeLedgerTotals,
+  escalateReceipt,
+  type LedgerTotals,
+  latestReceiptsByOperation,
+  type ReservationRequest,
+  requestReservation,
+  retryReceipt,
+  type SettlementOutcome,
+  settleReceipt,
+  settleUnknown,
+} from "./production/ledger.js";
+export {
   type CreatedProject,
   type CreateProjectOptions,
   createProject,
@@ -47,6 +59,20 @@ export {
 } from "./schema/compiled.js";
 export type { PlanSource } from "./schema/export-schema.js";
 export { exportSchemas, validatePlanSource } from "./schema/export-schema.js";
+export type {
+  Money,
+  ProductionLedger,
+  Receipt,
+  ReceiptAuthorization,
+  ReceiptStatus,
+} from "./schema/production.js";
+export {
+  MoneySchema,
+  ProductionLedgerSchema,
+  ReceiptAuthorizationSchema,
+  ReceiptSchema,
+  ReceiptStatusSchema,
+} from "./schema/production.js";
 export type {
   LockedProfileAsset,
   ProfileLock,

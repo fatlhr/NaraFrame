@@ -276,7 +276,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M0 complete, including M0.10; M1.1 (production readiness and accounting) is next.**
+Current step: **M0 complete, including M0.10; M1.1 (production readiness and accounting) is in progress — ledger/receipt primitives landed, provider wiring and cost reporting remain.**
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -539,7 +539,7 @@ Every edit uses the same source transaction and preserves spend/receipts across 
 | Encode settings and final audio sample coverage | Not run | M1 narrated export |
 | Indonesian TTS/phrase-timing recipe and price/usage evidence | Not available as verified route | M1 narrated pilot |
 | Block prosody and partial voice replacement | Not run | M1 exit |
-| Budget/unknown-result/retry tests | Not run | Any paid pilot operation |
+| Budget/unknown-result/retry tests | M1.1 ledger primitives (`packages/core/src/schema/production.ts`, `packages/core/src/production/ledger.ts`) implemented: append-only versioned receipts per `operationId`, `requestReservation`/`settleReceipt`/`settleUnknown`/`retryReceipt`/`escalateReceipt`. Manual probe proved the exact spec scenario: budget 100/spent 40/reserved 40, a next=30 reservation is denied (`BUDGET_EXCEEDED`); a timed-out request moves to `unknown` and keeps its 40 held against budget rather than releasing it; `retryReceipt` on that `unknown` receipt is refused (`RECEIPT_NOT_RETRYABLE`, "must not be blindly resent") — resolution requires `settleUnknown` once the actual cost is confirmed; a failed operation's first retry (attempt 2) succeeds, a third attempt is refused (`ATTEMPT_LIMIT_REACHED`), and `escalateReceipt` is the only path forward; every historical receipt version (5 for that operation) remains in the append-only array after escalation, proving no version is erased. No provider wiring, cost-report publishing, or automated tests yet — those, plus the skill's prepared-media/silent-draft/narrated-route distinction and rights/subscription bookkeeping, remain open for the rest of M1.1. | M1.1 in progress |
 | Source/build crash recovery and profile rollback | Not run | M1/M2 feature gates |
 | Owner workflow, render latency, cost/reuse | Not measured | M3 exit |
 | Visual variety checks and bounded transitions | M0.10.1/2/4 implemented, tested (74 unit + 52 integration passing), and migrated onto both reference projects: `samples/krakatau-draft` and `work/lbc-benchmark/engine` each now use `push-through`/`mask-reveal`(/`match-cut` for LBC) instead of `cut` only; `SINGLE_TRANSITION_TYPE` is clear on both. Menu enforcement (`ENTRY_STYLE_NOT_PERMITTED`/`TRANSITION_NOT_PERMITTED`/`FOCUS_STYLE_NOT_PERMITTED`) verified on a probe with a restrictive `render.variety.menu`; unrestricted samples unaffected. | M0.10 complete |
