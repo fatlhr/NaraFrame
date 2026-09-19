@@ -1,5 +1,5 @@
-import { createHash } from "node:crypto";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
+import { hashValue } from "../project/hash.js";
 import type { CompiledAsset, CompiledDraft } from "../schema/compiled.js";
 import { CompiledDraftSchema } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
@@ -23,27 +23,6 @@ import { checkVoiceBindings } from "./voice-binding.js";
 export type DraftScope =
   | { type: "project" }
   | { type: "scene"; sceneId: string };
-
-const stableValue = (value: unknown): unknown => {
-  if (Array.isArray(value)) {
-    return value.map(stableValue);
-  }
-
-  if (value !== null && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>)
-        .sort(([left], [right]) => left.localeCompare(right))
-        .map(([key, nested]) => [key, stableValue(nested)]),
-    );
-  }
-
-  return value;
-};
-
-const hashValue = (value: unknown): string =>
-  createHash("sha256")
-    .update(JSON.stringify(stableValue(value)))
-    .digest("hex");
 
 const msToFrameOffset = (milliseconds: number, fps: number): number =>
   Math.round((milliseconds / 1000) * fps);

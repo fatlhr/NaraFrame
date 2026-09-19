@@ -3,9 +3,15 @@ import { fileURLToPath } from "node:url";
 import {
   compileDraft,
   createProject,
+  editProject,
   exportSchemas,
   type Issue,
   loadPlanProject,
+  readRevisionState,
+  syncWorkingCopy,
+  undoProject,
+  withProjectLock,
+  writePreviewSelection,
 } from "@naraframe/core";
 import { isVisualPreflightError } from "@naraframe/renderer-remotion";
 import {
@@ -400,6 +406,7 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
     loaded.value.root,
     compiled.value,
   );
+  const revision = await readRevisionState(loaded.value.root);
   const metadataFailed = preview.issues.some(
     (issue) => issue.severity === "error" && issue.responsible === "system",
   );
@@ -421,6 +428,15 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
         planReadiness: "valid",
         ...preview.data,
         currentSourceFingerprint: compiled.value.assemblyKey,
+        revision: {
+          ...revision,
+          state:
+            revision.currentId === null
+              ? "untracked"
+              : revision.currentId === compiled.value.sourceRevision
+                ? "in-sync"
+                : "working-copy-differs",
+        },
       },
     }),
     ...(metadataFailed
@@ -492,6 +508,21 @@ const previewCommand = async (
     error.name = "AbortError";
     throw error;
   }
+  const synced = await withProjectLock(loaded.value.root, () =>
+    syncWorkingCopy(loaded.value.root),
+  );
+  if (!synced.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("preview", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        mode: "draft",
+        issues: synced.issues,
+      }),
+    };
+  }
   console.error(
     `Rendering ${loaded.value.source.project.title}${sceneId ? ` / ${sceneId}` : ""} (${compiled.value.totalFrames} frames)...`,
   );
@@ -513,6 +544,11 @@ const previewCommand = async (
     },
   });
   process.stderr.write("\n");
+  await writePreviewSelection(
+    loaded.value.root,
+    compiled.value.sourceRevision,
+    published.buildId,
+  );
   const artifacts = {
     current: published.currentPointer,
     previewMp4: resolve(published.buildDirectory, "preview.mp4"),
@@ -547,13 +583,108 @@ const previewCommand = async (
   };
 };
 
+const editCommand = async (args: readonly string[]): Promise<Execution> => {
+  const parsed = parseArguments(args, [], ["--from", "--expect", "--summary"]);
+  if (
+    parsed.error ||
+    parsed.positionals.length !== 1 ||
+    !parsed.values.has("--from") ||
+    !parsed.values.has("--expect")
+  ) {
+    return usageFailure(
+      "edit",
+      parsed.error ??
+        "edit requires one project, --from <staging-dir>, and --expect <revision>.",
+    );
+  }
+  const root = resolve(parsed.positionals[0] ?? ".");
+  const result = await editProject({
+    root,
+    from: resolve(parsed.values.get("--from") ?? ""),
+    expect: parsed.values.get("--expect") ?? "",
+    summary:
+      parsed.values.get("--summary") ?? "Edit applied from a staging directory",
+  });
+  if (!result.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("edit", {
+        status: "failed",
+        success: false,
+        readiness: "unknown",
+        issues: result.issues,
+      }),
+    };
+  }
+  return {
+    exitCode: 0,
+    event: commonEvent("edit", {
+      readiness: "unknown",
+      sourceRevision: result.value.revisionId,
+      issues: result.issues,
+      data: {
+        parentRevision: result.value.parentId,
+        files: result.value.files,
+        capturedDirectEdits: result.value.captured,
+      },
+    }),
+    human: [
+      `Revision ${result.value.revisionId.slice(0, 12)} (from ${result.value.parentId.slice(0, 12)}): ${result.value.files.join(", ")}`,
+    ],
+  };
+};
+
+const undoCommand = async (args: readonly string[]): Promise<Execution> => {
+  const parsed = parseArguments(args, [], []);
+  if (parsed.error || parsed.positionals.length !== 1) {
+    return usageFailure(
+      "undo",
+      parsed.error ?? "undo requires exactly one project.",
+    );
+  }
+  const result = await undoProject({
+    root: resolve(parsed.positionals[0] ?? "."),
+  });
+  if (!result.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("undo", {
+        status: "failed",
+        success: false,
+        readiness: "unknown",
+        issues: result.issues,
+      }),
+    };
+  }
+  return {
+    exitCode: 0,
+    event: commonEvent("undo", {
+      readiness: "unknown",
+      sourceRevision: result.value.revisionId,
+      issues: result.issues,
+      data: {
+        fromRevision: result.value.fromRevisionId,
+        preservedInvalidCopy: result.value.preservedInvalidCopy,
+      },
+    }),
+    human: [
+      `Restored revision ${result.value.revisionId.slice(0, 12)} (was ${result.value.fromRevisionId.slice(0, 12)}); receipts and spend are unchanged.`,
+      ...(result.value.preservedInvalidCopy
+        ? [`Uncommitted files kept in ${result.value.preservedInvalidCopy}`]
+        : []),
+    ],
+  };
+};
+
 const knownCommand = (value: string | undefined): CommandName =>
   value === "doctor" ||
   value === "schema" ||
   value === "create" ||
   value === "validate" ||
   value === "status" ||
-  value === "preview"
+  value === "preview" ||
+  value === "edit" ||
+  value === "undo"
     ? value
     : "unknown";
 
@@ -568,6 +699,8 @@ const executeCommand = async (
   if (command === "validate") return validateCommand(args);
   if (command === "status") return statusCommand(args);
   if (command === "preview") return previewCommand(args, options);
+  if (command === "edit") return editCommand(args);
+  if (command === "undo") return undoCommand(args);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 

@@ -7,6 +7,8 @@ export type CommandName =
   | "validate"
   | "status"
   | "preview"
+  | "edit"
+  | "undo"
   | "unknown";
 
 export type CommandReadiness =

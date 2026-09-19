@@ -90,6 +90,20 @@ export {
   type CreateProjectOptions,
   createProject,
 } from "./project/create-project.js";
+export {
+  type SyncResult,
+  type SyncStatus,
+  syncWorkingCopy,
+} from "./revision/capture.js";
+export {
+  type EditOptions,
+  type EditResult,
+  editProject,
+} from "./revision/edit.js";
+export { withProjectLock } from "./revision/lock.js";
+export { type RevisionState, readRevisionState } from "./revision/state.js";
+export { writePreviewSelection } from "./revision/store.js";
+export { type UndoResult, undoProject } from "./revision/undo.js";
 export type { Asset, AssetManifest } from "./schema/asset.js";
 export {
   AssetManifestSchema,

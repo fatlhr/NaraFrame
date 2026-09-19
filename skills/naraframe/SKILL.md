@@ -30,4 +30,6 @@ Run commands from the NaraFrame repository root with `pnpm naraframe`. Before th
 - Stop on `success: false`. Repair agent-responsible source issues, ask the user for user-responsible choices, and surface system-responsible dependency issues.
 - Never import private package modules, write `.naraframe/compiled.json`, write preview metadata, or invent identifiers absent from the result.
 - M0 output is a labelled, muted, `draft-only` preview. Do not claim narrated, production, final, or publish-ready status.
-- Call only `doctor`, `schema`, `create`, `validate --stage plan`, `status`, and `preview --draft`; do not advertise or guess future commands.
+- Call only `doctor`, `schema`, `create`, `validate --stage plan`, `status`, `preview --draft`, `edit`, and `undo`; do not advertise or guess future commands.
+- Prefer `edit` over rewriting files in place when a change should be reviewable or undoable: put only the changed source files in a staging directory laid out like the project, read the current revision from `status` (`sourceRevision`), then run `pnpm naraframe edit <project> --from <staging-dir> --expect <sourceRevision> --summary "<what changed>" --json`. `REVISION_CONFLICT` means the project moved on: re-read `status`, re-apply the change, retry. `undo` restores the previous accepted revision without any provider call; receipts and spend are never rolled back.
+- Direct edits to the JSON files are still detected and captured as a revision before the next preview or edit; an invalid working copy is reported and left untouched.

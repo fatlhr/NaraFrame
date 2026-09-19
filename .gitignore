@@ -25,3 +25,7 @@ output/
 # Local sample projects with generated audio; too large for git
 samples/krakatau-narrated/
 samples/krakatau-draft/audio/
+
+# Revision history and locks are project-local working state
+samples/*/revisions/
+samples/*/.naraframe/
