@@ -50,6 +50,8 @@ export interface NarratedOverrides {
   requireSourcing?: boolean;
   scenes?: Scene[];
   blocks?: unknown[];
+  captionStyle?: NonNullable<PlanSource["profile"]["render"]["captions"]>;
+  captions?: PlanSource["captions"];
 }
 
 /** Two ready blocks: context (2 phrases) and mechanism, per the spec example. */
@@ -78,7 +80,9 @@ export const narratedSource = (
       version: "0.1.0",
       source: { kind: "local", identity: "probe@0.1.0" },
       direction: { text: "Probe direction.", sha256: "a".repeat(64) },
-      render,
+      render: overrides.captionStyle
+        ? { ...render, captions: overrides.captionStyle }
+        : render,
       production: {
         voiceStyleSignature: "probe",
         illustrationStyleSignature: "probe",
@@ -106,6 +110,7 @@ export const narratedSource = (
         audioAsset("voice-mechanism", SHA_B),
       ],
     },
+    ...(overrides.captions ? { captions: overrides.captions } : {}),
     narration: {
       schemaVersion: 1,
       order: ["context", "mechanism"],

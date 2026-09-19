@@ -157,3 +157,115 @@ describe("compileDraft with narration", () => {
     }
   });
 });
+
+describe("compileDraft captions", () => {
+  it("compiles one cue per phrase with frame ranges and default style scaled to the draft", () => {
+    const result = compileDraft(narratedSource());
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.captions?.style).toEqual({
+      fontSize: 22,
+      maxLines: 2,
+      bottom: 12,
+      side: 24,
+    });
+    expect(result.value.captions?.cues).toEqual([
+      {
+        id: "context/c1",
+        text: "Krakatau memiliki sejarah.",
+        startFrame: 3,
+        endFrame: 30,
+      },
+      {
+        id: "context/c2",
+        text: "Erupsinya panjang.",
+        startFrame: 36,
+        endFrame: 66,
+      },
+      {
+        id: "mechanism/m1",
+        text: "Tekanan magma meningkat.",
+        startFrame: 84,
+        endFrame: 132,
+      },
+    ]);
+  });
+
+  it("uses the profile's caption style and adds the safe zone", () => {
+    const result = compileDraft(
+      narratedSource({
+        captionStyle: { fontSize: 60, maxLines: 3, bottomOffset: 100 },
+      }),
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.captions?.style).toMatchObject({
+      fontSize: 30,
+      maxLines: 3,
+      bottom: 50,
+    });
+  });
+
+  it("shows an attributed display correction while leaving the spoken text alone", () => {
+    const result = compileDraft(
+      narratedSource({
+        captions: {
+          schemaVersion: 1,
+          corrections: [
+            {
+              id: "fix1",
+              blockId: "context",
+              phraseId: "c2",
+              displayText: "Erupsinya sangat panjang.",
+              reason: "clearer wording",
+            },
+          ],
+        },
+      }),
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.captions?.cues[1]?.text).toBe(
+      "Erupsinya sangat panjang.",
+    );
+  });
+
+  it("rejects a correction that targets no phrase", () => {
+    const result = compileDraft(
+      narratedSource({
+        captions: {
+          schemaVersion: 1,
+          corrections: [
+            {
+              id: "x",
+              blockId: "context",
+              phraseId: "zz",
+              displayText: "a",
+              reason: "r",
+            },
+          ],
+        },
+      }),
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(codes(result.issues)).toContain("CAPTION_CORRECTION_TARGET_UNKNOWN");
+  });
+
+  it("emits no captions without narration, or for a scene-scoped preview", () => {
+    const { narration: _omit, ...silent } = narratedSource({
+      scenes: [narratedScene("s1")],
+    });
+    const withoutNarration = compileDraft(silent);
+    expect(withoutNarration.ok).toBe(true);
+    if (withoutNarration.ok)
+      expect(withoutNarration.value.captions).toBeUndefined();
+
+    const scoped = compileDraft(narratedSource(), {
+      type: "scene",
+      sceneId: "s2",
+    });
+    expect(scoped.ok).toBe(true);
+    if (scoped.ok) expect(scoped.value.captions).toBeUndefined();
+  });
+});

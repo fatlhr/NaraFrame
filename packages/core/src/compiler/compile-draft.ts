@@ -12,6 +12,7 @@ import type {
   Scene,
   Transition,
 } from "../schema/scene.js";
+import { deriveCaptionCues } from "./captions.js";
 import { checkContrast } from "./contrast.js";
 import { resolveNarrationTimeline } from "./narration-timeline.js";
 import { checkProvenance } from "./provenance.js";
@@ -604,6 +605,7 @@ export const compileDraft = (
     ? T
     : never;
   let narrationClips: CompiledDraft["narration"];
+  let compiledCaptions: CompiledDraft["captions"];
   if (hasNarration && source.narration) {
     narrationTimeline = resolveNarrationTimeline(source.narration);
     if (narrationTimeline.totalDurationMs === null) {
@@ -650,6 +652,35 @@ export const compileDraft = (
       } else {
         partitionedScenes =
           partitioned.value as unknown as typeof partitionedScenes;
+        const cues = deriveCaptionCues(narrationTimeline, source.captions);
+        if (!cues.ok) {
+          issues.push(...cues.issues);
+        } else if (requestedScope.type === "project") {
+          const captionStyle = source.profile.render.captions;
+          const safe = source.profile.render.safeZone;
+          compiledCaptions = {
+            style: {
+              fontSize: Math.round((captionStyle?.fontSize ?? 44) * scaleX),
+              maxLines: captionStyle?.maxLines ?? 2,
+              bottom: Math.round(
+                (safe.bottom + (captionStyle?.bottomOffset ?? 24)) * scaleY,
+              ),
+              side: Math.round((safe.left + 48) * scaleX),
+            },
+            cues: cues.value.map((cue) => {
+              const startFrame = Math.round((cue.startMs * fps) / 1000);
+              return {
+                id: cue.id,
+                text: cue.text,
+                startFrame,
+                endFrame: Math.max(
+                  startFrame + 1,
+                  Math.round((cue.endMs * fps) / 1000),
+                ),
+              };
+            }),
+          };
+        }
         // Build audio clips for renderer: each ready block at its global start
         narrationClips = {
           totalDurationMs: narrationTimeline.totalDurationMs,
@@ -937,6 +968,7 @@ export const compileDraft = (
     fonts: compiledFonts(source),
     scenes,
     ...(narrationClips ? { narration: narrationClips } : {}),
+    ...(compiledCaptions ? { captions: compiledCaptions } : {}),
   };
   const parsed = CompiledDraftSchema.safeParse(draftCandidate);
 

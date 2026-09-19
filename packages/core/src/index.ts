@@ -96,6 +96,7 @@ export {
 export type {
   CompiledAsset,
   CompiledBeat,
+  CompiledCaptions,
   CompiledDraft,
   CompiledFont,
   CompiledTransition,

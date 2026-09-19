@@ -115,6 +115,15 @@ export const RenderTokensSchema = z
       })
       .strict(),
     appearance: AppearanceTokensSchema.optional(),
+    /** Caption style in design pixels; unset fields use renderer defaults. */
+    captions: z
+      .object({
+        fontSize: z.number().int().min(16).max(96).optional(),
+        maxLines: z.number().int().min(1).max(4).optional(),
+        bottomOffset: z.number().int().nonnegative().optional(),
+      })
+      .strict()
+      .optional(),
     variety: VarietyPolicySchema.optional(),
     safeZone: z
       .object({

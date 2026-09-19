@@ -183,6 +183,29 @@ const CompiledAudioClipSchema = z
   })
   .strict();
 
+const CompiledCaptionsSchema = z
+  .object({
+    style: z
+      .object({
+        fontSize: z.number().positive(),
+        maxLines: PositiveIntegerSchema,
+        bottom: z.number().nonnegative(),
+        side: z.number().nonnegative(),
+      })
+      .strict(),
+    cues: z.array(
+      z
+        .object({
+          id: z.string().min(1),
+          text: z.string().min(1),
+          startFrame: NonNegativeIntegerSchema,
+          endFrame: PositiveIntegerSchema,
+        })
+        .strict(),
+    ),
+  })
+  .strict();
+
 export const CompiledDraftSchema = z
   .object({
     schemaVersion: SchemaVersionSchema,
@@ -212,6 +235,7 @@ export const CompiledDraftSchema = z
         clips: z.array(CompiledAudioClipSchema),
       })
       .optional(),
+    captions: CompiledCaptionsSchema.optional(),
   })
   .strict()
   .superRefine((draft, context) => {
@@ -230,5 +254,6 @@ export type CompiledAsset = z.infer<typeof CompiledAssetSchema>;
 export type CompiledBeat = z.infer<typeof CompiledBeatSchema>;
 export type CompiledFont = z.infer<typeof CompiledFontSchema>;
 export type CompiledTransition = z.infer<typeof CompiledTransitionSchema>;
+export type CompiledCaptions = z.infer<typeof CompiledCaptionsSchema>;
 export type CompiledAudioClip = z.infer<typeof CompiledAudioClipSchema>;
 export type CompiledDraft = z.infer<typeof CompiledDraftSchema>;

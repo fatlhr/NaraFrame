@@ -6,6 +6,7 @@ import {
   sortIssues,
 } from "../model/issue.js";
 import { type AssetManifest, AssetManifestSchema } from "./asset.js";
+import { type Captions, CaptionsSchema } from "./captions.js";
 import { CompiledDraftSchema } from "./compiled.js";
 import { type Narration, NarrationSchema } from "./narration.js";
 import { type ProfileLock, ProfileLockSchema } from "./profile.js";
@@ -18,6 +19,7 @@ export interface PlanSource {
   scenes: Scenes;
   assets: AssetManifest;
   narration?: Narration;
+  captions?: Captions;
 }
 
 const artifacts = {
@@ -32,6 +34,8 @@ const schemaEntries = [
   ["ProfileLock", ProfileLockSchema],
   ["Scenes", ScenesSchema],
   ["AssetManifest", AssetManifestSchema],
+  ["Narration", NarrationSchema],
+  ["Captions", CaptionsSchema],
   ["CompiledDraft", CompiledDraftSchema],
 ] as const;
 
@@ -101,6 +105,10 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
   const profileResult = ProfileLockSchema.safeParse(container.profile);
   const scenesResult = ScenesSchema.safeParse(container.scenes);
   const assetsResult = AssetManifestSchema.safeParse(container.assets);
+  const captionsResult =
+    container.captions === undefined
+      ? { success: true as const, data: undefined as Captions | undefined }
+      : CaptionsSchema.safeParse(container.captions);
   const narrationResult =
     container.narration === undefined
       ? { success: true as const, data: undefined as Narration | undefined }
@@ -118,6 +126,12 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
     ...(assetsResult.success
       ? []
       : issuesFromZodError(assetsResult.error, artifacts.assets)),
+    ...(!captionsResult.success
+      ? issuesFromZodError(
+          (captionsResult as { error: z.ZodError }).error,
+          "captions.json",
+        )
+      : []),
     ...(!narrationResult.success
       ? issuesFromZodError(
           (narrationResult as { error: z.ZodError }).error,
@@ -131,7 +145,8 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
     !profileResult.success ||
     !scenesResult.success ||
     !assetsResult.success ||
-    !narrationResult.success
+    !narrationResult.success ||
+    !captionsResult.success
   ) {
     return { ok: false, issues: sortIssues(schemaIssues) };
   }
@@ -271,6 +286,7 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
       scenes,
       assets,
       ...(narration ? { narration } : {}),
+      ...(captionsResult.data ? { captions: captionsResult.data } : {}),
     },
     issues: sortedIssues,
   };

@@ -8,6 +8,7 @@ import {
   staticFile,
   useCurrentFrame,
 } from "remotion";
+import { CAPTION_LINE_HEIGHT, captionPadding } from "./captions.js";
 import {
   groupScreenTransformFor,
   motionStateFor,
@@ -395,6 +396,53 @@ const TransitionFrame = ({
   );
 };
 
+const CaptionLayer = ({ draft }: { draft: CompiledDraft }) => {
+  const captions = draft.captions;
+  if (!captions) return null;
+  const { style } = captions;
+  const render = draft.profile.render;
+  const padding = captionPadding(style.fontSize);
+  return (
+    <>
+      {captions.cues.map((cue) => (
+        <Sequence
+          durationInFrames={cue.endFrame - cue.startFrame}
+          from={cue.startFrame}
+          key={cue.id}
+          name={`caption-${cue.id}`}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: style.side,
+              right: style.side,
+              bottom: style.bottom,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                padding: `${padding.y}px ${padding.x}px`,
+                borderRadius: Math.round(style.fontSize * 0.35),
+                backgroundColor: "rgba(0, 0, 0, 0.62)",
+                color: render.palette.text,
+                fontFamily: render.typography.fontFamily,
+                fontSize: style.fontSize,
+                fontWeight: render.typography.headingWeight,
+                lineHeight: CAPTION_LINE_HEIGHT,
+                textAlign: "center",
+              }}
+            >
+              {cue.text}
+            </div>
+          </div>
+        </Sequence>
+      ))}
+    </>
+  );
+};
+
 export const DraftVideo = (draft: CompiledDraft) => (
   <AbsoluteFill
     style={{
@@ -415,6 +463,7 @@ export const DraftVideo = (draft: CompiledDraft) => (
         </TransitionFrame>
       </Sequence>
     ))}
+    <CaptionLayer draft={draft} />
     {draft.narration?.clips.map((clip) => {
       const asset = draft.assets[clip.assetId];
       if (!asset || asset.kind !== "mp3") return null;
