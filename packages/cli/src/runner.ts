@@ -534,7 +534,7 @@ const previewCommand = async (
       issues: published.issues,
       data: {
         label: compiled.value.label,
-        muted: true,
+        muted: !compiled.value.narration,
         timelineScope: compiled.value.timelineScope,
         manifestSha256: published.manifestSha256,
       },
@@ -542,7 +542,7 @@ const previewCommand = async (
     human: [
       `Preview build ready: ${published.buildDirectory}`,
       `Current pointer: ${published.currentPointer}`,
-      `${published.rendered.width}x${published.rendered.height} @ ${published.rendered.fps}fps, ${(published.rendered.durationInFrames / published.rendered.fps).toFixed(1)}s, draft only, no audio`,
+      `${published.rendered.width}x${published.rendered.height} @ ${published.rendered.fps}fps, ${(published.rendered.durationInFrames / published.rendered.fps).toFixed(1)}s, ${compiled.value.narration ? "narrated" : "draft only, no audio"}`,
     ],
   };
 };

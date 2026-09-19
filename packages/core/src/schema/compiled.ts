@@ -3,6 +3,7 @@ import {
   IdSchema,
   NonNegativeIntegerSchema,
   PositiveIntegerSchema,
+  RelativeAudioPathSchema,
   RelativeFontPathSchema,
   RelativePngPathSchema,
   SchemaVersionSchema,
@@ -56,6 +57,13 @@ const CompiledAssetSchema = z.discriminatedUnion("kind", [
     .object({
       kind: z.literal("png"),
       publicPath: RelativePngPathSchema,
+      sha256: Sha256Schema,
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal("mp3"),
+      publicPath: RelativeAudioPathSchema,
       sha256: Sha256Schema,
     })
     .strict(),
@@ -164,6 +172,17 @@ const CompiledSceneSchema = z
     path: ["endFrame"],
   });
 
+const CompiledAudioClipSchema = z
+  .object({
+    blockId: IdSchema,
+    assetId: IdSchema,
+    startFrame: NonNegativeIntegerSchema,
+    durationInFrames: PositiveIntegerSchema,
+    startMs: NonNegativeIntegerSchema,
+    durationMs: PositiveIntegerSchema,
+  })
+  .strict();
+
 export const CompiledDraftSchema = z
   .object({
     schemaVersion: SchemaVersionSchema,
@@ -187,6 +206,12 @@ export const CompiledDraftSchema = z
     assets: z.record(IdSchema, CompiledAssetSchema),
     fonts: z.array(CompiledFontSchema),
     scenes: z.array(CompiledSceneSchema).min(1),
+    narration: z
+      .object({
+        totalDurationMs: PositiveIntegerSchema,
+        clips: z.array(CompiledAudioClipSchema),
+      })
+      .optional(),
   })
   .strict()
   .superRefine((draft, context) => {
@@ -205,4 +230,5 @@ export type CompiledAsset = z.infer<typeof CompiledAssetSchema>;
 export type CompiledBeat = z.infer<typeof CompiledBeatSchema>;
 export type CompiledFont = z.infer<typeof CompiledFontSchema>;
 export type CompiledTransition = z.infer<typeof CompiledTransitionSchema>;
+export type CompiledAudioClip = z.infer<typeof CompiledAudioClipSchema>;
 export type CompiledDraft = z.infer<typeof CompiledDraftSchema>;

@@ -167,17 +167,24 @@ export const loadPlanProject = async (
   projectRoot: string,
 ): Promise<Result<LoadedPlanProject>> => {
   const root = resolve(projectRoot);
-  const [project, profile, scenes, assets] = await Promise.all([
+  const [project, profile, scenes, assets, narration] = await Promise.all([
     readJson(root, sourceFiles.project),
     readJson(root, sourceFiles.profile),
     readJson(root, sourceFiles.scenes),
     readJson(root, sourceFiles.assets),
+    readJson(root, "narration.json").then((result) =>
+      result.ok
+        ? result
+        : result.issues[0]?.code === "SOURCE_MISSING"
+          ? { ok: true as const, value: undefined, issues: [] as Issue[] }
+          : result,
+    ),
   ]);
-  const issues = [project, profile, scenes, assets].flatMap((result) =>
-    result.ok ? [] : result.issues,
+  const issues = [project, profile, scenes, assets, narration].flatMap(
+    (result) => (result.ok ? [] : result.issues),
   );
 
-  if (!project.ok || !profile.ok || !scenes.ok || !assets.ok) {
+  if (!project.ok || !profile.ok || !scenes.ok || !assets.ok || !narration.ok) {
     return { ok: false, issues };
   }
 
@@ -186,6 +193,7 @@ export const loadPlanProject = async (
     profile: profile.value,
     scenes: scenes.value,
     assets: assets.value,
+    ...(narration.value !== undefined ? { narration: narration.value } : {}),
   });
 
   if (!validated.ok) {

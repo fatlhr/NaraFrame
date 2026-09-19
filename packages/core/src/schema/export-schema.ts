@@ -7,6 +7,7 @@ import {
 } from "../model/issue.js";
 import { type AssetManifest, AssetManifestSchema } from "./asset.js";
 import { CompiledDraftSchema } from "./compiled.js";
+import { type Narration, NarrationSchema } from "./narration.js";
 import { type ProfileLock, ProfileLockSchema } from "./profile.js";
 import { type ProjectConfig, ProjectConfigSchema } from "./project.js";
 import { type Scenes, ScenesSchema } from "./scene.js";
@@ -16,6 +17,7 @@ export interface PlanSource {
   profile: ProfileLock;
   scenes: Scenes;
   assets: AssetManifest;
+  narration?: Narration;
 }
 
 const artifacts = {
@@ -99,6 +101,10 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
   const profileResult = ProfileLockSchema.safeParse(container.profile);
   const scenesResult = ScenesSchema.safeParse(container.scenes);
   const assetsResult = AssetManifestSchema.safeParse(container.assets);
+  const narrationResult =
+    container.narration === undefined
+      ? { success: true as const, data: undefined as Narration | undefined }
+      : NarrationSchema.safeParse(container.narration);
   const schemaIssues = [
     ...(projectResult.success
       ? []
@@ -112,13 +118,20 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
     ...(assetsResult.success
       ? []
       : issuesFromZodError(assetsResult.error, artifacts.assets)),
+    ...(!narrationResult.success
+      ? issuesFromZodError(
+          (narrationResult as { error: z.ZodError }).error,
+          "narration.json",
+        )
+      : []),
   ];
 
   if (
     !projectResult.success ||
     !profileResult.success ||
     !scenesResult.success ||
-    !assetsResult.success
+    !assetsResult.success ||
+    !narrationResult.success
   ) {
     return { ok: false, issues: sortIssues(schemaIssues) };
   }
@@ -127,6 +140,7 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
   const profile = profileResult.data;
   const scenes = scenesResult.data;
   const assets = assetsResult.data;
+  const narration = narrationResult.data;
   const issues: Issue[] = [];
 
   if (project.profile.id !== profile.id) {
@@ -163,6 +177,54 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
       );
     }
   });
+
+  if (narration) {
+    const blockIds = new Set(narration.blocks.map((block) => block.id));
+    narration.blocks.forEach((block, blockIndex) => {
+      if ("audioAssetId" in block) {
+        if (!assetIds.has(block.audioAssetId)) {
+          issues.push(
+            customIssue(
+              "ASSET_UNDECLARED",
+              "narration.json",
+              `/blocks/${blockIndex}/audioAssetId`,
+              `Audio asset ${block.audioAssetId} is not declared in the asset manifest.`,
+            ),
+          );
+        }
+      }
+    });
+    scenes.scenes.forEach((scene, sceneIndex) => {
+      if (!scene.narration) return;
+      if (!blockIds.has(scene.narration.blockId)) {
+        issues.push(
+          customIssue(
+            "NARRATION_BLOCK_UNKNOWN",
+            "scenes.json",
+            `/scenes/${sceneIndex}/narration/blockId`,
+            `Scene ${scene.id} references unknown block ${scene.narration.blockId}.`,
+          ),
+        );
+      } else if (scene.narration.phraseId) {
+        const block = narration.blocks.find(
+          (candidate) => candidate.id === scene.narration?.blockId,
+        );
+        const phrases = block && "phrases" in block ? block.phrases : undefined;
+        if (
+          !phrases?.some((phrase) => phrase.id === scene.narration?.phraseId)
+        ) {
+          issues.push(
+            customIssue(
+              "NARRATION_PHRASE_UNKNOWN",
+              "scenes.json",
+              `/scenes/${sceneIndex}/narration/phraseId`,
+              `Block ${scene.narration.blockId} has no phrase ${scene.narration.phraseId}.`,
+            ),
+          );
+        }
+      }
+    });
+  }
 
   let totalDurationMs = 0;
   let safetyIssueAdded = false;
@@ -203,7 +265,13 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
 
   return {
     ok: true,
-    value: { project, profile, scenes, assets },
+    value: {
+      project,
+      profile,
+      scenes,
+      assets,
+      ...(narration ? { narration } : {}),
+    },
     issues: sortedIssues,
   };
 };

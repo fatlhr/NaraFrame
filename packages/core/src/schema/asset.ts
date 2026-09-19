@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   IdSchema,
+  RelativeAudioPathSchema,
   RelativePngPathSchema,
   SchemaVersionSchema,
   Sha256Schema,
@@ -14,7 +15,7 @@ const AssetOriginTypeSchema = z.enum([
   "bundled",
 ]);
 
-const PlannedAssetSchema = z
+const PlannedPngAssetSchema = z
   .object({
     id: IdSchema,
     status: z.literal("planned"),
@@ -24,7 +25,22 @@ const PlannedAssetSchema = z
   })
   .strict();
 
-const ReadyAssetSchema = z
+const PlannedAudioAssetSchema = z
+  .object({
+    id: IdSchema,
+    status: z.literal("planned"),
+    kind: z.enum(["mp3", "wav", "m4a"]),
+    purpose: z.string().trim().min(1),
+    intendedOrigin: AssetOriginTypeSchema,
+  })
+  .strict();
+
+const PlannedAssetSchema = z.union([
+  PlannedPngAssetSchema,
+  PlannedAudioAssetSchema,
+]);
+
+const ReadyPngAssetSchema = z
   .object({
     id: IdSchema,
     status: z.literal("ready"),
@@ -41,10 +57,26 @@ const ReadyAssetSchema = z
   })
   .strict();
 
-export const AssetSchema = z.discriminatedUnion("status", [
-  PlannedAssetSchema,
-  ReadyAssetSchema,
-]);
+const ReadyAudioAssetSchema = z
+  .object({
+    id: IdSchema,
+    status: z.literal("ready"),
+    kind: z.enum(["mp3", "wav", "m4a"]),
+    path: RelativeAudioPathSchema,
+    sha256: Sha256Schema,
+    origin: z
+      .object({
+        type: AssetOriginTypeSchema,
+        source: z.string().trim().min(1).optional(),
+        license: z.string().trim().min(1).optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
+const ReadyAssetSchema = z.union([ReadyPngAssetSchema, ReadyAudioAssetSchema]);
+
+export const AssetSchema = z.union([PlannedAssetSchema, ReadyAssetSchema]);
 
 export const AssetManifestSchema = z
   .object({

@@ -21,3 +21,7 @@ output/
 .env.*
 !.env.example
 .DS_Store
+
+# Local sample projects with generated audio; too large for git
+samples/krakatau-narrated/
+samples/krakatau-draft/audio/

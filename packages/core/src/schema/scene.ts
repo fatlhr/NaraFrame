@@ -285,6 +285,13 @@ export const TransitionSchema = z.discriminatedUnion("type", [
     .strict(),
 ]);
 
+export const SceneNarrationSchema = z
+  .object({
+    blockId: IdSchema,
+    phraseId: IdSchema.optional(),
+  })
+  .strict();
+
 export const SceneSchema = z
   .object({
     id: IdSchema,
@@ -293,6 +300,7 @@ export const SceneSchema = z
     visual: SceneVisualSchema,
     beats: z.array(BeatSchema),
     transition: TransitionSchema,
+    narration: SceneNarrationSchema.optional(),
   })
   .strict();
 
@@ -449,5 +457,6 @@ export type Layer = z.infer<typeof LayerSchema>;
 export type Beat = z.infer<typeof BeatSchema>;
 export type Transition = z.infer<typeof TransitionSchema>;
 export type SceneVisual = z.infer<typeof SceneVisualSchema>;
+export type SceneNarration = z.infer<typeof SceneNarrationSchema>;
 export type Scene = z.infer<typeof SceneSchema>;
 export type Scenes = z.infer<typeof ScenesSchema>;

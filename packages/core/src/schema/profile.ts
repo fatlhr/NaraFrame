@@ -141,6 +141,7 @@ export const ProductionProfileSchema = z
     illustrationStyleSignature: z.string().trim().min(1),
     timing: z.object({ wordLevelRequired: z.boolean() }).strict(),
     assetPolicy: z.object({ allowPlannedInDraft: z.boolean() }).strict(),
+    requireSourcing: z.boolean().optional(),
   })
   .strict();
 

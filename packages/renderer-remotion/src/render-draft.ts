@@ -167,6 +167,7 @@ export const renderDraft = async ({
   const cancellation = makeCancelSignal();
   const onAbort = () => cancellation.cancel();
   signal?.addEventListener("abort", onAbort, { once: true });
+  const hasNarration = Boolean(preflight.draft.narration);
   try {
     await renderMedia({
       serveUrl,
@@ -175,7 +176,7 @@ export const renderDraft = async ({
       outputLocation: outputPath,
       browserExecutable,
       codec: "h264",
-      muted: true,
+      muted: !hasNarration,
       overwrite: true,
       logLevel: "warn",
       cancelSignal: cancellation.cancelSignal,

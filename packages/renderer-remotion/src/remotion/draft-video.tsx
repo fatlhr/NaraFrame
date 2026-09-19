@@ -2,6 +2,7 @@ import type { CompiledDraft, Layer } from "@naraframe/core";
 import type { CSSProperties, ReactNode } from "react";
 import {
   AbsoluteFill,
+  Audio,
   Img,
   Sequence,
   staticFile,
@@ -69,19 +70,21 @@ const AssetView = ({
   focalPoint?: { x: number; y: number };
 }) => {
   const asset = draft.assets[assetId];
-  return asset?.kind === "png" ? (
-    <Img
-      src={staticFile(asset.publicPath)}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: fit,
-        objectPosition: `${focalPoint.x * 100}% ${focalPoint.y * 100}%`,
-      }}
-    />
-  ) : (
-    <Placeholder label={asset?.label ?? assetId} />
-  );
+  if (asset?.kind === "png") {
+    return (
+      <Img
+        src={staticFile(asset.publicPath)}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: fit,
+          objectPosition: `${focalPoint.x * 100}% ${focalPoint.y * 100}%`,
+        }}
+      />
+    );
+  }
+  const label = asset?.kind === "placeholder" ? asset.label : assetId;
+  return <Placeholder label={label} />;
 };
 
 const LayerView = ({
@@ -412,6 +415,20 @@ export const DraftVideo = (draft: CompiledDraft) => (
         </TransitionFrame>
       </Sequence>
     ))}
+    {draft.narration?.clips.map((clip) => {
+      const asset = draft.assets[clip.assetId];
+      if (!asset || asset.kind !== "mp3") return null;
+      return (
+        <Sequence
+          key={clip.blockId}
+          from={clip.startFrame}
+          durationInFrames={clip.durationInFrames}
+          name={`audio-${clip.blockId}`}
+        >
+          <Audio src={staticFile(asset.publicPath)} />
+        </Sequence>
+      );
+    })}
     <div
       style={{
         position: "absolute",
