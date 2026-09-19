@@ -1,14 +1,23 @@
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  type Approval,
+  type CompiledDraft,
+  checkProductionReadiness,
   compileDraft,
+  computeCostReport,
   computeReuse,
   createProject,
   editProject,
   exportSchemas,
   type Issue,
+  type LoadedPlanProject,
   loadPlanProject,
+  readApprovals,
+  readProductionLedger,
   readRevisionState,
+  recordApproval,
   syncWorkingCopy,
   undoProject,
   withProjectLock,
@@ -24,6 +33,11 @@ import {
   usageIssue,
 } from "./command-result.js";
 import { runDoctorChecks } from "./doctor.js";
+import {
+  preflightNarrationAudio,
+  publishFinalBuild,
+  readCurrentOutput,
+} from "./final-build.js";
 import { publishPreviewBuild } from "./preview-build.js";
 import { readCurrentPreviewStatus } from "./preview-status.js";
 
@@ -298,15 +312,16 @@ const createCommand = async (args: readonly string[]): Promise<Execution> => {
 
 const validateCommand = async (args: readonly string[]): Promise<Execution> => {
   const parsed = parseArguments(args, [], ["--stage"]);
+  const stage = parsed.values.get("--stage");
   if (
     parsed.error ||
     parsed.positionals.length > 1 ||
-    parsed.values.get("--stage") !== "plan"
+    (stage !== "plan" && stage !== "production")
   ) {
     return usageFailure(
       "validate",
       parsed.error ??
-        "validate accepts at most one project and requires --stage plan in M0.",
+        "validate accepts at most one project and requires --stage plan or --stage production.",
     );
   }
   const projectPath = parsed.positionals[0] ?? ".";
@@ -323,6 +338,26 @@ const validateCommand = async (args: readonly string[]): Promise<Execution> => {
         issues: loaded.issues,
         data: { stage: "plan" },
       }),
+    };
+  }
+  if (stage === "production") {
+    const checks = await runProductionChecks(loaded.value);
+    return {
+      exitCode: checks.ok ? 0 : 1,
+      event: commonEvent("validate", {
+        status: checks.ok ? "completed" : "failed",
+        success: checks.ok,
+        readiness: checks.ok ? "ready" : "not-ready",
+        mode: "final",
+        scope: { type: "project" },
+        sourceRevision: checks.draft?.sourceRevision ?? null,
+        fingerprint: checks.final?.assemblyKey ?? null,
+        issues: [...loaded.issues, ...checks.issues],
+        data: { stage: "production" },
+      }),
+      ...(checks.ok
+        ? { human: ["Production checks passed: ready for a reviewed export."] }
+        : {}),
     };
   }
   const compiled = compileDraft(loaded.value.source);
@@ -408,6 +443,11 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
     compiled.value,
   );
   const revision = await readRevisionState(loaded.value.root);
+  const output = await readCurrentOutput(loaded.value.root);
+  const approvals = await readApprovals(
+    loaded.value.root,
+    compiled.value.sourceRevision,
+  );
   const reuse =
     revision.currentId && revision.parentId
       ? await computeReuse(loaded.value.root, revision.currentId)
@@ -433,6 +473,16 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
         planReadiness: "valid",
         ...preview.data,
         currentSourceFingerprint: compiled.value.assemblyKey,
+        output: output
+          ? {
+              buildId: output.buildId,
+              state:
+                output.sourceRevision === compiled.value.sourceRevision
+                  ? "current"
+                  : "stale",
+            }
+          : { buildId: null, state: "none" },
+        approval: approvals.at(-1) ?? null,
         revision: {
           ...revision,
           reuse: reuse?.ok ? reuse.value : null,
@@ -689,6 +739,248 @@ const undoCommand = async (args: readonly string[]): Promise<Execution> => {
   };
 };
 
+interface ProductionChecks {
+  ok: boolean;
+  issues: Issue[];
+  draft?: CompiledDraft;
+  final?: CompiledDraft;
+}
+
+/** Plan compile, final compile, production readiness, and the audio preflight. */
+const runProductionChecks = async (
+  loaded: LoadedPlanProject,
+): Promise<ProductionChecks> => {
+  const draft = compileDraft(loaded.source);
+  const final = compileDraft(
+    loaded.source,
+    { type: "project" },
+    { mode: "final" },
+  );
+  const issues: Issue[] = [...draft.issues, ...final.issues];
+  if (!draft.ok || !final.ok) return { ok: false, issues };
+  issues.push(
+    ...checkProductionReadiness(loaded.source, final.value, final.issues),
+  );
+  issues.push(...(await preflightNarrationAudio(loaded.root, final.value)));
+  const ok = !issues.some((issue) => issue.severity === "error");
+  return { ok, issues, draft: draft.value, final: final.value };
+};
+
+const renderCommand = async (
+  args: readonly string[],
+  options: RunCliOptions,
+): Promise<Execution> => {
+  const parsed = parseArguments(
+    args,
+    ["--autonomous"],
+    ["--approve-preview", "--authorized-by", "--note"],
+  );
+  const reviewed = parsed.values.get("--approve-preview");
+  const autonomous = parsed.flags.has("--autonomous");
+  const authorizedBy = parsed.values.get("--authorized-by");
+  if (
+    parsed.error ||
+    parsed.positionals.length > 1 ||
+    (reviewed === undefined) === !autonomous ||
+    (autonomous && !authorizedBy) ||
+    (!autonomous && (authorizedBy || parsed.values.has("--note")))
+  ) {
+    return usageFailure(
+      "render",
+      parsed.error ??
+        "render needs exactly one approval: --approve-preview <build-id> for a preview you reviewed, or --autonomous --authorized-by <name> when the owner explicitly authorised export without review.",
+    );
+  }
+
+  const loaded = await loadPlanProject(parsed.positionals[0] ?? ".");
+  if (!loaded.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("render", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        mode: "final",
+        issues: loaded.issues,
+      }),
+    };
+  }
+  const synced = await withProjectLock(loaded.value.root, () =>
+    syncWorkingCopy(loaded.value.root),
+  );
+  if (!synced.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("render", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        mode: "final",
+        issues: synced.issues,
+      }),
+    };
+  }
+
+  const checks = await runProductionChecks(loaded.value);
+  if (!checks.ok || !checks.draft || !checks.final) {
+    return {
+      exitCode: 1,
+      event: commonEvent("render", {
+        status: "failed",
+        success: false,
+        readiness: "not-ready",
+        mode: "final",
+        sourceRevision: synced.value.revisionId,
+        issues: checks.issues,
+      }),
+    };
+  }
+
+  const approvalIssues: Issue[] = [];
+  const fail = (code: string, message: string, suggestion: string): void => {
+    approvalIssues.push({
+      code,
+      severity: "error",
+      responsible: "user",
+      artifact: "preview",
+      path: "/",
+      message,
+      suggestion,
+    });
+  };
+  if (reviewed !== undefined) {
+    const manifestPath = resolve(
+      loaded.value.root,
+      "preview",
+      "builds",
+      reviewed,
+      "manifest.json",
+    );
+    let manifest: Record<string, unknown> | null = null;
+    try {
+      manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<
+        string,
+        unknown
+      >;
+    } catch {
+      manifest = null;
+    }
+    const render = (manifest?.render ?? {}) as Record<string, unknown>;
+    const scope = (manifest?.scope ?? {}) as Record<string, unknown>;
+    if (!manifest) {
+      fail(
+        "APPROVAL_PREVIEW_UNKNOWN",
+        `Preview build ${reviewed} does not exist.`,
+        "Use a build id reported by preview or status.",
+      );
+    } else if (
+      manifest.sourceRevision !== checks.draft.sourceRevision ||
+      manifest.assemblyKey !== checks.draft.assemblyKey ||
+      scope.type !== "project"
+    ) {
+      fail(
+        "APPROVAL_PREVIEW_STALE",
+        `Preview build ${reviewed} is not a full preview of the current source, so its review does not carry over.`,
+        "Run preview --draft on the current source, review it, and approve that build.",
+      );
+    } else if (render.audio !== "aac") {
+      fail(
+        "APPROVAL_PREVIEW_SILENT",
+        `Preview build ${reviewed} has no narration audio.`,
+        "Review a narrated preview before exporting.",
+      );
+    }
+  }
+  if (approvalIssues.length > 0) {
+    return {
+      exitCode: 1,
+      event: commonEvent("render", {
+        status: "failed",
+        success: false,
+        readiness: "not-ready",
+        mode: "final",
+        sourceRevision: checks.draft.sourceRevision,
+        issues: approvalIssues,
+      }),
+    };
+  }
+
+  const approval: Approval = await recordApproval(loaded.value.root, {
+    sourceRevision: checks.draft.sourceRevision,
+    assemblyKey: checks.draft.assemblyKey,
+    scope: { type: "project" },
+    previewBuildId: reviewed ?? null,
+    autonomy: autonomous
+      ? {
+          authorizedBy: authorizedBy ?? "",
+          ...(parsed.values.get("--note")
+            ? { note: parsed.values.get("--note") ?? "" }
+            : {}),
+        }
+      : null,
+    approvedAt: new Date().toISOString(),
+  });
+
+  const ledger = await readProductionLedger(loaded.value.root);
+  const { signal, onPreviewRenameDispatched } = options;
+  console.error(
+    `Exporting ${loaded.value.source.project.title} (${checks.final.width}x${checks.final.height}, ${checks.final.totalFrames} frames)...`,
+  );
+  let lastReported = -1;
+  const published = await publishFinalBuild({
+    projectRoot: loaded.value.root,
+    draft: checks.final,
+    approval,
+    issues: checks.issues,
+    cost: ledger.ok && ledger.value ? computeCostReport(ledger.value) : null,
+    ...(signal ? { signal } : {}),
+    onProgress: (progress) => {
+      const percent = Math.floor(progress * 100);
+      if (percent >= lastReported + 10) {
+        lastReported = percent;
+        process.stderr.write(`\rRender ${percent}%`);
+      }
+    },
+  });
+  void onPreviewRenameDispatched;
+  process.stderr.write("\n");
+  return {
+    exitCode: 0,
+    event: commonEvent("render", {
+      readiness: "ready",
+      sourceRevision: checks.final.sourceRevision,
+      fingerprint: checks.final.assemblyKey,
+      buildId: published.buildId,
+      mode: "final",
+      scope: checks.final.scope,
+      artifacts: {
+        current: published.currentPointer,
+        finalMp4: resolve(published.buildDirectory, "final.mp4"),
+        reportJson: resolve(published.buildDirectory, "report.json"),
+        manifestJson: resolve(published.buildDirectory, "manifest.json"),
+      },
+      issues: published.issues,
+      data: {
+        approval,
+        width: published.rendered.width,
+        height: published.rendered.height,
+        fps: published.rendered.fps,
+        durationInFrames: published.rendered.durationInFrames,
+        codec: "h264",
+        audio: "aac",
+        manifestSha256: published.manifestSha256,
+      },
+    }),
+    human: [
+      `Final export ready: ${published.buildDirectory}`,
+      `${published.rendered.width}x${published.rendered.height} @ ${published.rendered.fps}fps, ${(published.rendered.durationInFrames / published.rendered.fps).toFixed(1)}s, H.264 + AAC`,
+      approval.autonomy
+        ? `Approved by autonomy authorisation from ${approval.autonomy.authorizedBy}`
+        : `Approved from reviewed preview ${approval.previewBuildId}`,
+    ],
+  };
+};
+
 const knownCommand = (value: string | undefined): CommandName =>
   value === "doctor" ||
   value === "schema" ||
@@ -697,7 +989,8 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "status" ||
   value === "preview" ||
   value === "edit" ||
-  value === "undo"
+  value === "undo" ||
+  value === "render"
     ? value
     : "unknown";
 
@@ -714,6 +1007,7 @@ const executeCommand = async (
   if (command === "preview") return previewCommand(args, options);
   if (command === "edit") return editCommand(args);
   if (command === "undo") return undoCommand(args);
+  if (command === "render") return renderCommand(args, options);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 

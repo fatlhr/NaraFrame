@@ -203,9 +203,10 @@ export interface PreviewOutputRoots {
   builds: string;
 }
 
-const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
+export const json = (value: unknown): string =>
+  `${JSON.stringify(value, null, 2)}\n`;
 
-const throwIfAborted = (signal?: AbortSignal): void => {
+export const throwIfAborted = (signal?: AbortSignal): void => {
   if (signal?.aborted) {
     const error = new Error("Preview publication was interrupted.");
     error.name = "AbortError";
@@ -216,10 +217,10 @@ const throwIfAborted = (signal?: AbortSignal): void => {
 const sha256Buffer = (value: Buffer | string): string =>
   createHash("sha256").update(value).digest("hex");
 
-const sha256File = async (path: string): Promise<string> =>
+export const sha256File = async (path: string): Promise<string> =>
   sha256Buffer(await readFile(path));
 
-const execute = async (
+export const execute = async (
   executable: string,
   args: readonly string[],
 ): Promise<{ stdout: string; stderr: string }> =>
@@ -249,7 +250,7 @@ const execute = async (
     });
   });
 
-const commandVersion = async (
+export const commandVersion = async (
   executable: string,
   args: readonly string[],
 ): Promise<string> => {
@@ -257,10 +258,10 @@ const commandVersion = async (
   return (result.stdout || result.stderr).split("\n")[0]?.trim() ?? "unknown";
 };
 
-const ffmpegExecutable = (): string =>
+export const ffmpegExecutable = (): string =>
   process.env.NARAFRAME_FFMPEG_EXECUTABLE ?? "/opt/homebrew/bin/ffmpeg";
 
-const ffprobeExecutable = (): string =>
+export const ffprobeExecutable = (): string =>
   process.env.NARAFRAME_FFPROBE_EXECUTABLE ??
   join(dirname(ffmpegExecutable()), "ffprobe");
 
@@ -292,7 +293,7 @@ const validateOutputAncestor = async (
   return resolved;
 };
 
-const validateExistingOutputAncestors = async (
+export const validateExistingOutputAncestors = async (
   realProjectRoot: string,
   segments: readonly string[],
 ): Promise<void> => {
@@ -317,7 +318,7 @@ const validateExistingOutputAncestors = async (
   }
 };
 
-const resolveSafeOutputDirectory = async (
+export const resolveSafeOutputDirectory = async (
   realProjectRoot: string,
   segments: readonly string[],
 ): Promise<string> => {

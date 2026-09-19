@@ -24,7 +24,10 @@ export const generationKeyForBlock = (
 
 type DraftBody = Omit<CompiledDraft, "assemblyKey">;
 
-const referencedAssetIds = (value: unknown, found = new Set<string>()) => {
+export const referencedAssetIds = (
+  value: unknown,
+  found = new Set<string>(),
+): Set<string> => {
   if (Array.isArray(value)) {
     for (const item of value) referencedAssetIds(item, found);
   } else if (value !== null && typeof value === "object") {

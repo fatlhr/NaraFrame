@@ -2,6 +2,7 @@ export const corePackage = "@naraframe/core";
 
 export { type CaptionCue, deriveCaptionCues } from "./compiler/captions.js";
 export {
+  type CompileOptions,
   compileDraft,
   type DraftScope,
 } from "./compiler/compile-draft.js";
@@ -19,6 +20,7 @@ export {
   type ResolvedPhrase,
   resolveNarrationTimeline,
 } from "./compiler/narration-timeline.js";
+export { checkProductionReadiness } from "./compiler/production.js";
 export {
   checkProvenance,
   checkSourceProvenance,
@@ -98,6 +100,12 @@ export {
   type CreateProjectOptions,
   createProject,
 } from "./project/create-project.js";
+export {
+  type Approval,
+  ApprovalSchema,
+  readApprovals,
+  recordApproval,
+} from "./revision/approval.js";
 export {
   type SyncResult,
   type SyncStatus,

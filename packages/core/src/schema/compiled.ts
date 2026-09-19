@@ -62,7 +62,7 @@ const CompiledAssetSchema = z.discriminatedUnion("kind", [
     .strict(),
   z
     .object({
-      kind: z.literal("mp3"),
+      kind: z.enum(["mp3", "wav", "m4a"]),
       publicPath: RelativeAudioPathSchema,
       sha256: Sha256Schema,
     })
@@ -209,14 +209,14 @@ const CompiledCaptionsSchema = z
 export const CompiledDraftSchema = z
   .object({
     schemaVersion: SchemaVersionSchema,
-    mode: z.literal("draft"),
-    width: z.literal(540),
-    height: z.literal(960),
+    mode: z.enum(["draft", "final"]),
+    width: z.union([z.literal(540), z.literal(1080)]),
+    height: z.union([z.literal(960), z.literal(1920)]),
     fps: z.literal(30),
     totalFrames: PositiveIntegerSchema,
     scope: CompiledScopeSchema,
     timelineScope: z.enum(["project", "local"]),
-    label: z.enum(["DRAFT • NO AUDIO", "DRAFT • WITH AUDIO"]),
+    label: z.enum(["DRAFT • NO AUDIO", "DRAFT • WITH AUDIO", "FINAL"]),
     sourceRevision: Sha256Schema,
     assemblyKey: Sha256Schema,
     profile: z
@@ -239,6 +239,18 @@ export const CompiledDraftSchema = z
   })
   .strict()
   .superRefine((draft, context) => {
+    const isFinal = draft.mode === "final";
+    if (
+      isFinal !== (draft.width === 1080 && draft.height === 1920) ||
+      isFinal !== (draft.label === "FINAL")
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "A final draft uses the 1080x1920 design format and the FINAL label; a draft uses 540x960 and a DRAFT label",
+        path: ["mode"],
+      });
+    }
     draft.scenes.forEach((scene, index) => {
       if (scene.endFrame > draft.totalFrames) {
         context.addIssue({

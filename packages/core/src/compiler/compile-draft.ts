@@ -52,14 +52,14 @@ const compiledAssets = (source: PlanSource): Record<string, CompiledAsset> =>
     source.assets.assets.map((asset) => [
       asset.id,
       asset.status === "ready"
-        ? asset.kind === "mp3"
+        ? asset.kind === "png"
           ? {
-              kind: "mp3" as const,
+              kind: "png" as const,
               publicPath: asset.path,
               sha256: asset.sha256,
             }
           : {
-              kind: "png" as const,
+              kind: asset.kind,
               publicPath: asset.path,
               sha256: asset.sha256,
             }
@@ -541,16 +541,40 @@ const validateLayerFrames = (
   return issues;
 };
 
+export interface CompileOptions {
+  /** "final" compiles at the design format with no draft label. */
+  mode?: "draft" | "final";
+}
+
 export const compileDraft = (
   source: PlanSource,
   requestedScope: DraftScope = { type: "project" },
+  options: CompileOptions = {},
 ): Result<CompiledDraft> => {
-  const fps = source.project.format.draft.fps;
-  const scaleX =
-    source.project.format.draft.width / source.project.format.design.width;
-  const scaleY =
-    source.project.format.draft.height / source.project.format.design.height;
+  const mode = options.mode ?? "draft";
+  const format =
+    mode === "final"
+      ? source.project.format.design
+      : source.project.format.draft;
+  const fps = format.fps;
+  const scaleX = format.width / source.project.format.design.width;
+  const scaleY = format.height / source.project.format.design.height;
   const issues: Issue[] = [];
+
+  if (mode === "final" && requestedScope.type !== "project") {
+    return {
+      ok: false,
+      issues: [
+        compileIssue(
+          "FINAL_REQUIRES_PROJECT_SCOPE",
+          "/",
+          "A final export covers the whole project, not one scene.",
+          "error",
+          "Export without a scene scope.",
+        ),
+      ],
+    };
+  }
 
   const displayFontFamily = source.profile.render.typography.displayFontFamily;
   if (
@@ -918,9 +942,9 @@ export const compileDraft = (
       : renderCursor;
   const draftCandidate = {
     schemaVersion: 1 as const,
-    mode: "draft" as const,
-    width: source.project.format.draft.width,
-    height: source.project.format.draft.height,
+    mode,
+    width: format.width,
+    height: format.height,
     fps,
     totalFrames,
     scope: compiledScope,
@@ -928,9 +952,12 @@ export const compileDraft = (
       requestedScope.type === "project"
         ? ("project" as const)
         : ("local" as const),
-    label: narrationClips?.clips.length
-      ? ("DRAFT • WITH AUDIO" as const)
-      : ("DRAFT • NO AUDIO" as const),
+    label:
+      mode === "final"
+        ? ("FINAL" as const)
+        : narrationClips?.clips.length
+          ? ("DRAFT • WITH AUDIO" as const)
+          : ("DRAFT • NO AUDIO" as const),
     sourceRevision,
     profile: {
       id: source.profile.id,

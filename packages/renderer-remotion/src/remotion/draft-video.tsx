@@ -466,7 +466,8 @@ export const DraftVideo = (draft: CompiledDraft) => (
     <CaptionLayer draft={draft} />
     {draft.narration?.clips.map((clip) => {
       const asset = draft.assets[clip.assetId];
-      if (asset?.kind !== "mp3") return null;
+      if (!asset || asset.kind === "png" || asset.kind === "placeholder")
+        return null;
       return (
         <Sequence
           key={clip.blockId}
@@ -478,20 +479,22 @@ export const DraftVideo = (draft: CompiledDraft) => (
         </Sequence>
       );
     })}
-    <div
-      style={{
-        position: "absolute",
-        left: 44,
-        right: 44,
-        bottom: 34,
-        color: draft.profile.render.palette.accent,
-        fontSize: 18,
-        fontWeight: 800,
-        letterSpacing: 2,
-        textAlign: "center",
-      }}
-    >
-      {draft.label}
-    </div>
+    {draft.mode === "draft" && (
+      <div
+        style={{
+          position: "absolute",
+          left: 44,
+          right: 44,
+          bottom: 34,
+          color: draft.profile.render.palette.accent,
+          fontSize: 18,
+          fontWeight: 800,
+          letterSpacing: 2,
+          textAlign: "center",
+        }}
+      >
+        {draft.label}
+      </div>
+    )}
   </AbsoluteFill>
 );
