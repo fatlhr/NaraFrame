@@ -7,6 +7,13 @@ export {
 } from "./compiler/compile-draft.js";
 export { contrastRatio, contrastThresholdFor } from "./compiler/contrast.js";
 export {
+  computeAssemblyKey,
+  computeSceneRenderKeys,
+  generationKeyForBlock,
+  RENDER_ENGINE,
+  type SceneRenderKey,
+} from "./compiler/keys.js";
+export {
   type ResolvedBlock,
   type ResolvedNarrationTimeline,
   type ResolvedPhrase,
@@ -65,6 +72,7 @@ export {
   settleReceipt,
   settleUnknown,
 } from "./production/ledger.js";
+export { readProductionLedger } from "./production/ledger-io.js";
 export {
   type ProductionRoute,
   type ProductionRouteInput,
@@ -101,6 +109,12 @@ export {
   editProject,
 } from "./revision/edit.js";
 export { withProjectLock } from "./revision/lock.js";
+export {
+  type CostSide,
+  computeReuse,
+  type ReuseCounts,
+  type ReuseReport,
+} from "./revision/reuse.js";
 export { type RevisionState, readRevisionState } from "./revision/state.js";
 export { writePreviewSelection } from "./revision/store.js";
 export { type UndoResult, undoProject } from "./revision/undo.js";

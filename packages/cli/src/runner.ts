@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   compileDraft,
+  computeReuse,
   createProject,
   editProject,
   exportSchemas,
@@ -407,6 +408,10 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
     compiled.value,
   );
   const revision = await readRevisionState(loaded.value.root);
+  const reuse =
+    revision.currentId && revision.parentId
+      ? await computeReuse(loaded.value.root, revision.currentId)
+      : null;
   const metadataFailed = preview.issues.some(
     (issue) => issue.severity === "error" && issue.responsible === "system",
   );
@@ -430,6 +435,7 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
         currentSourceFingerprint: compiled.value.assemblyKey,
         revision: {
           ...revision,
+          reuse: reuse?.ok ? reuse.value : null,
           state:
             revision.currentId === null
               ? "untracked"
@@ -616,20 +622,27 @@ const editCommand = async (args: readonly string[]): Promise<Execution> => {
       }),
     };
   }
+  const reuse = await computeReuse(root, result.value.revisionId);
   return {
     exitCode: 0,
     event: commonEvent("edit", {
       readiness: "unknown",
       sourceRevision: result.value.revisionId,
-      issues: result.issues,
+      issues: [...result.issues, ...(reuse.ok ? [] : reuse.issues)],
       data: {
         parentRevision: result.value.parentId,
         files: result.value.files,
         capturedDirectEdits: result.value.captured,
+        reuse: reuse.ok ? reuse.value : null,
       },
     }),
     human: [
       `Revision ${result.value.revisionId.slice(0, 12)} (from ${result.value.parentId.slice(0, 12)}): ${result.value.files.join(", ")}`,
+      ...(reuse.ok && reuse.value?.overallRatio != null
+        ? [
+            `Reuse: ${Math.round(reuse.value.overallRatio * 100)}% of voice clips, images, and scenes survived unchanged`,
+          ]
+        : []),
     ],
   };
 };

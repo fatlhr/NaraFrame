@@ -14,6 +14,7 @@ import type {
 } from "../schema/scene.js";
 import { deriveCaptionCues } from "./captions.js";
 import { checkContrast } from "./contrast.js";
+import { computeAssemblyKey } from "./keys.js";
 import { resolveNarrationTimeline } from "./narration-timeline.js";
 import { checkSourceProvenance } from "./provenance.js";
 import { partitionScenes, type SceneNarrationRef } from "./scene-partition.js";
@@ -931,11 +932,6 @@ export const compileDraft = (
       ? ("DRAFT • WITH AUDIO" as const)
       : ("DRAFT • NO AUDIO" as const),
     sourceRevision,
-    assemblyKey: hashValue({
-      sourceRevision,
-      renderer: "m0.9",
-      scope: compiledScope,
-    }),
     profile: {
       id: source.profile.id,
       version: source.profile.version,
@@ -947,7 +943,13 @@ export const compileDraft = (
     ...(narrationClips ? { narration: narrationClips } : {}),
     ...(compiledCaptions ? { captions: compiledCaptions } : {}),
   };
-  const parsed = CompiledDraftSchema.safeParse(draftCandidate);
+  const draftWithKey = {
+    ...draftCandidate,
+    assemblyKey: computeAssemblyKey(
+      draftCandidate as Parameters<typeof computeAssemblyKey>[0],
+    ),
+  };
+  const parsed = CompiledDraftSchema.safeParse(draftWithKey);
 
   if (!parsed.success) {
     return {
