@@ -12,7 +12,10 @@ export {
   type ResolvedPhrase,
   resolveNarrationTimeline,
 } from "./compiler/narration-timeline.js";
-export { checkProvenance } from "./compiler/provenance.js";
+export {
+  checkProvenance,
+  checkSourceProvenance,
+} from "./compiler/provenance.js";
 export {
   type ContrastSample,
   computeReadabilityMetrics,
@@ -177,3 +180,5 @@ export {
   TransitionSchema,
   TypographyRoleSchema,
 } from "./schema/scene.js";
+export type { Source } from "./schema/source.js";
+export { SourceSchema } from "./schema/source.js";

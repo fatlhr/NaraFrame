@@ -6,6 +6,7 @@ import {
   PositiveIntegerSchema,
   SchemaVersionSchema,
 } from "./primitives.js";
+import { SourceSchema } from "./source.js";
 
 export const FrameSchema = z
   .object({
@@ -301,12 +302,15 @@ export const SceneSchema = z
     beats: z.array(BeatSchema),
     transition: TransitionSchema,
     narration: SceneNarrationSchema.optional(),
+    carriesFactualClaim: z.boolean().optional(),
+    sourceIds: z.array(IdSchema).optional(),
   })
   .strict();
 
 export const ScenesSchema = z
   .object({
     schemaVersion: SchemaVersionSchema,
+    sources: z.array(SourceSchema).optional(),
     scenes: z.array(SceneSchema),
   })
   .strict()

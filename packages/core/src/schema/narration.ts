@@ -4,6 +4,7 @@ import {
   NonNegativeIntegerSchema,
   SchemaVersionSchema,
 } from "./primitives.js";
+import { type Source, SourceSchema } from "./source.js";
 
 const WordSchema = z
   .object({
@@ -21,15 +22,6 @@ const PhraseSchema = z
     startMs: NonNegativeIntegerSchema,
     endMs: NonNegativeIntegerSchema,
     words: z.array(WordSchema).optional(),
-  })
-  .strict();
-
-const SourceSchema = z
-  .object({
-    id: IdSchema,
-    title: z.string().trim().min(1),
-    url: z.string().trim().min(1).optional(),
-    retrievedAt: z.string().date().optional(),
   })
   .strict();
 
@@ -154,6 +146,6 @@ export const NarrationSchema = z
     }
   });
 
-export type NarrationSource = z.infer<typeof SourceSchema>;
+export type NarrationSource = Source;
 export type NarrationBlock = z.infer<typeof NarrationBlockSchema>;
 export type Narration = z.infer<typeof NarrationSchema>;

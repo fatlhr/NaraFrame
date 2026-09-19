@@ -15,7 +15,7 @@ import type {
 import { deriveCaptionCues } from "./captions.js";
 import { checkContrast } from "./contrast.js";
 import { resolveNarrationTimeline } from "./narration-timeline.js";
-import { checkProvenance } from "./provenance.js";
+import { checkSourceProvenance } from "./provenance.js";
 import { partitionScenes, type SceneNarrationRef } from "./scene-partition.js";
 import { checkVariety, type VarietyScene } from "./variety.js";
 import { checkVoiceBindings } from "./voice-binding.js";
@@ -589,6 +589,8 @@ export const compileDraft = (
     });
   }
 
+  issues.push(...checkSourceProvenance(source));
+
   // Narration wiring: when narration.json exists, derive timeline, check
   // provenance, and partition scenes against the narration clock. Otherwise
   // fall back to draft durations.
@@ -618,12 +620,6 @@ export const compileDraft = (
         ),
       );
     }
-    issues.push(
-      ...checkProvenance(
-        source.narration,
-        Boolean(source.profile.production.requireSourcing),
-      ),
-    );
     issues.push(...checkVoiceBindings(source));
     const refs: SceneNarrationRef[] = [];
     let missingNarration = false;
