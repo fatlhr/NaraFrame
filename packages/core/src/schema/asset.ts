@@ -64,6 +64,14 @@ const ReadyAudioAssetSchema = z
     kind: z.enum(["mp3", "wav", "m4a"]),
     path: RelativeAudioPathSchema,
     sha256: Sha256Schema,
+    /** What the clip was spoken from, so edited text cannot reuse stale voice. */
+    generation: z
+      .object({
+        textSha256: Sha256Schema,
+        voiceStyleSignature: z.string().trim().min(1).optional(),
+      })
+      .strict()
+      .optional(),
     origin: z
       .object({
         type: AssetOriginTypeSchema,

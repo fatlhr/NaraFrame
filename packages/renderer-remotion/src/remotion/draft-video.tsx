@@ -466,7 +466,7 @@ export const DraftVideo = (draft: CompiledDraft) => (
     <CaptionLayer draft={draft} />
     {draft.narration?.clips.map((clip) => {
       const asset = draft.assets[clip.assetId];
-      if (!asset || asset.kind !== "mp3") return null;
+      if (asset?.kind !== "mp3") return null;
       return (
         <Sequence
           key={clip.blockId}

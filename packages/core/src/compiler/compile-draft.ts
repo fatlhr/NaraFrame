@@ -18,6 +18,7 @@ import { resolveNarrationTimeline } from "./narration-timeline.js";
 import { checkProvenance } from "./provenance.js";
 import { partitionScenes, type SceneNarrationRef } from "./scene-partition.js";
 import { checkVariety, type VarietyScene } from "./variety.js";
+import { checkVoiceBindings } from "./voice-binding.js";
 
 export type DraftScope =
   | { type: "project" }
@@ -623,6 +624,7 @@ export const compileDraft = (
         Boolean(source.profile.production.requireSourcing),
       ),
     );
+    issues.push(...checkVoiceBindings(source));
     const refs: SceneNarrationRef[] = [];
     let missingNarration = false;
     source.scenes.scenes.forEach((scene, index) => {
@@ -828,30 +830,23 @@ export const compileDraft = (
   // For narrated project, renderCursor should start at partitioned start, but
   // for selected scene scope we start at 0. For project scope, use partitioned
   // frames directly; for draft fallback, accumulate.
-  const scenes = selectedSources.map(
-    ({ scene, sceneIndex, sourceStartFrame, sourceEndFrame }) => {
-      let startFrame: number;
-      let endFrame: number;
-      let durationInFrames: number;
-      if (hasNarration && partitionedScenes.length > 0) {
-        const part = partitionedScenes.find(
-          (candidate) => candidate.sceneId === scene.id,
-        );
-        if (part) {
-          if (requestedScope.type === "project") {
-            startFrame = part.startFrame;
-            endFrame = part.endFrame;
-            durationInFrames = endFrame - startFrame;
-            // renderCursor not needed for project scope; keep it for non-narrated math
-            renderCursor = Math.max(renderCursor, endFrame);
-          } else {
-            durationInFrames = part.endFrame - part.startFrame;
-            startFrame = renderCursor;
-            endFrame = startFrame + durationInFrames;
-            renderCursor = endFrame;
-          }
+  const scenes = selectedSources.map(({ scene, sceneIndex }) => {
+    let startFrame: number;
+    let endFrame: number;
+    let durationInFrames: number;
+    if (hasNarration && partitionedScenes.length > 0) {
+      const part = partitionedScenes.find(
+        (candidate) => candidate.sceneId === scene.id,
+      );
+      if (part) {
+        if (requestedScope.type === "project") {
+          startFrame = part.startFrame;
+          endFrame = part.endFrame;
+          durationInFrames = endFrame - startFrame;
+          // renderCursor not needed for project scope; keep it for non-narrated math
+          renderCursor = Math.max(renderCursor, endFrame);
         } else {
-          durationInFrames = msToDurationFrames(scene.durationMs, fps);
+          durationInFrames = part.endFrame - part.startFrame;
           startFrame = renderCursor;
           endFrame = startFrame + durationInFrames;
           renderCursor = endFrame;
@@ -862,60 +857,65 @@ export const compileDraft = (
         endFrame = startFrame + durationInFrames;
         renderCursor = endFrame;
       }
-      issues.push(...validateLayerFrames(scene, sceneIndex, source));
-      const layout =
-        scene.visual.type === "composition"
-          ? resolveGroupLayouts(
-              scene.visual.layers.map((layer) =>
-                resolveLayerAppearance(layer, source.profile.render),
-              ),
-              sceneIndex,
-            )
-          : { layers: [], issues: [] };
-      issues.push(...layout.issues);
-      varietyEntries.push({ scene, sceneIndex, resolvedLayers: layout.layers });
-
-      const beats = scene.beats.map((beat, beatIndex) => {
-        const beatStartFrame = msToFrameOffset(beat.startMs, fps);
-        const beatDurationInFrames = msToDurationFrames(beat.durationMs, fps);
-        if (beatStartFrame + beatDurationInFrames > durationInFrames) {
-          issues.push(
-            compileIssue(
-              "BEAT_OUTSIDE_SCENE",
-              `/scenes/${sceneIndex}/beats/${beatIndex}`,
-              `Beat ${beat.id} ends after scene ${scene.id}.`,
-              "error",
-              "Keep the beat inside its owning scene and compile again.",
+    } else {
+      durationInFrames = msToDurationFrames(scene.durationMs, fps);
+      startFrame = renderCursor;
+      endFrame = startFrame + durationInFrames;
+      renderCursor = endFrame;
+    }
+    issues.push(...validateLayerFrames(scene, sceneIndex, source));
+    const layout =
+      scene.visual.type === "composition"
+        ? resolveGroupLayouts(
+            scene.visual.layers.map((layer) =>
+              resolveLayerAppearance(layer, source.profile.render),
             ),
-          );
-        }
+            sceneIndex,
+          )
+        : { layers: [], issues: [] };
+    issues.push(...layout.issues);
+    varietyEntries.push({ scene, sceneIndex, resolvedLayers: layout.layers });
 
-        return scaleBeat(
-          beat,
-          beatStartFrame,
-          beatDurationInFrames,
-          scaleX,
-          scaleY,
+    const beats = scene.beats.map((beat, beatIndex) => {
+      const beatStartFrame = msToFrameOffset(beat.startMs, fps);
+      const beatDurationInFrames = msToDurationFrames(beat.durationMs, fps);
+      if (beatStartFrame + beatDurationInFrames > durationInFrames) {
+        issues.push(
+          compileIssue(
+            "BEAT_OUTSIDE_SCENE",
+            `/scenes/${sceneIndex}/beats/${beatIndex}`,
+            `Beat ${beat.id} ends after scene ${scene.id}.`,
+            "error",
+            "Keep the beat inside its owning scene and compile again.",
+          ),
         );
-      });
+      }
 
-      return {
-        id: scene.id,
-        startFrame,
-        endFrame,
-        visual:
-          scene.visual.type === "composition"
-            ? { type: "composition" as const }
-            : scene.visual,
-        layers:
-          scene.visual.type === "composition"
-            ? layout.layers.map((layer) => scaleLayer(layer, scaleX, scaleY))
-            : [],
-        beats,
-        transitionOut: compileTransition(scene.transition, fps),
-      };
-    },
-  );
+      return scaleBeat(
+        beat,
+        beatStartFrame,
+        beatDurationInFrames,
+        scaleX,
+        scaleY,
+      );
+    });
+
+    return {
+      id: scene.id,
+      startFrame,
+      endFrame,
+      visual:
+        scene.visual.type === "composition"
+          ? { type: "composition" as const }
+          : scene.visual,
+      layers:
+        scene.visual.type === "composition"
+          ? layout.layers.map((layer) => scaleLayer(layer, scaleX, scaleY))
+          : [],
+      beats,
+      transitionOut: compileTransition(scene.transition, fps),
+    };
+  });
 
   if (requestedScope.type === "project") {
     issues.push(...checkVariety(varietyEntries, source.profile.render));

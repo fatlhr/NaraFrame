@@ -26,6 +26,10 @@ export {
   type SceneNarrationRef,
 } from "./compiler/scene-partition.js";
 export {
+  checkVoiceBindings,
+  narrationTextHash,
+} from "./compiler/voice-binding.js";
+export {
   type LoadedPlanProject,
   loadPlanProject,
 } from "./io/load-project.js";
