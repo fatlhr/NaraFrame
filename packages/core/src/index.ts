@@ -58,6 +58,10 @@ export {
   resolveProductionRoute,
 } from "./production/route.js";
 export {
+  createSayTtsProvider,
+  type SayTtsProviderOptions,
+} from "./production/say-tts-provider.js";
+export {
   type SynthesizeNarrationOutcome,
   type SynthesizeNarrationRequest,
   synthesizeNarration,

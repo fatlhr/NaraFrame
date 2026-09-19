@@ -14,6 +14,8 @@ export interface TtsPhrase {
 
 export interface TtsSynthesisResult {
   audioSha256: string;
+  /** Absolute path of the synthesized clip, when the provider writes one. */
+  audioPath?: string;
   durationMs: number;
   phrases: TtsPhrase[];
   cost: Money;
