@@ -41,6 +41,12 @@ export {
 } from "./production/cost-report.js";
 export { createFakeTtsProvider } from "./production/fake-tts-provider.js";
 export {
+  type ImportAudioOptions,
+  type ImportedAudio,
+  type ImportedPhrase,
+  importPreparedAudio,
+} from "./production/import-audio.js";
+export {
   computeLedgerTotals,
   escalateReceipt,
   type LedgerTotals,
