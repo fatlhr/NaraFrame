@@ -1,10 +1,18 @@
 export const corePackage = "@naraframe/core";
 
+export { type CaptionCue, deriveCaptionCues } from "./compiler/captions.js";
 export {
   compileDraft,
   type DraftScope,
 } from "./compiler/compile-draft.js";
 export { contrastRatio, contrastThresholdFor } from "./compiler/contrast.js";
+export {
+  type ResolvedBlock,
+  type ResolvedNarrationTimeline,
+  type ResolvedPhrase,
+  resolveNarrationTimeline,
+} from "./compiler/narration-timeline.js";
+export { checkProvenance } from "./compiler/provenance.js";
 export {
   type ContrastSample,
   computeReadabilityMetrics,
@@ -12,6 +20,11 @@ export {
   type ReadabilityMetrics,
   type VarietyMetrics,
 } from "./compiler/qa-report.js";
+export {
+  type PartitionedScene,
+  partitionScenes,
+  type SceneNarrationRef,
+} from "./compiler/scene-partition.js";
 export {
   type LoadedPlanProject,
   loadPlanProject,
@@ -65,6 +78,11 @@ export {
   AssetManifestSchema,
   AssetSchema,
 } from "./schema/asset.js";
+export type { CaptionCorrection, Captions } from "./schema/captions.js";
+export {
+  CaptionCorrectionSchema,
+  CaptionsSchema,
+} from "./schema/captions.js";
 export type {
   CompiledAsset,
   CompiledBeat,
@@ -80,6 +98,12 @@ export {
 } from "./schema/compiled.js";
 export type { PlanSource } from "./schema/export-schema.js";
 export { exportSchemas, validatePlanSource } from "./schema/export-schema.js";
+export type {
+  Narration,
+  NarrationBlock,
+  NarrationSource,
+} from "./schema/narration.js";
+export { NarrationBlockSchema, NarrationSchema } from "./schema/narration.js";
 export type {
   Money,
   ProductionLedger,

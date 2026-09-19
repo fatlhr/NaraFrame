@@ -276,7 +276,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M0 complete, including M0.10; M1.1 (production readiness and accounting) is in progress — ledger/receipt primitives and a fake-provider narration recipe landed, skill/CLI wiring and cost reporting remain.**
+Current step: **M0 complete; M1.1 core primitives done (skill/CLI wiring and per-build cost report wait on a narrated build). M1.2 in progress: narration schema, timeline, scene partition, captions and provenance checks exist in core with 125 unit tests; wiring into `compileDraft`, audio probing, and the real voice pilot remain.**
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -375,13 +375,13 @@ Cost accounting is the capability nothing comparable offers, so it is a headline
 
 ### M1.2 — Block timeline, captions, and voice continuity
 
-- [ ] Implement ordered story blocks, probed clip durations, local phrases/optional words, pauses, stable IDs, source-text/settings bindings, and derived global offsets.
-- [ ] Compile complete scene partitions with natural gap ownership and sample-safe final coverage. Adapt exclusive frame ends for inclusive renderer APIs; reject zero-frame intervals.
-- [ ] Implement phrase captions and attributed display corrections separate from intended speech. Long phrases without words wrap/display whole; guessed split timing is draft-only.
-- [ ] Prove the spec example starts at 0/2700 ms, totals 4500 ms, and a 3000 ms first clip moves block two to 3300 ms without replacing its media/timing.
+- [ ] Implement ordered story blocks, probed clip durations, local phrases/optional words, pauses, stable IDs, source-text/settings bindings, and derived global offsets. (`NarrationSchema` and `resolveNarrationTimeline` cover blocks, phrases/words, pauses, planned blocks, and derived offsets. Still open: ffprobe-measured durations, audio assets in the manifest, and the text/settings hash binding.)
+- [ ] Compile complete scene partitions with natural gap ownership and sample-safe final coverage. Adapt exclusive frame ends for inclusive renderer APIs; reject zero-frame intervals. (`partitionScenes` does the partition, shared rounded boundaries, ceil final end, and zero-frame rejection. Still open: a `narration` reference on scenes and feeding it into `compileDraft`/the renderer.)
+- [ ] Implement phrase captions and attributed display corrections separate from intended speech. Long phrases without words wrap/display whole; guessed split timing is draft-only. (`deriveCaptionCues` and `CaptionsSchema` produce stable-id cues with attributed corrections; no split timing is ever guessed. Still open: rendering cues in the video.)
+- [x] Prove the spec example starts at 0/2700 ms, totals 4500 ms, and a 3000 ms first clip moves block two to 3300 ms without replacing its media/timing.
 - [ ] Produce three voice blocks and replace the middle one. First/third hashes remain; listen across both joins and compare natural continuity with a complete-utterance sample. Explain any neighbor regeneration and budget impact before doing it.
-- [ ] Test reorder, 1000 ms pause, 300 ms breath gap, caption spelling, and last sample coverage. Synthetic scheduling tolerance: at most one frame at 30 fps; listening separately establishes perceived sync/prosody.
-- [ ] Implement checkable source provenance for factual claims. A block or scene marked as carrying a factual claim must reference a declared source entry; `SOURCE_MISSING` blocks publication when the active profile requires sourcing. The `current-issues` profile direction already demands separating confirmed facts from estimates, so enforce that as a contract instead of prose the agent may ignore.
+- [x] Test reorder, 1000 ms pause, 300 ms breath gap, caption spelling, and last sample coverage. Synthetic scheduling tolerance: at most one frame at 30 fps; listening separately establishes perceived sync/prosody. (Covered by `narration.test.ts`, `scene-partition.test.ts`, `captions.test.ts`; frame boundaries are exact integers here.)
+- [ ] Implement checkable source provenance for factual claims. A block or scene marked as carrying a factual claim must reference a declared source entry; `SOURCE_MISSING` blocks publication when the active profile requires sourcing. (Block-level `checkProvenance` is implemented: `SOURCE_MISSING` is an error when sourcing is required, else a warning; `SOURCE_UNKNOWN` is always an error. Still open: a profile `requireSourcing` flag, scene-level marking, and running the check inside `compileDraft`.) The `current-issues` profile direction already demands separating confirmed facts from estimates, so enforce that as a contract instead of prose the agent may ignore.
 
 ### M1.3 — Revisions, preview, and final export
 
