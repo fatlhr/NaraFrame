@@ -952,7 +952,9 @@ export const compileDraft = (
       requestedScope.type === "project"
         ? ("project" as const)
         : ("local" as const),
-    label: "DRAFT • NO AUDIO" as const,
+    label: narrationClips?.clips.length
+      ? ("DRAFT • WITH AUDIO" as const)
+      : ("DRAFT • NO AUDIO" as const),
     sourceRevision,
     assemblyKey: hashValue({
       sourceRevision,

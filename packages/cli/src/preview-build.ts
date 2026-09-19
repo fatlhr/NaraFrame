@@ -586,7 +586,10 @@ const assertMetadataShape = (
     (metadata.scope.type === "project"
       ? metadata.timelineScope !== "project"
       : metadata.timelineScope !== "local") ||
-    metadata.label !== "DRAFT • NO AUDIO" ||
+    !(
+      metadata.label === "DRAFT • NO AUDIO" ||
+      metadata.label === "DRAFT • WITH AUDIO"
+    ) ||
     metadata.status !== "success" ||
     metadata.failure !== null ||
     !validTimestamp(metadata.startedAt) ||
@@ -618,6 +621,8 @@ const assertMetadataShape = (
     (render.durationInFrames as number) <= 0 ||
     render.codec !== "h264" ||
     !(render.audio === "none" || render.audio === "aac") ||
+    metadata.label !==
+      (render.audio === "aac" ? "DRAFT • WITH AUDIO" : "DRAFT • NO AUDIO") ||
     typeof render.muted !== "boolean" ||
     JSON.stringify(metadata.contactSheet) !==
       JSON.stringify(expectedContactSheet) ||

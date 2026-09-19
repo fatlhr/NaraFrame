@@ -216,7 +216,7 @@ export const CompiledDraftSchema = z
     totalFrames: PositiveIntegerSchema,
     scope: CompiledScopeSchema,
     timelineScope: z.enum(["project", "local"]),
-    label: z.literal("DRAFT • NO AUDIO"),
+    label: z.enum(["DRAFT • NO AUDIO", "DRAFT • WITH AUDIO"]),
     sourceRevision: Sha256Schema,
     assemblyKey: Sha256Schema,
     profile: z

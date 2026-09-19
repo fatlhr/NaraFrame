@@ -115,6 +115,7 @@ const createStagedBuild = async (
     | "invalid-contact-sheet"
     | "missing-coverage"
     | "mixed-runtime"
+    | "label-audio-mismatch"
     | "mixed-timestamps" = "valid",
 ): Promise<string> => {
   const directory = join(root, `staged-${buildId}`);
@@ -150,7 +151,8 @@ const createStagedBuild = async (
     mode: draft.mode,
     scope: draft.scope,
     timelineScope: draft.timelineScope,
-    label: draft.label,
+    label:
+      variant === "label-audio-mismatch" ? "DRAFT • WITH AUDIO" : draft.label,
     profile: { id: draft.profile.id, version: draft.profile.version },
     runtime: {
       node: "v24.20.0",
@@ -526,6 +528,11 @@ describe("atomic preview publication", () => {
       ["missing-metadata", "incomplete-report", "Build metadata is incomplete"],
       ["invalid-frames", "invalid-frame-shape", "invalid checked frame"],
       ["mixed-runtime", "mixed-runtime", "disagree on shared runtime"],
+      [
+        "label-mismatch",
+        "label-audio-mismatch",
+        "Build metadata is incomplete",
+      ],
       [
         "mixed-timestamps",
         "mixed-timestamps",

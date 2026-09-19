@@ -269,3 +269,19 @@ describe("compileDraft captions", () => {
     if (scoped.ok) expect(scoped.value.captions).toBeUndefined();
   });
 });
+
+describe("compileDraft draft label", () => {
+  it("says the draft has audio only when narration clips are compiled", () => {
+    const narrated = compileDraft(narratedSource());
+    expect(narrated.ok).toBe(true);
+    if (narrated.ok) expect(narrated.value.label).toBe("DRAFT • WITH AUDIO");
+
+    const { narration: _omit, ...silent } = narratedSource({
+      scenes: [narratedScene("s1")],
+    });
+    const silentResult = compileDraft(silent);
+    expect(silentResult.ok).toBe(true);
+    if (silentResult.ok)
+      expect(silentResult.value.label).toBe("DRAFT • NO AUDIO");
+  });
+});
