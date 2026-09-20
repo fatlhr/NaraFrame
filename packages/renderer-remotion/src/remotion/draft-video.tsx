@@ -1,89 +1,33 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   AbsoluteFill,
-  Easing,
   Img,
-  interpolate,
   Sequence,
   staticFile,
   useCurrentFrame,
 } from "remotion";
+import {
+  groupScreenTransformFor,
+  motionStateFor,
+  motionStyleFor,
+  sceneTransitionStateFor,
+} from "./motion.js";
+import { fontFamilyForRole } from "./typography.js";
 
-const clamp = {
-  extrapolateLeft: "clamp" as const,
-  extrapolateRight: "clamp" as const,
+const rgba = (hex: string, opacity: number): string => {
+  const channels = [1, 3, 5].map((start) =>
+    Number.parseInt(hex.slice(start, start + 2), 16),
+  );
+  return `rgba(${channels[0]}, ${channels[1]}, ${channels[2]}, ${opacity})`;
 };
 
-const combineTransforms = (...transforms: Array<string | undefined>): string =>
-  transforms.filter((transform) => transform).join(" ");
-
-const easingFor = (
-  preset: "linear" | "smooth" | "snappy" | undefined,
-  action: "reveal" | "emphasize" | "focus",
-) => {
-  if (preset === "linear") return Easing.linear;
-  if (preset === "smooth") return Easing.inOut(Easing.cubic);
-  if (preset === "snappy") return Easing.out(Easing.cubic);
-  return action === "focus"
-    ? Easing.inOut(Easing.cubic)
-    : Easing.out(Easing.cubic);
-};
-
-export const motionFor = (
-  draft: CompiledDraft,
-  scene: CompiledDraft["scenes"][number],
-  targetId: string,
-  localFrame: number,
-): CSSProperties => {
-  const transforms: string[] = [];
-  let opacity = 1;
-
-  for (const beat of scene.beats.filter((item) => item.targetId === targetId)) {
-    const progress = interpolate(
-      localFrame,
-      [beat.startFrame, beat.startFrame + beat.durationInFrames],
-      [0, 1],
-      { ...clamp, easing: easingFor(beat.params.easingPreset, beat.action) },
-    );
-
-    if (beat.action === "reveal") {
-      opacity *= progress;
-      const offset = (1 - progress) * beat.params.distance;
-      const translation = {
-        up: `translateY(${offset}px)`,
-        down: `translateY(${-offset}px)`,
-        left: `translateX(${offset}px)`,
-        right: `translateX(${-offset}px)`,
-      }[beat.params.direction];
-      transforms.push(translation);
-    }
-
-    if (beat.action === "emphasize") {
-      const pulse = Math.sin(progress * Math.PI);
-      transforms.push(`scale(${1 + pulse * (beat.params.scale - 1)})`);
-    }
-
-    if (beat.action === "focus") {
-      const strength = progress * beat.params.intensity;
-      const distance = draft.profile.render.spacingUnit * 12 * strength;
-      const scale = 1 + strength * (draft.profile.render.motion.focusScale - 1);
-
-      if (beat.params.camera === "pan") {
-        transforms.push(`translateX(${-distance}px)`);
-      } else if (beat.params.camera === "push") {
-        transforms.push(`translateY(${-distance / 2}px) scale(${scale})`);
-      } else {
-        transforms.push(`scale(${scale})`);
-      }
-    }
-  }
-
-  return {
-    opacity,
-    transform: transforms.length > 0 ? transforms.join(" ") : undefined,
-  };
-};
+const shadowFor = (
+  shadow: Extract<Layer, { type: "image" | "shape" }>["shadow"],
+): string | undefined =>
+  shadow
+    ? `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px ${rgba(shadow.color, shadow.opacity)}`
+    : undefined;
 
 const Placeholder = ({ label }: { label: string }) => (
   <div
@@ -117,16 +61,23 @@ const AssetView = ({
   draft,
   assetId,
   fit,
+  focalPoint = { x: 0.5, y: 0.5 },
 }: {
   draft: CompiledDraft;
   assetId: string;
   fit: "cover" | "contain";
+  focalPoint?: { x: number; y: number };
 }) => {
   const asset = draft.assets[assetId];
   return asset?.kind === "png" ? (
     <Img
       src={staticFile(asset.publicPath)}
-      style={{ width: "100%", height: "100%", objectFit: fit }}
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: fit,
+        objectPosition: `${focalPoint.x * 100}% ${focalPoint.y * 100}%`,
+      }}
     />
   ) : (
     <Placeholder label={asset?.label ?? assetId} />
@@ -144,34 +95,48 @@ const LayerView = ({
   localFrame: number;
   scene: CompiledDraft["scenes"][number];
 }) => {
-  const motion = motionFor(draft, scene, layer.id, localFrame);
+  const motion = motionStateFor(draft, scene, layer.id, localFrame);
   const baseStyle: CSSProperties = {
     position: "absolute",
     left: layer.frame.x,
     top: layer.frame.y,
     width: layer.frame.width,
     height: layer.frame.height,
-    opacity: layer.opacity * Number(motion.opacity ?? 1),
-    transform: combineTransforms(
-      `rotate(${layer.rotationDeg}deg)`,
-      motion.transform,
-    ),
+    opacity: layer.opacity * motion.opacity,
+    rotate: `${layer.rotationDeg}deg`,
+    translate: `${motion.translateX}px ${motion.translateY}px`,
+    scale: motion.scale,
     zIndex: layer.zIndex,
-    transformOrigin: "center center",
+    transformOrigin: `${motion.anchor.x * 100}% ${motion.anchor.y * 100}%`,
+    boxSizing: "border-box",
   };
 
   if (layer.type === "text") {
+    const padding = layer.padding ?? { top: 0, right: 0, bottom: 0, left: 0 };
+    const justifyContent = {
+      top: "flex-start",
+      center: "center",
+      bottom: "flex-end",
+    }[layer.verticalAlign ?? "center"];
     return (
       <div
         style={{
           ...baseStyle,
-          whiteSpace: "pre-line",
-          color: draft.profile.render.palette.text,
-          fontSize: 34,
-          fontWeight: draft.profile.render.typography.headingWeight,
-          lineHeight: 1.15,
+          whiteSpace: "pre-wrap",
+          overflowWrap: "normal",
+          color: layer.color ?? draft.profile.render.palette.text,
+          fontFamily: fontFamilyForRole(draft.profile.render, layer.role),
+          fontSize: layer.fontSize ?? 34,
+          fontWeight:
+            layer.fontWeight ?? draft.profile.render.typography.headingWeight,
+          lineHeight: layer.lineHeight ?? 1.15,
+          letterSpacing: layer.letterSpacing ?? 0,
+          textAlign: layer.textAlign ?? "left",
+          padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
+          justifyContent,
+          overflow: "hidden",
         }}
       >
         {layer.text}
@@ -180,20 +145,41 @@ const LayerView = ({
   }
 
   if (layer.type === "shape") {
+    const radius =
+      layer.shape === "circle" ? "50%" : (layer.cornerRadius ?? 22);
     return (
       <div
         style={{
           ...baseStyle,
           backgroundColor: layer.fill,
-          borderRadius: layer.shape === "circle" ? "50%" : 22,
+          borderRadius: radius,
+          border: layer.stroke
+            ? `${layer.stroke.width}px solid ${layer.stroke.color}`
+            : undefined,
+          boxShadow: shadowFor(layer.shadow),
         }}
       />
     );
   }
 
   return (
-    <div style={{ ...baseStyle, overflow: "hidden" }}>
-      <AssetView draft={draft} assetId={layer.assetId} fit={layer.fit} />
+    <div
+      style={{
+        ...baseStyle,
+        overflow: "hidden",
+        borderRadius: layer.cornerRadius ?? 0,
+        border: layer.stroke
+          ? `${layer.stroke.width}px solid ${layer.stroke.color}`
+          : undefined,
+        boxShadow: shadowFor(layer.shadow),
+      }}
+    >
+      <AssetView
+        draft={draft}
+        assetId={layer.assetId}
+        fit={layer.fit}
+        {...(layer.focalPoint ? { focalPoint: layer.focalPoint } : {})}
+      />
     </div>
   );
 };
@@ -211,7 +197,7 @@ const GroupView = ({
   localFrame: number;
   scene: CompiledDraft["scenes"][number];
 }) => {
-  const motion = motionFor(draft, scene, group.id, localFrame);
+  const transform = groupScreenTransformFor(draft, scene, group, localFrame);
   const members = group.memberIds.flatMap((memberId) => {
     const member = layersById.get(memberId);
     return member && member.type !== "group" ? [member] : [];
@@ -236,12 +222,11 @@ const GroupView = ({
         top,
         width: right - left,
         height: bottom - top,
-        opacity: group.transform.opacity * Number(motion.opacity ?? 1),
-        transform: combineTransforms(
-          `translate(${group.transform.x}px, ${group.transform.y}px) scale(${group.transform.scale}) rotate(${group.transform.rotationDeg}deg)`,
-          motion.transform,
-        ),
-        transformOrigin: "center center",
+        opacity: transform.opacity,
+        translate: `${transform.translateX}px ${transform.translateY}px`,
+        scale: transform.scale,
+        rotate: `${transform.rotationDeg}deg`,
+        transformOrigin: `${transform.anchorX * 100}% ${transform.anchorY * 100}%`,
         zIndex: group.zIndex,
       }}
     >
@@ -277,9 +262,10 @@ const SceneView = ({
 }) => {
   const localFrame = useCurrentFrame();
   const safeZone = draft.profile.render.safeZone;
-  const sceneMotion = motionFor(draft, scene, scene.id, localFrame);
+  const sceneMotion = motionStyleFor(draft, scene, scene.id, localFrame);
 
   if (scene.visual.type === "text") {
+    const display = draft.profile.render.typography.roles?.display;
     return (
       <AbsoluteFill
         style={{
@@ -292,10 +278,13 @@ const SceneView = ({
         <div
           style={{
             color: draft.profile.render.palette.text,
-            fontSize: 64,
-            fontWeight: draft.profile.render.typography.headingWeight,
-            letterSpacing: -2.5,
-            lineHeight: 1.02,
+            fontFamily: fontFamilyForRole(draft.profile.render, "display"),
+            fontSize: display?.fontSize ?? 64,
+            fontWeight:
+              display?.fontWeight ??
+              draft.profile.render.typography.headingWeight,
+            letterSpacing: display?.letterSpacing ?? -2.5,
+            lineHeight: display?.lineHeight ?? 1.02,
             whiteSpace: "pre-line",
           }}
         >
@@ -314,6 +303,7 @@ const SceneView = ({
   }
 
   if (scene.visual.type === "media") {
+    const media = draft.profile.render.appearance?.media;
     return (
       <AbsoluteFill
         style={{
@@ -322,11 +312,20 @@ const SceneView = ({
           boxSizing: "border-box",
         }}
       >
-        <AssetView
-          draft={draft}
-          assetId={scene.visual.assetId}
-          fit={scene.visual.fit}
-        />
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            overflow: "hidden",
+            borderRadius: media?.cornerRadius ?? 0,
+          }}
+        >
+          <AssetView
+            draft={draft}
+            assetId={scene.visual.assetId}
+            fit={scene.visual.fit}
+          />
+        </div>
       </AbsoluteFill>
     );
   }
@@ -367,6 +366,32 @@ const SceneView = ({
   );
 };
 
+const TransitionFrame = ({
+  draft,
+  sceneIndex,
+  children,
+}: {
+  draft: CompiledDraft;
+  sceneIndex: number;
+  children: ReactNode;
+}) => {
+  const localFrame = useCurrentFrame();
+  const state = sceneTransitionStateFor(draft, sceneIndex, localFrame);
+  return (
+    <AbsoluteFill
+      style={{
+        opacity: state.opacity,
+        translate: `${state.translateX}px ${state.translateY}px`,
+        scale: state.scale,
+        transformOrigin: `${state.anchor.x * 100}% ${state.anchor.y * 100}%`,
+        ...(state.clipPath ? { clipPath: state.clipPath } : {}),
+      }}
+    >
+      {children}
+    </AbsoluteFill>
+  );
+};
+
 export const DraftVideo = (draft: CompiledDraft) => (
   <AbsoluteFill
     style={{
@@ -375,14 +400,16 @@ export const DraftVideo = (draft: CompiledDraft) => (
       overflow: "hidden",
     }}
   >
-    {draft.scenes.map((scene) => (
+    {draft.scenes.map((scene, sceneIndex) => (
       <Sequence
         durationInFrames={scene.endFrame - scene.startFrame}
         from={scene.startFrame}
         key={scene.id}
         name={scene.id}
       >
-        <SceneView draft={draft} scene={scene} />
+        <TransitionFrame draft={draft} sceneIndex={sceneIndex}>
+          <SceneView draft={draft} scene={scene} />
+        </TransitionFrame>
       </Sequence>
     ))}
     <div

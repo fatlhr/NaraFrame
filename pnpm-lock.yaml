@@ -157,6 +157,9 @@ importers:
       '@remotion/cli':
         specifier: 4.0.521
         version: 4.0.521(lightningcss@1.33.0)(postcss@8.5.28)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@8.1.1)(typescript@7.0.2)
+      '@remotion/layout-utils':
+        specifier: 4.0.521
+        version: 4.0.521
       '@remotion/renderer':
         specifier: 4.0.521
         version: 4.0.521(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -744,6 +747,9 @@ packages:
     resolution: {integrity: sha512-qMH571qfwDpaxw6AbWBfPIXFGKJ8o67IMkugIAgchsxPBz2vNxHVeopnyDOvcqBNQsTgwrreoWv51iP4pCO4IA==}
     cpu: [x64]
     os: [win32]
+
+  '@remotion/layout-utils@4.0.521':
+    resolution: {integrity: sha512-ybudzehyYAt1acTAr+nvhCzfE4XjnuiMgokr1ts8K1BAPeKDjvgBRy5R8eJsbLQwzec4OnAx2Mf6tPGz3A//+A==}
 
   '@remotion/licensing@4.0.521':
     resolution: {integrity: sha512-KSrKeq4mBPqif4uPTW1imUOgjDdjY5Z20IKLLIpjPvFyEMILM3AltiFnBup6qM0yLFKOSHZ7s/4q1aYz1V1l6A==}
@@ -2660,6 +2666,8 @@ snapshots:
 
   '@remotion/compositor-win32-x64-msvc@4.0.521':
     optional: true
+
+  '@remotion/layout-utils@4.0.521': {}
 
   '@remotion/licensing@4.0.521': {}
 

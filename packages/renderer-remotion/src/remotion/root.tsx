@@ -1,6 +1,11 @@
 import type { CompiledDraft } from "@naraframe/core";
 import { Composition } from "remotion";
 import { DraftVideo } from "./draft-video.js";
+import { loadBundledFonts } from "./typography.js";
+import {
+  resolveVisualPreflight,
+  visualPreflightProperty,
+} from "./visual-preflight.js";
 
 const placeholderHash = "0".repeat(64);
 
@@ -41,6 +46,7 @@ const fallbackDraft: CompiledDraft = {
     },
   },
   assets: {},
+  fonts: [],
   scenes: [
     {
       id: "fallback",
@@ -49,6 +55,7 @@ const fallbackDraft: CompiledDraft = {
       visual: { type: "text", text: "NaraFrame" },
       layers: [],
       beats: [],
+      transitionOut: { type: "cut" },
     },
   ],
 };
@@ -62,11 +69,20 @@ export const RemotionRoot = () => (
     width={fallbackDraft.width}
     height={fallbackDraft.height}
     defaultProps={fallbackDraft}
-    calculateMetadata={({ props }) => ({
-      durationInFrames: props.totalFrames,
-      fps: props.fps,
-      width: props.width,
-      height: props.height,
-    })}
+    calculateMetadata={async ({ props }) => {
+      const loadedFontFamilies = await loadBundledFonts(props.fonts);
+      await document.fonts.ready;
+      const preflight = resolveVisualPreflight(props, loadedFontFamilies);
+      return {
+        durationInFrames: props.totalFrames,
+        fps: props.fps,
+        width: props.width,
+        height: props.height,
+        props: {
+          ...preflight.draft,
+          [visualPreflightProperty]: preflight.report,
+        },
+      };
+    }}
   />
 );

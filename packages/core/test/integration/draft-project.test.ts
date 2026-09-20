@@ -107,11 +107,18 @@ describe("Krakatau draft project", () => {
 
     const scene = compiled.value.scenes[0];
     const map = scene?.layers.find((layer) => layer.id === "map-image");
+    const copy = scene?.layers.find((layer) => layer.id === "context-copy");
     const reveal = scene?.beats.find((beat) => beat.id === "reveal-map");
     const emphasize = scene?.beats.find((beat) => beat.id === "pulse-marker");
     const focus = scene?.beats.find((beat) => beat.id === "focus-map");
     expect(map).toMatchObject({
       frame: { x: 65, y: 180, width: 410, height: 307.5 },
+    });
+    expect(copy).toMatchObject({
+      type: "text",
+      fontSize: 34,
+      lineHeight: 1.15,
+      overflowPolicy: "shrink",
     });
     expect(reveal).toMatchObject({
       action: "reveal",
@@ -315,6 +322,37 @@ describe("Krakatau draft project", () => {
     }
     expect(loaded.issues.map((issue) => issue.code)).toContain(
       "ASSET_HASH_MISMATCH",
+    );
+  });
+
+  it("stays free of M0.10 variety warnings at project scope after its transition migration", async () => {
+    const loaded = await loadPlanProject(sampleRoot);
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+
+    const compiled = compileDraft(loaded.value.source);
+
+    expect(compiled.ok).toBe(true);
+    if (!compiled.ok) return;
+    expect(compiled.issues.map((issue) => issue.code)).not.toContain(
+      "SINGLE_TRANSITION_TYPE",
+    );
+  });
+
+  it("does not run project-wide variety checks against a single scene", async () => {
+    const loaded = await loadPlanProject(sampleRoot);
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+
+    const compiled = compileDraft(loaded.value.source, {
+      type: "scene",
+      sceneId: "context",
+    });
+
+    expect(compiled.ok).toBe(true);
+    if (!compiled.ok) return;
+    expect(compiled.issues).not.toContainEqual(
+      expect.objectContaining({ code: "SINGLE_TRANSITION_TYPE" }),
     );
   });
 });

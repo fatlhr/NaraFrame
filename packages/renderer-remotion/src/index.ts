@@ -8,4 +8,8 @@ export type {
   RenderDraftRequest,
   RenderedDraft,
 } from "./render-draft.js";
-export { renderDraft } from "./render-draft.js";
+export {
+  isVisualPreflightError,
+  renderDraft,
+  VisualPreflightError,
+} from "./render-draft.js";

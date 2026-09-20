@@ -16,6 +16,40 @@ export const FrameSchema = z
   })
   .strict();
 
+export const InsetsSchema = z
+  .object({
+    top: z.number().nonnegative(),
+    right: z.number().nonnegative(),
+    bottom: z.number().nonnegative(),
+    left: z.number().nonnegative(),
+  })
+  .strict();
+
+export const FocalPointSchema = z
+  .object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })
+  .strict();
+
+export const StrokeSchema = z
+  .object({ color: ColorSchema, width: z.number().min(0).max(40) })
+  .strict();
+
+export const ShadowSchema = z
+  .object({
+    color: ColorSchema,
+    opacity: z.number().min(0).max(1),
+    offsetX: z.number().min(-200).max(200),
+    offsetY: z.number().min(-200).max(200),
+    blur: z.number().min(0).max(200),
+  })
+  .strict();
+
+export const TypographyRoleSchema = z.enum([
+  "display",
+  "heading",
+  "body",
+  "label",
+]);
+
 const LayerPresentationShape = {
   opacity: z.number().min(0).max(1),
   rotationDeg: z.number(),
@@ -29,6 +63,18 @@ const TextLayerSchema = z
     type: z.literal("text"),
     text: z.string().min(1),
     frame: FrameSchema,
+    role: TypographyRoleSchema.optional(),
+    fontSize: z.number().min(12).max(320).optional(),
+    fontWeight: z.number().int().min(100).max(900).optional(),
+    lineHeight: z.number().min(0.8).max(2).optional(),
+    letterSpacing: z.number().min(-20).max(40).optional(),
+    color: ColorSchema.optional(),
+    textAlign: z.enum(["left", "center", "right"]).optional(),
+    verticalAlign: z.enum(["top", "center", "bottom"]).optional(),
+    padding: InsetsSchema.optional(),
+    maxLines: z.number().int().min(1).max(20).optional(),
+    overflowPolicy: z.enum(["error", "shrink"]).optional(),
+    avoidLayerIds: z.array(IdSchema).max(20).optional(),
     ...LayerPresentationShape,
   })
   .strict();
@@ -40,6 +86,10 @@ const ImageLayerSchema = z
     assetId: IdSchema,
     fit: z.enum(["cover", "contain"]),
     frame: FrameSchema,
+    focalPoint: FocalPointSchema.optional(),
+    cornerRadius: z.number().min(0).max(960).optional(),
+    stroke: StrokeSchema.optional(),
+    shadow: ShadowSchema.optional(),
     ...LayerPresentationShape,
   })
   .strict();
@@ -51,6 +101,9 @@ const ShapeLayerSchema = z
     shape: z.enum(["rectangle", "circle"]),
     fill: ColorSchema,
     frame: FrameSchema,
+    cornerRadius: z.number().min(0).max(960).optional(),
+    stroke: StrokeSchema.optional(),
+    shadow: ShadowSchema.optional(),
     ...LayerPresentationShape,
   })
   .strict();
@@ -60,6 +113,31 @@ const GroupLayerSchema = z
     id: IdSchema,
     type: z.literal("group"),
     memberIds: z.array(IdSchema).min(1),
+    frame: FrameSchema.optional(),
+    layout: z
+      .discriminatedUnion("type", [
+        z.object({ type: z.literal("absolute") }).strict(),
+        z
+          .object({
+            type: z.literal("stack"),
+            direction: z.enum(["horizontal", "vertical"]),
+            gap: z.number().min(0).max(400),
+            padding: InsetsSchema,
+            align: z.enum(["start", "center", "end", "stretch"]),
+          })
+          .strict(),
+        z
+          .object({
+            type: z.literal("grid"),
+            columns: z.number().int().min(1).max(12),
+            columnGap: z.number().min(0).max(400),
+            rowGap: z.number().min(0).max(400),
+            padding: InsetsSchema,
+            align: z.enum(["start", "center", "end", "stretch"]),
+          })
+          .strict(),
+      ])
+      .optional(),
     transform: z
       .object({
         x: z.number(),
@@ -72,7 +150,16 @@ const GroupLayerSchema = z
     zIndex: z.number().int(),
     slot: IdSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((group, context) => {
+    if (group.layout && group.layout.type !== "absolute" && !group.frame) {
+      context.addIssue({
+        code: "custom",
+        message: "Stack and grid groups require a frame",
+        path: ["frame"],
+      });
+    }
+  });
 
 export const LayerSchema = z.discriminatedUnion("type", [
   TextLayerSchema,
@@ -150,6 +237,7 @@ const FocusBeatSchema = z
       .object({
         camera: z.enum(["push", "pan", "zoom"]),
         intensity: z.number().min(0).max(1),
+        anchor: FocalPointSchema.optional(),
         easingPreset: EasingPresetSchema.optional(),
       })
       .strict(),
@@ -162,6 +250,41 @@ export const BeatSchema = z.discriminatedUnion("action", [
   FocusBeatSchema,
 ]);
 
+const TransitionDurationSchema = z.number().int().min(200).max(1200);
+
+/**
+ * Declares how THIS scene exits into the next one. The first scene's value
+ * has no predecessor to affect; the last scene's value has no successor to
+ * carry it into, and the compiler reports that as a warning rather than
+ * silently dropping it. `cut` remains the zero-effect default — every
+ * primitive beyond it needs a bounded duration that must fit inside both
+ * neighbouring scenes' own runtime (see TRANSITION_DURATION_EXCEEDS_SCENE).
+ */
+export const TransitionSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("cut") }).strict(),
+  z
+    .object({
+      type: z.literal("push-through"),
+      durationMs: TransitionDurationSchema,
+      direction: z.enum(["up", "down", "left", "right"]),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("mask-reveal"),
+      durationMs: TransitionDurationSchema,
+      shape: z.enum(["circle", "rectangle"]),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("match-cut"),
+      durationMs: TransitionDurationSchema,
+      anchor: FocalPointSchema.optional(),
+    })
+    .strict(),
+]);
+
 export const SceneSchema = z
   .object({
     id: IdSchema,
@@ -169,7 +292,7 @@ export const SceneSchema = z
     durationMs: PositiveIntegerSchema,
     visual: SceneVisualSchema,
     beats: z.array(BeatSchema),
-    transition: z.object({ type: z.literal("cut") }).strict(),
+    transition: TransitionSchema,
   })
   .strict();
 
@@ -204,6 +327,37 @@ export const ScenesSchema = z
           });
         }
         layersById.set(layer.id, layer);
+      });
+
+      layers.forEach((layer, layerIndex) => {
+        if (layer.type !== "text" || !layer.avoidLayerIds) {
+          return;
+        }
+
+        const avoided = new Set<string>();
+        layer.avoidLayerIds.forEach((avoidId, avoidIndex) => {
+          if (
+            avoidId === layer.id ||
+            !layersById.has(avoidId) ||
+            avoided.has(avoidId)
+          ) {
+            context.addIssue({
+              code: "custom",
+              message:
+                "Text avoid targets must be unique IDs of other layers in the same scene",
+              path: [
+                "scenes",
+                sceneIndex,
+                "visual",
+                "layers",
+                layerIndex,
+                "avoidLayerIds",
+                avoidIndex,
+              ],
+            });
+          }
+          avoided.add(avoidId);
+        });
       });
 
       layers.forEach((layer, layerIndex) => {
@@ -286,8 +440,14 @@ export const ScenesSchema = z
   });
 
 export type Frame = z.infer<typeof FrameSchema>;
+export type Insets = z.infer<typeof InsetsSchema>;
+export type FocalPoint = z.infer<typeof FocalPointSchema>;
+export type Stroke = z.infer<typeof StrokeSchema>;
+export type Shadow = z.infer<typeof ShadowSchema>;
+export type TypographyRole = z.infer<typeof TypographyRoleSchema>;
 export type Layer = z.infer<typeof LayerSchema>;
 export type Beat = z.infer<typeof BeatSchema>;
+export type Transition = z.infer<typeof TransitionSchema>;
 export type SceneVisual = z.infer<typeof SceneVisualSchema>;
 export type Scene = z.infer<typeof SceneSchema>;
 export type Scenes = z.infer<typeof ScenesSchema>;

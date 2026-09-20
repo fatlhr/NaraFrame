@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "current-issues",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "render": {
     "palette": {
       "background": "#11130F",
@@ -12,7 +12,46 @@
     "typography": {
       "fontFamily": "Arial, Helvetica, sans-serif",
       "headingWeight": 800,
-      "bodyWeight": 500
+      "bodyWeight": 500,
+      "minimumFontSize": 28,
+      "roles": {
+        "display": {
+          "fontSize": 128,
+          "fontWeight": 800,
+          "lineHeight": 1.02,
+          "letterSpacing": -3
+        },
+        "heading": {
+          "fontSize": 80,
+          "fontWeight": 800,
+          "lineHeight": 1.08,
+          "letterSpacing": -1.5
+        },
+        "body": {
+          "fontSize": 52,
+          "fontWeight": 500,
+          "lineHeight": 1.22,
+          "letterSpacing": 0
+        },
+        "label": {
+          "fontSize": 32,
+          "fontWeight": 800,
+          "lineHeight": 1.1,
+          "letterSpacing": 1.5
+        }
+      }
+    },
+    "appearance": {
+      "radius": { "small": 20, "medium": 44, "large": 72 },
+      "stroke": { "color": "#E8E0D2", "width": 0 },
+      "shadow": {
+        "color": "#000000",
+        "opacity": 0.18,
+        "offsetX": 0,
+        "offsetY": 20,
+        "blur": 40
+      },
+      "media": { "fit": "cover", "cornerRadius": 44 }
     },
     "safeZone": {
       "top": 160,

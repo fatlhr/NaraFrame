@@ -9,6 +9,77 @@ import {
   Sha256Schema,
   VersionSchema,
 } from "./primitives.js";
+import { ShadowSchema, StrokeSchema } from "./scene.js";
+
+const TypographyRoleTokenSchema = z
+  .object({
+    fontSize: z.number().min(12).max(320),
+    fontWeight: z.number().int().min(100).max(900),
+    lineHeight: z.number().min(0.8).max(2),
+    letterSpacing: z.number().min(-20).max(40),
+  })
+  .strict();
+
+const AppearanceTokensSchema = z
+  .object({
+    radius: z
+      .object({
+        small: z.number().min(0).max(960),
+        medium: z.number().min(0).max(960),
+        large: z.number().min(0).max(960),
+      })
+      .strict(),
+    stroke: StrokeSchema,
+    shadow: ShadowSchema,
+    media: z
+      .object({
+        fit: z.enum(["cover", "contain"]),
+        cornerRadius: z.number().min(0).max(960),
+      })
+      .strict(),
+  })
+  .strict();
+
+/**
+ * Bounds on how much a project may repeat itself. Absent fields fall back to
+ * VARIETY_DEFAULTS in the compiler; `severity` decides whether a repetition
+ * finding blocks publication or only reports.
+ */
+/**
+ * A profile-declared vocabulary of permitted choices — the menu bang-motion
+ * enforces through advisory prompt rules, made checkable instead: a scene
+ * whose reveal direction, transition type, or focus camera falls outside
+ * the declared set is a compile-time error, not a style opinion an agent
+ * may ignore. Absent (the default) means unrestricted, so existing
+ * profiles are unaffected until they opt in.
+ */
+const ChoiceMenuSchema = z
+  .object({
+    entryDirections: z
+      .array(z.enum(["up", "down", "left", "right"]))
+      .min(1)
+      .optional(),
+    transitionTypes: z
+      .array(z.enum(["cut", "push-through", "mask-reveal", "match-cut"]))
+      .min(1)
+      .optional(),
+    focusCameras: z
+      .array(z.enum(["push", "pan", "zoom"]))
+      .min(1)
+      .optional(),
+  })
+  .strict();
+
+const VarietyPolicySchema = z
+  .object({
+    maxConsecutiveSameEntry: z.number().int().min(1).max(20).optional(),
+    maxScenesWithoutViewpointChange: z.number().int().min(1).max(20).optional(),
+    requireMultipleTransitionTypes: z.boolean().optional(),
+    requireMultipleTypeRoles: z.boolean().optional(),
+    severity: z.enum(["warning", "error"]).optional(),
+    menu: ChoiceMenuSchema.optional(),
+  })
+  .strict();
 
 export const RenderTokensSchema = z
   .object({
@@ -23,10 +94,28 @@ export const RenderTokensSchema = z
     typography: z
       .object({
         fontFamily: z.string().trim().min(1),
+        /** Applied to `role: "display"` text (and scene-level "text"
+         * visuals) only, so a project can use one distinct display face
+         * without touching body/heading/label. Must match a bundled
+         * `assets[].family` of `kind: "font"`, or a real collision/overflow
+         * check can never load it and FONT_NOT_LOADED fires honestly. */
+        displayFontFamily: z.string().trim().min(1).optional(),
         headingWeight: z.number().int().min(100).max(900),
         bodyWeight: z.number().int().min(100).max(900),
+        minimumFontSize: z.number().min(12).max(160).optional(),
+        roles: z
+          .object({
+            display: TypographyRoleTokenSchema,
+            heading: TypographyRoleTokenSchema,
+            body: TypographyRoleTokenSchema,
+            label: TypographyRoleTokenSchema,
+          })
+          .strict()
+          .optional(),
       })
       .strict(),
+    appearance: AppearanceTokensSchema.optional(),
+    variety: VarietyPolicySchema.optional(),
     safeZone: z
       .object({
         top: z.number().int().nonnegative(),
@@ -72,6 +161,10 @@ const ProfileAssetBaseSchema = z
     kind: z.enum(["font", "png"]),
     path: SafeRelativePathSchema,
     sha256: Sha256Schema.optional(),
+    /** Font-only: the CSS family name the renderer registers this face
+     * under. Required for `kind: "font"`, forbidden otherwise. */
+    family: z.string().trim().min(1).optional(),
+    weight: z.number().int().min(100).max(900).optional(),
   })
   .strict()
   .superRefine((asset, context) => {
@@ -91,6 +184,21 @@ const ProfileAssetBaseSchema = z
             ? "PNG profile assets must end in .png"
             : "Font profile assets must end in .ttf, .otf, or .woff2",
         path: ["path"],
+      });
+    }
+
+    if (asset.kind === "font" && !asset.family) {
+      context.addIssue({
+        code: "custom",
+        message: "Font profile assets must declare a family name",
+        path: ["family"],
+      });
+    }
+    if (asset.kind === "png" && (asset.family || asset.weight !== undefined)) {
+      context.addIssue({
+        code: "custom",
+        message: "PNG profile assets cannot declare family or weight",
+        path: ["family"],
       });
     }
   });

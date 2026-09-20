@@ -3,13 +3,53 @@ import {
   IdSchema,
   NonNegativeIntegerSchema,
   PositiveIntegerSchema,
+  RelativeFontPathSchema,
   RelativePngPathSchema,
   SchemaVersionSchema,
   Sha256Schema,
   VersionSchema,
 } from "./primitives.js";
 import { RenderTokensSchema } from "./profile.js";
-import { LayerSchema } from "./scene.js";
+import { FocalPointSchema, LayerSchema } from "./scene.js";
+
+/** A bundled profile font ready to register before measurement/preflight. */
+export const CompiledFontSchema = z
+  .object({
+    family: z.string().trim().min(1),
+    weight: z.number().int().min(100).max(900),
+    publicPath: RelativeFontPathSchema,
+    sha256: Sha256Schema,
+  })
+  .strict();
+
+/**
+ * Frame-space counterpart of `TransitionSchema`: `durationMs` becomes
+ * `durationInFrames` once fps is known, same shape otherwise.
+ */
+export const CompiledTransitionSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("cut") }).strict(),
+  z
+    .object({
+      type: z.literal("push-through"),
+      durationInFrames: PositiveIntegerSchema,
+      direction: z.enum(["up", "down", "left", "right"]),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("mask-reveal"),
+      durationInFrames: PositiveIntegerSchema,
+      shape: z.enum(["circle", "rectangle"]),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("match-cut"),
+      durationInFrames: PositiveIntegerSchema,
+      anchor: FocalPointSchema.optional(),
+    })
+    .strict(),
+]);
 
 const CompiledAssetSchema = z.discriminatedUnion("kind", [
   z
@@ -83,6 +123,7 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
         .object({
           camera: z.enum(["push", "pan", "zoom"]),
           intensity: z.number().min(0).max(1),
+          anchor: FocalPointSchema.optional(),
           easingPreset: EasingPresetSchema.optional(),
         })
         .strict(),
@@ -114,6 +155,8 @@ const CompiledSceneSchema = z
     visual: CompiledVisualSchema,
     layers: z.array(LayerSchema),
     beats: z.array(CompiledBeatSchema),
+    /** How this scene exits into the next one; `cut` on the last scene. */
+    transitionOut: CompiledTransitionSchema,
   })
   .strict()
   .refine((scene) => scene.endFrame > scene.startFrame, {
@@ -142,6 +185,7 @@ export const CompiledDraftSchema = z
       })
       .strict(),
     assets: z.record(IdSchema, CompiledAssetSchema),
+    fonts: z.array(CompiledFontSchema),
     scenes: z.array(CompiledSceneSchema).min(1),
   })
   .strict()
@@ -159,4 +203,6 @@ export const CompiledDraftSchema = z
 
 export type CompiledAsset = z.infer<typeof CompiledAssetSchema>;
 export type CompiledBeat = z.infer<typeof CompiledBeatSchema>;
+export type CompiledFont = z.infer<typeof CompiledFontSchema>;
+export type CompiledTransition = z.infer<typeof CompiledTransitionSchema>;
 export type CompiledDraft = z.infer<typeof CompiledDraftSchema>;

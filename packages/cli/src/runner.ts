@@ -7,6 +7,7 @@ import {
   type Issue,
   loadPlanProject,
 } from "@naraframe/core";
+import { isVisualPreflightError } from "@naraframe/renderer-remotion";
 import {
   type CommandEventInput,
   type CommandName,
@@ -530,7 +531,7 @@ const previewCommand = async (
       mode: "draft",
       scope: compiled.value.scope,
       artifacts,
-      issues,
+      issues: published.issues,
       data: {
         label: compiled.value.label,
         muted: true,
@@ -599,13 +600,18 @@ export const runCommandLine = async (
       !previewRenameDispatched &&
       (options.signal?.aborted ||
         (error instanceof Error && error.name === "AbortError"));
+    const visualPreflightFailed = isVisualPreflightError(error);
     execution = {
-      exitCode: interrupted ? 130 : 2,
+      exitCode: interrupted ? 130 : visualPreflightFailed ? 1 : 2,
       event: commonEvent(command, {
         status: interrupted ? "interrupted" : "failed",
         success: false,
-        readiness: "not-ready",
-        issues: [interrupted ? interruptedIssue() : systemIssue(error)],
+        readiness: visualPreflightFailed ? "invalid" : "not-ready",
+        issues: interrupted
+          ? [interruptedIssue()]
+          : visualPreflightFailed
+            ? error.issues
+            : [systemIssue(error)],
       }),
     };
   }

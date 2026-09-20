@@ -439,6 +439,7 @@ describe("public CLI command contract", () => {
           buildDirectory: "/fixture/preview/builds/committed-preview",
           currentPointer: "/fixture/preview/current.json",
           manifestSha256: "a".repeat(64),
+          issues: [],
           rendered: {
             outputPath: "/fixture/preview/builds/committed-preview/preview.mp4",
             durationInFrames: options.draft.totalFrames,
@@ -447,6 +448,7 @@ describe("public CLI command contract", () => {
             fps: options.draft.fps,
             browserExecutable: "/fixture/chrome",
             remotionVersion: "4.0.521",
+            visualPreflight: { checkedFrames: [], issues: [] },
           },
         };
       },
@@ -570,7 +572,9 @@ describe("public CLI command contract", () => {
       expect.objectContaining({
         command: "status",
         success: false,
-        issues: [expect.objectContaining({ code: "PREVIEW_METADATA_INVALID" })],
+        issues: expect.arrayContaining([
+          expect.objectContaining({ code: "PREVIEW_METADATA_INVALID" }),
+        ]),
       }),
     ]);
   });
@@ -722,9 +726,9 @@ describe("public CLI command contract", () => {
           command: "status",
           success: false,
           artifacts: {},
-          issues: [
+          issues: expect.arrayContaining([
             expect.objectContaining({ code: "PREVIEW_METADATA_INVALID" }),
-          ],
+          ]),
         }),
       ]);
     }
@@ -761,7 +765,9 @@ describe("public CLI command contract", () => {
           previewState: "stale",
           previewSourceRevision: initialEvent.sourceRevision,
         }),
-        issues: [expect.objectContaining({ code: "PREVIEW_STALE" })],
+        issues: expect.arrayContaining([
+          expect.objectContaining({ code: "PREVIEW_STALE" }),
+        ]),
       }),
     ]);
     expect(

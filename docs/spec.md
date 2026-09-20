@@ -1,11 +1,11 @@
 # NaraFrame MVP Product and Technical Specification
 
-Status: Approved design baseline; implementation requires milestone planning
+Status: Active product contract; M0.9 visual-fidelity correction approved
 
-Revision: 0.3
+Revision: 0.4
 
-Date: 2026-09-07
-Implementation status: Not started
+Date: 2026-09-14
+Implementation status: M0.1–M0.8 verified; M0.9 planned; M1 paused until the M0.9 gate passes
 
 ## 1. Summary
 
@@ -60,6 +60,10 @@ Authors choose semantic visual forms and actions. Raw animation keyframes are no
 ### NF-PR-07: Measured extensibility
 
 MVP favors a small tested capability set. Unsupported recurring needs become reusable engine capabilities after pilot evidence. Arbitrary per-project React/TSX scenes are excluded.
+
+### NF-PR-08: Layout-safe output
+
+Declared geometry and appearance MUST render predictably. Required text may not silently clip, overflow, or collide with other required text. Image masking must match its declared shape. Automatic text fitting, when requested, is bounded by the active profile's minimum readable size; otherwise the build fails with an actionable issue.
 
 ## 4. Scope boundary
 
@@ -307,7 +311,7 @@ The root artifacts above are an editable working copy. Managed preview/render co
 
 ### NF-PJ-01: Schema versioning
 
-Every machine-readable source artifact MUST declare `schemaVersion` (each event for JSONL). MVP reads schema version 1 only. Unsupported versions fail with a migration-oriented message; no migration command is required until a later schema exists. Spec revision 0.3 is a design revision, not a deployed schema migration.
+Every machine-readable source artifact MUST declare `schemaVersion` (each event for JSONL). MVP reads schema version 1 only. Unsupported versions fail with a migration-oriented message; no migration command is required until a later schema exists. Spec revision 0.4 is a design revision, not a deployed schema migration.
 
 ### NF-PJ-02: State derivation
 
@@ -337,7 +341,7 @@ profiles/current-issues/
 `profile.json` is machine-resolved. It has separate `render` and provider-neutral `production` sections. It contains:
 
 - `id`, `version`, and profile schema version;
-- `render`: palette/typography tokens, safe zones, spacing, scene/layout/motion defaults, captions, and mix defaults;
+- `render`: palette, typography roles, minimum readable type sizes, shape/media appearance tokens, safe zones, spacing, scene/layout/motion defaults, captions, and mix defaults;
 - `production`: stable voice identity/style signature, illustration style signature, timing requirements, and asset policy used by the skill and profile invalidation;
 - recommended duration and validation thresholds;
 - locked and overridable configuration paths;
@@ -433,7 +437,20 @@ group
 
 M0 requires text, image, shape, and group. SVG/video support is enabled only after their safety/decode gates pass. Layers may declare static geometry, crop/fit behavior, rotation, opacity, z-order, and semantic layout slots. Static coordinates use the 1080 × 1920 design coordinate system and are checked against profile safe zones.
 
-### 11.4 Semantic beats
+### 11.4 Layer appearance and bounded layout
+
+Text layers select a profile typography role such as `display`, `heading`, `body`, or `label`, with bounded per-layer overrides. A text box may declare `maxLines` and one explicit overflow policy:
+
+- `error` is the default and blocks preview when required copy does not fit;
+- `shrink` may reduce type only to the profile's minimum readable size, then fails if the content still does not fit.
+
+Silent clipping and unbounded auto-shrink are prohibited. Text measurement uses the actual loaded font, size, weight, line height, letter spacing, and box width. Font readiness is part of renderer preflight.
+
+Image and shape layers may declare corner radius, stroke, and shadow using bounded tokens or validated numeric values. Image crop uses `fit` plus an optional normalized focal point. The rendered media wrapper clips to the same declared geometry so rounded images cannot remain visually square.
+
+Groups remain non-recursive in the initial implementation and may use `absolute`, `stack`, or `grid` layout with bounded padding, gap, and alignment. Existing schema-version-1 projects remain readable: omitted fields resolve through profile and engine defaults instead of acquiring project-specific renderer code.
+
+### 11.5 Semantic beats
 
 M0 actions are `reveal`, `emphasize`, and `focus`. Expand toward the following envelope when reference videos require it:
 
@@ -463,9 +480,11 @@ easingPreset
 
 Raw keyframes, arbitrary CSS/JS animation, and arbitrary executable components are excluded.
 
-### 11.5 Transitions
+### 11.6 Camera continuity and transitions
 
-M0 uses `cut`; add `push` and `mask` with tested recipes in M2. Transitions occur within existing visual intervals and MUST NOT alter the resolved narration timeline duration.
+M0 uses `cut`. M0.9 may add a bounded overlap or object-wipe transition only when the LBC benchmark demonstrates the need; later recipes may add `push` and `mask`. Transitions occur within existing visual intervals and MUST NOT alter the resolved narration timeline duration.
+
+`focus` can move a whole scene or declared group as a camera/world rig around a bounded focal anchor. Authors select semantic presets and targets, not raw keyframes, arbitrary CSS/JS animation, or GSAP timelines. Scene-to-scene continuity SHOULD preserve a visual through-line when the content supports one; it must not force the same motion template onto unrelated topics.
 
 ## 12. Narration-driven timeline
 
@@ -735,12 +754,16 @@ Errors block the requested stage. Warnings are reported but do not change exit c
 - beat outside scene;
 - required word timing absent;
 - caption outside required safe zone or clipped;
-- text overflow that makes required content invisible;
+- `TEXT_OVERFLOW`: required text exceeds its resolved box or `maxLines`;
+- `TEXT_COLLISION`: required text intersects another required text or an explicitly avoided layer at a sampled state;
+- `MIN_FONT_SIZE_VIOLATION`: fitting would require text below the profile minimum;
+- `FONT_NOT_LOADED`: the resolved font is unavailable when measurement/render begins;
+- `IMAGE_MASK_INVALID`: rendered image clipping does not match its declared mask geometry;
 - unsupported motion/layout/transition;
 - duration beyond configured safety limit;
 - renderer dependency unavailable.
 
-Production-stage validation is coordinated by the CLI and contains two internal passes: renderer-independent static validation followed by renderer preflight for loaded fonts/media, text measurement, caption safe zones, and representative scene states. Preflight records the exact checked frames/states. It does not prove every intervening frame is safe or claim aesthetic quality. Intentional offscreen entry/exit is not automatically clipping failure; inspect motion boundaries/video as separate evidence.
+Production-stage validation is coordinated by the CLI and contains two internal passes: renderer-independent static validation followed by renderer preflight for loaded fonts/media, text measurement, mask geometry, caption safe zones, and representative scene states. Draft preview runs the same visual preflight for every real asset and font it uses. Collision checks cover text against other required text and explicit avoid targets; a text layer may intentionally overlap its declared background/card. Preflight samples scene entry, settled states, semantic-beat peaks, transition boundaries, and the last visible state, and records the exact frames/states. It does not prove every intervening frame is safe or claim aesthetic quality. Intentional offscreen entry/exit is not automatically clipping failure; inspect motion boundaries/video as separate evidence.
 
 ### NF-PV-01: Scoped validation and draft readiness
 
@@ -783,7 +806,7 @@ Resolve these under `preview/builds/<build-id>/` via `preview/current.json`. Def
 
 ### NF-QA-02: Contact sheet
 
-The contact sheet includes at least one representative frame per scene plus frames associated with selected semantic beats or visual warnings. `frames.json` records the exact frame numbers/reasons.
+The contact sheet includes scene entry, a settled composition, relevant semantic-beat peaks, transition boundaries, and the last visible state as applicable, rather than only one arbitrary frame per scene. It also includes frames associated with visual warnings. `frames.json` records the exact frame numbers/reasons and whether each frame was part of layout preflight.
 
 ### NF-QA-03: Final output
 
@@ -797,7 +820,7 @@ Wall-clock metadata is excluded from the deterministic fingerprint.
 
 ### NF-QA-05: Human visual review
 
-Automated checks do not establish motion quality. MVP skill requires review of preview video and contact sheet before final rendering unless explicitly waived by the user.
+Automated checks do not establish motion quality. MVP skill requires review of preview video and contact sheet before final rendering unless explicitly waived by the user. Review covers actual corner masking, type hierarchy, text collision/overflow, crop and focal-point intent, motion continuity, and whether each shot communicates one dominant statement. A technically valid preview may still fail this visual gate.
 
 ## 21. Security and trust boundaries
 
@@ -825,6 +848,8 @@ Contact sheet: renderer stills plus a proven image-composition library
 
 All `remotion` and `@remotion/*` packages MUST use the same exact version. No browser Studio/Vite application is created in MVP.
 
+M0.9 may add the exact-version-matched `@remotion/layout-utils` package for deterministic text measurement and fitting. NaraFrame does not adopt Bang Motion's HTML/GSAP/CDN runtime; Bang Motion is a composition and review reference only, preserving NaraFrame's declarative, offline, deterministic Remotion pipeline.
+
 M0 includes a narrow spike to lock supported versions and the formats/settings needed for its first draft. M1/M2 extend the tested matrix as narrated/video/illustrated recipes need it. Current local installations are evidence for development availability, not product requirements. Create the initial lockfile with an ordinary install, then verify frozen reinstall; do not request frozen install before a lockfile exists.
 
 The spike MUST prove explicit offline browser use; relying on Remotion's implicit browser download behavior is prohibited during preview/render.
@@ -845,9 +870,9 @@ The renderer defaults to a 180-second safety limit to catch accidental timestamp
 - A contrasting test-only profile to prove switching/invalidation without choosing the user's next public niche.
 - Two independent source projects plus one derived profile-switch variant.
 - Production capability recipe, budget/receipts, block-local voice revision, and source edit/undo.
-- Technical and visual QA evidence.
+- Technical and visual QA evidence, including the corrective LBC parity benchmark.
 
-Delivery gates are M0 first 15–30s visual draft through skill/CLI, M1 narrated pilot with budget and reversible spoken edits, M2 reference projects/profile variation/scoped preview/music/SFX/needed recipes, and M3 owner dogfooding/reliability evidence. Each gate includes safety for the features it introduces. M0 is not the completed narrated MVP. Detailed sequencing and milestone evidence live in `docs/plan.md`.
+Delivery gates are M0 first 15–30s visual draft through skill/CLI, M0.9 visual-fidelity correction using the LBC benchmark, M1 narrated pilot with budget and reversible spoken edits, M2 reference projects/profile variation/scoped preview/music/SFX/needed recipes, and M3 owner dogfooding/reliability evidence. Each gate includes safety for the features it introduces. M0 remains complete for its original technical draft scope, but M1 may not start until M0.9 proves safe typography, masks, and revision-tolerant layout. Detailed sequencing and milestone evidence live in `docs/plan.md`.
 
 ## 25. Explicit non-goals
 
@@ -958,6 +983,17 @@ Given three voice blocks, change the middle block's speech. Initially regenerate
 - Stale `--expect` returns `REVISION_CONFLICT` without overwrite.
 - Invalid manual working-copy edits are preserved and reported, not silently ignored in a render of old sources.
 
+### NF-AC-15: Visual fidelity and revision safety
+
+Using the same LBC source intent and local assets as the direct-Remotion reference:
+
+- every image declared inside a rounded frame is visibly clipped to that radius at rest and during motion;
+- required text has no overlap, unintended clipping, or out-of-frame content at recorded preflight states and during full-video review;
+- typography roles create a clear display/heading/body/label hierarchy without per-project renderer code;
+- changing representative copy length either reflows within declared stack/grid bounds or fails with `TEXT_OVERFLOW`/`MIN_FONT_SIZE_VIOLATION`, never silently corrupting the frame;
+- crop/focal-point, stroke, shadow, and padding changes are expressible through profile/project artifacts;
+- Fatih accepts the full silent video plus the frames around seconds 8, 15, 21, and 27 as sufficiently faithful for NaraFrame to resume M1.
+
 All acceptance criteria above are requirements, not passed tests. Current implementation/runtime evidence is tracked in `docs/refine-spec.md` and `docs/plan.md`.
 
 ## 27. Post-MVP evidence gate
@@ -975,3 +1011,7 @@ The first GUI may edit text/narration, asset selection and crop/transform, scene
 - Remotion Player: https://www.remotion.dev/docs/player
 - Remotion deterministic randomness guidance: https://www.remotion.dev/docs/using-randomness
 - Remotion licensing and version guidance: https://www.remotion.dev/docs/licensing
+- Remotion text measurement: https://www.remotion.dev/docs/layout-utils/measure-text
+- Remotion text fitting: https://www.remotion.dev/docs/layout-utils/fit-text
+- Remotion transition sequencing: https://www.remotion.dev/docs/transitions/transitionseries
+- Bang Motion composition reference, pinned review snapshot: https://github.com/bangtutorial/bang-motion/tree/0f1bd1103835890354496d009af62885fe0a05d5

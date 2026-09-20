@@ -1,7 +1,11 @@
 import { access, mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { CompiledDraft } from "@naraframe/core";
+import {
+  type CompiledDraft,
+  CompiledDraftSchema,
+  type Issue,
+} from "@naraframe/core";
 import { bundle } from "@remotion/bundler";
 import {
   makeCancelSignal,
@@ -9,6 +13,10 @@ import {
   selectComposition,
 } from "@remotion/renderer";
 import { VERSION as remotionVersion } from "remotion";
+import {
+  type VisualPreflightReport,
+  visualPreflightProperty,
+} from "./remotion/visual-preflight.js";
 
 const macChrome =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -57,7 +65,44 @@ export interface RenderedDraft {
   fps: number;
   browserExecutable: string;
   remotionVersion: string;
+  visualPreflight: VisualPreflightReport;
 }
+
+export class VisualPreflightError extends Error {
+  readonly issues: Issue[];
+
+  constructor(issues: Issue[]) {
+    super("Visual preflight rejected the draft before rendering.");
+    this.name = "VisualPreflightError";
+    this.issues = issues;
+  }
+}
+
+export const isVisualPreflightError = (
+  error: unknown,
+): error is VisualPreflightError =>
+  error instanceof Error &&
+  error.name === "VisualPreflightError" &&
+  Array.isArray((error as VisualPreflightError).issues);
+
+const preflightFromComposition = (composition: {
+  props: Record<string, unknown>;
+}): { draft: CompiledDraft; report: VisualPreflightReport } => {
+  const candidate = { ...composition.props };
+  const report = candidate[visualPreflightProperty] as
+    | VisualPreflightReport
+    | undefined;
+  delete candidate[visualPreflightProperty];
+  const draft = CompiledDraftSchema.parse(candidate);
+  if (
+    !report ||
+    !Array.isArray(report.issues) ||
+    !Array.isArray(report.frames)
+  ) {
+    throw new Error("Renderer did not return visual preflight metadata.");
+  }
+  return { draft, report };
+};
 
 export const renderDraft = async ({
   draft,
@@ -108,6 +153,13 @@ export const renderDraft = async ({
     browserExecutable,
     logLevel: "warn",
   });
+  const preflight = preflightFromComposition(composition);
+  const blockingIssues = preflight.report.issues.filter(
+    (issue) => issue.severity === "error",
+  );
+  if (blockingIssues.length > 0) {
+    throw new VisualPreflightError(blockingIssues);
+  }
 
   if (signal?.aborted) {
     throw interrupted();
@@ -119,7 +171,7 @@ export const renderDraft = async ({
     await renderMedia({
       serveUrl,
       composition,
-      inputProps: draft,
+      inputProps: preflight.draft,
       outputLocation: outputPath,
       browserExecutable,
       codec: "h264",
@@ -146,5 +198,6 @@ export const renderDraft = async ({
     fps: composition.fps,
     browserExecutable,
     remotionVersion,
+    visualPreflight: preflight.report,
   };
 };

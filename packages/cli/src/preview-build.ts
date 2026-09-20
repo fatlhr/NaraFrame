@@ -14,7 +14,14 @@ import {
 } from "node:fs/promises";
 import { arch, platform, release } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import type { CompiledDraft, Issue } from "@naraframe/core";
+import {
+  type CompiledDraft,
+  computeReadabilityMetrics,
+  computeVarietyMetrics,
+  type Issue,
+  type ReadabilityMetrics,
+  type VarietyMetrics,
+} from "@naraframe/core";
 import { type RenderedDraft, renderDraft } from "@naraframe/renderer-remotion";
 
 const artifactNames = [
@@ -80,6 +87,18 @@ interface PreviewMetadata {
   };
   contactSheet: ContactSheetLayout;
   checkedFrames: CheckedFrame[];
+  visualPreflight: {
+    issues: Issue[];
+    checkedFrames: Array<{
+      frame: number;
+      sceneId: string;
+      reasons: string[];
+    }>;
+  };
+  /** M0.10.5: the reviewable evidence a build is safe to publish, measured
+   * from the final compiled draft rather than a screenshot. */
+  varietyMetrics: VarietyMetrics;
+  readability: ReadabilityMetrics;
   startedAt: string;
   completedAt: string;
   status: "success";
@@ -96,6 +115,7 @@ export interface PublishedPreviewBuild {
   currentPointer: string;
   manifestSha256: string;
   rendered: RenderedDraft;
+  issues: Issue[];
 }
 
 export interface PreviewBuildOptions {
@@ -383,11 +403,18 @@ export const selectCheckedFrames = (
   };
 
   for (const scene of draft.scenes) {
+    add(scene.startFrame, scene.id, "scene-entry");
+    add(
+      scene.startFrame + Math.floor((scene.endFrame - scene.startFrame) * 0.25),
+      scene.id,
+      "scene-settled",
+    );
     add(
       scene.startFrame + Math.floor((scene.endFrame - scene.startFrame) / 2),
       scene.id,
       "scene-representative",
     );
+    add(scene.endFrame - 1, scene.id, "scene-final");
     for (const beat of scene.beats) {
       add(
         scene.startFrame +
@@ -395,6 +422,11 @@ export const selectCheckedFrames = (
           Math.floor(beat.durationInFrames / 2),
         scene.id,
         `semantic-beat:${beat.action}:${beat.id}`,
+      );
+      add(
+        scene.startFrame + beat.startFrame + beat.durationInFrames,
+        scene.id,
+        `semantic-beat-settled:${beat.action}:${beat.id}`,
       );
     }
   }
@@ -1219,7 +1251,8 @@ export const publishPreviewBuild = async ({
       ...(signal ? { signal } : {}),
     });
     throwIfAborted(signal);
-    const frames = selectCheckedFrames(draft, issues);
+    const allIssues = [...issues, ...rendered.visualPreflight.issues];
+    const frames = selectCheckedFrames(draft, allIssues);
     const contactSheet = contactSheetLayoutFor(frames.length);
     const ffmpeg = ffmpegExecutable();
     const ffprobe = ffprobeExecutable();
@@ -1303,6 +1336,12 @@ export const publishPreviewBuild = async ({
       },
       contactSheet,
       checkedFrames: frames,
+      visualPreflight: {
+        issues: rendered.visualPreflight.issues,
+        checkedFrames: rendered.visualPreflight.frames,
+      },
+      varietyMetrics: computeVarietyMetrics(draft),
+      readability: computeReadabilityMetrics(draft),
       startedAt,
       completedAt,
       status: "success",
@@ -1347,6 +1386,7 @@ export const publishPreviewBuild = async ({
       buildId,
       ...promoted,
       rendered: withPublishedOutputPath(rendered, promoted.buildDirectory),
+      issues: allIssues,
     };
   } finally {
     await rm(attemptDirectory, { recursive: true, force: true });

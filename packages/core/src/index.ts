@@ -4,6 +4,14 @@ export {
   compileDraft,
   type DraftScope,
 } from "./compiler/compile-draft.js";
+export { contrastRatio, contrastThresholdFor } from "./compiler/contrast.js";
+export {
+  type ContrastSample,
+  computeReadabilityMetrics,
+  computeVarietyMetrics,
+  type ReadabilityMetrics,
+  type VarietyMetrics,
+} from "./compiler/qa-report.js";
 export {
   type LoadedPlanProject,
   loadPlanProject,
@@ -28,10 +36,14 @@ export type {
   CompiledAsset,
   CompiledBeat,
   CompiledDraft,
+  CompiledFont,
+  CompiledTransition,
 } from "./schema/compiled.js";
 export {
   CompiledBeatSchema,
   CompiledDraftSchema,
+  CompiledFontSchema,
+  CompiledTransitionSchema,
 } from "./schema/compiled.js";
 export type { PlanSource } from "./schema/export-schema.js";
 export { exportSchemas, validatePlanSource } from "./schema/export-schema.js";
@@ -51,17 +63,29 @@ export type { ProjectConfig } from "./schema/project.js";
 export { ProjectConfigSchema } from "./schema/project.js";
 export type {
   Beat,
+  FocalPoint,
   Frame,
+  Insets,
   Layer,
   Scene,
   Scenes,
   SceneVisual,
+  Shadow,
+  Stroke,
+  Transition,
+  TypographyRole,
 } from "./schema/scene.js";
 export {
   BeatSchema,
+  FocalPointSchema,
   FrameSchema,
+  InsetsSchema,
   LayerSchema,
   SceneSchema,
   ScenesSchema,
   SceneVisualSchema,
+  ShadowSchema,
+  StrokeSchema,
+  TransitionSchema,
+  TypographyRoleSchema,
 } from "./schema/scene.js";
