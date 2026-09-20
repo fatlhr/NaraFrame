@@ -225,8 +225,11 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
           (candidate) => candidate.id === scene.narration?.blockId,
         );
         const phrases = block && "phrases" in block ? block.phrases : undefined;
+        // A planned block has no phrases yet; they arrive with its audio, so
+        // a scene may already name the phrase it will start at.
         if (
-          !phrases?.some((phrase) => phrase.id === scene.narration?.phraseId)
+          phrases &&
+          !phrases.some((phrase) => phrase.id === scene.narration?.phraseId)
         ) {
           issues.push(
             customIssue(

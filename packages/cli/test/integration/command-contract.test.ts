@@ -329,7 +329,13 @@ describe("public CLI command contract", () => {
   });
 
   it("uses stable result events for usage, source, and cancellation failures", async () => {
-    const usage = await captureJsonResult(["preview", sampleRoot, "--json"]);
+    const usage = await captureJsonResult([
+      "preview",
+      sampleRoot,
+      "unexpected-second-project",
+      "--draft",
+      "--json",
+    ]);
     expect(usage.exitCode).toBe(3);
     expect(usage.events).toEqual([
       expect.objectContaining({

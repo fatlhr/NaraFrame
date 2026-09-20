@@ -75,6 +75,33 @@ describe("validatePlanSource with narration", () => {
   });
 });
 
+describe("scenes that name a phrase of a planned block", () => {
+  it("validates, because the phrases only exist once the block has audio", () => {
+    const base = narratedSource();
+    const planned = {
+      ...base,
+      narration: {
+        schemaVersion: 1 as const,
+        order: ["context", "mechanism"],
+        blocks: [
+          { id: "context", text: "Belum direkam." },
+          ...base.narration.blocks.filter((block) => block.id === "mechanism"),
+        ],
+      },
+    };
+    expect(validatePlanSource(planned).ok).toBe(true);
+  });
+
+  it("still rejects a phrase the ready block does not have", () => {
+    const result = validatePlanSource(
+      narratedSource({
+        scenes: [narratedScene("s1", { blockId: "context", phraseId: "zz" })],
+      }),
+    );
+    expect(result.ok).toBe(false);
+  });
+});
+
 describe("AssetManifestSchema audio assets", () => {
   const manifest = (assets: unknown[]) =>
     AssetManifestSchema.safeParse({ schemaVersion: 1, assets });

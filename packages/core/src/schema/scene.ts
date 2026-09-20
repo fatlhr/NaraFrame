@@ -304,6 +304,8 @@ export const SceneSchema = z
     narration: SceneNarrationSchema.optional(),
     carriesFactualClaim: z.boolean().optional(),
     sourceIds: z.array(IdSchema).optional(),
+    /** An editorial note. It is never rendered and never affects a render key. */
+    note: z.string().trim().min(1).optional(),
   })
   .strict();
 

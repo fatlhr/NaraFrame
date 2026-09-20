@@ -1,4 +1,5 @@
 import type { Issue, Result } from "../model/issue.js";
+import type { Narration } from "../schema/narration.js";
 import type { ResolvedNarrationTimeline } from "./narration-timeline.js";
 
 export interface SceneNarrationRef {
@@ -194,4 +195,82 @@ export const partitionScenes = (
   }
 
   return { ok: true, value: scenes, issues: [] };
+};
+
+export interface SceneLocalRange {
+  sceneId: string;
+  blockId: string;
+  /** Milliseconds from the start of the block's audio clip. */
+  localStartMs: number;
+  localEndMs: number;
+}
+
+/**
+ * Where one scene sits inside its own block, in block-local time. This needs
+ * only that block's measured audio, so it works even when an earlier block
+ * still has none and the global offset is unknown. Same ownership rules as
+ * `partitionScenes`: the block's first scene owns the leading silence, later
+ * scenes start at their phrase, and the last scene owns the trailing silence
+ * and the pause.
+ */
+export const sceneLocalRange = (
+  narration: Narration,
+  refs: readonly SceneNarrationRef[],
+  sceneId: string,
+): Result<SceneLocalRange> => {
+  const fail = (code: string, message: string): Result<SceneLocalRange> => ({
+    ok: false,
+    issues: [issue(code, "/scope/sceneId", message)],
+  });
+  const own = refs.find((ref) => ref.sceneId === sceneId);
+  if (!own) {
+    return fail(
+      "SCENE_NARRATION_MISSING",
+      `Scene ${sceneId} has no narration reference.`,
+    );
+  }
+  const block = narration.blocks.find(
+    (candidate) => candidate.id === own.blockId,
+  );
+  if (!block) {
+    return fail("NARRATION_BLOCK_UNKNOWN", `Unknown block ${own.blockId}.`);
+  }
+  if (!("audioDurationMs" in block)) {
+    return fail(
+      "SCENE_BLOCK_NOT_READY",
+      `Scene ${sceneId} belongs to block ${block.id}, which has no measured audio yet.`,
+    );
+  }
+
+  const siblings = refs.filter((ref) => ref.blockId === block.id);
+  const startOf = (ref: SceneNarrationRef, index: number): number | null => {
+    if (index === 0) return 0;
+    const phrase = block.phrases.find(
+      (candidate) => candidate.id === ref.phraseId,
+    );
+    return phrase ? phrase.startMs : null;
+  };
+  const index = siblings.findIndex((ref) => ref.sceneId === sceneId);
+  const start = startOf(own, index);
+  if (start === null) {
+    return fail(
+      "NARRATION_PHRASE_UNKNOWN",
+      `Scene ${sceneId} does not name a phrase of block ${block.id} to start at.`,
+    );
+  }
+  const next = siblings[index + 1];
+  const end = next
+    ? startOf(next, index + 1)
+    : block.audioDurationMs + block.pauseAfterMs;
+  if (end === null || end <= start) {
+    return fail(
+      "SCENE_PHRASE_ORDER",
+      `Scene ${sceneId} would end at or before it starts inside block ${block.id}.`,
+    );
+  }
+  return {
+    ok: true,
+    value: { sceneId, blockId: block.id, localStartMs: start, localEndMs: end },
+    issues: [],
+  };
 };

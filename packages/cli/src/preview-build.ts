@@ -2,9 +2,12 @@ import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import {
   access,
+  copyFile,
+  link,
   lstat,
   mkdir,
   open,
+  readdir,
   readFile,
   realpath,
   rename,
@@ -22,7 +25,12 @@ import {
   type ReadabilityMetrics,
   type VarietyMetrics,
 } from "@naraframe/core";
-import { type RenderedDraft, renderDraft } from "@naraframe/renderer-remotion";
+import {
+  type RenderedDraft,
+  renderDraft,
+  rendererRemotionVersion,
+  resolveBrowserExecutable,
+} from "@naraframe/renderer-remotion";
 
 const artifactNames = [
   "preview.mp4",
@@ -103,6 +111,8 @@ interface PreviewMetadata {
   completedAt: string;
   status: "success";
   failure: null;
+  /** Set when the pixels were reused from an earlier build instead of rendered. */
+  reusedFromBuildId?: string;
 }
 
 interface PreviewManifest extends PreviewMetadata {
@@ -379,7 +389,9 @@ export const preparePreviewOutputRoots = async (
 };
 
 const frameSourceNumber = (draft: CompiledDraft, frame: number): number =>
-  draft.scope.type === "scene" ? draft.scope.sourceStartFrame + frame : frame;
+  draft.scope.type === "scene" && draft.scope.sourceStartFrame !== null
+    ? draft.scope.sourceStartFrame + frame
+    : frame;
 
 export const selectCheckedFrames = (
   draft: CompiledDraft,
@@ -552,10 +564,18 @@ const isValidPreviewScope = (
   if (scope.type === "project") {
     return Object.keys(scope).length === 1;
   }
+  if (
+    scope.type !== "scene" ||
+    Object.keys(scope).length !== 4 ||
+    !nonEmptyString(scope.sceneId)
+  ) {
+    return false;
+  }
+  // Both null: an earlier block has no audio yet, so the global offset is unknown.
+  if (scope.sourceStartFrame === null && scope.sourceEndFrame === null) {
+    return true;
+  }
   return (
-    scope.type === "scene" &&
-    Object.keys(scope).length === 4 &&
-    nonEmptyString(scope.sceneId) &&
     Number.isInteger(scope.sourceStartFrame) &&
     (scope.sourceStartFrame as number) >= 0 &&
     Number.isInteger(scope.sourceEndFrame) &&
@@ -1417,6 +1437,211 @@ export const publishPreviewBuild = async ({
       ...promoted,
       rendered: withPublishedOutputPath(rendered, promoted.buildDirectory),
       issues: allIssues,
+    };
+  } finally {
+    await rm(attemptDirectory, { recursive: true, force: true });
+  }
+};
+
+export interface ReusablePreview {
+  buildId: string;
+  buildDirectory: string;
+  report: PreviewMetadata;
+}
+
+const sameJson = (left: unknown, right: unknown): boolean =>
+  JSON.stringify(left) === JSON.stringify(right);
+
+/** What must match, besides the render inputs, for old pixels to be reusable. */
+const currentRuntime = async (): Promise<{
+  remotion: string;
+  browser: string;
+  ffmpeg: string;
+}> => {
+  const browser = await resolveBrowserExecutable();
+  return {
+    remotion: rendererRemotionVersion,
+    browser: await commandVersion(browser, ["--version"]),
+    ffmpeg: await commandVersion(ffmpegExecutable(), ["-version"]),
+  };
+};
+
+/**
+ * Finds a published build that already holds the pixels this draft would
+ * render: the same assembly key and scope, the same runtime, and artifacts that
+ * still match their recorded hashes. The source revision may differ, for
+ * example after an editorial note, which is exactly when reuse pays off.
+ */
+export const findReusablePreview = async (
+  projectRoot: string,
+  draft: CompiledDraft,
+  frames: readonly CheckedFrame[],
+): Promise<ReusablePreview | null> => {
+  let runtime: Awaited<ReturnType<typeof currentRuntime>>;
+  try {
+    runtime = await currentRuntime();
+  } catch {
+    return null;
+  }
+  const buildsDirectory = join(resolve(projectRoot), "preview", "builds");
+  let names: string[];
+  try {
+    names = await readdir(buildsDirectory);
+  } catch {
+    return null;
+  }
+
+  const candidates: ReusablePreview[] = [];
+  for (const name of names) {
+    const directory = join(buildsDirectory, name);
+    try {
+      const manifest = JSON.parse(
+        await readFile(join(directory, "manifest.json"), "utf8"),
+      ) as PreviewManifest;
+      if (
+        manifest.status !== "success" ||
+        manifest.mode !== "draft" ||
+        manifest.assemblyKey !== draft.assemblyKey ||
+        !sameJson(manifest.scope, draft.scope) ||
+        !sameJson(manifest.checkedFrames, frames) ||
+        manifest.runtime.remotion !== runtime.remotion ||
+        manifest.runtime.browser.version !== runtime.browser ||
+        manifest.runtime.ffmpeg.version !== runtime.ffmpeg
+      ) {
+        continue;
+      }
+      let intact = true;
+      for (const artifact of ["preview.mp4", "contact-sheet.png"] as const) {
+        const record = manifest.artifacts[artifact];
+        intact &&=
+          (await sha256File(join(directory, artifact))) === record.sha256;
+      }
+      if (intact) {
+        candidates.push({
+          buildId: name,
+          buildDirectory: directory,
+          report: manifest,
+        });
+      }
+    } catch {
+      // An incomplete or foreign directory is simply not reusable.
+    }
+  }
+  candidates.sort((left, right) =>
+    right.report.completedAt.localeCompare(left.report.completedAt),
+  );
+  return candidates[0] ?? null;
+};
+
+/**
+ * Publishes a new build for the current source that points at an earlier
+ * build's pixels. The media is linked, not re-rendered; the metadata is new
+ * (build id, source revision, timestamps) and the same integrity checks run
+ * before it is promoted, so the new build is as trustworthy as a rendered one.
+ */
+export const publishReusedPreviewBuild = async ({
+  projectRoot,
+  draft,
+  issues,
+  source,
+  failureInjection,
+  signal,
+  onPointerRenameDispatched,
+}: PreviewBuildOptions & {
+  source: ReusablePreview;
+}): Promise<PublishedPreviewBuild> => {
+  throwIfAborted(signal);
+  const startedAt = new Date().toISOString();
+  const attemptId = randomUUID();
+  const buildId = `${draft.assemblyKey.slice(0, 12)}-${attemptId.slice(0, 12)}`;
+  const outputRoots = await preparePreviewOutputRoots(projectRoot);
+  const attemptDirectory = join(outputRoots.attempts, attemptId);
+  const staged = join(attemptDirectory, "build");
+  await mkdir(staged, { recursive: true });
+  try {
+    for (const name of ["preview.mp4", "contact-sheet.png"] as const) {
+      const from = join(source.buildDirectory, name);
+      const to = join(staged, name);
+      try {
+        await link(from, to);
+      } catch {
+        await copyFile(from, to);
+      }
+    }
+    const frames = source.report.checkedFrames;
+    await writeFile(
+      join(staged, "frames.json"),
+      json({
+        schemaVersion: 1,
+        buildId,
+        sourceRevision: draft.sourceRevision,
+        assemblyKey: draft.assemblyKey,
+        scope: draft.scope,
+        timelineScope: draft.timelineScope,
+        contactSheet: source.report.contactSheet,
+        frames,
+      }),
+      { flag: "wx" },
+    );
+    const metadata: PreviewMetadata = {
+      ...source.report,
+      buildId,
+      sourceRevision: draft.sourceRevision,
+      label: draft.label,
+      varietyMetrics: computeVarietyMetrics(draft),
+      readability: computeReadabilityMetrics(draft),
+      startedAt,
+      completedAt: new Date().toISOString(),
+      reusedFromBuildId: source.buildId,
+    };
+    await writeFile(join(staged, "report.json"), json(metadata), {
+      flag: "wx",
+    });
+    const records = await Promise.all([
+      artifactRecord(staged, "preview.mp4", "video/mp4"),
+      artifactRecord(staged, "contact-sheet.png", "image/png"),
+      artifactRecord(staged, "frames.json", "application/json"),
+      artifactRecord(staged, "report.json", "application/json"),
+    ]);
+    const manifest: PreviewManifest = {
+      ...metadata,
+      artifacts: Object.fromEntries(
+        records.map((record) => [record.path, record]),
+      ) as Record<ArtifactName, ArtifactRecord>,
+    };
+    await writeFile(join(staged, "manifest.json"), json(manifest), {
+      flag: "wx",
+    });
+
+    const promoted = await promotePreviewBuild({
+      stagedBuildDirectory: staged,
+      previewDirectory: outputRoots.preview,
+      buildId,
+      draft,
+      ...(failureInjection ? { failureInjection } : {}),
+      ffmpegExecutable: ffmpegExecutable(),
+      ffprobeExecutable: ffprobeExecutable(),
+      ...(signal ? { signal } : {}),
+      ...(onPointerRenameDispatched ? { onPointerRenameDispatched } : {}),
+    });
+    const rendered: RenderedDraft = {
+      outputPath: join(promoted.buildDirectory, "preview.mp4"),
+      durationInFrames: source.report.render.durationInFrames,
+      width: source.report.render.width,
+      height: source.report.render.height,
+      fps: source.report.render.fps,
+      browserExecutable: source.report.runtime.browser.executable,
+      remotionVersion: source.report.runtime.remotion,
+      visualPreflight: {
+        issues: source.report.visualPreflight.issues,
+        frames: [],
+      },
+    };
+    return {
+      buildId,
+      ...promoted,
+      rendered,
+      issues: [...issues, ...source.report.visualPreflight.issues],
     };
   } finally {
     await rm(attemptDirectory, { recursive: true, force: true });

@@ -382,7 +382,13 @@ describe("M0 owner flow", () => {
       frames,
     );
 
-    const repeatedPreview = await runCli(project, ["preview", "--draft"], true);
+    // --rerender keeps this a real determinism check; without it the second
+    // preview would simply reuse the first build's pixels.
+    const repeatedPreview = await runCli(
+      project,
+      ["preview", "--draft", "--rerender"],
+      true,
+    );
     expect(repeatedPreview.result.code, repeatedPreview.result.stderr).toBe(0);
     const repeatedBuild = await assertPublishedBuild(project);
     expect(repeatedBuild.pointer.buildId).not.toBe(firstBuild.pointer.buildId);

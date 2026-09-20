@@ -475,7 +475,10 @@ export const DraftVideo = (draft: CompiledDraft) => (
           durationInFrames={clip.durationInFrames}
           name={`audio-${clip.blockId}`}
         >
-          <Audio src={staticFile(asset.publicPath)} />
+          <Audio
+            src={staticFile(asset.publicPath)}
+            startFrom={clip.trimStartFrames ?? 0}
+          />
         </Sequence>
       );
     })}

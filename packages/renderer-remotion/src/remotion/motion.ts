@@ -212,7 +212,7 @@ export const sceneTransitionStateFor = (
 
   if (
     scene.transitionOut.type !== "cut" &&
-    sceneIndex < draft.scenes.length - 1
+    (sceneIndex < draft.scenes.length - 1 || scene.hasNextScene === true)
   ) {
     const windowStart =
       sceneDurationInFrames - scene.transitionOut.durationInFrames;
@@ -233,16 +233,17 @@ export const sceneTransitionStateFor = (
     }
   }
 
-  const previous = draft.scenes[sceneIndex - 1];
-  if (previous && previous.transitionOut.type !== "cut") {
-    const durationInFrames = previous.transitionOut.durationInFrames;
+  const incoming =
+    scene.transitionIn ?? draft.scenes[sceneIndex - 1]?.transitionOut;
+  if (incoming && incoming.type !== "cut") {
+    const durationInFrames = incoming.durationInFrames;
     if (localFrame < durationInFrames) {
       const eased = interpolate(localFrame, [0, durationInFrames], [0, 1], {
         ...clamp,
         easing: transitionEasing,
       });
       return boundedTransitionState(
-        previous.transitionOut,
+        incoming,
         eased,
         "entry",
         draft.width,

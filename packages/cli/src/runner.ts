@@ -24,6 +24,7 @@ import {
   writePreviewSelection,
 } from "@naraframe/core";
 import { isVisualPreflightError } from "@naraframe/renderer-remotion";
+import { cleanCache } from "./cache-clean.js";
 import {
   type CommandEventInput,
   type CommandName,
@@ -38,7 +39,12 @@ import {
   publishFinalBuild,
   readCurrentOutput,
 } from "./final-build.js";
-import { publishPreviewBuild } from "./preview-build.js";
+import {
+  findReusablePreview,
+  publishPreviewBuild,
+  publishReusedPreviewBuild,
+  selectCheckedFrames,
+} from "./preview-build.js";
 import { readCurrentPreviewStatus } from "./preview-status.js";
 
 export interface RunCliOptions {
@@ -66,9 +72,10 @@ Usage:
   naraframe doctor [--json]
   naraframe schema [--json]
   naraframe create <name> --profile <id-or-path> [--json]
-  naraframe validate [project] --stage plan [--json]
+  naraframe validate [project] --stage plan|production [--scene <scene-id>] [--json]
   naraframe status [project] [--json]
-  naraframe preview [project] --draft [--scene <scene-id>] [--json]`;
+  naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--json]
+  naraframe cache clean [project] [--dry-run] [--json]`;
 
 const repositoryRoot = resolve(
   fileURLToPath(new URL(".", import.meta.url)),
@@ -311,12 +318,13 @@ const createCommand = async (args: readonly string[]): Promise<Execution> => {
 };
 
 const validateCommand = async (args: readonly string[]): Promise<Execution> => {
-  const parsed = parseArguments(args, [], ["--stage"]);
+  const parsed = parseArguments(args, [], ["--stage", "--scene"]);
   const stage = parsed.values.get("--stage");
   if (
     parsed.error ||
     parsed.positionals.length > 1 ||
-    (stage !== "plan" && stage !== "production")
+    (stage !== "plan" && stage !== "production") ||
+    (stage === "plan" && parsed.values.has("--scene"))
   ) {
     return usageFailure(
       "validate",
@@ -341,17 +349,21 @@ const validateCommand = async (args: readonly string[]): Promise<Execution> => {
     };
   }
   if (stage === "production") {
-    const checks = await runProductionChecks(loaded.value);
+    const sceneId = parsed.values.get("--scene");
+    const checks = sceneId
+      ? await runPreviewProductionChecks(loaded.value, sceneId)
+      : await runProductionChecks(loaded.value);
     return {
       exitCode: checks.ok ? 0 : 1,
       event: commonEvent("validate", {
         status: checks.ok ? "completed" : "failed",
         success: checks.ok,
         readiness: checks.ok ? "ready" : "not-ready",
-        mode: "final",
-        scope: { type: "project" },
+        mode: sceneId ? "draft" : "final",
+        scope: sceneId ? { type: "scene", sceneId } : { type: "project" },
         sourceRevision: checks.draft?.sourceRevision ?? null,
-        fingerprint: checks.final?.assemblyKey ?? null,
+        fingerprint:
+          (sceneId ? checks.draft : checks.final)?.assemblyKey ?? null,
         issues: [...loaded.issues, ...checks.issues],
         data: { stage: "production" },
       }),
@@ -514,18 +526,14 @@ const previewCommand = async (
   options: RunCliOptions,
 ): Promise<Execution> => {
   const { signal, onPreviewRenameDispatched } = options;
-  const parsed = parseArguments(args, ["--draft"], ["--scene"]);
-  if (
-    parsed.error ||
-    parsed.positionals.length > 1 ||
-    !parsed.flags.has("--draft")
-  ) {
+  const parsed = parseArguments(args, ["--draft", "--rerender"], ["--scene"]);
+  if (parsed.error || parsed.positionals.length > 1) {
     return usageFailure(
       "preview",
-      parsed.error ??
-        "preview accepts at most one project and requires --draft in M0.",
+      parsed.error ?? "preview accepts at most one project.",
     );
   }
+  const productionStage = !parsed.flags.has("--draft");
   const projectPath = parsed.positionals[0] ?? ".";
   const loaded = await loadPlanProject(projectPath);
   if (!loaded.ok) {
@@ -541,11 +549,34 @@ const previewCommand = async (
     };
   }
   const sceneId = parsed.values.get("--scene");
+  const productionChecks = productionStage
+    ? await runPreviewProductionChecks(loaded.value, sceneId)
+    : null;
+  if (productionChecks && !productionChecks.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("preview", {
+        status: "failed",
+        success: false,
+        readiness: "not-ready",
+        mode: "draft",
+        scope: sceneId ? { type: "scene", sceneId } : { type: "project" },
+        issues: [...loaded.issues, ...productionChecks.issues],
+        data: { stage: "production" },
+      }),
+    };
+  }
   const compiled = compileDraft(
     loaded.value.source,
     sceneId ? { type: "scene", sceneId } : { type: "project" },
   );
-  const issues = [...loaded.issues, ...compiled.issues];
+  const issues = [
+    ...loaded.issues,
+    ...compiled.issues,
+    ...(productionChecks
+      ? productionChecks.issues.filter((issue) => issue.severity === "info")
+      : []),
+  ];
   if (!compiled.ok) {
     return {
       exitCode: 1,
@@ -583,22 +614,40 @@ const previewCommand = async (
     `Rendering ${loaded.value.source.project.title}${sceneId ? ` / ${sceneId}` : ""} (${compiled.value.totalFrames} frames)...`,
   );
   let lastReported = -1;
-  const published = await publishPreviewBuild({
-    draft: compiled.value,
-    projectRoot: loaded.value.root,
-    issues,
-    ...(signal ? { signal } : {}),
-    ...(onPreviewRenameDispatched
-      ? { onPointerRenameDispatched: onPreviewRenameDispatched }
-      : {}),
-    onProgress: (progress) => {
-      const percent = Math.floor(progress * 10) * 10;
-      if (percent !== lastReported) {
-        lastReported = percent;
-        process.stderr.write(`Render ${percent}%\r`);
-      }
-    },
-  });
+  const reusable = parsed.flags.has("--rerender")
+    ? null
+    : await findReusablePreview(
+        loaded.value.root,
+        compiled.value,
+        selectCheckedFrames(compiled.value, issues),
+      );
+  const published = reusable
+    ? await publishReusedPreviewBuild({
+        draft: compiled.value,
+        projectRoot: loaded.value.root,
+        issues,
+        source: reusable,
+        ...(signal ? { signal } : {}),
+        ...(onPreviewRenameDispatched
+          ? { onPointerRenameDispatched: onPreviewRenameDispatched }
+          : {}),
+      })
+    : await publishPreviewBuild({
+        draft: compiled.value,
+        projectRoot: loaded.value.root,
+        issues,
+        ...(signal ? { signal } : {}),
+        ...(onPreviewRenameDispatched
+          ? { onPointerRenameDispatched: onPreviewRenameDispatched }
+          : {}),
+        onProgress: (progress) => {
+          const percent = Math.floor(progress * 10) * 10;
+          if (percent !== lastReported) {
+            lastReported = percent;
+            process.stderr.write(`Render ${percent}%\r`);
+          }
+        },
+      });
   process.stderr.write("\n");
   await writePreviewSelection(
     loaded.value.root,
@@ -629,6 +678,7 @@ const previewCommand = async (
         muted: !compiled.value.narration,
         timelineScope: compiled.value.timelineScope,
         manifestSha256: published.manifestSha256,
+        reusedFromBuildId: reusable?.buildId ?? null,
       },
     }),
     human: [
@@ -764,6 +814,32 @@ const runProductionChecks = async (
   issues.push(...(await preflightNarrationAudio(loaded.root, final.value)));
   const ok = !issues.some((issue) => issue.severity === "error");
   return { ok, issues, draft: draft.value, final: final.value };
+};
+
+/**
+ * The checks behind a production-ready preview, for the whole project or one
+ * scene. A scene is checked with its own dependencies only; gaps elsewhere are
+ * reported as info and never block.
+ */
+const runPreviewProductionChecks = async (
+  loaded: LoadedPlanProject,
+  sceneId: string | undefined,
+): Promise<ProductionChecks> => {
+  const draft = compileDraft(
+    loaded.source,
+    sceneId ? { type: "scene", sceneId } : { type: "project" },
+  );
+  const issues: Issue[] = [...draft.issues];
+  if (!draft.ok) return { ok: false, issues };
+  issues.push(
+    ...checkProductionReadiness(loaded.source, draft.value, draft.issues, {
+      requireNarration: false,
+      ...(sceneId ? { sceneId } : {}),
+    }),
+  );
+  issues.push(...(await preflightNarrationAudio(loaded.root, draft.value)));
+  const ok = !issues.some((issue) => issue.severity === "error");
+  return { ok, issues, draft: draft.value };
 };
 
 const renderCommand = async (
@@ -981,6 +1057,44 @@ const renderCommand = async (
   };
 };
 
+const cacheCommand = async (args: readonly string[]): Promise<Execution> => {
+  const [subcommand, ...rest] = args;
+  const parsed = parseArguments(rest, ["--dry-run"], []);
+  if (subcommand !== "clean" || parsed.error || parsed.positionals.length > 1) {
+    return usageFailure(
+      "cache",
+      parsed.error ?? "cache supports only: cache clean [project] [--dry-run].",
+    );
+  }
+  const root = resolve(parsed.positionals[0] ?? ".");
+  const dryRun = parsed.flags.has("--dry-run");
+  const result = await withProjectLock(root, async () => ({
+    ok: true as const,
+    value: await cleanCache(root, { dryRun }),
+    issues: [] as Issue[],
+  }));
+  if (!result.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("cache", {
+        status: "failed",
+        success: false,
+        readiness: "not-applicable",
+        issues: result.issues,
+      }),
+    };
+  }
+  const cleaned = result.value;
+  return {
+    exitCode: 0,
+    event: commonEvent("cache", { data: { ...cleaned } }),
+    human: [
+      `${dryRun ? "Would remove" : "Removed"} ${cleaned.removed.length} disposable item(s), ${cleaned.reclaimedBytes} bytes.`,
+      `Kept ${cleaned.keptBuilds.length} preview build(s); source, media, history, receipts and exports are never touched.`,
+    ],
+  };
+};
+
 const knownCommand = (value: string | undefined): CommandName =>
   value === "doctor" ||
   value === "schema" ||
@@ -990,7 +1104,8 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "preview" ||
   value === "edit" ||
   value === "undo" ||
-  value === "render"
+  value === "render" ||
+  value === "cache"
     ? value
     : "unknown";
 
@@ -1008,6 +1123,7 @@ const executeCommand = async (
   if (command === "edit") return editCommand(args);
   if (command === "undo") return undoCommand(args);
   if (command === "render") return renderCommand(args, options);
+  if (command === "cache") return cacheCommand(args);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 

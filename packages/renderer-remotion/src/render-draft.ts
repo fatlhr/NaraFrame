@@ -21,7 +21,7 @@ import {
 const macChrome =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
-const resolveBrowserExecutable = async (
+export const resolveBrowserExecutable = async (
   requested?: string,
 ): Promise<string> => {
   const browserExecutable =

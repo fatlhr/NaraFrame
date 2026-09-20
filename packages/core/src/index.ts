@@ -20,7 +20,13 @@ export {
   type ResolvedPhrase,
   resolveNarrationTimeline,
 } from "./compiler/narration-timeline.js";
-export { checkProductionReadiness } from "./compiler/production.js";
+export {
+  checkProductionReadiness,
+  computeSceneClosure,
+  outOfScopeGaps,
+  type ProductionScope,
+  type SceneClosure,
+} from "./compiler/production.js";
 export {
   checkProvenance,
   checkSourceProvenance,
@@ -56,6 +62,10 @@ export {
   computeCostReport,
 } from "./production/cost-report.js";
 export { createFakeTtsProvider } from "./production/fake-tts-provider.js";
+export {
+  type PendingGeneration,
+  pendingGeneration,
+} from "./production/generation-plan.js";
 export {
   type ImportAudioOptions,
   type ImportedAudio,

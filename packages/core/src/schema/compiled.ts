@@ -145,14 +145,22 @@ const CompiledScopeSchema = z.discriminatedUnion("type", [
     .object({
       type: z.literal("scene"),
       sceneId: IdSchema,
-      sourceStartFrame: NonNegativeIntegerSchema,
-      sourceEndFrame: PositiveIntegerSchema,
+      /** Null when an earlier block has no measured audio: never invented. */
+      sourceStartFrame: NonNegativeIntegerSchema.nullable(),
+      sourceEndFrame: PositiveIntegerSchema.nullable(),
     })
     .strict()
-    .refine((scope) => scope.sourceEndFrame > scope.sourceStartFrame, {
-      message: "sourceEndFrame must be greater than sourceStartFrame",
-      path: ["sourceEndFrame"],
-    }),
+    .refine(
+      (scope) =>
+        (scope.sourceStartFrame === null) === (scope.sourceEndFrame === null) &&
+        (scope.sourceStartFrame === null ||
+          (scope.sourceEndFrame ?? 0) > scope.sourceStartFrame),
+      {
+        message:
+          "Both source frames are null together, or sourceEndFrame is greater than sourceStartFrame",
+        path: ["sourceEndFrame"],
+      },
+    ),
 ]);
 
 const CompiledSceneSchema = z
@@ -165,6 +173,13 @@ const CompiledSceneSchema = z
     beats: z.array(CompiledBeatSchema),
     /** How this scene exits into the next one; `cut` on the last scene. */
     transitionOut: CompiledTransitionSchema,
+    /**
+     * Set only in a preview of one scene: the previous scene's transition
+     * handle that plays inside this scene's first frames.
+     */
+    transitionIn: CompiledTransitionSchema.optional(),
+    /** Set only in a preview of one scene that is not the project's last scene. */
+    hasNextScene: z.boolean().optional(),
   })
   .strict()
   .refine((scene) => scene.endFrame > scene.startFrame, {
@@ -180,6 +195,8 @@ const CompiledAudioClipSchema = z
     durationInFrames: PositiveIntegerSchema,
     startMs: NonNegativeIntegerSchema,
     durationMs: PositiveIntegerSchema,
+    /** Frames skipped at the start of the clip (a scoped preview starts mid-block). */
+    trimStartFrames: NonNegativeIntegerSchema.optional(),
   })
   .strict();
 

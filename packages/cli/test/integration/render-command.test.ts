@@ -62,6 +62,10 @@ interface Options {
   contextDeclaredMs?: number;
   omitNarration?: boolean;
   plannedImage?: boolean;
+  /** Scene that still uses the planned image; defaults to s1. */
+  plannedImageOn?: string;
+  /** Leave the first block without audio. */
+  plannedContext?: boolean;
   unbound?: boolean;
 }
 
@@ -124,7 +128,7 @@ const makeProject = async (
           origin: { type: "generated" },
           ...generation("mechanism"),
         },
-        ...(options.plannedImage
+        ...(options.plannedImage || options.plannedImageOn
           ? [
               {
                 id: "art",
@@ -140,7 +144,8 @@ const makeProject = async (
     scenes: {
       ...base.scenes,
       scenes: base.scenes.scenes.map((scene) =>
-        options.plannedImage && scene.id === "s1"
+        (options.plannedImage || options.plannedImageOn) &&
+        scene.id === (options.plannedImageOn ?? "s1")
           ? {
               ...scene,
               visual: {
@@ -159,7 +164,13 @@ const makeProject = async (
   await write("profile.lock.json", source.profile);
   await write("scenes.json", source.scenes);
   await write("assets/manifest.json", source.assets);
-  if (!options.omitNarration) await write("narration.json", source.narration);
+  if (options.plannedContext) {
+    const blocks = source.narration?.blocks.map((block) =>
+      block.id === "context" ? { id: "context", text: block.text } : block,
+    );
+    await write("narration.json", { ...source.narration, blocks });
+  } else if (!options.omitNarration)
+    await write("narration.json", source.narration);
   else
     await write("scenes.json", {
       ...source.scenes,
@@ -370,5 +381,86 @@ describe.skipIf(!existsSync(ffmpeg))("status output and approval", () => {
     const { event } = await run("status", root);
     expect(event.data.output).toEqual({ buildId: null, state: "none" });
     expect(event.data.approval).toBeNull();
+  });
+});
+
+describe.skipIf(!existsSync(ffmpeg))("scoped production checks", () => {
+  const scopedCheck = (root: string, sceneId?: string) =>
+    run(
+      "validate",
+      root,
+      "--stage",
+      "production",
+      ...(sceneId ? ["--scene", sceneId] : []),
+    );
+  const infoCodes = (event: Event) =>
+    event.issues
+      .filter((issue) => issue.severity === "info")
+      .map((issue) => issue.code);
+
+  it("passes a ready scene while the last scene's image is still planned, and reports the gap separately", async () => {
+    const { root } = await makeProject({ plannedImageOn: "s3" });
+    const scene = await scopedCheck(root, "s1");
+    expect(scene.exitCode, JSON.stringify(scene.event.issues)).toBe(0);
+    expect(scene.event).toMatchObject({
+      status: "completed",
+      readiness: "ready",
+      data: { stage: "production" },
+    });
+    expect(infoCodes(scene.event)).toContain("OUT_OF_SCOPE_ASSET_NOT_READY");
+    expect(codes(scene.event)).toEqual([]);
+  });
+
+  it("fails the whole project and the scene that owns the planned image, so a final export is refused", async () => {
+    const { root } = await makeProject({ plannedImageOn: "s3" });
+    const whole = await scopedCheck(root);
+    expect(whole.exitCode).toBe(1);
+    expect(codes(whole.event)).toContain("ASSET_NOT_READY");
+    const owner = await scopedCheck(root, "s3");
+    expect(owner.exitCode).toBe(1);
+    expect(codes(owner.event)).toContain("ASSET_NOT_READY");
+    const refused = await run("render", root, "--approve-preview", "any-build");
+    expect(refused.exitCode).toBe(1);
+    expect(codes(refused.event)).toContain("ASSET_NOT_READY");
+  });
+
+  it("previews a later scene on a local timeline while an earlier block has no audio", async () => {
+    const { root } = await makeProject({ plannedContext: true });
+    expect(codes((await scopedCheck(root)).event)).toContain(
+      "TIMELINE_INCOMPLETE",
+    );
+    const later = await scopedCheck(root, "s3");
+    expect(later.exitCode, JSON.stringify(later.event.issues)).toBe(0);
+    expect(later.event).toMatchObject({
+      readiness: "ready",
+      data: { stage: "production" },
+    });
+    expect(infoCodes(later.event)).toContain("OUT_OF_SCOPE_BLOCK_NOT_READY");
+    const first = await scopedCheck(root, "s1");
+    expect(first.exitCode).toBe(1);
+    expect(codes(first.event)).toContain("SCENE_BLOCK_NOT_READY");
+  });
+
+  it("makes a production preview fail fast, without rendering, when the scope is not ready", async () => {
+    const { root } = await makeProject({ plannedImageOn: "s3" });
+    const blocked = await run("preview", root, "--scene", "s3");
+    expect(blocked.exitCode).toBe(1);
+    expect(blocked.event).toMatchObject({
+      status: "failed",
+      readiness: "not-ready",
+      data: { stage: "production" },
+    });
+    expect(codes(blocked.event)).toContain("ASSET_NOT_READY");
+  });
+
+  it("rejects --scene at the plan stage and an unknown scene", async () => {
+    const { root } = await makeProject();
+    expect(
+      (await run("validate", root, "--stage", "plan", "--scene", "s1"))
+        .exitCode,
+    ).toBe(3);
+    const missing = await scopedCheck(root, "nope");
+    expect(missing.exitCode).toBe(1);
+    expect(codes(missing.event)).toContain("SCENE_NOT_FOUND");
   });
 });

@@ -252,21 +252,13 @@ describe("compileDraft captions", () => {
     expect(codes(result.issues)).toContain("CAPTION_CORRECTION_TARGET_UNKNOWN");
   });
 
-  it("emits no captions without narration, or for a scene-scoped preview", () => {
+  it("emits no captions for a project without narration", () => {
     const { narration: _omit, ...silent } = narratedSource({
       scenes: [narratedScene("s1")],
     });
-    const withoutNarration = compileDraft(silent);
-    expect(withoutNarration.ok).toBe(true);
-    if (withoutNarration.ok)
-      expect(withoutNarration.value.captions).toBeUndefined();
-
-    const scoped = compileDraft(narratedSource(), {
-      type: "scene",
-      sceneId: "s2",
-    });
-    expect(scoped.ok).toBe(true);
-    if (scoped.ok) expect(scoped.value.captions).toBeUndefined();
+    const result = compileDraft(silent);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.captions).toBeUndefined();
   });
 });
 

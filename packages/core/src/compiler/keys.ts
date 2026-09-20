@@ -68,6 +68,7 @@ export const computeSceneRenderKeys = (
 ): SceneRenderKey[] =>
   draft.scenes.map((scene, index) => {
     const previous = draft.scenes[index - 1];
+    const incoming = scene.transitionIn ?? previous?.transitionOut;
     const assets = [...referencedAssetIds([scene.visual, scene.layers])]
       .sort()
       .map((id) => [id, draft.assets[id] ?? null]);
@@ -81,17 +82,25 @@ export const computeSceneRenderKeys = (
       from: Math.max(cue.startFrame, scene.startFrame) - scene.startFrame,
       to: Math.min(cue.endFrame, scene.endFrame) - scene.startFrame,
     }));
+    // Trim, offset and length inside this scene, so the same audio in the same
+    // place gives the same key whether the scene is compiled alone or in the
+    // whole project.
     const audio = (draft.narration?.clips ?? [])
-      .map((clip) => ({
-        ...clip,
-        startFrame: clip.startFrame,
-        endFrame: clip.startFrame + clip.durationInFrames,
-      }))
-      .filter(overlap)
-      .map((clip) => ({
+      .map((clip) => {
+        const clipStart = clip.startFrame;
+        const clipEnd = clipStart + clip.durationInFrames;
+        return {
+          clip,
+          from: Math.max(clipStart, scene.startFrame),
+          to: Math.min(clipEnd, scene.endFrame),
+        };
+      })
+      .filter((entry) => entry.to > entry.from)
+      .map(({ clip, from, to }) => ({
         asset: draft.assets[clip.assetId] ?? null,
-        offset: clip.startFrame - scene.startFrame,
-        durationInFrames: clip.durationInFrames,
+        trimStartFrames: (clip.trimStartFrames ?? 0) + (from - clip.startFrame),
+        offset: from - scene.startFrame,
+        durationInFrames: to - from,
       }));
 
     return {
@@ -112,7 +121,8 @@ export const computeSceneRenderKeys = (
           transitionOut: scene.transitionOut,
         },
         durationInFrames: scene.endFrame - scene.startFrame,
-        incomingTransition: previous?.transitionOut ?? null,
+        incomingTransition:
+          incoming && incoming.type !== "cut" ? incoming : null,
         assets,
         fonts: draft.fonts,
         render: renderSubset(draft),

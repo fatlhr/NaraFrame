@@ -11,5 +11,6 @@ export type {
 export {
   isVisualPreflightError,
   renderDraft,
+  resolveBrowserExecutable,
   VisualPreflightError,
 } from "./render-draft.js";

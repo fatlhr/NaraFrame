@@ -18,6 +18,11 @@ import { computeAssemblyKey } from "./keys.js";
 import { resolveNarrationTimeline } from "./narration-timeline.js";
 import { checkSourceProvenance } from "./provenance.js";
 import { partitionScenes, type SceneNarrationRef } from "./scene-partition.js";
+import {
+  captionStyleFor,
+  compileSceneNarration,
+  type ScopedNarration,
+} from "./scoped-narration.js";
 import { checkVariety, type VarietyScene } from "./variety.js";
 import { checkVoiceBindings } from "./voice-binding.js";
 
@@ -541,6 +546,34 @@ const validateLayerFrames = (
   return issues;
 };
 
+/**
+ * In a preview of one scene the neighbours are not in the draft, so the
+ * previous scene's entry handle and the fact that this scene has a successor
+ * are carried on the scene itself.
+ */
+const scopedTransitionHandles = (
+  source: PlanSource,
+  sceneIndex: number,
+  durationInFrames: number,
+  fps: number,
+): {
+  transitionIn?: CompiledDraft["scenes"][number]["transitionOut"];
+  hasNextScene?: boolean;
+} => {
+  const previous = source.scenes.scenes[sceneIndex - 1];
+  const handle = previous ? compileTransition(previous.transition, fps) : null;
+  const fits =
+    handle !== null &&
+    handle.type !== "cut" &&
+    handle.durationInFrames < durationInFrames;
+  return {
+    ...(handle && fits ? { transitionIn: handle } : {}),
+    ...(sceneIndex < source.scenes.scenes.length - 1
+      ? { hasNextScene: true }
+      : {}),
+  };
+};
+
 export interface CompileOptions {
   /** "final" compiles at the design format with no draft label. */
   mode?: "draft" | "final";
@@ -613,7 +646,45 @@ export const compileDraft = (
     : never;
   let narrationClips: CompiledDraft["narration"];
   let compiledCaptions: CompiledDraft["captions"];
-  if (hasNarration && source.narration) {
+  let scopedNarration: ScopedNarration | undefined;
+  if (hasNarration && source.narration && requestedScope.type === "scene") {
+    narrationTimeline = resolveNarrationTimeline(source.narration);
+    const ownBlock = source.scenes.scenes.find(
+      (scene) => scene.id === requestedScope.sceneId,
+    )?.narration?.blockId;
+    // A voice problem in another block must not block previewing this scene.
+    issues.push(
+      ...checkVoiceBindings(source).map((issue) =>
+        issue.entityId === ownBlock || issue.severity !== "error"
+          ? issue
+          : { ...issue, severity: "warning" as const },
+      ),
+    );
+    const scoped = compileSceneNarration({
+      source,
+      sceneId: requestedScope.sceneId,
+      timeline: narrationTimeline,
+      fps,
+      scaleX,
+      scaleY,
+    });
+    if (!scoped.ok) {
+      issues.push(...scoped.issues);
+    } else {
+      scopedNarration = scoped.value;
+      partitionedScenes = [
+        {
+          sceneId: requestedScope.sceneId,
+          startMs: 0,
+          endMs: 0,
+          startFrame: 0,
+          endFrame: scoped.value.durationInFrames,
+        },
+      ] as unknown as typeof partitionedScenes;
+      narrationClips = scoped.value.narration;
+      compiledCaptions = scoped.value.captions;
+    }
+  } else if (hasNarration && source.narration) {
     narrationTimeline = resolveNarrationTimeline(source.narration);
     if (narrationTimeline.totalDurationMs === null) {
       issues.push(
@@ -658,17 +729,8 @@ export const compileDraft = (
         if (!cues.ok) {
           issues.push(...cues.issues);
         } else if (requestedScope.type === "project") {
-          const captionStyle = source.profile.render.captions;
-          const safe = source.profile.render.safeZone;
           compiledCaptions = {
-            style: {
-              fontSize: Math.round((captionStyle?.fontSize ?? 44) * scaleX),
-              maxLines: captionStyle?.maxLines ?? 2,
-              bottom: Math.round(
-                (safe.bottom + (captionStyle?.bottomOffset ?? 24)) * scaleY,
-              ),
-              side: Math.round((safe.left + 48) * scaleX),
-            },
+            style: captionStyleFor(source, scaleX, scaleY),
             cues: cues.value.map((cue) => {
               const startFrame = Math.round((cue.startMs * fps) / 1000);
               return {
@@ -741,9 +803,17 @@ export const compileDraft = (
   const outgoingTransitionFrames: Array<number | null> = sourceScenes.map(
     () => null,
   );
+  // A narrated scene's length is only known once its block has audio. In a
+  // scoped preview the other scenes are not placed, so they are not checked.
+  const durationKnown = (index: number): boolean =>
+    !hasNarration ||
+    partitionedScenes.some(
+      (entry) => entry.sceneId === sourceScenes[index]?.scene.id,
+    );
   sourceScenes.forEach(
     ({ scene, sceneIndex, sourceStartFrame, sourceEndFrame }) => {
       if (scene.transition.type === "cut") return;
+      if (!durationKnown(sceneIndex)) return;
       const ownDurationInFrames = sourceEndFrame - sourceStartFrame;
       const transitionFrames = msToDurationFrames(
         scene.transition.durationMs,
@@ -762,6 +832,7 @@ export const compileDraft = (
         );
         return;
       }
+      if (!durationKnown(sceneIndex + 1)) return;
       const nextDurationInFrames = next.sourceEndFrame - next.sourceStartFrame;
       if (
         transitionFrames >= ownDurationInFrames ||
@@ -787,6 +858,7 @@ export const compileDraft = (
   // outgoing exit).
   sourceScenes.forEach(
     ({ scene, sceneIndex, sourceStartFrame, sourceEndFrame }) => {
+      if (!durationKnown(sceneIndex)) return;
       const ownDurationInFrames = sourceEndFrame - sourceStartFrame;
       const incoming =
         sceneIndex > 0 ? (outgoingTransitionFrames[sceneIndex - 1] ?? 0) : 0;
@@ -914,6 +986,9 @@ export const compileDraft = (
           : [],
       beats,
       transitionOut: compileTransition(scene.transition, fps),
+      ...(requestedScope.type === "scene"
+        ? scopedTransitionHandles(source, sceneIndex, durationInFrames, fps)
+        : {}),
     };
   });
 
@@ -933,11 +1008,17 @@ export const compileDraft = (
       : {
           type: "scene" as const,
           sceneId: requestedScope.sceneId,
-          sourceStartFrame: selectedSources[0]?.sourceStartFrame ?? 0,
-          sourceEndFrame: selectedSources[0]?.sourceEndFrame ?? 0,
+          sourceStartFrame: scopedNarration
+            ? scopedNarration.sourceStartFrame
+            : (selectedSources[0]?.sourceStartFrame ?? 0),
+          sourceEndFrame: scopedNarration
+            ? scopedNarration.sourceEndFrame
+            : (selectedSources[0]?.sourceEndFrame ?? 0),
         };
   const totalFrames =
-    hasNarration && narrationTimeline?.totalDurationMs !== null
+    requestedScope.type === "project" &&
+    hasNarration &&
+    narrationTimeline?.totalDurationMs !== null
       ? Math.ceil(((narrationTimeline?.totalDurationMs ?? 0) * fps) / 1000)
       : renderCursor;
   const draftCandidate = {

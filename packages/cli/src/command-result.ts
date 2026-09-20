@@ -10,6 +10,7 @@ export type CommandName =
   | "edit"
   | "undo"
   | "render"
+  | "cache"
   | "unknown";
 
 export type CommandReadiness =
