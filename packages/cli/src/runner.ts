@@ -6,11 +6,13 @@ import {
   applyProfile,
   buildProfileLock,
   type CompiledDraft,
+  capabilityRegistry,
   checkProductionReadiness,
   compileDraft,
   computeCostReport,
   computeReuse,
   createProject,
+  dedupeIssues,
   editProject,
   exportSchemas,
   type Issue,
@@ -242,10 +244,13 @@ const schemaCommand = async (args: readonly string[]): Promise<Execution> => {
     );
   }
   const schemas = exportSchemas();
+  // The capability list travels with the schemas: an agent reading one to
+  // author a project needs the other to know which forms this build renders.
+  const capabilities = capabilityRegistry();
   return {
     exitCode: 0,
-    event: commonEvent("schema", { data: { schemas } }),
-    humanJson: schemas,
+    event: commonEvent("schema", { data: { schemas, capabilities } }),
+    humanJson: { schemas, capabilities },
   };
 };
 
@@ -845,8 +850,9 @@ const runProductionChecks = async (
   );
   issues.push(...(await preflightNarrationAudio(loaded.root, final.value)));
   issues.push(...(await preflightSoundtrackAudio(loaded.root, final.value)));
-  const ok = !issues.some((issue) => issue.severity === "error");
-  return { ok, issues, draft: draft.value, final: final.value };
+  const reported = dedupeIssues(issues);
+  const ok = !reported.some((issue) => issue.severity === "error");
+  return { ok, issues: reported, draft: draft.value, final: final.value };
 };
 
 /**
@@ -872,8 +878,9 @@ const runPreviewProductionChecks = async (
   );
   issues.push(...(await preflightNarrationAudio(loaded.root, draft.value)));
   issues.push(...(await preflightSoundtrackAudio(loaded.root, draft.value)));
-  const ok = !issues.some((issue) => issue.severity === "error");
-  return { ok, issues, draft: draft.value };
+  const reported = dedupeIssues(issues);
+  const ok = !reported.some((issue) => issue.severity === "error");
+  return { ok, issues: reported, draft: draft.value };
 };
 
 const renderCommand = async (

@@ -12,7 +12,9 @@
       "!**/dist",
       "!**/.naraframe",
       "!**/preview",
-      "!**/output"
+      "!**/output",
+      "!test-fixtures/**/*.json",
+      "!**/revisions"
     ]
   },
   "formatter": {

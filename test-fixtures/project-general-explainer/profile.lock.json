@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "id": "general-explainer",
+  "version": "1.0.0",
+  "render": {
+    "palette": {
+      "background": "#0E1B2A",
+      "surface": "#F7F3E8",
+      "text": "#F2EFE6",
+      "accent": "#F2B705"
+    },
+    "typography": {
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "headingWeight": 700,
+      "bodyWeight": 400,
+      "minimumFontSize": 30,
+      "roles": {
+        "display": {
+          "fontSize": 112,
+          "fontWeight": 700,
+          "lineHeight": 1.04,
+          "letterSpacing": -2
+        },
+        "heading": {
+          "fontSize": 72,
+          "fontWeight": 700,
+          "lineHeight": 1.1,
+          "letterSpacing": -1
+        },
+        "body": {
+          "fontSize": 50,
+          "fontWeight": 400,
+          "lineHeight": 1.3,
+          "letterSpacing": 0
+        },
+        "label": {
+          "fontSize": 30,
+          "fontWeight": 700,
+          "lineHeight": 1.1,
+          "letterSpacing": 1.2
+        }
+      }
+    },
+    "appearance": {
+      "radius": {
+        "small": 12,
+        "medium": 28,
+        "large": 48
+      },
+      "stroke": {
+        "color": "#F7F3E8",
+        "width": 0
+      },
+      "shadow": {
+        "color": "#000000",
+        "opacity": 0.22,
+        "offsetX": 0,
+        "offsetY": 14,
+        "blur": 30
+      },
+      "media": {
+        "fit": "cover",
+        "cornerRadius": 28
+      }
+    },
+    "safeZone": {
+      "top": 160,
+      "right": 88,
+      "bottom": 200,
+      "left": 88
+    },
+    "spacingUnit": 8,
+    "motion": {
+      "revealDurationMs": 460,
+      "emphasizeScale": 1.06,
+      "focusScale": 1.1
+    }
+  },
+  "production": {
+    "voiceStyleSignature": "id-teaching-warm-v1",
+    "illustrationStyleSignature": "diagram-explainer-v1",
+    "timing": {
+      "wordLevelRequired": false
+    },
+    "assetPolicy": {
+      "allowPlannedInDraft": true
+    },
+    "requireSourcing": false
+  },
+  "duration": {
+    "preferredMinMs": 15000,
+    "preferredMaxMs": 60000
+  },
+  "lockedPaths": [
+    "format.design",
+    "format.draft",
+    "render.safeZone"
+  ],
+  "overridablePaths": [
+    "render.palette",
+    "render.motion",
+    "render.captions"
+  ],
+  "assets": [],
+  "source": {
+    "kind": "local",
+    "identity": "general-explainer@1.0.0"
+  },
+  "direction": {
+    "text": "# General Explainer\n\nTeach one idea from a stable subject: how something works, what the numbers\nsay, how two things differ. Nothing here depends on today's news, so this\nprofile deliberately carries none of the current-affairs rules.\n\n- Open with the question the viewer already has, then answer it once.\n- Facts still need a source when they are specific, but dated sourcing is not\n  required: the subject does not move.\n- Deep blue ground, warm paper panels, a single amber accent for the one\n  number or label that carries the scene.\n- Compare with structure rather than colour: put the two things in the same\n  grid, at the same size, and let the difference show.\n- Motion explains sequence. Reveal in the order the viewer should read, and\n  hold still once everything is on screen.\n",
+    "sha256": "76c73e91b14f8da711fc48c27975e579c5306238030708774727522d7fbe5f93"
+  }
+}

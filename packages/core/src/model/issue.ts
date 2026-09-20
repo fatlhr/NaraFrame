@@ -71,3 +71,37 @@ export const sortIssues = (issues: readonly Issue[]): Issue[] =>
       left.path.localeCompare(right.path) ||
       left.code.localeCompare(right.code),
   );
+
+const SEVERITY_RANK: Record<Issue["severity"], number> = {
+  error: 3,
+  warning: 2,
+  info: 1,
+};
+
+/**
+ * Collapses the same finding reported more than once. A production check runs
+ * the draft compile, the final compile, and the readiness pass over the same
+ * source, and a stage that escalates a warning to an error re-reports it, so
+ * one stale voice clip can arrive three times. Only the most severe copy is
+ * kept, because that is the one that decides whether the stage passes.
+ */
+export const dedupeIssues = (issues: readonly Issue[]): Issue[] => {
+  const kept = new Map<string, Issue>();
+  for (const issue of issues) {
+    const key = [
+      issue.code,
+      issue.artifact,
+      issue.path,
+      issue.entityId ?? "",
+      issue.message,
+    ].join("\u0000");
+    const existing = kept.get(key);
+    if (
+      !existing ||
+      SEVERITY_RANK[issue.severity] > SEVERITY_RANK[existing.severity]
+    ) {
+      kept.set(key, issue);
+    }
+  }
+  return [...kept.values()];
+};

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "project-general-explainer",
+  "title": "Project General Explainer",
+  "profile": {
+    "id": "general-explainer",
+    "version": "1.0.0"
+  },
+  "format": {
+    "design": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30
+    },
+    "draft": {
+      "width": 540,
+      "height": 960,
+      "fps": 30
+    }
+  },
+  "safetyMaxDurationMs": 180000
+}

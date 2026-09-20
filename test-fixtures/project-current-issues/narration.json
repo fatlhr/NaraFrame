@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "order": [
+    "opening",
+    "mechanism",
+    "closing"
+  ],
+  "blocks": [
+    {
+      "id": "opening",
+      "text": "Selat Sunda tidak pernah diam. Gunung api di tengahnya terus diawasi setiap hari.",
+      "audioAssetId": "voice-opening",
+      "audioDurationMs": 6348,
+      "pauseAfterMs": 300,
+      "phrases": [
+        {
+          "id": "opening-p1",
+          "text": "Selat Sunda tidak pernah diam.",
+          "startMs": 0,
+          "endMs": 2286
+        },
+        {
+          "id": "opening-p2",
+          "text": "Gunung api di tengahnya terus diawasi setiap hari.",
+          "startMs": 2539,
+          "endMs": 6348
+        }
+      ]
+    },
+    {
+      "id": "mechanism",
+      "text": "Tercatat tiga kali peristiwa besar. Yang terakhir dipicu oleh lereng yang runtuh ke laut.",
+      "audioAssetId": "voice-mechanism",
+      "audioDurationMs": 6583,
+      "pauseAfterMs": 300,
+      "phrases": [
+        {
+          "id": "mechanism-p1",
+          "text": "Tercatat tiga kali peristiwa besar.",
+          "startMs": 0,
+          "endMs": 2613
+        },
+        {
+          "id": "mechanism-p2",
+          "text": "Yang terakhir dipicu oleh lereng yang runtuh ke laut.",
+          "startMs": 2898,
+          "endMs": 6583
+        }
+      ]
+    },
+    {
+      "id": "closing",
+      "text": "Karena itu pemantauan berlanjut. Yang bisa diukur, bisa diperingatkan lebih awal.",
+      "audioAssetId": "voice-closing",
+      "audioDurationMs": 6374,
+      "pauseAfterMs": 0,
+      "phrases": [
+        {
+          "id": "closing-p1",
+          "text": "Karena itu pemantauan berlanjut.",
+          "startMs": 0,
+          "endMs": 2264
+        },
+        {
+          "id": "closing-p2",
+          "text": "Yang bisa diukur, bisa diperingatkan lebih awal.",
+          "startMs": 2604,
+          "endMs": 6374
+        }
+      ]
+    }
+  ]
+}

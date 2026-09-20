@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "order": [
+    "question",
+    "cause",
+    "recovery"
+  ],
+  "blocks": [
+    {
+      "id": "question",
+      "text": "Terumbu karang bisa kehilangan warnanya. Yang memutih sebenarnya bukan karangnya.",
+      "audioAssetId": "voice-question",
+      "audioDurationMs": 5851,
+      "pauseAfterMs": 300,
+      "phrases": [
+        {
+          "id": "question-p1",
+          "text": "Terumbu karang bisa kehilangan warnanya.",
+          "startMs": 0,
+          "endMs": 2731
+        },
+        {
+          "id": "question-p2",
+          "text": "Yang memutih sebenarnya bukan karangnya.",
+          "startMs": 3019,
+          "endMs": 5851
+        }
+      ]
+    },
+    {
+      "id": "cause",
+      "text": "Suhu air yang naik sedikit saja sudah cukup. Karang melepas alga yang memberinya warna.",
+      "audioAssetId": "voice-cause",
+      "audioDurationMs": 6687,
+      "pauseAfterMs": 300,
+      "phrases": [
+        {
+          "id": "cause-p1",
+          "text": "Suhu air yang naik sedikit saja sudah cukup.",
+          "startMs": 0,
+          "endMs": 3386
+        },
+        {
+          "id": "cause-p2",
+          "text": "Karang melepas alga yang memberinya warna.",
+          "startMs": 3748,
+          "endMs": 6687
+        }
+      ]
+    },
+    {
+      "id": "recovery",
+      "text": "Karang itu belum mati. Warnanya bisa kembali kalau tekanannya berhenti.",
+      "audioAssetId": "voice-recovery",
+      "audioDurationMs": 5512,
+      "pauseAfterMs": 0,
+      "phrases": [
+        {
+          "id": "recovery-p1",
+          "text": "Karang itu belum mati.",
+          "startMs": 0,
+          "endMs": 1560
+        },
+        {
+          "id": "recovery-p2",
+          "text": "Warnanya bisa kembali kalau tekanannya berhenti.",
+          "startMs": 1836,
+          "endMs": 5512
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "id": "contrast",
+  "version": "1.0.0",
+  "render": {
+    "palette": {
+      "background": "#F4F1EA",
+      "surface": "#1C2733",
+      "text": "#16202B",
+      "accent": "#0B7A75"
+    },
+    "typography": {
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "headingWeight": 600,
+      "bodyWeight": 400,
+      "minimumFontSize": 30,
+      "roles": {
+        "display": {
+          "fontSize": 104,
+          "fontWeight": 600,
+          "lineHeight": 1.02,
+          "letterSpacing": -2
+        },
+        "heading": {
+          "fontSize": 68,
+          "fontWeight": 600,
+          "lineHeight": 1.08,
+          "letterSpacing": -1
+        },
+        "body": {
+          "fontSize": 48,
+          "fontWeight": 400,
+          "lineHeight": 1.22,
+          "letterSpacing": 0.2
+        },
+        "label": {
+          "fontSize": 30,
+          "fontWeight": 600,
+          "lineHeight": 1.1,
+          "letterSpacing": 2
+        }
+      }
+    },
+    "appearance": {
+      "radius": {
+        "small": 4,
+        "medium": 8,
+        "large": 12
+      },
+      "stroke": {
+        "color": "#1C2733",
+        "width": 3
+      },
+      "shadow": {
+        "color": "#000000",
+        "opacity": 0.06,
+        "offsetX": 0,
+        "offsetY": 6,
+        "blur": 16
+      },
+      "media": {
+        "fit": "cover",
+        "cornerRadius": 8
+      }
+    },
+    "safeZone": {
+      "top": 160,
+      "right": 88,
+      "bottom": 200,
+      "left": 88
+    },
+    "spacingUnit": 8,
+    "motion": {
+      "revealDurationMs": 340,
+      "emphasizeScale": 1.04,
+      "focusScale": 1.06
+    }
+  },
+  "production": {
+    "voiceStyleSignature": "id-calm-explainer-v1",
+    "illustrationStyleSignature": "flat-editorial-contrast-v1",
+    "timing": {
+      "wordLevelRequired": false
+    },
+    "assetPolicy": {
+      "allowPlannedInDraft": true
+    },
+    "requireSourcing": true
+  },
+  "duration": {
+    "preferredMinMs": 15000,
+    "preferredMaxMs": 45000
+  },
+  "lockedPaths": [
+    "format.design",
+    "format.draft",
+    "render.safeZone"
+  ],
+  "overridablePaths": [
+    "render.palette",
+    "render.motion"
+  ],
+  "assets": []
+}

@@ -1,14 +1,17 @@
 import type { Issue } from "../model/issue.js";
 import type { RenderTokens } from "../schema/profile.js";
+import type { Layer } from "../schema/scene.js";
 import type { VarietyScene } from "./variety.js";
 
 /**
  * WCAG 2.x relative-luminance contrast math. Pure color arithmetic — no
  * DOM, no canvas, no render — so it runs during `validate`, not only after
  * a full browser render. It checks resolved text color against the
- * project's flat `palette.background` only: a photo or shape actually
- * behind a layer at render time is not sampled, so this catches the
- * common flat-background mistake, not every real compositing case.
+ * project's background: either the flat `palette.background`, or the fill
+ * of an opaque shape painted under the text and covering it, which is how
+ * editorial layouts put dark type on a light panel. An image behind a layer
+ * is still not sampled — its pixels are unknown here — so a text layer over
+ * a photograph is left alone rather than judged against the page.
  */
 
 const srgbChannelToLinear = (channel8Bit: number): number => {
@@ -35,6 +38,44 @@ export const contrastRatio = (hexA: string, hexB: string): number => {
   return (lighter + 0.05) / (darker + 0.05);
 };
 
+const covers = (
+  outer: { x: number; y: number; width: number; height: number },
+  inner: { x: number; y: number; width: number; height: number },
+): boolean =>
+  outer.x <= inner.x &&
+  outer.y <= inner.y &&
+  outer.x + outer.width >= inner.x + inner.width &&
+  outer.y + outer.height >= inner.y + inner.height;
+
+/**
+ * What the text is actually read against: the last opaque rectangle painted
+ * under it that covers it, or the page background when there is none. A
+ * circle is not used — its corners leave the text over whatever is behind.
+ */
+const backdropFor = (
+  layers: readonly Layer[],
+  textIndex: number,
+  render: RenderTokens,
+): { color: string; layerId?: string } => {
+  const text = layers[textIndex];
+  if (text?.type !== "text") return { color: render.palette.background };
+  let backdrop: { color: string; layerId?: string } = {
+    color: render.palette.background,
+  };
+  layers.forEach((layer, index) => {
+    if (index === textIndex) return;
+    if (layer.type === "image") return;
+    if (layer.type !== "shape" || layer.shape !== "rectangle") return;
+    if ((layer.opacity ?? 1) < 1) return;
+    const under =
+      (layer.zIndex ?? 0) < (text.zIndex ?? 0) ||
+      ((layer.zIndex ?? 0) === (text.zIndex ?? 0) && index < textIndex);
+    if (!under || !covers(layer.frame, text.frame)) return;
+    backdrop = { color: layer.fill, layerId: layer.id };
+  });
+  return backdrop;
+};
+
 /** WCAG 2.x: 18pt/24px regular (or 14pt/~19px bold) counts as "large text". */
 const LARGE_TEXT_PX = 24;
 const CONTRAST_MINIMUM_LARGE_TEXT = 3;
@@ -57,7 +98,8 @@ export const checkContrast = (
       if (layer.type !== "text") return;
       const textColor = layer.color ?? render.palette.text;
       const fontSize = layer.fontSize ?? 34;
-      const ratio = contrastRatio(textColor, render.palette.background);
+      const backdrop = backdropFor(resolvedLayers, layerIndex, render);
+      const ratio = contrastRatio(textColor, backdrop.color);
       const threshold = contrastThresholdFor(fontSize);
       if (ratio < threshold) {
         issues.push({
@@ -67,7 +109,7 @@ export const checkContrast = (
           artifact: "scenes.json",
           path: `/scenes/${sceneIndex}/visual/layers/${layerIndex}`,
           entityId: layer.id,
-          message: `Text layer ${layer.id} in scene ${scene.id} has a ${ratio.toFixed(2)}:1 contrast ratio against the background, below the ${threshold}:1 WCAG minimum for its size.`,
+          message: `Text layer ${layer.id} in scene ${scene.id} has a ${ratio.toFixed(2)}:1 contrast ratio against ${backdrop.layerId ? `panel ${backdrop.layerId}` : "the background"}, below the ${threshold}:1 WCAG minimum for its size.`,
           suggestion:
             "Choose a text or background color with more contrast, or size the text at or above 24px to use the large-text threshold.",
         });

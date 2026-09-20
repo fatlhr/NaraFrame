@@ -397,6 +397,14 @@ const TransitionFrame = ({
   );
 };
 
+/** A palette hex at a given opacity, for scrims drawn over the scene. */
+const withAlpha = (hexColor: string, alpha: number): string => {
+  const red = Number.parseInt(hexColor.slice(1, 3), 16);
+  const green = Number.parseInt(hexColor.slice(3, 5), 16);
+  const blue = Number.parseInt(hexColor.slice(5, 7), 16);
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+};
+
 const SoundtrackLayer = ({ draft }: { draft: CompiledDraft }) => {
   const soundtrack = draft.soundtrack;
   if (!soundtrack) return null;
@@ -464,7 +472,10 @@ const CaptionLayer = ({ draft }: { draft: CompiledDraft }) => {
               style={{
                 padding: `${padding.y}px ${padding.x}px`,
                 borderRadius: Math.round(style.fontSize * 0.35),
-                backgroundColor: "rgba(0, 0, 0, 0.62)",
+                // The scrim is the project's own background, so a light
+                // profile gets a light caption with its dark type instead of
+                // dark type on a black box.
+                backgroundColor: withAlpha(render.palette.background, 0.72),
                 color: render.palette.text,
                 fontFamily: render.typography.fontFamily,
                 fontSize: style.fontSize,

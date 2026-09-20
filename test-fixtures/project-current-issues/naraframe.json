@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "project-current-issues",
+  "title": "Project Current Issues",
+  "profile": {
+    "id": "current-issues",
+    "version": "0.3.0"
+  },
+  "format": {
+    "design": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30
+    },
+    "draft": {
+      "width": 540,
+      "height": 960,
+      "fps": 30
+    }
+  },
+  "safetyMaxDurationMs": 180000,
+  "soundtrack": {
+    "music": {
+      "assetId": "music-bed",
+      "volume": 0.6,
+      "loop": true,
+      "fadeInMs": 1500,
+      "fadeOutMs": 2000,
+      "duck": {
+        "volume": 0.15,
+        "attackMs": 250,
+        "releaseMs": 500
+      }
+    },
+    "sfx": [
+      {
+        "id": "mechanism-mark",
+        "assetId": "mark",
+        "sceneId": "diagram",
+        "offsetMs": 300,
+        "volume": 0.9
+      }
+    ]
+  }
+}

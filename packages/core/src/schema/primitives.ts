@@ -10,6 +10,23 @@ export const Sha256Schema = z
 export const ColorSchema = z
   .string()
   .regex(/^#[0-9A-Fa-f]{6}$/, "Expected a six-digit hex color");
+/**
+ * A scene may name a profile colour instead of a literal one. Without this a
+ * project's shapes keep their hex values when the profile changes, so a
+ * profile switch repaints the type and the page but leaves every rule,
+ * panel and marker in the old palette.
+ */
+export const PaletteTokenSchema = z.enum([
+  "palette.background",
+  "palette.surface",
+  "palette.text",
+  "palette.accent",
+]);
+export type PaletteToken = z.infer<typeof PaletteTokenSchema>;
+
+/** A literal colour, or a profile palette slot resolved at compile time. */
+export const ColorValueSchema = z.union([ColorSchema, PaletteTokenSchema]);
+
 export const VersionSchema = z
   .string()
   .regex(/^\d+\.\d+\.\d+$/, "Expected a semantic version");

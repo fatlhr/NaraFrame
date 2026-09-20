@@ -1,0 +1,19 @@
+{
+  "blocks": [
+    {
+      "id": "opening",
+      "pauseAfterMs": 300,
+      "text": "Selat Sunda tidak pernah diam. Gunung api di tengahnya terus diawasi setiap hari."
+    },
+    {
+      "id": "mechanism",
+      "pauseAfterMs": 300,
+      "text": "Tercatat tiga kali peristiwa besar. Yang terakhir dipicu oleh lereng yang runtuh ke laut."
+    },
+    {
+      "id": "closing",
+      "pauseAfterMs": 0,
+      "text": "Karena itu pemantauan berlanjut. Yang bisa diukur, bisa diperingatkan lebih awal."
+    }
+  ]
+}

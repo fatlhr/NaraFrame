@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "id": "general-explainer",
+  "version": "1.0.0",
+  "render": {
+    "palette": {
+      "background": "#0E1B2A",
+      "surface": "#F7F3E8",
+      "text": "#F2EFE6",
+      "accent": "#F2B705"
+    },
+    "typography": {
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "headingWeight": 700,
+      "bodyWeight": 400,
+      "minimumFontSize": 30,
+      "roles": {
+        "display": {
+          "fontSize": 112,
+          "fontWeight": 700,
+          "lineHeight": 1.04,
+          "letterSpacing": -2
+        },
+        "heading": {
+          "fontSize": 72,
+          "fontWeight": 700,
+          "lineHeight": 1.1,
+          "letterSpacing": -1
+        },
+        "body": {
+          "fontSize": 50,
+          "fontWeight": 400,
+          "lineHeight": 1.3,
+          "letterSpacing": 0
+        },
+        "label": {
+          "fontSize": 30,
+          "fontWeight": 700,
+          "lineHeight": 1.1,
+          "letterSpacing": 1.2
+        }
+      }
+    },
+    "appearance": {
+      "radius": {
+        "small": 12,
+        "medium": 28,
+        "large": 48
+      },
+      "stroke": {
+        "color": "#F7F3E8",
+        "width": 0
+      },
+      "shadow": {
+        "color": "#000000",
+        "opacity": 0.22,
+        "offsetX": 0,
+        "offsetY": 14,
+        "blur": 30
+      },
+      "media": {
+        "fit": "cover",
+        "cornerRadius": 28
+      }
+    },
+    "safeZone": {
+      "top": 160,
+      "right": 88,
+      "bottom": 200,
+      "left": 88
+    },
+    "spacingUnit": 8,
+    "motion": {
+      "revealDurationMs": 460,
+      "emphasizeScale": 1.06,
+      "focusScale": 1.1
+    }
+  },
+  "production": {
+    "voiceStyleSignature": "id-teaching-warm-v1",
+    "illustrationStyleSignature": "diagram-explainer-v1",
+    "timing": {
+      "wordLevelRequired": false
+    },
+    "assetPolicy": {
+      "allowPlannedInDraft": true
+    },
+    "requireSourcing": false
+  },
+  "duration": {
+    "preferredMinMs": 15000,
+    "preferredMaxMs": 60000
+  },
+  "lockedPaths": [
+    "format.design",
+    "format.draft",
+    "render.safeZone"
+  ],
+  "overridablePaths": [
+    "render.palette",
+    "render.motion",
+    "render.captions"
+  ],
+  "assets": []
+}

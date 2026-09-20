@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   ColorSchema,
+  ColorValueSchema,
   IdSchema,
   NonNegativeIntegerSchema,
   PositiveIntegerSchema,
@@ -69,7 +70,7 @@ const TextLayerSchema = z
     fontWeight: z.number().int().min(100).max(900).optional(),
     lineHeight: z.number().min(0.8).max(2).optional(),
     letterSpacing: z.number().min(-20).max(40).optional(),
-    color: ColorSchema.optional(),
+    color: ColorValueSchema.optional(),
     textAlign: z.enum(["left", "center", "right"]).optional(),
     verticalAlign: z.enum(["top", "center", "bottom"]).optional(),
     padding: InsetsSchema.optional(),
@@ -100,7 +101,7 @@ const ShapeLayerSchema = z
     id: IdSchema,
     type: z.literal("shape"),
     shape: z.enum(["rectangle", "circle"]),
-    fill: ColorSchema,
+    fill: ColorValueSchema,
     frame: FrameSchema,
     cornerRadius: z.number().min(0).max(960).optional(),
     stroke: StrokeSchema.optional(),

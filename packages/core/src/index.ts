@@ -1,5 +1,9 @@
 export const corePackage = "@naraframe/core";
 
+export {
+  type CapabilityRegistry,
+  capabilityRegistry,
+} from "./capabilities.js";
 export { type CaptionCue, deriveCaptionCues } from "./compiler/captions.js";
 export {
   type CompileOptions,
@@ -61,6 +65,7 @@ export type {
   IssueSeverity,
   Result,
 } from "./model/issue.js";
+export { dedupeIssues } from "./model/issue.js";
 export {
   type CostReport,
   computeCostReport,

@@ -1,0 +1,659 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "bmkg-2026",
+      "title": "BMKG \u2014 Laporan pemantauan Selat Sunda, 15 Januari 2026",
+      "url": "https://example.invalid/bmkg/selat-sunda-2026",
+      "retrievedAt": "2026-09-20"
+    },
+    {
+      "id": "pvmbg-1927",
+      "title": "PVMBG \u2014 Catatan kemunculan Anak Krakatau, 1927",
+      "url": "https://example.invalid/pvmbg/anak-krakatau-1927",
+      "retrievedAt": "2026-09-20"
+    },
+    {
+      "id": "bnpb-2018",
+      "title": "BNPB \u2014 Kaji cepat tsunami Selat Sunda, Desember 2018",
+      "url": "https://example.invalid/bnpb/tsunami-2018",
+      "retrievedAt": "2026-09-20"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "narrativeRole": "hook",
+      "durationMs": 4000,
+      "visual": {
+        "type": "text",
+        "text": "Selat Sunda bergerak.\nKita mengukurnya setiap hari."
+      },
+      "beats": [],
+      "transition": {
+        "type": "cut"
+      },
+      "narration": {
+        "blockId": "opening"
+      }
+    },
+    {
+      "id": "map",
+      "narrativeRole": "context",
+      "durationMs": 4500,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "map-panel",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 88,
+              "y": 300,
+              "width": 904,
+              "height": 700
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 0
+          },
+          {
+            "id": "map-image",
+            "type": "image",
+            "assetId": "sunda-map",
+            "fit": "cover",
+            "frame": {
+              "x": 128,
+              "y": 340,
+              "width": 824,
+              "height": 550
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "island-ring",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 520,
+              "y": 560,
+              "width": 96,
+              "height": 96
+            },
+            "opacity": 0.3,
+            "rotationDeg": 0,
+            "zIndex": 2
+          },
+          {
+            "id": "island-core",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 552,
+              "y": 592,
+              "width": 32,
+              "height": 32
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "island-marker",
+            "type": "group",
+            "memberIds": [
+              "island-ring",
+              "island-core"
+            ],
+            "transform": {
+              "x": 0,
+              "y": 0,
+              "scale": 1,
+              "rotationDeg": 0,
+              "opacity": 1
+            },
+            "zIndex": 3
+          },
+          {
+            "id": "map-label",
+            "type": "text",
+            "text": "SELAT SUNDA",
+            "frame": {
+              "x": 128,
+              "y": 900,
+              "width": 824,
+              "height": 60
+            },
+            "role": "label",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 4,
+            "color": "palette.background"
+          },
+          {
+            "id": "map-copy",
+            "type": "text",
+            "text": "Gunung api di tengah selat itu tidak pernah benar-benar diam.",
+            "frame": {
+              "x": 88,
+              "y": 1060,
+              "width": 904,
+              "height": 200
+            },
+            "role": "body",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 4
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "map-in",
+          "targetId": "map-image",
+          "action": "reveal",
+          "startMs": 0,
+          "durationMs": 600,
+          "params": {
+            "direction": "up",
+            "distance": 40,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "map-hold",
+          "targetId": "map-image",
+          "action": "focus",
+          "startMs": 600,
+          "durationMs": 2200,
+          "params": {
+            "camera": "push",
+            "intensity": 0.4
+          }
+        },
+        {
+          "id": "marker-pop",
+          "targetId": "island-marker",
+          "action": "emphasize",
+          "startMs": 1400,
+          "durationMs": 600,
+          "params": {
+            "scale": 1.08
+          }
+        }
+      ],
+      "transition": {
+        "type": "push-through",
+        "direction": "up",
+        "durationMs": 420
+      },
+      "narration": {
+        "blockId": "opening",
+        "phraseId": "opening-p2"
+      },
+      "sourceIds": [
+        "bmkg-2026"
+      ],
+      "carriesFactualClaim": true
+    },
+    {
+      "id": "timeline",
+      "narrativeRole": "evidence",
+      "durationMs": 4500,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "timeline-title",
+            "type": "text",
+            "text": "Tiga kali tercatat",
+            "frame": {
+              "x": 88,
+              "y": 300,
+              "width": 904,
+              "height": 110
+            },
+            "role": "heading",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "timeline-rule",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 88,
+              "y": 520,
+              "width": 904,
+              "height": 6
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "stop-1",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 120,
+              "y": 500,
+              "width": 44,
+              "height": 44
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 2
+          },
+          {
+            "id": "stop-2",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 508,
+              "y": 500,
+              "width": 44,
+              "height": 44
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 2
+          },
+          {
+            "id": "stop-3",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 896,
+              "y": 500,
+              "width": 44,
+              "height": 44
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 2
+          },
+          {
+            "id": "stops",
+            "type": "group",
+            "memberIds": [
+              "stop-1",
+              "stop-2",
+              "stop-3"
+            ],
+            "transform": {
+              "x": 0,
+              "y": 0,
+              "scale": 1,
+              "rotationDeg": 0,
+              "opacity": 1
+            },
+            "zIndex": 2
+          },
+          {
+            "id": "stop-1-label",
+            "type": "text",
+            "text": "1883",
+            "frame": {
+              "x": 88,
+              "y": 580,
+              "width": 200,
+              "height": 50
+            },
+            "role": "label",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "stop-2-label",
+            "type": "text",
+            "text": "1927",
+            "frame": {
+              "x": 440,
+              "y": 580,
+              "width": 200,
+              "height": 50
+            },
+            "role": "label",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "stop-3-label",
+            "type": "text",
+            "text": "2018",
+            "frame": {
+              "x": 792,
+              "y": 580,
+              "width": 200,
+              "height": 50
+            },
+            "role": "label",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "timeline-copy",
+            "type": "text",
+            "text": "Letusan besar, kemunculan kembali, lalu longsoran yang memicu tsunami.",
+            "frame": {
+              "x": 88,
+              "y": 700,
+              "width": 904,
+              "height": 240
+            },
+            "role": "body",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "rule-in",
+          "targetId": "timeline-rule",
+          "action": "reveal",
+          "startMs": 0,
+          "durationMs": 500,
+          "params": {
+            "direction": "right",
+            "distance": 240,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "stops-in",
+          "targetId": "stops",
+          "action": "reveal",
+          "startMs": 400,
+          "durationMs": 500,
+          "params": {
+            "direction": "down",
+            "distance": 30,
+            "easingPreset": "snappy"
+          }
+        },
+        {
+          "id": "copy-in",
+          "targetId": "timeline-copy",
+          "action": "reveal",
+          "startMs": 900,
+          "durationMs": 500,
+          "params": {
+            "direction": "up",
+            "distance": 40
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      },
+      "narration": {
+        "blockId": "mechanism"
+      },
+      "sourceIds": [
+        "pvmbg-1927",
+        "bnpb-2018"
+      ],
+      "carriesFactualClaim": true
+    },
+    {
+      "id": "diagram",
+      "narrativeRole": "mechanism",
+      "durationMs": 4500,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "plate",
+            "type": "image",
+            "assetId": "archive-plate",
+            "fit": "cover",
+            "frame": {
+              "x": 88,
+              "y": 300,
+              "width": 420,
+              "height": 620
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "cornerRadius": 20
+          },
+          {
+            "id": "layer-1",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 560,
+              "y": 300,
+              "width": 432,
+              "height": 180
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "layer-2",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 560,
+              "y": 500,
+              "width": 432,
+              "height": 180
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "layer-3",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 560,
+              "y": 700,
+              "width": 432,
+              "height": 220
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "layer-3-mark",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 560,
+              "y": 700,
+              "width": 10,
+              "height": 220
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 2
+          },
+          {
+            "id": "layer-stack",
+            "type": "group",
+            "memberIds": [
+              "layer-1",
+              "layer-2",
+              "layer-3"
+            ],
+            "transform": {
+              "x": 0,
+              "y": 0,
+              "scale": 1,
+              "rotationDeg": 0,
+              "opacity": 1
+            },
+            "zIndex": 1
+          },
+          {
+            "id": "layer-1-text",
+            "type": "text",
+            "text": "Tekanan naik",
+            "frame": {
+              "x": 596,
+              "y": 360,
+              "width": 360,
+              "height": 60
+            },
+            "role": "label",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "color": "palette.background"
+          },
+          {
+            "id": "layer-2-text",
+            "type": "text",
+            "text": "Lereng melemah",
+            "frame": {
+              "x": 596,
+              "y": 560,
+              "width": 360,
+              "height": 60
+            },
+            "role": "label",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "color": "palette.background"
+          },
+          {
+            "id": "layer-3-text",
+            "type": "text",
+            "text": "Material longsor",
+            "frame": {
+              "x": 596,
+              "y": 780,
+              "width": 360,
+              "height": 60
+            },
+            "role": "label",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "color": "palette.background"
+          },
+          {
+            "id": "diagram-copy",
+            "type": "text",
+            "text": "Bukan letusannya yang memicu gelombang, melainkan lereng yang runtuh ke laut.",
+            "frame": {
+              "x": 88,
+              "y": 980,
+              "width": 904,
+              "height": 260
+            },
+            "role": "body",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "plate-in",
+          "targetId": "plate",
+          "action": "reveal",
+          "startMs": 0,
+          "durationMs": 600,
+          "params": {
+            "direction": "left",
+            "distance": 60,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "stack-in",
+          "targetId": "layer-stack",
+          "action": "reveal",
+          "startMs": 500,
+          "durationMs": 600,
+          "params": {
+            "direction": "right",
+            "distance": 60,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "stack-look",
+          "targetId": "layer-3",
+          "action": "emphasize",
+          "startMs": 2600,
+          "durationMs": 800,
+          "params": {
+            "scale": 1.06
+          }
+        },
+        {
+          "id": "diagram-look",
+          "targetId": "plate",
+          "action": "focus",
+          "startMs": 1200,
+          "durationMs": 2000,
+          "params": {
+            "camera": "pan",
+            "intensity": 0.3
+          }
+        }
+      ],
+      "transition": {
+        "type": "mask-reveal",
+        "durationMs": 460,
+        "shape": "circle"
+      },
+      "narration": {
+        "blockId": "mechanism",
+        "phraseId": "mechanism-p2"
+      },
+      "sourceIds": [
+        "bnpb-2018"
+      ],
+      "carriesFactualClaim": true
+    },
+    {
+      "id": "close",
+      "narrativeRole": "impact",
+      "durationMs": 4000,
+      "visual": {
+        "type": "text",
+        "text": "Yang bisa diukur, bisa diperingatkan lebih awal."
+      },
+      "beats": [],
+      "transition": {
+        "type": "cut"
+      },
+      "narration": {
+        "blockId": "closing"
+      },
+      "note": "Tutup tanpa angka baru: semua klaim sudah disebut di scene sebelumnya."
+    }
+  ]
+}

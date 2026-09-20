@@ -1,0 +1,19 @@
+{
+  "blocks": [
+    {
+      "id": "question",
+      "pauseAfterMs": 300,
+      "text": "Terumbu karang bisa kehilangan warnanya. Yang memutih sebenarnya bukan karangnya."
+    },
+    {
+      "id": "cause",
+      "pauseAfterMs": 300,
+      "text": "Suhu air yang naik sedikit saja sudah cukup. Karang melepas alga yang memberinya warna."
+    },
+    {
+      "id": "recovery",
+      "pauseAfterMs": 0,
+      "text": "Karang itu belum mati. Warnanya bisa kembali kalau tekanannya berhenti."
+    }
+  ]
+}

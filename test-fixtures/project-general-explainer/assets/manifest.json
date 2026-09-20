@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "reef-plate",
+      "status": "ready",
+      "kind": "png",
+      "path": "assets/reef-plate.png",
+      "sha256": "fcf96d5d00ec5bdd687edea1056f5a194d71d929265788e1a276c950c8470c6a",
+      "origin": {
+        "type": "generated",
+        "source": "test-fixtures/tools/make-assets.py"
+      }
+    },
+    {
+      "id": "species-plate",
+      "status": "ready",
+      "kind": "png",
+      "path": "assets/species-plate.png",
+      "sha256": "de7be032ceaa4d8bd037aefcacb5fdb11be72ecf96a0c551bf0feb9727914162",
+      "origin": {
+        "type": "generated",
+        "source": "test-fixtures/tools/make-assets.py"
+      }
+    },
+    {
+      "id": "voice-question",
+      "status": "ready",
+      "kind": "mp3",
+      "path": "audio/narration/6aadd6f0e65d02ba53f8f986854c05f07323f255b92c8eb9d5b69688dd3ebc4a.mp3",
+      "sha256": "6aadd6f0e65d02ba53f8f986854c05f07323f255b92c8eb9d5b69688dd3ebc4a",
+      "origin": {
+        "type": "generated",
+        "source": "macOS say (Damayanti) via make-narration.mjs"
+      },
+      "generation": {
+        "textSha256": "91b77b4f26969c4cdfa44805fcabfdd24ee83e6976ac206ac6377bfda9fb1b06",
+        "voiceStyleSignature": "id-teaching-warm-v1"
+      }
+    },
+    {
+      "id": "voice-cause",
+      "status": "ready",
+      "kind": "mp3",
+      "path": "audio/narration/a52caab11dcf366f2681dceac6d800b055a6805fef236bf06278c6b352276340.mp3",
+      "sha256": "a52caab11dcf366f2681dceac6d800b055a6805fef236bf06278c6b352276340",
+      "origin": {
+        "type": "generated",
+        "source": "macOS say (Damayanti) via make-narration.mjs"
+      },
+      "generation": {
+        "textSha256": "f8c0eb38a3167714e866ee20dbb92cc48c9832e4d03159e664c8a868e1ccc8f0",
+        "voiceStyleSignature": "id-teaching-warm-v1"
+      }
+    },
+    {
+      "id": "voice-recovery",
+      "status": "ready",
+      "kind": "mp3",
+      "path": "audio/narration/5c9e348eeca1d2615d85375bca799801c258bda1f7d639b2072ae0134723e820.mp3",
+      "sha256": "5c9e348eeca1d2615d85375bca799801c258bda1f7d639b2072ae0134723e820",
+      "origin": {
+        "type": "generated",
+        "source": "macOS say (Damayanti) via make-narration.mjs"
+      },
+      "generation": {
+        "textSha256": "d08bdc4a572c0ad00c30e2a8e76d9cbf33aaa6063640cc615c3d82fb99c2a489",
+        "voiceStyleSignature": "id-teaching-warm-v1"
+      }
+    }
+  ]
+}

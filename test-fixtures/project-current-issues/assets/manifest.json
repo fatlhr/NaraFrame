@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "sunda-map",
+      "status": "ready",
+      "kind": "png",
+      "path": "assets/sunda-map.png",
+      "sha256": "2e44a8d9dc825ccaf0e7193e6f0859ec9cad6093b2d6541d3dc51f66f40bec18",
+      "origin": {
+        "type": "generated",
+        "source": "test-fixtures/tools/make-assets.py"
+      }
+    },
+    {
+      "id": "archive-plate",
+      "status": "ready",
+      "kind": "png",
+      "path": "assets/archive-plate.png",
+      "sha256": "f8bc37cd1a9018d7722537fc48ad14a4f658f7140ac94191eacbcd203c6d9331",
+      "origin": {
+        "type": "generated",
+        "source": "test-fixtures/tools/make-assets.py"
+      }
+    },
+    {
+      "id": "music-bed",
+      "status": "ready",
+      "kind": "mp3",
+      "path": "audio/music/bed.mp3",
+      "sha256": "93f1b4b5d13982408715a85b565ee39f5b794acea83c5cc5beb21a07b215bdb2",
+      "origin": {
+        "type": "generated",
+        "source": "test-fixtures/tools/make-audio-beds.sh"
+      }
+    },
+    {
+      "id": "mark",
+      "status": "ready",
+      "kind": "mp3",
+      "path": "audio/music/mark.mp3",
+      "sha256": "ee81bcded9a32dc3c1bb738635f71a626239a65e6fbcfbb1b772e50278311297",
+      "origin": {
+        "type": "generated",
+        "source": "test-fixtures/tools/make-audio-beds.sh"
+      }
+    },
+    {
+      "id": "voice-opening",
+      "status": "ready",
+      "kind": "mp3",
+      "path": "audio/narration/fc51e26045edd3ea476f9fa127508bed8b27b83ee45d7785e8ded7a5c10a3c54.mp3",
+      "sha256": "fc51e26045edd3ea476f9fa127508bed8b27b83ee45d7785e8ded7a5c10a3c54",
+      "origin": {
+        "type": "generated",
+        "source": "macOS say (Damayanti) via make-narration.mjs"
+      },
+      "generation": {
+        "textSha256": "2a72b8053f27fa4c985628362ed1f0fc4855dd2d5424fb4aad2a81089cd6558a",
+        "voiceStyleSignature": "id-editorial-grounded-v1"
+      }
+    },
+    {
+      "id": "voice-mechanism",
+      "status": "ready",
+      "kind": "mp3",
+      "path": "audio/narration/403807ebee911bc0da7d9cd257b6944406f3e56a6a33db9c96f85df3834d5f5e.mp3",
+      "sha256": "403807ebee911bc0da7d9cd257b6944406f3e56a6a33db9c96f85df3834d5f5e",
+      "origin": {
+        "type": "generated",
+        "source": "macOS say (Damayanti) via make-narration.mjs"
+      },
+      "generation": {
+        "textSha256": "6c3966f3ecea95dc36aa67e51796699e6c69b80f918727d03d5fea10a7255cd7",
+        "voiceStyleSignature": "id-editorial-grounded-v1"
+      }
+    },
+    {
+      "id": "voice-closing",
+      "status": "ready",
+      "kind": "mp3",
+      "path": "audio/narration/53d7009d8907f6fd95df04e0451d15f927c0d1cd3915bb28f77b610d8cc8f855.mp3",
+      "sha256": "53d7009d8907f6fd95df04e0451d15f927c0d1cd3915bb28f77b610d8cc8f855",
+      "origin": {
+        "type": "generated",
+        "source": "macOS say (Damayanti) via make-narration.mjs"
+      },
+      "generation": {
+        "textSha256": "eed4c9d962febbd32fc93f6bbfa0fc6e27636fa09ac5911d1e3e38db110be12b",
+        "voiceStyleSignature": "id-editorial-grounded-v1"
+      }
+    }
+  ]
+}

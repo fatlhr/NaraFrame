@@ -421,12 +421,21 @@ Cost accounting is the capability nothing comparable offers, so it is a headline
 
 ### M2.3 — Two source projects and one variant
 
-- [ ] Build `test-fixtures/project-current-issues/` and `test-fixtures/project-general-explainer/` as independent source projects.
-- [ ] Current issues exercises map/timeline/diagram-composition/captions/music/SFX and dated factual source review. The second exercises media/stat/list-comparison/composition without globally inheriting current-affairs rules.
-- [ ] Use `test-fixtures/profiles/contrast/` to derive the profile-switch variant; it is not the user's next public niche.
-- [ ] Both projects and the variant preview/render without executable per-project code. Review profile distinction, layout, audio, and source/asset invalidation.
+- [x] Build `test-fixtures/project-current-issues/` and `test-fixtures/project-general-explainer/` as independent source projects. Both validate at production stage and render; `test-fixtures/README.md` documents how the images, music and narration are regenerated. Narration is real speech (macOS `Damayanti`) whose phrase timing is measured by `importPreparedAudio`, not estimated.
+- [x] Current issues exercises map/timeline/diagram-composition/captions/music/SFX and dated factual source review. The second exercises media/stat/list-comparison/composition without globally inheriting current-affairs rules. The second project has its own profile (`test-fixtures/profiles/general-explainer/`), which carries no current-affairs direction and does not require dated sourcing.
+- [x] Use `test-fixtures/profiles/contrast/` to derive the profile-switch variant; it is not the user's next public niche. The variant is derived in the e2e test rather than committed, so the switch itself is the evidence.
+- [x] Both projects and the variant preview/render without executable per-project code. Review profile distinction, layout, audio, and source/asset invalidation. Evidence: `packages/cli/test/e2e/reference-projects.test.ts` (3 scenarios, 203 s) — both projects validate at production stage and render; the variant's dry run changes nothing, the apply reports all three voice blocks as `voice-style` in `status.needsProduction`, the draft re-renders without reuse, final is blocked by three `VOICE_STYLE_MISMATCH` errors and nothing else, and undo restores the previous fingerprint and clears the report.
 
-**Exit gate:** NF-AC-03/08/13 pass with real renders, profile diff/undo evidence, and the tested capability/media registry. No source `examples/` directory is needed.
+**Four defects the reference projects exposed, all fixed here.** (1) The contrast check compared every text layer against `palette.background`, so dark type on a light panel was reported as failing; it now reads the opaque rectangle painted under the text. (2) A production report repeated one finding up to three times, because the draft compile, the final compile and the readiness escalation each carried it; `dedupeIssues` keeps the most severe copy. (3) Captions drew dark profile type on a hard-coded black scrim, which is unreadable under a light profile; the scrim is now the profile's own background. (4) Scene colours could only be literal hex, so a profile switch repainted the type and the page but left every rule, panel and marker in the old palette; `palette.*` tokens in `fill` and `color` resolve at compile time (`palette-tokens.test.ts`), and the variant's timeline rule and panels now follow the profile.
+
+**Exit gate: met.**
+
+- **NF-AC-03** — three scenarios in `reference-projects.test.ts`, real renders, 203 s.
+- **NF-AC-08** — editing a profile leaves a project alone until `profile apply`: the dry run changes nothing (asserted on the compiled fingerprint), a locked override blocks the apply, and the effects and kept/reset overrides are read back from the project's own files (`profile-apply.test.ts`, `profile-command.test.ts`, `project-overrides.test.ts`).
+- **NF-AC-13** — scoped preview, reuse and build integrity carried over from M2.1 (`scoped-preview.test.ts`, `preview-reuse.test.ts`, `final-publication.test.ts`), with the reference projects now exercising the same paths on real source.
+- **Capability/media registry** — `capabilityRegistry()` is read from the schemas that accept each form, published in `naraframe schema` alongside them, and `capabilities.test.ts` fails if a form is advertised without evidence or appears in both the supported and unsupported lists. SVG, video and JPEG stay listed as unsupported with their reason.
+
+No source `examples/` directory is needed.
 
 ## 8. M3 — Owner dogfooding and release evidence
 

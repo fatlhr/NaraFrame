@@ -193,6 +193,17 @@ const scaleLayer = (layer: Layer, scaleX: number, scaleY: number): Layer => {
 
 const zeroInsets: Insets = { top: 0, right: 0, bottom: 0, left: 0 };
 
+/** Turns a `palette.*` reference into the profile's own colour. */
+const resolveColor = (
+  value: string | undefined,
+  render: RenderTokens,
+): string | undefined => {
+  if (value === undefined) return undefined;
+  if (!value.startsWith("palette.")) return value;
+  const slot = value.slice("palette.".length) as keyof RenderTokens["palette"];
+  return render.palette[slot] ?? value;
+};
+
 const resolveLayerAppearance = (layer: Layer, render: RenderTokens): Layer => {
   if (layer.type === "text") {
     const role = layer.role ?? "heading";
@@ -214,7 +225,7 @@ const resolveLayerAppearance = (layer: Layer, render: RenderTokens): Layer => {
       lineHeight:
         layer.lineHeight ?? roleDefaults?.lineHeight ?? legacyLineHeight,
       letterSpacing: layer.letterSpacing ?? roleDefaults?.letterSpacing ?? 0,
-      color: layer.color ?? render.palette.text,
+      color: resolveColor(layer.color, render) ?? render.palette.text,
       textAlign: layer.textAlign ?? "left",
       verticalAlign: layer.verticalAlign ?? "center",
       padding: layer.padding ?? zeroInsets,
@@ -236,6 +247,7 @@ const resolveLayerAppearance = (layer: Layer, render: RenderTokens): Layer => {
   if (layer.type === "shape") {
     return {
       ...layer,
+      fill: resolveColor(layer.fill, render) ?? layer.fill,
       cornerRadius:
         layer.shape === "circle"
           ? Math.min(layer.frame.width, layer.frame.height) / 2

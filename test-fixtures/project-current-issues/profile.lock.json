@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "current-issues",
+  "version": "0.3.0",
+  "render": {
+    "palette": {
+      "background": "#11130F",
+      "surface": "#E8E0D2",
+      "text": "#F5F1E8",
+      "accent": "#FF5A36"
+    },
+    "typography": {
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "headingWeight": 800,
+      "bodyWeight": 500,
+      "minimumFontSize": 28,
+      "roles": {
+        "display": {
+          "fontSize": 128,
+          "fontWeight": 800,
+          "lineHeight": 1.02,
+          "letterSpacing": -3
+        },
+        "heading": {
+          "fontSize": 80,
+          "fontWeight": 800,
+          "lineHeight": 1.08,
+          "letterSpacing": -1.5
+        },
+        "body": {
+          "fontSize": 52,
+          "fontWeight": 500,
+          "lineHeight": 1.22,
+          "letterSpacing": 0
+        },
+        "label": {
+          "fontSize": 32,
+          "fontWeight": 800,
+          "lineHeight": 1.1,
+          "letterSpacing": 1.5
+        }
+      }
+    },
+    "appearance": {
+      "radius": {
+        "small": 20,
+        "medium": 44,
+        "large": 72
+      },
+      "stroke": {
+        "color": "#E8E0D2",
+        "width": 0
+      },
+      "shadow": {
+        "color": "#000000",
+        "opacity": 0.18,
+        "offsetX": 0,
+        "offsetY": 20,
+        "blur": 40
+      },
+      "media": {
+        "fit": "cover",
+        "cornerRadius": 44
+      }
+    },
+    "safeZone": {
+      "top": 160,
+      "right": 88,
+      "bottom": 200,
+      "left": 88
+    },
+    "spacingUnit": 8,
+    "motion": {
+      "revealDurationMs": 500,
+      "emphasizeScale": 1.08,
+      "focusScale": 1.14
+    }
+  },
+  "production": {
+    "voiceStyleSignature": "id-editorial-grounded-v1",
+    "illustrationStyleSignature": "paper-map-editorial-v1",
+    "timing": {
+      "wordLevelRequired": false
+    },
+    "assetPolicy": {
+      "allowPlannedInDraft": true
+    },
+    "requireSourcing": true
+  },
+  "duration": {
+    "preferredMinMs": 15000,
+    "preferredMaxMs": 30000
+  },
+  "lockedPaths": [
+    "format.design",
+    "format.draft",
+    "render.safeZone"
+  ],
+  "overridablePaths": [
+    "render.palette",
+    "render.motion"
+  ],
+  "assets": [],
+  "source": {
+    "kind": "repository",
+    "identity": "profiles/current-issues@0.3.0"
+  },
+  "direction": {
+    "text": "# Current Issues\n\nExplain a current event with factual, restrained, high-contrast editorial motion graphics optimized for vertical reading.\n\n- Lead with the immediate event, then add only the historical context needed to understand it.\n- Separate confirmed facts from estimates or developing information.\n- Prefer short Indonesian sentences, strong hierarchy, and one visual idea per scene.\n- Use warm paper surfaces, near-black backgrounds, and orange-red accents sparingly.\n- Choose motion from the scene's meaning: use a sustained focus for maps or photos, stagger related composition layers, and repeat emphasis only where the viewer should look again.\n- Keep movement smooth and readable at normal playback. Vary choreography by context instead of applying one entrance pattern to every scene.\n- Write a short style brief and shot rundown before authoring scenes. Give each shot one dominant statement and one focal visual.\n- Use display, heading, body, and label roles consistently. Shorten copy before shrinking it below the profile minimum.\n- Review entry, settled, beat-peak, transition, and final frames. Reject card-grid pacing when the story needs a continuous camera move or visual through-line.\n- Avoid sensational imagery, decorative motion, and claims that cannot be sourced.\n",
+    "sha256": "f047d8c190ec615f751a16b3aa0a1f52ff1a2a534964ce2e1da3314057cb4522"
+  }
+}

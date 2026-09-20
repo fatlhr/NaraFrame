@@ -28,4 +28,6 @@ samples/krakatau-draft/audio/
 
 # Revision history and locks are project-local working state
 samples/*/revisions/
+test-fixtures/*/revisions/
+test-fixtures/*/.naraframe/
 samples/*/.naraframe/
