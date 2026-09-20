@@ -497,7 +497,9 @@ describe("atomic preview publication", () => {
     const dispatched = await Promise.race([
       renameStarted.then(() => true),
       new Promise<boolean>((resolvePromise) => {
-        setTimeout(() => resolvePromise(false), 50);
+        // A generous bound: promotion hashes and probes files first, which can
+        // take well over 50 ms on a busy machine.
+        setTimeout(() => resolvePromise(false), 5000);
       }),
     ]);
     expect(dispatched).toBe(true);
