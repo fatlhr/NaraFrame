@@ -2,11 +2,13 @@ import type { CompiledDraft, Layer } from "@naraframe/core";
 import type { CSSProperties, ReactNode } from "react";
 import {
   AbsoluteFill,
+  Audio,
   Img,
   Sequence,
   staticFile,
   useCurrentFrame,
 } from "remotion";
+import { CAPTION_LINE_HEIGHT, captionPadding } from "./captions.js";
 import {
   groupScreenTransformFor,
   motionStateFor,
@@ -69,19 +71,21 @@ const AssetView = ({
   focalPoint?: { x: number; y: number };
 }) => {
   const asset = draft.assets[assetId];
-  return asset?.kind === "png" ? (
-    <Img
-      src={staticFile(asset.publicPath)}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: fit,
-        objectPosition: `${focalPoint.x * 100}% ${focalPoint.y * 100}%`,
-      }}
-    />
-  ) : (
-    <Placeholder label={asset?.label ?? assetId} />
-  );
+  if (asset?.kind === "png") {
+    return (
+      <Img
+        src={staticFile(asset.publicPath)}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: fit,
+          objectPosition: `${focalPoint.x * 100}% ${focalPoint.y * 100}%`,
+        }}
+      />
+    );
+  }
+  const label = asset?.kind === "placeholder" ? asset.label : assetId;
+  return <Placeholder label={label} />;
 };
 
 const LayerView = ({
@@ -392,6 +396,53 @@ const TransitionFrame = ({
   );
 };
 
+const CaptionLayer = ({ draft }: { draft: CompiledDraft }) => {
+  const captions = draft.captions;
+  if (!captions) return null;
+  const { style } = captions;
+  const render = draft.profile.render;
+  const padding = captionPadding(style.fontSize);
+  return (
+    <>
+      {captions.cues.map((cue) => (
+        <Sequence
+          durationInFrames={cue.endFrame - cue.startFrame}
+          from={cue.startFrame}
+          key={cue.id}
+          name={`caption-${cue.id}`}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: style.side,
+              right: style.side,
+              bottom: style.bottom,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                padding: `${padding.y}px ${padding.x}px`,
+                borderRadius: Math.round(style.fontSize * 0.35),
+                backgroundColor: "rgba(0, 0, 0, 0.62)",
+                color: render.palette.text,
+                fontFamily: render.typography.fontFamily,
+                fontSize: style.fontSize,
+                fontWeight: render.typography.headingWeight,
+                lineHeight: CAPTION_LINE_HEIGHT,
+                textAlign: "center",
+              }}
+            >
+              {cue.text}
+            </div>
+          </div>
+        </Sequence>
+      ))}
+    </>
+  );
+};
+
 export const DraftVideo = (draft: CompiledDraft) => (
   <AbsoluteFill
     style={{
@@ -412,20 +463,38 @@ export const DraftVideo = (draft: CompiledDraft) => (
         </TransitionFrame>
       </Sequence>
     ))}
-    <div
-      style={{
-        position: "absolute",
-        left: 44,
-        right: 44,
-        bottom: 34,
-        color: draft.profile.render.palette.accent,
-        fontSize: 18,
-        fontWeight: 800,
-        letterSpacing: 2,
-        textAlign: "center",
-      }}
-    >
-      {draft.label}
-    </div>
+    <CaptionLayer draft={draft} />
+    {draft.narration?.clips.map((clip) => {
+      const asset = draft.assets[clip.assetId];
+      if (!asset || asset.kind === "png" || asset.kind === "placeholder")
+        return null;
+      return (
+        <Sequence
+          key={clip.blockId}
+          from={clip.startFrame}
+          durationInFrames={clip.durationInFrames}
+          name={`audio-${clip.blockId}`}
+        >
+          <Audio src={staticFile(asset.publicPath)} />
+        </Sequence>
+      );
+    })}
+    {draft.mode === "draft" && (
+      <div
+        style={{
+          position: "absolute",
+          left: 44,
+          right: 44,
+          bottom: 34,
+          color: draft.profile.render.palette.accent,
+          fontSize: 18,
+          fontWeight: 800,
+          letterSpacing: 2,
+          textAlign: "center",
+        }}
+      >
+        {draft.label}
+      </div>
+    )}
   </AbsoluteFill>
 );

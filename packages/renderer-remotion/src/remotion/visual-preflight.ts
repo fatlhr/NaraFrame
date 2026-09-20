@@ -1,5 +1,6 @@
 import type { CompiledDraft, Issue, Layer } from "@naraframe/core";
 import { measureText } from "@remotion/layout-utils";
+import { captionLayoutFor } from "./captions.js";
 import {
   type GroupTransform,
   groupScreenTransformFor,
@@ -296,6 +297,23 @@ const applySceneTransition = (
   };
 };
 
+const captionIssue = (
+  code: string,
+  path: string,
+  message: string,
+  suggestion: string,
+  entityId?: string,
+): Issue => ({
+  code,
+  severity: "error",
+  responsible: "agent",
+  artifact: "narration.json",
+  path,
+  ...(entityId ? { entityId } : {}),
+  message,
+  suggestion,
+});
+
 const framesForScene = (
   scene: CompiledDraft["scenes"][number],
 ): VisualPreflightFrame[] => {
@@ -334,6 +352,56 @@ export const resolveVisualPreflight = (
   const draft = structuredClone(input);
   const issues: Issue[] = [];
   const frames = draft.scenes.flatMap(framesForScene);
+  const captions = draft.captions;
+
+  captions?.cues.forEach((cue) => {
+    const midpoint = Math.floor((cue.startFrame + cue.endFrame) / 2);
+    const scene = draft.scenes.find(
+      (candidate) =>
+        midpoint >= candidate.startFrame && midpoint < candidate.endFrame,
+    );
+    if (!scene) return;
+    const reason = `caption:${cue.id}`;
+    const existing = frames.find(
+      (item) => item.frame === midpoint && item.sceneId === scene.id,
+    );
+    if (existing) existing.reasons = [...existing.reasons, reason].sort();
+    else frames.push({ frame: midpoint, sceneId: scene.id, reasons: [reason] });
+  });
+
+  if (captions) {
+    const fontLoaded = document.fonts.check(
+      `${captions.style.fontSize}px ${draft.profile.render.typography.fontFamily}`,
+    );
+    if (!fontLoaded) {
+      issues.push(
+        captionIssue(
+          "FONT_NOT_LOADED",
+          "/captions",
+          "The caption font was not loaded before measurement.",
+          "Provision the profile font locally and wait for it before previewing.",
+        ),
+      );
+    } else {
+      captions.cues.forEach((cue, cueIndex) => {
+        const layout = captionLayoutFor(draft, captions.style, cue.text);
+        if (
+          layout.unbreakableOverflow ||
+          layout.lines.length > captions.style.maxLines
+        ) {
+          issues.push(
+            captionIssue(
+              "CAPTION_OVERFLOW",
+              `/captions/cues/${cueIndex}`,
+              `Caption ${cue.id} needs ${layout.lines.length} lines but the profile allows ${captions.style.maxLines}.`,
+              "Split the spoken phrase into shorter sentences, or lower render.captions.fontSize / raise render.captions.maxLines in the profile.",
+              cue.id,
+            ),
+          );
+        }
+      });
+    }
+  }
 
   draft.scenes.forEach((scene, sceneIndex) => {
     const textMetrics = new Map<string, TextMetrics>();
@@ -462,6 +530,55 @@ export const resolveVisualPreflight = (
       const sceneState = sceneTransitionStateFor(draft, sceneIndex, localFrame);
       return withGroup * sceneState.opacity;
     };
+    const checkedCaptionPairs = new Set<string>();
+    if (captions) {
+      for (const frame of frames.filter((item) => item.sceneId === scene.id)) {
+        const localFrame = frame.frame - scene.startFrame;
+        for (const cue of captions.cues) {
+          if (frame.frame < cue.startFrame || frame.frame >= cue.endFrame)
+            continue;
+          const captionBox = captionLayoutFor(
+            draft,
+            captions.style,
+            cue.text,
+          ).box;
+          for (const layer of textLayers) {
+            const metrics = textMetrics.get(layer.id);
+            if (!metrics || metrics.overflow) continue;
+            const state = motionStateFor(draft, scene, layer.id, localFrame);
+            if (
+              opacityOnScreen(
+                layer.id,
+                layer.opacity * state.opacity,
+                localFrame,
+              ) < 0.9
+            )
+              continue;
+            const layerRectangle = rectangleOnScreen(
+              layer.id,
+              transformedRectangle(textRectangle(layer, metrics), state),
+              localFrame,
+            );
+            const pair = `${cue.id}:${layer.id}`;
+            if (
+              checkedCaptionPairs.has(pair) ||
+              !intersects(captionBox, layerRectangle)
+            )
+              continue;
+            checkedCaptionPairs.add(pair);
+            issues.push(
+              captionIssue(
+                "CAPTION_COLLISION",
+                `/captions/cues/${captions.cues.indexOf(cue)}`,
+                `Caption ${cue.id} covers text layer ${layer.id} in scene ${scene.id} at frame ${frame.frame}.`,
+                "Move the scene text above the caption zone, shorten it, or lower render.captions.bottomOffset in the profile.",
+                cue.id,
+              ),
+            );
+          }
+        }
+      }
+    }
     const checkedPairs = new Set<string>();
     for (const frame of frames.filter((item) => item.sceneId === scene.id)) {
       const localFrame = frame.frame - scene.startFrame;

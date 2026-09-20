@@ -167,17 +167,40 @@ export const loadPlanProject = async (
   projectRoot: string,
 ): Promise<Result<LoadedPlanProject>> => {
   const root = resolve(projectRoot);
-  const [project, profile, scenes, assets] = await Promise.all([
-    readJson(root, sourceFiles.project),
-    readJson(root, sourceFiles.profile),
-    readJson(root, sourceFiles.scenes),
-    readJson(root, sourceFiles.assets),
-  ]);
-  const issues = [project, profile, scenes, assets].flatMap((result) =>
-    result.ok ? [] : result.issues,
-  );
+  const optionalJson = (artifact: string) =>
+    readJson(root, artifact).then((result) =>
+      result.ok
+        ? result
+        : result.issues[0]?.code === "SOURCE_MISSING"
+          ? { ok: true as const, value: undefined, issues: [] as Issue[] }
+          : result,
+    );
+  const [project, profile, scenes, assets, narration, captions] =
+    await Promise.all([
+      readJson(root, sourceFiles.project),
+      readJson(root, sourceFiles.profile),
+      readJson(root, sourceFiles.scenes),
+      readJson(root, sourceFiles.assets),
+      optionalJson("narration.json"),
+      optionalJson("captions.json"),
+    ]);
+  const issues = [
+    project,
+    profile,
+    scenes,
+    assets,
+    narration,
+    captions,
+  ].flatMap((result) => (result.ok ? [] : result.issues));
 
-  if (!project.ok || !profile.ok || !scenes.ok || !assets.ok) {
+  if (
+    !project.ok ||
+    !profile.ok ||
+    !scenes.ok ||
+    !assets.ok ||
+    !narration.ok ||
+    !captions.ok
+  ) {
     return { ok: false, issues };
   }
 
@@ -186,6 +209,8 @@ export const loadPlanProject = async (
     profile: profile.value,
     scenes: scenes.value,
     assets: assets.value,
+    ...(narration.value !== undefined ? { narration: narration.value } : {}),
+    ...(captions.value !== undefined ? { captions: captions.value } : {}),
   });
 
   if (!validated.ok) {

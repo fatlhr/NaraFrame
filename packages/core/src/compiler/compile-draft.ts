@@ -1,5 +1,5 @@
-import { createHash } from "node:crypto";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
+import { hashValue } from "../project/hash.js";
 import type { CompiledAsset, CompiledDraft } from "../schema/compiled.js";
 import { CompiledDraftSchema } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
@@ -12,33 +12,18 @@ import type {
   Scene,
   Transition,
 } from "../schema/scene.js";
+import { deriveCaptionCues } from "./captions.js";
 import { checkContrast } from "./contrast.js";
+import { computeAssemblyKey } from "./keys.js";
+import { resolveNarrationTimeline } from "./narration-timeline.js";
+import { checkSourceProvenance } from "./provenance.js";
+import { partitionScenes, type SceneNarrationRef } from "./scene-partition.js";
 import { checkVariety, type VarietyScene } from "./variety.js";
+import { checkVoiceBindings } from "./voice-binding.js";
 
 export type DraftScope =
   | { type: "project" }
   | { type: "scene"; sceneId: string };
-
-const stableValue = (value: unknown): unknown => {
-  if (Array.isArray(value)) {
-    return value.map(stableValue);
-  }
-
-  if (value !== null && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>)
-        .sort(([left], [right]) => left.localeCompare(right))
-        .map(([key, nested]) => [key, stableValue(nested)]),
-    );
-  }
-
-  return value;
-};
-
-const hashValue = (value: unknown): string =>
-  createHash("sha256")
-    .update(JSON.stringify(stableValue(value)))
-    .digest("hex");
 
 const msToFrameOffset = (milliseconds: number, fps: number): number =>
   Math.round((milliseconds / 1000) * fps);
@@ -67,11 +52,17 @@ const compiledAssets = (source: PlanSource): Record<string, CompiledAsset> =>
     source.assets.assets.map((asset) => [
       asset.id,
       asset.status === "ready"
-        ? {
-            kind: "png" as const,
-            publicPath: asset.path,
-            sha256: asset.sha256,
-          }
+        ? asset.kind === "png"
+          ? {
+              kind: "png" as const,
+              publicPath: asset.path,
+              sha256: asset.sha256,
+            }
+          : {
+              kind: asset.kind,
+              publicPath: asset.path,
+              sha256: asset.sha256,
+            }
         : {
             kind: "placeholder" as const,
             assetId: asset.id,
@@ -550,17 +541,40 @@ const validateLayerFrames = (
   return issues;
 };
 
+export interface CompileOptions {
+  /** "final" compiles at the design format with no draft label. */
+  mode?: "draft" | "final";
+}
+
 export const compileDraft = (
   source: PlanSource,
   requestedScope: DraftScope = { type: "project" },
+  options: CompileOptions = {},
 ): Result<CompiledDraft> => {
-  const fps = source.project.format.draft.fps;
-  const scaleX =
-    source.project.format.draft.width / source.project.format.design.width;
-  const scaleY =
-    source.project.format.draft.height / source.project.format.design.height;
-  let sourceCursor = 0;
+  const mode = options.mode ?? "draft";
+  const format =
+    mode === "final"
+      ? source.project.format.design
+      : source.project.format.draft;
+  const fps = format.fps;
+  const scaleX = format.width / source.project.format.design.width;
+  const scaleY = format.height / source.project.format.design.height;
   const issues: Issue[] = [];
+
+  if (mode === "final" && requestedScope.type !== "project") {
+    return {
+      ok: false,
+      issues: [
+        compileIssue(
+          "FINAL_REQUIRES_PROJECT_SCOPE",
+          "/",
+          "A final export covers the whole project, not one scene.",
+          "error",
+          "Export without a scene scope.",
+        ),
+      ],
+    };
+  }
 
   const displayFontFamily = source.profile.render.typography.displayFontFamily;
   if (
@@ -579,12 +593,146 @@ export const compileDraft = (
     });
   }
 
+  issues.push(...checkSourceProvenance(source));
+
+  // Narration wiring: when narration.json exists, derive timeline, check
+  // provenance, and partition scenes against the narration clock. Otherwise
+  // fall back to draft durations.
+  const hasNarration = source.narration !== undefined;
+  let narrationTimeline:
+    | ReturnType<typeof resolveNarrationTimeline>
+    | undefined;
+  let partitionedScenes: ReturnType<typeof partitionScenes> extends Result<
+    infer T
+  >
+    ? T
+    : never = [] as unknown as ReturnType<
+    typeof partitionScenes
+  > extends Result<infer T>
+    ? T
+    : never;
+  let narrationClips: CompiledDraft["narration"];
+  let compiledCaptions: CompiledDraft["captions"];
+  if (hasNarration && source.narration) {
+    narrationTimeline = resolveNarrationTimeline(source.narration);
+    if (narrationTimeline.totalDurationMs === null) {
+      issues.push(
+        compileIssue(
+          "TIMELINE_INCOMPLETE",
+          "/narration",
+          "Every block needs measured audio before scenes can be partitioned against the narration clock.",
+        ),
+      );
+    }
+    issues.push(...checkVoiceBindings(source));
+    const refs: SceneNarrationRef[] = [];
+    let missingNarration = false;
+    source.scenes.scenes.forEach((scene, index) => {
+      if (!scene.narration) {
+        missingNarration = true;
+        issues.push(
+          compileIssue(
+            "SCENE_NARRATION_MISSING",
+            `/scenes/${index}/narration`,
+            `Scene ${scene.id} has no narration reference but the project has narration.json.`,
+          ),
+        );
+      } else {
+        refs.push({
+          sceneId: scene.id,
+          blockId: scene.narration.blockId,
+          ...(scene.narration.phraseId
+            ? { phraseId: scene.narration.phraseId }
+            : {}),
+        });
+      }
+    });
+    if (!missingNarration && narrationTimeline.totalDurationMs !== null) {
+      const partitioned = partitionScenes(narrationTimeline, refs, fps);
+      if (!partitioned.ok) {
+        issues.push(...partitioned.issues);
+      } else {
+        partitionedScenes =
+          partitioned.value as unknown as typeof partitionedScenes;
+        const cues = deriveCaptionCues(narrationTimeline, source.captions);
+        if (!cues.ok) {
+          issues.push(...cues.issues);
+        } else if (requestedScope.type === "project") {
+          const captionStyle = source.profile.render.captions;
+          const safe = source.profile.render.safeZone;
+          compiledCaptions = {
+            style: {
+              fontSize: Math.round((captionStyle?.fontSize ?? 44) * scaleX),
+              maxLines: captionStyle?.maxLines ?? 2,
+              bottom: Math.round(
+                (safe.bottom + (captionStyle?.bottomOffset ?? 24)) * scaleY,
+              ),
+              side: Math.round((safe.left + 48) * scaleX),
+            },
+            cues: cues.value.map((cue) => {
+              const startFrame = Math.round((cue.startMs * fps) / 1000);
+              return {
+                id: cue.id,
+                text: cue.text,
+                startFrame,
+                endFrame: Math.max(
+                  startFrame + 1,
+                  Math.round((cue.endMs * fps) / 1000),
+                ),
+              };
+            }),
+          };
+        }
+        // Build audio clips for renderer: each ready block at its global start
+        narrationClips = {
+          totalDurationMs: narrationTimeline.totalDurationMs,
+          clips: narrationTimeline.blocks
+            .filter((block) => block.ready && block.startMs !== null)
+            .map((block) => {
+              const blockRecord = source.narration?.blocks.find(
+                (candidate) => candidate.id === block.id,
+              );
+              const audioAssetId =
+                blockRecord && "audioAssetId" in blockRecord
+                  ? blockRecord.audioAssetId
+                  : "";
+              const durationMs =
+                blockRecord && "audioDurationMs" in blockRecord
+                  ? blockRecord.audioDurationMs
+                  : 0;
+              return {
+                blockId: block.id,
+                assetId: audioAssetId,
+                startMs: block.startMs as number,
+                durationMs,
+                startFrame: Math.round(
+                  ((block.startMs as number) * fps) / 1000,
+                ),
+                durationInFrames: msToDurationFrames(durationMs, fps),
+              };
+            }),
+        };
+      }
+    }
+  }
+
+  // Build source scene frames: either from narration partition or draft durations
+  let sourceCursor = 0;
   const sourceScenes = source.scenes.scenes.map((scene, sceneIndex) => {
+    if (hasNarration && partitionedScenes.length > 0) {
+      const part = partitionedScenes.find(
+        (candidate) => candidate.sceneId === scene.id,
+      );
+      if (part) {
+        const sourceStartFrame = part.startFrame;
+        const sourceEndFrame = part.endFrame;
+        return { scene, sceneIndex, sourceStartFrame, sourceEndFrame };
+      }
+    }
     const durationInFrames = msToDurationFrames(scene.durationMs, fps);
     const sourceStartFrame = sourceCursor;
     const sourceEndFrame = sourceStartFrame + durationInFrames;
     sourceCursor = sourceEndFrame;
-
     return { scene, sceneIndex, sourceStartFrame, sourceEndFrame };
   });
   // Frames a scene's own (playable) outgoing transition consumes from its
@@ -679,11 +827,42 @@ export const compileDraft = (
 
   let renderCursor = 0;
   const varietyEntries: VarietyScene[] = [];
+  // For narrated project, renderCursor should start at partitioned start, but
+  // for selected scene scope we start at 0. For project scope, use partitioned
+  // frames directly; for draft fallback, accumulate.
   const scenes = selectedSources.map(({ scene, sceneIndex }) => {
-    const durationInFrames = msToDurationFrames(scene.durationMs, fps);
-    const startFrame = renderCursor;
-    const endFrame = startFrame + durationInFrames;
-    renderCursor = endFrame;
+    let startFrame: number;
+    let endFrame: number;
+    let durationInFrames: number;
+    if (hasNarration && partitionedScenes.length > 0) {
+      const part = partitionedScenes.find(
+        (candidate) => candidate.sceneId === scene.id,
+      );
+      if (part) {
+        if (requestedScope.type === "project") {
+          startFrame = part.startFrame;
+          endFrame = part.endFrame;
+          durationInFrames = endFrame - startFrame;
+          // renderCursor not needed for project scope; keep it for non-narrated math
+          renderCursor = Math.max(renderCursor, endFrame);
+        } else {
+          durationInFrames = part.endFrame - part.startFrame;
+          startFrame = renderCursor;
+          endFrame = startFrame + durationInFrames;
+          renderCursor = endFrame;
+        }
+      } else {
+        durationInFrames = msToDurationFrames(scene.durationMs, fps);
+        startFrame = renderCursor;
+        endFrame = startFrame + durationInFrames;
+        renderCursor = endFrame;
+      }
+    } else {
+      durationInFrames = msToDurationFrames(scene.durationMs, fps);
+      startFrame = renderCursor;
+      endFrame = startFrame + durationInFrames;
+      renderCursor = endFrame;
+    }
     issues.push(...validateLayerFrames(scene, sceneIndex, source));
     const layout =
       scene.visual.type === "composition"
@@ -757,25 +936,29 @@ export const compileDraft = (
           sourceStartFrame: selectedSources[0]?.sourceStartFrame ?? 0,
           sourceEndFrame: selectedSources[0]?.sourceEndFrame ?? 0,
         };
+  const totalFrames =
+    hasNarration && narrationTimeline?.totalDurationMs !== null
+      ? Math.ceil(((narrationTimeline?.totalDurationMs ?? 0) * fps) / 1000)
+      : renderCursor;
   const draftCandidate = {
     schemaVersion: 1 as const,
-    mode: "draft" as const,
-    width: source.project.format.draft.width,
-    height: source.project.format.draft.height,
+    mode,
+    width: format.width,
+    height: format.height,
     fps,
-    totalFrames: renderCursor,
+    totalFrames,
     scope: compiledScope,
     timelineScope:
       requestedScope.type === "project"
         ? ("project" as const)
         : ("local" as const),
-    label: "DRAFT • NO AUDIO" as const,
+    label:
+      mode === "final"
+        ? ("FINAL" as const)
+        : narrationClips?.clips.length
+          ? ("DRAFT • WITH AUDIO" as const)
+          : ("DRAFT • NO AUDIO" as const),
     sourceRevision,
-    assemblyKey: hashValue({
-      sourceRevision,
-      renderer: "m0.9",
-      scope: compiledScope,
-    }),
     profile: {
       id: source.profile.id,
       version: source.profile.version,
@@ -784,8 +967,16 @@ export const compileDraft = (
     assets: compiledAssets(source),
     fonts: compiledFonts(source),
     scenes,
+    ...(narrationClips ? { narration: narrationClips } : {}),
+    ...(compiledCaptions ? { captions: compiledCaptions } : {}),
   };
-  const parsed = CompiledDraftSchema.safeParse(draftCandidate);
+  const draftWithKey = {
+    ...draftCandidate,
+    assemblyKey: computeAssemblyKey(
+      draftCandidate as Parameters<typeof computeAssemblyKey>[0],
+    ),
+  };
+  const parsed = CompiledDraftSchema.safeParse(draftWithKey);
 
   if (!parsed.success) {
     return {

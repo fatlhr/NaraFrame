@@ -7,6 +7,9 @@ export type CommandName =
   | "validate"
   | "status"
   | "preview"
+  | "edit"
+  | "undo"
+  | "render"
   | "unknown";
 
 export type CommandReadiness =
@@ -27,7 +30,7 @@ export interface CommandResultEvent {
   sourceRevision: string | null;
   fingerprint: string | null;
   buildId: string | null;
-  mode: "draft" | null;
+  mode: "draft" | "final" | null;
   scope: Record<string, unknown> | null;
   artifacts: Record<string, string>;
   issues: Issue[];

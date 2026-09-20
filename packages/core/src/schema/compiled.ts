@@ -3,6 +3,7 @@ import {
   IdSchema,
   NonNegativeIntegerSchema,
   PositiveIntegerSchema,
+  RelativeAudioPathSchema,
   RelativeFontPathSchema,
   RelativePngPathSchema,
   SchemaVersionSchema,
@@ -56,6 +57,13 @@ const CompiledAssetSchema = z.discriminatedUnion("kind", [
     .object({
       kind: z.literal("png"),
       publicPath: RelativePngPathSchema,
+      sha256: Sha256Schema,
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.enum(["mp3", "wav", "m4a"]),
+      publicPath: RelativeAudioPathSchema,
       sha256: Sha256Schema,
     })
     .strict(),
@@ -164,17 +172,51 @@ const CompiledSceneSchema = z
     path: ["endFrame"],
   });
 
+const CompiledAudioClipSchema = z
+  .object({
+    blockId: IdSchema,
+    assetId: IdSchema,
+    startFrame: NonNegativeIntegerSchema,
+    durationInFrames: PositiveIntegerSchema,
+    startMs: NonNegativeIntegerSchema,
+    durationMs: PositiveIntegerSchema,
+  })
+  .strict();
+
+const CompiledCaptionsSchema = z
+  .object({
+    style: z
+      .object({
+        fontSize: z.number().positive(),
+        maxLines: PositiveIntegerSchema,
+        bottom: z.number().nonnegative(),
+        side: z.number().nonnegative(),
+      })
+      .strict(),
+    cues: z.array(
+      z
+        .object({
+          id: z.string().min(1),
+          text: z.string().min(1),
+          startFrame: NonNegativeIntegerSchema,
+          endFrame: PositiveIntegerSchema,
+        })
+        .strict(),
+    ),
+  })
+  .strict();
+
 export const CompiledDraftSchema = z
   .object({
     schemaVersion: SchemaVersionSchema,
-    mode: z.literal("draft"),
-    width: z.literal(540),
-    height: z.literal(960),
+    mode: z.enum(["draft", "final"]),
+    width: z.union([z.literal(540), z.literal(1080)]),
+    height: z.union([z.literal(960), z.literal(1920)]),
     fps: z.literal(30),
     totalFrames: PositiveIntegerSchema,
     scope: CompiledScopeSchema,
     timelineScope: z.enum(["project", "local"]),
-    label: z.literal("DRAFT • NO AUDIO"),
+    label: z.enum(["DRAFT • NO AUDIO", "DRAFT • WITH AUDIO", "FINAL"]),
     sourceRevision: Sha256Schema,
     assemblyKey: Sha256Schema,
     profile: z
@@ -187,9 +229,28 @@ export const CompiledDraftSchema = z
     assets: z.record(IdSchema, CompiledAssetSchema),
     fonts: z.array(CompiledFontSchema),
     scenes: z.array(CompiledSceneSchema).min(1),
+    narration: z
+      .object({
+        totalDurationMs: PositiveIntegerSchema,
+        clips: z.array(CompiledAudioClipSchema),
+      })
+      .optional(),
+    captions: CompiledCaptionsSchema.optional(),
   })
   .strict()
   .superRefine((draft, context) => {
+    const isFinal = draft.mode === "final";
+    if (
+      isFinal !== (draft.width === 1080 && draft.height === 1920) ||
+      isFinal !== (draft.label === "FINAL")
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "A final draft uses the 1080x1920 design format and the FINAL label; a draft uses 540x960 and a DRAFT label",
+        path: ["mode"],
+      });
+    }
     draft.scenes.forEach((scene, index) => {
       if (scene.endFrame > draft.totalFrames) {
         context.addIssue({
@@ -205,4 +266,6 @@ export type CompiledAsset = z.infer<typeof CompiledAssetSchema>;
 export type CompiledBeat = z.infer<typeof CompiledBeatSchema>;
 export type CompiledFont = z.infer<typeof CompiledFontSchema>;
 export type CompiledTransition = z.infer<typeof CompiledTransitionSchema>;
+export type CompiledCaptions = z.infer<typeof CompiledCaptionsSchema>;
+export type CompiledAudioClip = z.infer<typeof CompiledAudioClipSchema>;
 export type CompiledDraft = z.infer<typeof CompiledDraftSchema>;

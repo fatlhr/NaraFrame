@@ -46,6 +46,11 @@ export const RelativePngPathSchema = SafeRelativePathSchema.refine(
   (value) => value.toLowerCase().endsWith(".png"),
   "Expected a path ending in .png",
 );
+export const RelativeAudioPathSchema = SafeRelativePathSchema.refine(
+  (value) =>
+    [".mp3", ".wav", ".m4a"].some((ext) => value.toLowerCase().endsWith(ext)),
+  "Expected a path ending in .mp3, .wav, or .m4a",
+);
 export const RelativeFontPathSchema = SafeRelativePathSchema.refine(
   (value) =>
     [".ttf", ".otf", ".woff2"].some((ext) => value.toLowerCase().endsWith(ext)),

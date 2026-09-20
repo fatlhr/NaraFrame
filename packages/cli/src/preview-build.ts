@@ -82,8 +82,8 @@ interface PreviewMetadata {
     fps: number;
     durationInFrames: number;
     codec: "h264";
-    audio: "none";
-    muted: true;
+    audio: "none" | "aac";
+    muted: boolean;
   };
   contactSheet: ContactSheetLayout;
   checkedFrames: CheckedFrame[];
@@ -203,9 +203,10 @@ export interface PreviewOutputRoots {
   builds: string;
 }
 
-const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
+export const json = (value: unknown): string =>
+  `${JSON.stringify(value, null, 2)}\n`;
 
-const throwIfAborted = (signal?: AbortSignal): void => {
+export const throwIfAborted = (signal?: AbortSignal): void => {
   if (signal?.aborted) {
     const error = new Error("Preview publication was interrupted.");
     error.name = "AbortError";
@@ -216,10 +217,10 @@ const throwIfAborted = (signal?: AbortSignal): void => {
 const sha256Buffer = (value: Buffer | string): string =>
   createHash("sha256").update(value).digest("hex");
 
-const sha256File = async (path: string): Promise<string> =>
+export const sha256File = async (path: string): Promise<string> =>
   sha256Buffer(await readFile(path));
 
-const execute = async (
+export const execute = async (
   executable: string,
   args: readonly string[],
 ): Promise<{ stdout: string; stderr: string }> =>
@@ -249,7 +250,7 @@ const execute = async (
     });
   });
 
-const commandVersion = async (
+export const commandVersion = async (
   executable: string,
   args: readonly string[],
 ): Promise<string> => {
@@ -257,10 +258,10 @@ const commandVersion = async (
   return (result.stdout || result.stderr).split("\n")[0]?.trim() ?? "unknown";
 };
 
-const ffmpegExecutable = (): string =>
+export const ffmpegExecutable = (): string =>
   process.env.NARAFRAME_FFMPEG_EXECUTABLE ?? "/opt/homebrew/bin/ffmpeg";
 
-const ffprobeExecutable = (): string =>
+export const ffprobeExecutable = (): string =>
   process.env.NARAFRAME_FFPROBE_EXECUTABLE ??
   join(dirname(ffmpegExecutable()), "ffprobe");
 
@@ -292,7 +293,7 @@ const validateOutputAncestor = async (
   return resolved;
 };
 
-const validateExistingOutputAncestors = async (
+export const validateExistingOutputAncestors = async (
   realProjectRoot: string,
   segments: readonly string[],
 ): Promise<void> => {
@@ -317,7 +318,7 @@ const validateExistingOutputAncestors = async (
   }
 };
 
-const resolveSafeOutputDirectory = async (
+export const resolveSafeOutputDirectory = async (
   realProjectRoot: string,
   segments: readonly string[],
 ): Promise<string> => {
@@ -586,7 +587,10 @@ const assertMetadataShape = (
     (metadata.scope.type === "project"
       ? metadata.timelineScope !== "project"
       : metadata.timelineScope !== "local") ||
-    metadata.label !== "DRAFT • NO AUDIO" ||
+    !(
+      metadata.label === "DRAFT • NO AUDIO" ||
+      metadata.label === "DRAFT • WITH AUDIO"
+    ) ||
     metadata.status !== "success" ||
     metadata.failure !== null ||
     !validTimestamp(metadata.startedAt) ||
@@ -617,8 +621,10 @@ const assertMetadataShape = (
     !Number.isInteger(render.durationInFrames) ||
     (render.durationInFrames as number) <= 0 ||
     render.codec !== "h264" ||
-    render.audio !== "none" ||
-    render.muted !== true ||
+    !(render.audio === "none" || render.audio === "aac") ||
+    metadata.label !==
+      (render.audio === "aac" ? "DRAFT • WITH AUDIO" : "DRAFT • NO AUDIO") ||
+    typeof render.muted !== "boolean" ||
     JSON.stringify(metadata.contactSheet) !==
       JSON.stringify(expectedContactSheet) ||
     !Array.isArray(checkedFrames) ||
@@ -663,6 +669,9 @@ const assertCompleteMetadata = (
     (metadata.render as Record<string, unknown>).fps !== draft.fps ||
     (metadata.render as Record<string, unknown>).durationInFrames !==
       draft.totalFrames ||
+    (metadata.render as Record<string, unknown>).audio !==
+      (draft.narration ? "aac" : "none") ||
+    (metadata.render as Record<string, unknown>).muted !== !draft.narration ||
     JSON.stringify(metadata.contactSheet) !==
       JSON.stringify(expectedContactSheet) ||
     !Array.isArray(metadata.checkedFrames) ||
@@ -682,7 +691,7 @@ const probePreview = async (
     "-v",
     "error",
     "-show_entries",
-    "stream=index,codec_type,codec_name,width,height,avg_frame_rate",
+    "stream=index,codec_type,codec_name,width,height,avg_frame_rate,duration",
     "-show_entries",
     "format=duration",
     "-of",
@@ -752,7 +761,7 @@ const decodeContactSheet = async (
 const validateProbe = (
   probe: Record<string, unknown>,
   draft: CompiledDraft,
-): { codec: "h264"; audio: "none" } => {
+): { codec: "h264"; audio: "none" | "aac" } => {
   const streams = (Array.isArray(probe.streams) ? probe.streams : []).filter(
     isObject,
   );
@@ -774,21 +783,39 @@ const validateProbe = (
       "preview.mp4 does not match the expected H.264 render signature.",
     );
   }
-  if (audioStreams.length > 0) {
+  const hasNarration = Boolean(draft.narration);
+  if (hasNarration) {
+    if (audioStreams.length !== 1 || audioStreams[0]?.codec_name !== "aac") {
+      throw new Error(
+        "Narrated preview.mp4 must contain exactly one AAC audio stream.",
+      );
+    }
+  } else if (audioStreams.length > 0) {
     throw new Error(
       "Silent draft preview.mp4 unexpectedly contains an audio stream.",
     );
   }
   const format = probe.format as Record<string, unknown> | undefined;
-  const duration = Number(format?.duration);
   const expectedDuration = draft.totalFrames / draft.fps;
+  const duration = Number(format?.duration);
+  // For narrated, the container duration follows the longer audio stream
+  // (AAC priming adds ~45ms). Check the video stream's own duration instead.
+  const videoDuration = Number(
+    (videoStreams[0] as Record<string, unknown>)?.duration,
+  );
+  const actualDuration = hasNarration
+    ? Number.isFinite(videoDuration)
+      ? videoDuration
+      : duration
+    : duration;
+  const tolerance = hasNarration ? 0.1 : 1 / draft.fps;
   if (
-    !Number.isFinite(duration) ||
-    Math.abs(duration - expectedDuration) > 1 / draft.fps
+    !Number.isFinite(actualDuration) ||
+    Math.abs(actualDuration - expectedDuration) > tolerance
   ) {
     throw new Error("preview.mp4 duration does not match the compiled draft.");
   }
-  return { codec: "h264", audio: "none" };
+  return { codec: "h264", audio: hasNarration ? "aac" : "none" };
 };
 
 export const validatePreviewMedia = async ({
@@ -798,7 +825,10 @@ export const validatePreviewMedia = async ({
   ffprobeExecutable: requestedFfprobe = ffprobeExecutable(),
   probe,
   decode,
-}: MediaValidationOptions): Promise<{ codec: "h264"; audio: "none" }> => {
+}: MediaValidationOptions): Promise<{
+  codec: "h264";
+  audio: "none" | "aac";
+}> => {
   const mp4 = await readFile(path);
   if (!hasMp4Signature(mp4)) {
     throw new Error("preview.mp4 has an invalid file signature.");
@@ -1332,7 +1362,7 @@ export const publishPreviewBuild = async ({
         durationInFrames: rendered.durationInFrames,
         codec: verifiedMedia.codec,
         audio: verifiedMedia.audio,
-        muted: true,
+        muted: verifiedMedia.audio === "none",
       },
       contactSheet,
       checkedFrames: frames,
