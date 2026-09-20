@@ -25,6 +25,29 @@ const temporaryRoots: string[] = [];
 const sha256 = (value: Buffer | string): string =>
   createHash("sha256").update(value).digest("hex");
 
+/**
+ * A throwaway copy of the sample's source files. Any test that runs `preview`
+ * must use one: previewing writes builds and a pointer into the project, and
+ * the sample directory is tracked, so running it there leaves artifacts that
+ * a later run can legitimately reuse instead of rendering — which silently
+ * disarms a test that mocks the renderer.
+ */
+const copySourceOnly = async (): Promise<string> => {
+  const root = await mkdtemp(join(tmpdir(), "naraframe-contract-source-"));
+  temporaryRoots.push(root);
+  const project = join(root, "project");
+  await mkdir(project, { recursive: true });
+  await Promise.all([
+    cp(join(sampleRoot, "assets"), join(project, "assets"), {
+      recursive: true,
+    }),
+    ...["naraframe.json", "profile.lock.json", "scenes.json"].map((file) =>
+      cp(join(sampleRoot, file), join(project, file)),
+    ),
+  ]);
+  return project;
+};
+
 const copyPublishedSample = async (sceneId?: string): Promise<string> => {
   const root = await mkdtemp(join(tmpdir(), "naraframe-status-contract-"));
   temporaryRoots.push(root);
@@ -270,7 +293,7 @@ describe("public CLI command contract", () => {
 
     const result = await captureJsonResult([
       "preview",
-      sampleRoot,
+      await copySourceOnly(),
       "--draft",
       "--json",
     ]);
@@ -368,7 +391,7 @@ describe("public CLI command contract", () => {
     controller.abort();
     vi.restoreAllMocks();
     const interrupted = await captureJsonResult(
-      ["preview", sampleRoot, "--draft", "--json"],
+      ["preview", await copySourceOnly(), "--draft", "--json"],
       { signal: controller.signal },
     );
     expect(interrupted.exitCode).toBe(130);
@@ -461,7 +484,7 @@ describe("public CLI command contract", () => {
     );
 
     const execution = runCliProcess(
-      ["preview", sampleRoot, "--draft", "--json"],
+      ["preview", await copySourceOnly(), "--draft", "--json"],
       { host },
     );
     await renameStarted;
@@ -511,7 +534,9 @@ describe("public CLI command contract", () => {
     );
 
     await expect(
-      runCliProcess(["preview", sampleRoot, "--draft", "--json"], { host }),
+      runCliProcess(["preview", await copySourceOnly(), "--draft", "--json"], {
+        host,
+      }),
     ).resolves.toBe(2);
     expect(writes.map((value) => JSON.parse(value))).toEqual([
       expect.objectContaining({

@@ -345,6 +345,121 @@ const framesForScene = (
   }));
 };
 
+/**
+ * A panel is a filled shape used as a backdrop. Dead space is a band of it
+ * that no content sits on: the eye reads it as an unfinished layout, and it
+ * is the flaw the owner hit on the Krakatau map scene, where the panel ran
+ * a third of its height below the map it was holding.
+ */
+const DEAD_SPACE_FRACTION = 0.2;
+
+const panelMargins = (
+  panel: Rectangle,
+  content: Rectangle,
+): Array<{ side: string; gap: number; fraction: number }> => [
+  {
+    side: "top",
+    gap: content.y - panel.y,
+    fraction: (content.y - panel.y) / panel.height,
+  },
+  {
+    side: "bottom",
+    gap: panel.y + panel.height - (content.y + content.height),
+    fraction:
+      (panel.y + panel.height - (content.y + content.height)) / panel.height,
+  },
+  {
+    side: "left",
+    gap: content.x - panel.x,
+    fraction: (content.x - panel.x) / panel.width,
+  },
+  {
+    side: "right",
+    gap: panel.x + panel.width - (content.x + content.width),
+    fraction:
+      (panel.x + panel.width - (content.x + content.width)) / panel.width,
+  },
+];
+
+const overlaps = (a: Rectangle, b: Rectangle): boolean =>
+  a.x < b.x + b.width &&
+  b.x < a.x + a.width &&
+  a.y < b.y + b.height &&
+  b.y < a.y + a.height;
+
+const unionOf = (rectangles: Rectangle[]): Rectangle | null => {
+  if (rectangles.length === 0) return null;
+  const left = Math.min(...rectangles.map((r) => r.x));
+  const top = Math.min(...rectangles.map((r) => r.y));
+  const right = Math.max(...rectangles.map((r) => r.x + r.width));
+  const bottom = Math.max(...rectangles.map((r) => r.y + r.height));
+  return { x: left, y: top, width: right - left, height: bottom - top };
+};
+
+/**
+ * Reports a filled panel whose content leaves one side far emptier than a
+ * padding would explain. Painted-under layers do not count: an opaque panel
+ * hides them.
+ */
+const panelDeadSpace = (
+  scene: CompiledDraft["scenes"][number],
+  sceneIndex: number,
+): Issue[] => {
+  const issues: Issue[] = [];
+  const frameOf = (layer: Layer): Rectangle | null => {
+    if (layer.type === "group") {
+      return unionOf(
+        layer.memberIds.flatMap((memberId) => {
+          const member = scene.layers.find(
+            (candidate) => candidate.id === memberId,
+          );
+          const rectangle =
+            member && member.type !== "group" ? member.frame : null;
+          return rectangle ? [rectangle] : [];
+        }),
+      );
+    }
+    return layer.frame;
+  };
+
+  scene.layers.forEach((panel, panelIndex) => {
+    if (
+      panel.type !== "shape" ||
+      panel.shape !== "rectangle" ||
+      (panel.opacity ?? 1) < 0.9
+    ) {
+      return;
+    }
+    const above = scene.layers.flatMap((layer, index) => {
+      if (index === panelIndex) return [];
+      const higher =
+        (layer.zIndex ?? 0) > (panel.zIndex ?? 0) ||
+        ((layer.zIndex ?? 0) === (panel.zIndex ?? 0) && index > panelIndex);
+      if (!higher) return [];
+      const rectangle = frameOf(layer);
+      return rectangle && overlaps(rectangle, panel.frame) ? [rectangle] : [];
+    });
+    const content = unionOf(above);
+    if (!content) return;
+    const worst = panelMargins(panel.frame, content)
+      .filter((margin) => margin.fraction > DEAD_SPACE_FRACTION)
+      .sort((a, b) => b.fraction - a.fraction)[0];
+    if (!worst) return;
+    issues.push({
+      ...issueFor(
+        "PANEL_DEAD_SPACE",
+        sceneIndex,
+        panelIndex,
+        panel.id,
+        `Panel ${panel.id} leaves ${Math.round(worst.fraction * 100)}% of itself empty along its ${worst.side} edge (${Math.round(worst.gap)} px with nothing on it).`,
+        "Size the panel to the content it holds, or put something in that band.",
+      ),
+      severity: "warning",
+    });
+  });
+  return issues;
+};
+
 export const resolveVisualPreflight = (
   input: CompiledDraft,
   loadedFontFamilies: ReadonlySet<string> = new Set(),
@@ -404,6 +519,7 @@ export const resolveVisualPreflight = (
   }
 
   draft.scenes.forEach((scene, sceneIndex) => {
+    issues.push(...panelDeadSpace(scene, sceneIndex));
     const textMetrics = new Map<string, TextMetrics>();
     scene.layers.forEach((layer, layerIndex) => {
       if (layer.type === "image") {

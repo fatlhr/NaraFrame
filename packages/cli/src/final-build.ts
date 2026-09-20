@@ -485,6 +485,43 @@ export const preflightNarrationAudio = async (
   return issues;
 };
 
+/** Mean level of an audio file in dBFS, or null when it cannot be measured. */
+export const measureMeanLevel = async (
+  path: string,
+): Promise<number | null> => {
+  try {
+    const result = await execute(ffmpegExecutable(), [
+      "-v",
+      "info",
+      "-i",
+      path,
+      "-af",
+      "volumedetect",
+      "-vn",
+      "-f",
+      "null",
+      "-",
+    ]);
+    const match = /mean_volume: (-?[\d.]+) dB/.exec(result.stderr);
+    return match?.[1] ? Number.parseFloat(match[1]) : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Measured on the owner's own material: narration averages about -17 dBFS.
+ * A bed less than 6 dB under that competes with the voice; more than 20 dB
+ * under it is not heard at all, which also makes its fades and ducking
+ * inaudible. Both ends are worth saying out loud.
+ */
+export const MUSIC_HEADROOM_DB = 6;
+export const MUSIC_FLOOR_DB = 20;
+/** With no narration to compare against, a bed this quiet is simply silent. */
+export const MUSIC_SILENT_DBFS = -45;
+
+const db = (gain: number): number => 20 * Math.log10(Math.max(gain, 1e-6));
+
 /**
  * Music and effects must decode, and a music bed that is not looped should
  * cover the video, or the tail plays in silence without anyone noticing.
@@ -505,6 +542,7 @@ export const preflightSoundtrackAudio = async (
     ]);
     return Math.round(Number.parseFloat(result.stdout.trim()) * 1000);
   },
+  measureLevel: (path: string) => Promise<number | null> = measureMeanLevel,
 ): Promise<Issue[]> => {
   const soundtrack = draft.soundtrack;
   if (!soundtrack) return [];
@@ -556,6 +594,66 @@ export const preflightSoundtrackAudio = async (
           suggestion:
             "Set loop to true, use a longer track, or accept the silence.",
         });
+      }
+    }
+  }
+
+  const music = soundtrack.music;
+  const musicAsset = music ? draft.assets[music.assetId] : undefined;
+  if (
+    music &&
+    musicAsset &&
+    musicAsset.kind !== "png" &&
+    musicAsset.kind !== "placeholder"
+  ) {
+    const bed = await measureLevel(join(projectRoot, musicAsset.publicPath));
+    if (bed !== null) {
+      // What the viewer actually hears: the track's own level, the configured
+      // volume, and the ducking that applies wherever narration plays.
+      const played = bed + db(music.volume);
+      const underSpeech = played + db(music.duck?.volume ?? 1);
+      const speech: number[] = [];
+      for (const clip of draft.narration?.clips ?? []) {
+        const asset = draft.assets[clip.assetId];
+        if (!asset || asset.kind === "png" || asset.kind === "placeholder")
+          continue;
+        const level = await measureLevel(join(projectRoot, asset.publicPath));
+        if (level !== null) speech.push(level);
+      }
+      const warn = (code: string, message: string, suggestion: string) =>
+        issues.push({
+          code,
+          severity: "warning",
+          responsible: "agent",
+          artifact: "naraframe.json",
+          path: "/soundtrack/music",
+          message,
+          suggestion,
+        });
+
+      if (speech.length > 0) {
+        const voice =
+          speech.reduce((sum, value) => sum + value, 0) / speech.length;
+        const gap = voice - underSpeech;
+        if (gap < MUSIC_HEADROOM_DB) {
+          warn(
+            "MUSIC_MASKS_NARRATION",
+            `Under speech the music is at ${underSpeech.toFixed(1)} dB against a ${voice.toFixed(1)} dB voice, only ${gap.toFixed(1)} dB apart.`,
+            "Lower the music volume or duck it further.",
+          );
+        } else if (gap > MUSIC_FLOOR_DB) {
+          warn(
+            "MUSIC_INAUDIBLE",
+            `Under speech the music is ${gap.toFixed(1)} dB below the voice, so it cannot be heard and neither can its fades or ducking.`,
+            "Raise the music volume, use a louder track, or duck it less.",
+          );
+        }
+      } else if (played < MUSIC_SILENT_DBFS) {
+        warn(
+          "MUSIC_INAUDIBLE",
+          `The track averages ${bed.toFixed(1)} dB and plays at ${played.toFixed(1)} dB, which is silent in practice.`,
+          "Raise the music volume or use a louder track.",
+        );
       }
     }
   }

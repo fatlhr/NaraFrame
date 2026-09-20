@@ -391,3 +391,146 @@ describe("resolveVisualPreflight — layer issue codes", () => {
     );
   });
 });
+
+describe("resolveVisualPreflight — panel dead space", () => {
+  const shape = (overrides: {
+    id: string;
+    frame: { x: number; y: number; width: number; height: number };
+    zIndex?: number;
+    opacity?: number;
+  }): Extract<Layer, { type: "shape" }> => ({
+    type: "shape",
+    shape: "rectangle",
+    fill: "#E8E0D2",
+    opacity: 1,
+    rotationDeg: 0,
+    zIndex: 0,
+    ...overrides,
+  });
+
+  const image = (overrides: {
+    id: string;
+    frame: { x: number; y: number; width: number; height: number };
+    zIndex?: number;
+  }): Extract<Layer, { type: "image" }> => ({
+    type: "image",
+    assetId: "krakatau-map",
+    fit: "cover",
+    opacity: 1,
+    rotationDeg: 0,
+    zIndex: 1,
+    ...overrides,
+  });
+
+  /**
+   * The owner's own failing scene: samples/krakatau-narrated, scene "context".
+   * The cream panel runs 1040 px tall while the map on it ends 345 px short
+   * of its bottom edge, which reads on screen as an unfinished block.
+   */
+  const krakatauContextLayers = (): Layer[] => [
+    shape({
+      id: "map-panel",
+      frame: { x: 88, y: 280, width: 904, height: 1040 },
+    }),
+    image({
+      id: "map-image",
+      frame: { x: 130, y: 360, width: 820, height: 615 },
+    }),
+    shape({
+      id: "eruption-ring",
+      frame: { x: 480, y: 760, width: 120, height: 120 },
+      opacity: 0.28,
+    }),
+    shape({
+      id: "eruption-core",
+      frame: { x: 515, y: 795, width: 50, height: 50 },
+      zIndex: 1,
+    }),
+    text({
+      id: "context-copy",
+      text: "1883",
+      frame: { x: 88, y: 1340, width: 904, height: 140 },
+    }),
+  ];
+
+  const deadSpace = (layers: Layer[]) =>
+    resolveVisualPreflight(draftWithScene(layers)).report.issues.filter(
+      (issue) => issue.code === "PANEL_DEAD_SPACE",
+    );
+
+  it("catches the empty band under the Krakatau map, naming the side and the size", () => {
+    const issues = deadSpace(krakatauContextLayers());
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.entityId).toBe("map-panel");
+    expect(issues[0]?.severity).toBe("warning");
+    expect(issues[0]?.message).toContain("bottom");
+    expect(issues[0]?.message).toContain("33%");
+    expect(issues[0]?.message).toContain("345 px");
+  });
+
+  it("goes quiet once the panel is sized to the map it holds", () => {
+    const fixed = krakatauContextLayers().map((layer) =>
+      layer.id === "map-panel"
+        ? shape({
+            id: "map-panel",
+            frame: { x: 88, y: 280, width: 904, height: 775 },
+          })
+        : layer,
+    );
+    expect(deadSpace(fixed)).toEqual([]);
+  });
+
+  it("accepts an even padding and ignores a panel with nothing on it at all", () => {
+    expect(
+      deadSpace([
+        shape({ id: "panel", frame: { x: 0, y: 0, width: 500, height: 500 } }),
+        image({ id: "art", frame: { x: 40, y: 40, width: 420, height: 420 } }),
+      ]),
+    ).toEqual([]);
+    // A bare backdrop is a deliberate choice, not a layout mistake.
+    expect(
+      deadSpace([
+        shape({ id: "panel", frame: { x: 0, y: 0, width: 500, height: 500 } }),
+      ]),
+    ).toEqual([]);
+  });
+
+  it("does not count content hidden behind the panel", () => {
+    const issues = deadSpace([
+      image({
+        id: "behind",
+        frame: { x: 10, y: 10, width: 480, height: 480 },
+        zIndex: 0,
+      }),
+      shape({
+        id: "panel",
+        frame: { x: 0, y: 0, width: 500, height: 500 },
+        zIndex: 1,
+      }),
+      image({
+        id: "small",
+        frame: { x: 200, y: 200, width: 100, height: 100 },
+        zIndex: 2,
+      }),
+    ]);
+    expect(issues).toHaveLength(1);
+  });
+
+  it("measures a group by the members it holds", () => {
+    const issues = deadSpace([
+      shape({ id: "panel", frame: { x: 0, y: 0, width: 500, height: 500 } }),
+      image({
+        id: "a",
+        frame: { x: 40, y: 40, width: 200, height: 420 },
+        zIndex: 1,
+      }),
+      image({
+        id: "b",
+        frame: { x: 260, y: 40, width: 200, height: 420 },
+        zIndex: 1,
+      }),
+      { type: "group", id: "pair", memberIds: ["a", "b"], zIndex: 2 },
+    ]);
+    expect(issues).toEqual([]);
+  });
+});
