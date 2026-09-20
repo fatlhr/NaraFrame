@@ -13,6 +13,8 @@ import { ShadowSchema, StrokeSchema } from "./scene.js";
 
 const TypographyRoleTokenSchema = z
   .object({
+    /** Overrides the profile family for this role; must be a bundled font. */
+    fontFamily: z.string().trim().min(1).optional(),
     fontSize: z.number().min(12).max(320),
     fontWeight: z.number().int().min(100).max(900),
     lineHeight: z.number().min(0.8).max(2),

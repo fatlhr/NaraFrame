@@ -69,19 +69,104 @@ const textStyle = (layer: Extract<Layer, { type: "text" }>) => ({
   overflowPolicy: layer.overflowPolicy ?? "error",
 });
 
+/**
+ * The weight a character is actually painted in. An accented or strong run is
+ * set heavier than the rest of the headline, so measuring the whole string at
+ * one weight under-reports its width and lets a line overflow unnoticed.
+ * Kept in step with `spanStyleFor` in the renderer.
+ */
+const spanWeights = (
+  layer: Extract<Layer, { type: "text" }>,
+  baseWeight: number,
+): number[] => {
+  const weights = new Array<number>(layer.text.length).fill(baseWeight);
+  if (!layer.spans) return weights;
+  let cursor = 0;
+  for (const span of layer.spans) {
+    const weight =
+      span.emphasis === "accent"
+        ? Math.min(900, baseWeight + 100)
+        : span.emphasis === "strong"
+          ? Math.min(900, baseWeight + 200)
+          : baseWeight;
+    for (let index = 0; index < span.text.length; index += 1) {
+      weights[cursor + index] = weight;
+    }
+    cursor += span.text.length;
+  }
+  return weights;
+};
+
 const measureWidth = (
   text: string,
   draft: CompiledDraft,
   layer: Extract<Layer, { type: "text" }>,
   fontSize: number,
-): number =>
-  measureText({
-    text,
-    fontFamily: fontFamilyForRole(draft.profile.render, layer.role),
-    fontSize,
-    fontWeight: layer.fontWeight ?? 700,
-    letterSpacing: `${layer.letterSpacing ?? 0}px`,
-  }).width;
+  weightsByCharacter?: number[],
+): number => {
+  const fontFamily = fontFamilyForRole(draft.profile.render, layer.role);
+  const letterSpacing = `${layer.letterSpacing ?? 0}px`;
+  const baseWeight = layer.fontWeight ?? 700;
+  if (!weightsByCharacter) {
+    return measureText({
+      text,
+      fontFamily,
+      fontSize,
+      fontWeight: baseWeight,
+      letterSpacing,
+    }).width;
+  }
+  // Measure each run at the weight it is painted in, then add the widths.
+  let total = 0;
+  let run = "";
+  let runWeight = weightsByCharacter[0] ?? baseWeight;
+  const flush = () => {
+    if (!run) return;
+    total += measureText({
+      text: run,
+      fontFamily,
+      fontSize,
+      fontWeight: runWeight,
+      letterSpacing,
+    }).width;
+    run = "";
+  };
+  for (let index = 0; index < text.length; index += 1) {
+    const weight = weightsByCharacter[index] ?? baseWeight;
+    if (weight !== runWeight) {
+      flush();
+      runWeight = weight;
+    }
+    run += text[index];
+  }
+  flush();
+  return total;
+};
+
+/** Splits a paragraph into words, carrying each word's per-character weights. */
+const wordsWithWeights = (
+  paragraph: string,
+  weights: number[],
+  offset: number,
+): Array<{ text: string; weights: number[] }> => {
+  const words: Array<{ text: string; weights: number[] }> = [];
+  let index = 0;
+  while (index < paragraph.length) {
+    if (/\s/u.test(paragraph[index] ?? "")) {
+      index += 1;
+      continue;
+    }
+    const start = index;
+    while (index < paragraph.length && !/\s/u.test(paragraph[index] ?? "")) {
+      index += 1;
+    }
+    words.push({
+      text: paragraph.slice(start, index),
+      weights: weights.slice(offset + start, offset + index),
+    });
+  }
+  return words;
+};
 
 const wrapText = (
   text: string,
@@ -89,27 +174,56 @@ const wrapText = (
   draft: CompiledDraft,
   layer: Extract<Layer, { type: "text" }>,
   fontSize: number,
+  weights?: number[],
 ): { lines: string[]; unbreakableOverflow: boolean } => {
   const lines: string[] = [];
   let unbreakableOverflow = false;
+  const baseWeight = layer.fontWeight ?? 700;
+  let paragraphOffset = 0;
   for (const paragraph of text.split("\n")) {
+    const offset = paragraphOffset;
+    paragraphOffset += paragraph.length + 1;
     if (paragraph.length === 0) {
       lines.push("");
       continue;
     }
-    const words = paragraph.trim().split(/\s+/u);
+    const words = weights
+      ? wordsWithWeights(paragraph, weights, offset)
+      : paragraph
+          .trim()
+          .split(/\s+/u)
+          .map((word) => ({ text: word, weights: [] as number[] }));
     let line = "";
+    let lineWeights: number[] = [];
     for (const word of words) {
-      const candidate = line ? `${line} ${word}` : word;
-      if (measureWidth(candidate, draft, layer, fontSize) <= withinWidth) {
+      const candidate = line ? `${line} ${word.text}` : word.text;
+      const candidateWeights = weights
+        ? line
+          ? [...lineWeights, baseWeight, ...word.weights]
+          : [...word.weights]
+        : undefined;
+      if (
+        measureWidth(candidate, draft, layer, fontSize, candidateWeights) <=
+        withinWidth
+      ) {
         line = candidate;
+        lineWeights = candidateWeights ?? [];
         continue;
       }
       if (line) lines.push(line);
-      if (measureWidth(word, draft, layer, fontSize) > withinWidth) {
+      if (
+        measureWidth(
+          word.text,
+          draft,
+          layer,
+          fontSize,
+          weights ? word.weights : undefined,
+        ) > withinWidth
+      ) {
         unbreakableOverflow = true;
       }
-      line = word;
+      line = word.text;
+      lineWeights = [...word.weights];
     }
     if (line) lines.push(line);
   }
@@ -127,7 +241,14 @@ const metricsAt = (
   if (width <= 0 || height <= 0) {
     return { fontSize, lines: [], contentHeight: 0, overflow: true };
   }
-  const wrapped = wrapText(layer.text, width, draft, layer, fontSize);
+  const wrapped = wrapText(
+    layer.text,
+    width,
+    draft,
+    layer,
+    fontSize,
+    layer.spans ? spanWeights(layer, layer.fontWeight ?? 700) : undefined,
+  );
   const contentHeight = wrapped.lines.length * fontSize * style.lineHeight;
   return {
     fontSize,

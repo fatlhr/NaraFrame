@@ -6,6 +6,7 @@ import {
   RelativeAudioPathSchema,
   RelativeFontPathSchema,
   RelativePngPathSchema,
+  RelativeSvgPathSchema,
   SchemaVersionSchema,
   Sha256Schema,
   VersionSchema,
@@ -65,6 +66,23 @@ const CompiledAssetSchema = z.discriminatedUnion("kind", [
       kind: z.enum(["mp3", "wav", "m4a"]),
       publicPath: RelativeAudioPathSchema,
       sha256: Sha256Schema,
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal("svg"),
+      publicPath: RelativeSvgPathSchema,
+      sha256: Sha256Schema,
+      /** Sanitised inner markup, ready to inline. */
+      body: z.string(),
+      viewBox: z
+        .object({
+          minX: z.number(),
+          minY: z.number(),
+          width: z.number().positive(),
+          height: z.number().positive(),
+        })
+        .strict(),
     })
     .strict(),
   z

@@ -1,6 +1,10 @@
 export const corePackage = "@naraframe/core";
 
 export {
+  type SanitizedSvg,
+  sanitizeSvg,
+} from "./asset/svg-sanitize.js";
+export {
   type CapabilityRegistry,
   capabilityRegistry,
 } from "./capabilities.js";

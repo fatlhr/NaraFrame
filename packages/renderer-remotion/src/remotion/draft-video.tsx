@@ -85,8 +85,49 @@ const AssetView = ({
       />
     );
   }
+  if (asset?.kind === "svg") {
+    // The markup was checked and id-namespaced by the loader, so it is
+    // inlined rather than fetched: the illustration's parts stay addressable
+    // and nothing re-parses unvalidated artwork at render time.
+    const { minX, minY, width, height } = asset.viewBox;
+    return (
+      <svg
+        viewBox={`${minX} ${minY} ${width} ${height}`}
+        preserveAspectRatio={
+          fit === "cover" ? "xMidYMid slice" : "xMidYMid meet"
+        }
+        style={{ width: "100%", height: "100%", display: "block" }}
+        role="presentation"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitised by the loader
+        dangerouslySetInnerHTML={{ __html: asset.body }}
+      />
+    );
+  }
   const label = asset?.kind === "placeholder" ? asset.label : assetId;
   return <Placeholder label={label} />;
+};
+
+/**
+ * Paints a headline's runs. `emphasis` says what a run means; the profile
+ * decides how it looks, so the same source reads correctly under another
+ * visual identity.
+ */
+const spanStyleFor = (
+  emphasis: "accent" | "strong" | "quiet" | undefined,
+  render: CompiledDraft["profile"]["render"],
+  baseWeight: number,
+): CSSProperties => {
+  if (emphasis === "accent") {
+    return {
+      color: render.palette.accent,
+      fontWeight: Math.min(900, baseWeight + 100),
+    };
+  }
+  if (emphasis === "strong") {
+    return { fontWeight: Math.min(900, baseWeight + 200) };
+  }
+  if (emphasis === "quiet") return { opacity: 0.62 };
+  return {};
 };
 
 const LayerView = ({
@@ -144,7 +185,22 @@ const LayerView = ({
           overflow: "hidden",
         }}
       >
-        {layer.text}
+        {layer.spans
+          ? layer.spans.map((span, index) => (
+              <span
+                // biome-ignore lint/suspicious/noArrayIndexKey: runs are positional
+                key={`${layer.id}-span-${index}`}
+                style={spanStyleFor(
+                  span.emphasis,
+                  draft.profile.render,
+                  layer.fontWeight ??
+                    draft.profile.render.typography.headingWeight,
+                )}
+              >
+                {span.text}
+              </span>
+            ))
+          : layer.text}
       </div>
     );
   }

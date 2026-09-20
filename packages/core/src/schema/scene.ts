@@ -59,11 +59,29 @@ const LayerPresentationShape = {
   slot: IdSchema.optional(),
 };
 
+/**
+ * A run inside a headline. `emphasis` is what the run means, not how it is
+ * painted: the profile decides what an accented or quiet run looks like, so
+ * the same source reads correctly under a different visual identity.
+ */
+const TextSpanSchema = z
+  .object({
+    text: z.string().min(1),
+    emphasis: z.enum(["accent", "strong", "quiet"]).optional(),
+  })
+  .strict();
+
 const TextLayerSchema = z
   .object({
     id: IdSchema,
     type: z.literal("text"),
     text: z.string().min(1),
+    /**
+     * Optional typographic detail for the same string. When present its runs
+     * must join back to `text`, so every measurement, caption and check that
+     * reads `text` keeps working and a legacy layer needs no migration.
+     */
+    spans: z.array(TextSpanSchema).min(1).optional(),
     frame: FrameSchema,
     role: TypographyRoleSchema.optional(),
     fontSize: z.number().min(12).max(320).optional(),
@@ -79,7 +97,18 @@ const TextLayerSchema = z
     avoidLayerIds: z.array(IdSchema).max(20).optional(),
     ...LayerPresentationShape,
   })
-  .strict();
+  .strict()
+  .superRefine((layer, context) => {
+    if (!layer.spans) return;
+    const joined = layer.spans.map((span) => span.text).join("");
+    if (joined !== layer.text) {
+      context.addIssue({
+        code: "custom",
+        message: "Text spans must join back to the layer's text exactly",
+        path: ["spans"],
+      });
+    }
+  });
 
 const ImageLayerSchema = z
   .object({

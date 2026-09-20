@@ -55,26 +55,61 @@ const compileIssue = (
 
 const compiledAssets = (source: PlanSource): Record<string, CompiledAsset> =>
   Object.fromEntries(
-    source.assets.assets.map((asset) => [
-      asset.id,
-      asset.status === "ready"
-        ? asset.kind === "png"
-          ? {
+    source.assets.assets.flatMap((asset): Array<[string, CompiledAsset]> => {
+      if (asset.status !== "ready") {
+        return [
+          [
+            asset.id,
+            {
+              kind: "placeholder" as const,
+              assetId: asset.id,
+              label: asset.purpose,
+            },
+          ],
+        ];
+      }
+      if (asset.kind === "png") {
+        return [
+          [
+            asset.id,
+            {
               kind: "png" as const,
               publicPath: asset.path,
               sha256: asset.sha256,
-            }
-          : {
-              kind: asset.kind,
-              publicPath: asset.path,
-              sha256: asset.sha256,
-            }
-        : {
-            kind: "placeholder" as const,
-            assetId: asset.id,
-            label: asset.purpose,
+            },
+          ],
+        ];
+      }
+      if (asset.kind === "svg") {
+        const vector = source.vectors?.[asset.id];
+        // An unresolved vector is reported by compileDraft; leaving it out
+        // here keeps the compiled draft free of unchecked markup.
+        return vector
+          ? [
+              [
+                asset.id,
+                {
+                  kind: "svg" as const,
+                  publicPath: asset.path,
+                  sha256: asset.sha256,
+                  body: vector.body,
+                  viewBox: vector.viewBox,
+                },
+              ],
+            ]
+          : [];
+      }
+      return [
+        [
+          asset.id,
+          {
+            kind: asset.kind,
+            publicPath: asset.path,
+            sha256: asset.sha256,
           },
-    ]),
+        ],
+      ];
+    }),
   );
 
 /**

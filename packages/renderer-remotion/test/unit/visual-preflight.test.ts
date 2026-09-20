@@ -2,9 +2,23 @@ import type { CompiledDraft, Layer } from "@naraframe/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveVisualPreflight } from "../../src/remotion/visual-preflight.js";
 
+// Heavier type is wider. Weights at or below 700 measure exactly as before,
+// so the older cases are unaffected while a span's own weight is observable.
 vi.mock("@remotion/layout-utils", () => ({
-  measureText: ({ text, fontSize }: { text: string; fontSize: number }) => ({
-    width: text.length * fontSize * 0.6,
+  measureText: ({
+    text,
+    fontSize,
+    fontWeight,
+  }: {
+    text: string;
+    fontSize: number;
+    fontWeight?: number;
+  }) => ({
+    width:
+      text.length *
+      fontSize *
+      0.6 *
+      (1 + Math.max(0, (fontWeight ?? 700) - 700) / 2000),
     height: fontSize * 1.2,
   }),
 }));
@@ -532,5 +546,160 @@ describe("resolveVisualPreflight — panel dead space", () => {
       { type: "group", id: "pair", memberIds: ["a", "b"], zIndex: 2 },
     ]);
     expect(issues).toEqual([]);
+  });
+});
+
+describe("resolveVisualPreflight — rich text and per-role fonts", () => {
+  const headline = (
+    spans: Array<{ text: string; emphasis?: "accent" | "strong" | "quiet" }>,
+    width = 520,
+  ): Extract<Layer, { type: "text" }> => ({
+    ...text({
+      id: "headline",
+      text: spans.map((span) => span.text).join(""),
+      frame: { x: 0, y: 0, width, height: 300 },
+      fontSize: 40,
+    }),
+    role: "display",
+    fontWeight: 700,
+    spans,
+  });
+
+  const draftWithFont = (
+    layers: Layer[],
+    roles: Record<string, { fontFamily?: string }> = {},
+  ): CompiledDraft => {
+    const draft = draftWithScene(layers);
+    return {
+      ...draft,
+      fonts: [
+        {
+          family: "Label Mono",
+          publicPath: "assets/profile/label.ttf",
+          sha256: "c".repeat(64),
+        },
+      ],
+      profile: {
+        ...draft.profile,
+        render: {
+          ...draft.profile.render,
+          typography: {
+            ...draft.profile.render.typography,
+            roles: {
+              display: {
+                fontSize: 40,
+                fontWeight: 700,
+                lineHeight: 1.1,
+                letterSpacing: 0,
+                ...roles.display,
+              },
+              heading: {
+                fontSize: 32,
+                fontWeight: 700,
+                lineHeight: 1.1,
+                letterSpacing: 0,
+                ...roles.heading,
+              },
+              body: {
+                fontSize: 24,
+                fontWeight: 400,
+                lineHeight: 1.2,
+                letterSpacing: 0,
+                ...roles.body,
+              },
+              label: {
+                fontSize: 18,
+                fontWeight: 600,
+                lineHeight: 1.1,
+                letterSpacing: 2,
+                ...roles.label,
+              },
+            },
+          },
+        },
+      },
+    };
+  };
+
+  const issuesFor = (draft: CompiledDraft) =>
+    resolveVisualPreflight(draft).report.issues.map((issue) => issue.code);
+
+  const wrappedLines = (layer: Layer, roles = {}) => {
+    const draft = draftWithFont([layer], roles);
+    // The wrapped result is what the overflow check reads, so a line count
+    // change is the observable consequence of measuring a run at its weight.
+    const report = resolveVisualPreflight(draft).report;
+    return report.issues.filter((issue) => issue.code === "TEXT_OVERFLOW")
+      .length;
+  };
+
+  it("measures an accented run at the weight it is painted in, not the base weight", () => {
+    // "Katanya semrawut" is 16 characters: 384px at the base weight, which
+    // fits this 390px box on one line. Painting "semrawut" heavier makes it
+    // 403px, so it wraps to a second line and no longer fits the height.
+    const box = { x: 0, y: 0, width: 390, height: 50 };
+    const plain = {
+      ...headline([{ text: "Katanya semrawut" }]),
+      frame: box,
+      overflowPolicy: "error" as const,
+    };
+    const heavy = {
+      ...headline([
+        { text: "Katanya " },
+        { text: "semrawut", emphasis: "strong" as const },
+      ]),
+      frame: box,
+      overflowPolicy: "error" as const,
+    };
+    expect(wrappedLines(plain)).toBe(0);
+    expect(wrappedLines(heavy)).toBe(1);
+  });
+
+  it("still reports an overflow that the spans themselves cause", () => {
+    const layer = headline(
+      [
+        { text: "Medan? " },
+        { text: "Katanya", emphasis: "quiet" },
+        { text: " semrawut", emphasis: "accent" },
+      ],
+      120,
+    );
+    expect(
+      issuesFor(draftWithFont([{ ...layer, overflowPolicy: "error" }])),
+    ).toContain("TEXT_OVERFLOW");
+  });
+
+  it("measures a role in its own bundled face, and reports that face when it fails to load", () => {
+    const label: Layer = {
+      ...text({
+        id: "place",
+        text: "MEDAN · SUMATERA UTARA",
+        frame: { x: 0, y: 0, width: 500, height: 60 },
+        fontSize: 18,
+      }),
+      role: "label",
+    };
+    const draft = draftWithFont([label], {
+      label: { fontFamily: "Label Mono" },
+    });
+    // The family is declared as a bundled asset but nothing loaded it here.
+    expect(
+      resolveVisualPreflight(draft, new Set()).report.issues.map((i) => i.code),
+    ).toContain("FONT_NOT_LOADED");
+    expect(
+      resolveVisualPreflight(draft, new Set(["Label Mono"])).report.issues.map(
+        (i) => i.code,
+      ),
+    ).not.toContain("FONT_NOT_LOADED");
+  });
+
+  it("leaves a layer with no spans measured exactly as before", () => {
+    const legacy: Layer = text({
+      id: "legacy",
+      text: "Satu baris lama",
+      frame: { x: 0, y: 0, width: 520, height: 120 },
+      fontSize: 40,
+    });
+    expect(issuesFor(draftWithScene([legacy]))).toEqual([]);
   });
 });

@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { type SanitizedSvg, sanitizeSvg } from "../asset/svg-sanitize.js";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
 import { sha256File, sha256Text } from "../project/hash.js";
 import { resolveSafeExistingFile } from "../project/safe-path.js";
@@ -163,6 +164,50 @@ const verifyLockedFiles = async (
   return sortIssues(issues);
 };
 
+/**
+ * Reads and checks every vector asset. The id prefix is the asset's own hash,
+ * so the same artwork always yields the same markup — render keys depend on
+ * it — and two illustrations on one scene cannot claim each other's gradients.
+ */
+const resolveVectors = async (
+  root: string,
+  source: PlanSource,
+): Promise<Result<Record<string, SanitizedSvg>>> => {
+  const vectors: Record<string, SanitizedSvg> = {};
+  const issues: Issue[] = [];
+
+  for (const [index, asset] of source.assets.assets.entries()) {
+    if (asset.status !== "ready" || asset.kind !== "svg") continue;
+    const resolved = await resolveSafeExistingFile(root, asset.path, {
+      artifact: sourceFiles.assets,
+      path: `/assets/${index}/path`,
+    });
+    if (!resolved.ok) {
+      issues.push(...resolved.issues);
+      continue;
+    }
+    const markup = await readFile(resolved.value, "utf8");
+    const sanitized = sanitizeSvg(markup, `${asset.sha256.slice(0, 12)}-`);
+    if (!sanitized.ok) {
+      issues.push(
+        ...sanitized.issues.map((issue) => ({
+          ...issue,
+          artifact: sourceFiles.assets,
+          path: `/assets/${index}/path`,
+          entityId: asset.id,
+          message: `Vector asset ${asset.id}: ${issue.message}`,
+        })),
+      );
+      continue;
+    }
+    vectors[asset.id] = sanitized.value;
+  }
+
+  return issues.length > 0
+    ? { ok: false, issues: sortIssues(issues) }
+    : { ok: true, value: vectors, issues: [] };
+};
+
 export const loadPlanProject = async (
   projectRoot: string,
 ): Promise<Result<LoadedPlanProject>> => {
@@ -225,9 +270,23 @@ export const loadPlanProject = async (
     };
   }
 
+  const vectors = await resolveVectors(root, validated.value);
+  if (!vectors.ok) {
+    return {
+      ok: false,
+      issues: sortIssues([...validated.issues, ...vectors.issues]),
+    };
+  }
+
   return {
     ok: true,
-    value: { root, source: validated.value },
+    value: {
+      root,
+      source:
+        Object.keys(vectors.value).length > 0
+          ? { ...validated.value, vectors: vectors.value }
+          : validated.value,
+    },
     issues: validated.issues,
   };
 };

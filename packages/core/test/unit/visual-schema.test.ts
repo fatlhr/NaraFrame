@@ -201,23 +201,30 @@ describe("visual source schema", () => {
     expect(ScenesSchema.safeParse(missingTarget).success).toBe(false);
   });
 
-  it("rejects SVG or video assets", () => {
-    for (const kind of ["svg", "video"]) {
-      expect(
-        AssetManifestSchema.safeParse({
-          schemaVersion: 1,
-          assets: [
-            {
-              id: "unsupported",
-              status: "ready",
-              kind,
-              path: `assets/source.${kind === "svg" ? "svg" : "mp4"}`,
-              sha256: "0".repeat(64),
-              origin: { type: "user" },
-            },
-          ],
-        }).success,
-      ).toBe(false);
-    }
+  it("accepts a vector asset and still rejects video", () => {
+    const manifest = (kind: string, extension: string) => ({
+      schemaVersion: 1,
+      assets: [
+        {
+          id: "artwork",
+          status: "ready",
+          kind,
+          path: `assets/source.${extension}`,
+          sha256: "0".repeat(64),
+          origin: { type: "user" },
+        },
+      ],
+    });
+    // SVG is supported since M2.4.1; it is read and sanitised by the loader.
+    expect(AssetManifestSchema.safeParse(manifest("svg", "svg")).success).toBe(
+      true,
+    );
+    // An SVG asset must actually be an .svg file.
+    expect(AssetManifestSchema.safeParse(manifest("svg", "png")).success).toBe(
+      false,
+    );
+    expect(
+      AssetManifestSchema.safeParse(manifest("video", "mp4")).success,
+    ).toBe(false);
   });
 });

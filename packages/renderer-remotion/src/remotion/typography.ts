@@ -13,13 +13,24 @@ import { staticFile } from "remotion";
  * so what's drawn matches what's measured) and visual-preflight.ts (so
  * measurement and the FONT_NOT_LOADED check test the same family).
  */
+/**
+ * The face a role is set in. A role's own `fontFamily` wins, then the legacy
+ * display override, then the profile family. Resolution order is shared with
+ * measurement, so a preflight check never measures a different face than the
+ * one that renders.
+ */
 export const fontFamilyForRole = (
   render: RenderTokens,
   role: TypographyRole | undefined,
-): string =>
-  role === "display" && render.typography.displayFontFamily
+): string => {
+  const roleFamily = role
+    ? render.typography.roles?.[role]?.fontFamily
+    : undefined;
+  if (roleFamily) return roleFamily;
+  return role === "display" && render.typography.displayFontFamily
     ? render.typography.displayFontFamily
     : render.typography.fontFamily;
+};
 
 /**
  * Registers each bundled profile font with the page before any measurement

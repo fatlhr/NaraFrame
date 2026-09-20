@@ -5,7 +5,8 @@ import type { NarrationBlock } from "../schema/narration.js";
 import { narrationTextHash } from "./voice-binding.js";
 
 /** Bump when a renderer change can alter pixels for identical input. */
-export const RENDER_ENGINE = "naraframe-draft/2";
+// 3: inline vector artwork and per-span headline weights changed the pixels.
+export const RENDER_ENGINE = "naraframe-draft/3";
 
 /**
  * Finds a retained voice clip for a block: the spoken text (whitespace
