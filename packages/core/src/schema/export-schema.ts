@@ -5,6 +5,7 @@ import {
   type Result,
   sortIssues,
 } from "../model/issue.js";
+import { applyProjectOverrides } from "../profile/overrides.js";
 import { type AssetManifest, AssetManifestSchema } from "./asset.js";
 import { type Captions, CaptionsSchema } from "./captions.js";
 import { CompiledDraftSchema } from "./compiled.js";
@@ -152,11 +153,16 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
   }
 
   const project = projectResult.data;
-  const profile = profileResult.data;
+  const lockedProfile = profileResult.data;
   const scenes = scenesResult.data;
   const assets = assetsResult.data;
   const narration = narrationResult.data;
   const issues: Issue[] = [];
+
+  // The lock is the pinned profile; project overrides are applied on top of it.
+  const resolved = applyProjectOverrides(lockedProfile, project.overrides);
+  if (!resolved.ok) issues.push(...resolved.issues);
+  const profile = resolved.ok ? resolved.value : lockedProfile;
 
   if (project.profile.id !== profile.id) {
     issues.push(
@@ -240,6 +246,63 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
             ),
           );
         }
+      }
+    });
+  }
+
+  if (project.soundtrack) {
+    const kinds = new Map(assets.assets.map((asset) => [asset.id, asset.kind]));
+    const narrationAudio = new Set(
+      (narration?.blocks ?? []).flatMap((block) =>
+        "audioAssetId" in block ? [block.audioAssetId] : [],
+      ),
+    );
+    const sceneIds = new Set(scenes.scenes.map((scene) => scene.id));
+    const check = (assetId: string, path: string) => {
+      const kind = kinds.get(assetId);
+      if (kind === undefined) {
+        issues.push(
+          customIssue(
+            "ASSET_UNDECLARED",
+            artifacts.project,
+            path,
+            `Audio asset ${assetId} is not declared in the asset manifest.`,
+          ),
+        );
+      } else if (kind === "png") {
+        issues.push(
+          customIssue(
+            "SOUNDTRACK_ASSET_NOT_AUDIO",
+            artifacts.project,
+            path,
+            `Asset ${assetId} is an image, not audio.`,
+          ),
+        );
+      } else if (narrationAudio.has(assetId)) {
+        issues.push(
+          customIssue(
+            "SOUNDTRACK_ASSET_IS_NARRATION",
+            artifacts.project,
+            path,
+            `Asset ${assetId} is narration audio and cannot also be music or an effect.`,
+          ),
+        );
+      }
+    };
+    if (project.soundtrack.music) {
+      check(project.soundtrack.music.assetId, "/soundtrack/music/assetId");
+    }
+    project.soundtrack.sfx.forEach((effect, index) => {
+      check(effect.assetId, `/soundtrack/sfx/${index}/assetId`);
+      if (!sceneIds.has(effect.sceneId)) {
+        issues.push(
+          customIssue(
+            "SFX_SCENE_UNKNOWN",
+            artifacts.project,
+            `/soundtrack/sfx/${index}/sceneId`,
+            `Effect ${effect.id} names unknown scene ${effect.sceneId}.`,
+          ),
+        );
       }
     });
   }

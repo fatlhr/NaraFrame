@@ -200,6 +200,48 @@ const CompiledAudioClipSchema = z
   })
   .strict();
 
+const CompiledSoundtrackSchema = z
+  .object({
+    music: z
+      .object({
+        assetId: IdSchema,
+        volume: z.number().min(0).max(1),
+        loop: z.boolean(),
+        trimStartFrames: NonNegativeIntegerSchema,
+        fadeInFrames: NonNegativeIntegerSchema,
+        fadeOutFrames: NonNegativeIntegerSchema,
+        duck: z
+          .object({
+            volume: z.number().min(0).max(1),
+            attackFrames: NonNegativeIntegerSchema,
+            releaseFrames: NonNegativeIntegerSchema,
+            windows: z.array(
+              z
+                .object({
+                  startFrame: NonNegativeIntegerSchema,
+                  endFrame: PositiveIntegerSchema,
+                })
+                .strict(),
+            ),
+          })
+          .strict()
+          .optional(),
+      })
+      .strict()
+      .optional(),
+    sfx: z.array(
+      z
+        .object({
+          id: IdSchema,
+          assetId: IdSchema,
+          startFrame: NonNegativeIntegerSchema,
+          volume: z.number().min(0).max(1),
+        })
+        .strict(),
+    ),
+  })
+  .strict();
+
 const CompiledCaptionsSchema = z
   .object({
     style: z
@@ -253,6 +295,7 @@ export const CompiledDraftSchema = z
       })
       .optional(),
     captions: CompiledCaptionsSchema.optional(),
+    soundtrack: CompiledSoundtrackSchema.optional(),
   })
   .strict()
   .superRefine((draft, context) => {
@@ -284,5 +327,6 @@ export type CompiledBeat = z.infer<typeof CompiledBeatSchema>;
 export type CompiledFont = z.infer<typeof CompiledFontSchema>;
 export type CompiledTransition = z.infer<typeof CompiledTransitionSchema>;
 export type CompiledCaptions = z.infer<typeof CompiledCaptionsSchema>;
+export type CompiledSoundtrack = z.infer<typeof CompiledSoundtrackSchema>;
 export type CompiledAudioClip = z.infer<typeof CompiledAudioClipSchema>;
 export type CompiledDraft = z.infer<typeof CompiledDraftSchema>;

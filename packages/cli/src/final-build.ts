@@ -484,3 +484,80 @@ export const preflightNarrationAudio = async (
   }
   return issues;
 };
+
+/**
+ * Music and effects must decode, and a music bed that is not looped should
+ * cover the video, or the tail plays in silence without anyone noticing.
+ */
+export const preflightSoundtrackAudio = async (
+  projectRoot: string,
+  draft: CompiledDraft,
+  probeDuration: (path: string) => Promise<number> = async (path) => {
+    await decodeAudio(path, ffmpegExecutable());
+    const result = await execute(ffprobeExecutable(), [
+      "-v",
+      "error",
+      "-show_entries",
+      "format=duration",
+      "-of",
+      "csv=p=0",
+      path,
+    ]);
+    return Math.round(Number.parseFloat(result.stdout.trim()) * 1000);
+  },
+): Promise<Issue[]> => {
+  const soundtrack = draft.soundtrack;
+  if (!soundtrack) return [];
+  const issues: Issue[] = [];
+  const entries = [
+    ...(soundtrack.music
+      ? [{ assetId: soundtrack.music.assetId, path: "/soundtrack/music" }]
+      : []),
+    ...soundtrack.sfx.map((effect, index) => ({
+      assetId: effect.assetId,
+      path: `/soundtrack/sfx/${index}`,
+    })),
+  ];
+  for (const entry of entries) {
+    const asset = draft.assets[entry.assetId];
+    if (!asset || asset.kind === "png" || asset.kind === "placeholder")
+      continue;
+    let actual: number;
+    try {
+      actual = await probeDuration(join(projectRoot, asset.publicPath));
+    } catch {
+      actual = Number.NaN;
+    }
+    if (!Number.isFinite(actual) || actual <= 0) {
+      issues.push({
+        code: "AUDIO_UNREADABLE",
+        severity: "error",
+        responsible: "user",
+        artifact: "naraframe.json",
+        path: entry.path,
+        message: `Audio ${asset.publicPath} could not be decoded.`,
+        suggestion: "Replace it with a valid audio file and update its hash.",
+      });
+      continue;
+    }
+    const music = soundtrack.music;
+    if (music && entry.path === "/soundtrack/music" && !music.loop) {
+      const playable =
+        actual - Math.round((music.trimStartFrames * 1000) / draft.fps);
+      const videoMs = Math.round((draft.totalFrames * 1000) / draft.fps);
+      if (playable < videoMs - AUDIO_TOLERANCE_MS) {
+        issues.push({
+          code: "MUSIC_SHORTER_THAN_VIDEO",
+          severity: "warning",
+          responsible: "agent",
+          artifact: "naraframe.json",
+          path: entry.path,
+          message: `Music has ${playable} ms after trimming but the video runs ${videoMs} ms, so it ends early.`,
+          suggestion:
+            "Set loop to true, use a longer track, or accept the silence.",
+        });
+      }
+    }
+  }
+  return issues;
+};

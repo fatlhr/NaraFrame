@@ -50,6 +50,9 @@ export interface NarratedOverrides {
   requireSourcing?: boolean;
   scenes?: Scene[];
   blocks?: unknown[];
+  overrides?: Record<string, unknown>;
+  lockedPaths?: string[];
+  overridablePaths?: string[];
   captionStyle?: NonNullable<PlanSource["profile"]["render"]["captions"]>;
   captions?: PlanSource["captions"];
 }
@@ -73,6 +76,7 @@ export const narratedSource = (
         draft: { width: 540, height: 960, fps: 30 },
       },
       safetyMaxDurationMs: 180_000,
+      ...(overrides.overrides ? { overrides: overrides.overrides } : {}),
     },
     profile: {
       schemaVersion: 1,
@@ -91,8 +95,8 @@ export const narratedSource = (
         ...(overrides.requireSourcing ? { requireSourcing: true } : {}),
       },
       duration: { preferredMinMs: 1000, preferredMaxMs: 60_000 },
-      lockedPaths: [],
-      overridablePaths: [],
+      lockedPaths: overrides.lockedPaths ?? [],
+      overridablePaths: overrides.overridablePaths ?? [],
       assets: [],
     },
     scenes: {

@@ -197,6 +197,42 @@ const pathExists = async (filePath: string): Promise<boolean> => {
   }
 };
 
+export interface BuiltProfileLock {
+  lock: ProfileLock;
+  assets: Array<LockedProfileAsset & { sourcePath: string }>;
+}
+
+/** Reads a profile directory and pins it as a lock plus the files it needs copied. */
+export const buildProfileLock = async (
+  profileDirectory: string,
+  profileSource: CreateProjectOptions["profileSource"],
+): Promise<Result<BuiltProfileLock>> => {
+  const directory = resolve(profileDirectory);
+  const source = await readProfileSource(directory);
+  if (!source.ok) return source;
+  const assets = await prepareProfileAssets(directory, source.value.profile);
+  if (!assets.ok) return assets;
+  return {
+    ok: true,
+    value: {
+      lock: {
+        ...source.value.profile,
+        source: {
+          ...profileSource,
+          identity: `${profileSource.identity}@${source.value.profile.version}`,
+        },
+        direction: {
+          text: source.value.direction,
+          sha256: sha256Text(source.value.direction),
+        },
+        assets: assets.value.map(({ sourcePath: _, ...asset }) => asset),
+      },
+      assets: assets.value,
+    },
+    issues: [],
+  };
+};
+
 export const createProject = async (
   options: CreateProjectOptions,
 ): Promise<Result<CreatedProject>> => {
@@ -216,18 +252,14 @@ export const createProject = async (
     };
   }
 
-  const source = await readProfileSource(resolve(options.profileDirectory));
-  if (!source.ok) {
-    return source;
-  }
-
-  const preparedAssets = await prepareProfileAssets(
-    resolve(options.profileDirectory),
-    source.value.profile,
+  const built = await buildProfileLock(
+    options.profileDirectory,
+    options.profileSource,
   );
-  if (!preparedAssets.ok) {
-    return preparedAssets;
+  if (!built.ok) {
+    return built;
   }
+  const preparedAssets = { value: built.value.assets };
 
   const staging = join(
     dirname(destination),
@@ -245,8 +277,8 @@ export const createProject = async (
     id: options.projectId,
     title: options.title,
     profile: {
-      id: source.value.profile.id,
-      version: source.value.profile.version,
+      id: built.value.lock.id,
+      version: built.value.lock.version,
     },
     format: {
       design: { width: 1080, height: 1920, fps: 30 },
@@ -254,18 +286,7 @@ export const createProject = async (
     },
     safetyMaxDurationMs: 180_000,
   };
-  const profileLock: ProfileLock = {
-    ...source.value.profile,
-    source: {
-      ...options.profileSource,
-      identity: `${options.profileSource.identity}@${source.value.profile.version}`,
-    },
-    direction: {
-      text: source.value.direction,
-      sha256: sha256Text(source.value.direction),
-    },
-    assets: preparedAssets.value.map(({ sourcePath: _, ...asset }) => asset),
-  };
+  const profileLock = built.value.lock;
   const scenes: Scenes = { schemaVersion: 1, scenes: [] };
   const manifest: AssetManifest = { schemaVersion: 1, assets: [] };
 

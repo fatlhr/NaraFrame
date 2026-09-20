@@ -11,6 +11,7 @@ export type CommandName =
   | "undo"
   | "render"
   | "cache"
+  | "profile"
   | "unknown";
 
 export type CommandReadiness =

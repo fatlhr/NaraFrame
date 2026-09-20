@@ -691,7 +691,8 @@ const assertCompleteMetadata = (
       draft.totalFrames ||
     (metadata.render as Record<string, unknown>).audio !==
       (draft.narration ? "aac" : "none") ||
-    (metadata.render as Record<string, unknown>).muted !== !draft.narration ||
+    (metadata.render as Record<string, unknown>).muted !==
+      !(draft.narration || draft.soundtrack) ||
     JSON.stringify(metadata.contactSheet) !==
       JSON.stringify(expectedContactSheet) ||
     !Array.isArray(metadata.checkedFrames) ||
@@ -803,7 +804,7 @@ const validateProbe = (
       "preview.mp4 does not match the expected H.264 render signature.",
     );
   }
-  const hasNarration = Boolean(draft.narration);
+  const hasNarration = Boolean(draft.narration || draft.soundtrack);
   if (hasNarration) {
     if (audioStreams.length !== 1 || audioStreams[0]?.codec_name !== "aac") {
       throw new Error(

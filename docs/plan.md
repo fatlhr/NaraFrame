@@ -412,12 +412,12 @@ Cost accounting is the capability nothing comparable offers, so it is a headline
 
 ### M2.2 — Profile apply and visual/audio growth
 
-- [ ] Implement profile inspect/dry-run/apply using the M1 transaction system. Diff render/production/editorial effects and existing overrides; preserve allowed overrides, block unresolved conflicts, never silently reset locked values.
-- [ ] Permit schema-valid apply as needs-production when voice/assets become stale. Final remains blocked until replacements are ready. Undo restores the old profile/media while retaining any incurred cost.
-- [ ] Direct profile editing/clone supports future defaults; project overrides affect the current project. No new profile GUI is needed.
+- [x] Implement profile inspect/dry-run/apply using the M1 transaction system. Diff render/production/editorial effects and existing overrides; preserve allowed overrides, block unresolved conflicts, never silently reset locked values. Evidence: `profile-apply.test.ts`, `profile-command.test.ts`, `project-overrides.test.ts`.
+- [x] Permit schema-valid apply as needs-production when voice/assets become stale. Final remains blocked until replacements are ready. Undo restores the old profile/media while retaining any incurred cost. Evidence: `VOICE_STYLE_MISMATCH` is a draft warning and a production error; `status.needsProduction`; undo test in `profile-apply.test.ts` (cost lives in `production.json`, outside snapshots).
+- [x] Direct profile editing/clone supports future defaults; project overrides affect the current project. No new profile GUI is needed.
 - [ ] Add domain recipes only where a real project has been blocked without one. The earlier map/timeline/stat/list/comparison/diagram checklist is withdrawn as an upfront commitment: each recipe is narrower than the equivalent hand-written component, and building six speculatively spends the milestone on expressive range, which is the dimension this tool does not compete on. The entry requirement is a named project that failed, its failing source, and the check that would have caught it.
 - [ ] Add further motion/transition recipes on the same evidence rule, on top of the M0.10 primitives rather than reimplementing them. Enable SVG/video/additional image/audio/font formats only after their safety/decode tests pass.
-- [ ] Add one optional music track plus SFX, volume/loop/trim/fades/ducking; verify decode, intelligibility, and no timeline-duration changes from transitions.
+- [x] Add one optional music track plus SFX, volume/loop/trim/fades/ducking; verify decode, intelligibility, and no timeline-duration changes from transitions. Progress: schema, compile (fades, ducking windows, scene-anchored SFX), assembly key, renderer mix, decode preflight, masking warning and no-duration-change tests done (`soundtrack.test.ts`, `soundtrack-gain.test.ts`); checked by a real render in `soundtrack-mix.test.ts` (e2e, 214 s): real Kore narration, synthetic bed and effect; ducked music is 0.25x the flat level under speech, both ends fade, the effect lands in its scene, length unchanged. Samples stay outside git, so the test skips where they are absent.
 
 ### M2.3 — Two source projects and one variant
 

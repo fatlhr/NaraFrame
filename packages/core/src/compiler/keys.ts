@@ -166,4 +166,16 @@ export const computeAssemblyKey = (
       : null,
     captions: draft.captions ?? null,
     fonts: draft.fonts,
+    // Absent unless the project has one, so existing builds keep their keys.
+    ...(draft.soundtrack
+      ? {
+          soundtrack: {
+            ...draft.soundtrack,
+            assets: [
+              draft.soundtrack.music?.assetId,
+              ...draft.soundtrack.sfx.map((effect) => effect.assetId),
+            ].map((id) => (id ? (draft.assets[id] ?? null) : null)),
+          },
+        }
+      : {}),
   });

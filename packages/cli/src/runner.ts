@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type Approval,
+  applyProfile,
+  buildProfileLock,
   type CompiledDraft,
   checkProductionReadiness,
   compileDraft,
@@ -14,6 +16,8 @@ import {
   type Issue,
   type LoadedPlanProject,
   loadPlanProject,
+  pendingGeneration,
+  planProfileApply,
   readApprovals,
   readProductionLedger,
   readRevisionState,
@@ -36,6 +40,7 @@ import {
 import { runDoctorChecks } from "./doctor.js";
 import {
   preflightNarrationAudio,
+  preflightSoundtrackAudio,
   publishFinalBuild,
   readCurrentOutput,
 } from "./final-build.js";
@@ -75,6 +80,8 @@ Usage:
   naraframe validate [project] --stage plan|production [--scene <scene-id>] [--json]
   naraframe status [project] [--json]
   naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--json]
+  naraframe profile inspect <id-or-path> [--json]
+  naraframe profile apply <id-or-path> [project] [--dry-run] [--reset-overrides] [--json]
   naraframe cache clean [project] [--dry-run] [--json]`;
 
 const repositoryRoot = resolve(
@@ -240,6 +247,30 @@ const schemaCommand = async (args: readonly string[]): Promise<Execution> => {
     event: commonEvent("schema", { data: { schemas } }),
     humanJson: schemas,
   };
+};
+
+const resolveProfileArgument = (
+  argument: string,
+): {
+  directory: string;
+  source: { kind: "repository" | "local"; identity: string };
+} => {
+  const isLocal =
+    argument.startsWith(".") ||
+    argument.startsWith("/") ||
+    argument.includes("/");
+  return isLocal
+    ? {
+        directory: resolve(argument),
+        source: {
+          kind: "local",
+          identity: argument.split(/[\\/]/).at(-1) ?? argument,
+        },
+      }
+    : {
+        directory: resolve(repositoryRoot, "profiles", argument),
+        source: { kind: "repository", identity: `profiles/${argument}` },
+      };
 };
 
 const createCommand = async (args: readonly string[]): Promise<Execution> => {
@@ -495,6 +526,7 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
             }
           : { buildId: null, state: "none" },
         approval: approvals.at(-1) ?? null,
+        needsProduction: pendingGeneration(loaded.value.source),
         revision: {
           ...revision,
           reuse: reuse?.ok ? reuse.value : null,
@@ -812,6 +844,7 @@ const runProductionChecks = async (
     ...checkProductionReadiness(loaded.source, final.value, final.issues),
   );
   issues.push(...(await preflightNarrationAudio(loaded.root, final.value)));
+  issues.push(...(await preflightSoundtrackAudio(loaded.root, final.value)));
   const ok = !issues.some((issue) => issue.severity === "error");
   return { ok, issues, draft: draft.value, final: final.value };
 };
@@ -838,6 +871,7 @@ const runPreviewProductionChecks = async (
     }),
   );
   issues.push(...(await preflightNarrationAudio(loaded.root, draft.value)));
+  issues.push(...(await preflightSoundtrackAudio(loaded.root, draft.value)));
   const ok = !issues.some((issue) => issue.severity === "error");
   return { ok, issues, draft: draft.value };
 };
@@ -1057,6 +1091,131 @@ const renderCommand = async (
   };
 };
 
+const profileCommand = async (args: readonly string[]): Promise<Execution> => {
+  const [subcommand, ...rest] = args;
+  const parsed = parseArguments(rest, ["--dry-run", "--reset-overrides"], []);
+  const usageText =
+    "profile supports: profile inspect <id-or-path> | profile apply <id-or-path> [project] [--dry-run] [--reset-overrides].";
+  if (
+    parsed.error ||
+    (subcommand !== "inspect" && subcommand !== "apply") ||
+    parsed.positionals.length < 1 ||
+    parsed.positionals.length > (subcommand === "apply" ? 2 : 1) ||
+    (subcommand === "inspect" && parsed.flags.size > 0)
+  ) {
+    return usageFailure("profile", parsed.error ?? usageText);
+  }
+  const target = resolveProfileArgument(parsed.positionals[0] ?? "");
+  const failed = (issues: Issue[]): Execution => ({
+    exitCode: 1,
+    event: commonEvent("profile", {
+      status: "failed",
+      success: false,
+      readiness: "not-applicable",
+      issues,
+    }),
+  });
+
+  if (subcommand === "inspect") {
+    const built = await buildProfileLock(target.directory, target.source);
+    if (!built.ok) return failed(built.issues);
+    const lock = built.value.lock;
+    const summary = {
+      id: lock.id,
+      version: lock.version,
+      directionSha256: lock.direction.sha256,
+      voiceStyleSignature: lock.production.voiceStyleSignature,
+      illustrationStyleSignature: lock.production.illustrationStyleSignature,
+      duration: lock.duration,
+      lockedPaths: lock.lockedPaths,
+      overridablePaths: lock.overridablePaths,
+      assets: lock.assets.map((asset) => ({
+        id: asset.id,
+        kind: asset.kind,
+        sha256: asset.sha256,
+      })),
+    };
+    return {
+      exitCode: 0,
+      event: commonEvent("profile", {
+        data: { action: "inspect", profile: summary },
+      }),
+      human: [
+        `${lock.id}@${lock.version}`,
+        `Voice: ${summary.voiceStyleSignature}`,
+        `Locked: ${lock.lockedPaths.join(", ") || "none"}`,
+        `Overridable: ${lock.overridablePaths.join(", ") || "none"}`,
+        `Assets: ${lock.assets.length}`,
+      ],
+    };
+  }
+
+  const root = resolve(parsed.positionals[1] ?? ".");
+  const options = {
+    root,
+    profileDirectory: target.directory,
+    profileSource: target.source,
+    resetConflicts: parsed.flags.has("--reset-overrides"),
+  };
+  const dryRun = parsed.flags.has("--dry-run");
+  const planned = await planProfileApply(options);
+  if (!planned.ok) return failed(planned.issues);
+  const plan = planned.value;
+  const summaryLines = [
+    `${plan.from.id}@${plan.from.version} -> ${plan.to.id}@${plan.to.version}`,
+    `Changes: ${plan.changes.length}; effects: ${plan.effects.join(", ") || "none"}`,
+    ...(plan.preservedOverrides.length
+      ? [`Kept overrides: ${plan.preservedOverrides.join(", ")}`]
+      : []),
+    ...plan.conflicts.map(
+      (conflict) =>
+        `Conflicting override: ${conflict.path} (${conflict.reason})`,
+    ),
+  ];
+  if (dryRun || plan.blocked) {
+    return {
+      exitCode: plan.blocked && !dryRun ? 1 : 0,
+      event: commonEvent("profile", {
+        status: plan.blocked && !dryRun ? "failed" : "completed",
+        success: !(plan.blocked && !dryRun),
+        issues: planned.issues,
+        data: { action: "apply", dryRun, applied: false, plan },
+      }),
+      human: [
+        ...summaryLines,
+        dryRun ? "Dry run: nothing changed." : "Blocked: nothing changed.",
+      ],
+    };
+  }
+  const applied = await applyProfile(options);
+  if (!applied.ok) return failed(applied.issues);
+  return {
+    exitCode: 0,
+    event: commonEvent("profile", {
+      sourceRevision: applied.value.edit.revisionId,
+      issues: applied.issues,
+      data: {
+        action: "apply",
+        dryRun: false,
+        applied: true,
+        plan: applied.value.plan,
+        revision: applied.value.edit.revisionId,
+        parentRevision: applied.value.edit.parentId,
+      },
+    }),
+    human: [
+      ...summaryLines,
+      `Revision ${applied.value.edit.revisionId.slice(0, 12)} (undo restores the previous profile).`,
+      ...(plan.effects.includes("regenerate-narration") ||
+      plan.effects.includes("replace-assets")
+        ? [
+            "Some voice or images are now stale: final export waits for replacements (see status needsProduction).",
+          ]
+        : []),
+    ],
+  };
+};
+
 const cacheCommand = async (args: readonly string[]): Promise<Execution> => {
   const [subcommand, ...rest] = args;
   const parsed = parseArguments(rest, ["--dry-run"], []);
@@ -1105,7 +1264,8 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "edit" ||
   value === "undo" ||
   value === "render" ||
-  value === "cache"
+  value === "cache" ||
+  value === "profile"
     ? value
     : "unknown";
 
@@ -1124,6 +1284,7 @@ const executeCommand = async (
   if (command === "undo") return undoCommand(args);
   if (command === "render") return renderCommand(args, options);
   if (command === "cache") return cacheCommand(args);
+  if (command === "profile") return profileCommand(args);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 

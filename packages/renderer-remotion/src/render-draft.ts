@@ -167,7 +167,9 @@ export const renderDraft = async ({
   const cancellation = makeCancelSignal();
   const onAbort = () => cancellation.cancel();
   signal?.addEventListener("abort", onAbort, { once: true });
-  const hasNarration = Boolean(preflight.draft.narration);
+  const hasNarration = Boolean(
+    preflight.draft.narration || preflight.draft.soundtrack,
+  );
   try {
     await renderMedia({
       serveUrl,

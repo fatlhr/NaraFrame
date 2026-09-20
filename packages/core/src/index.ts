@@ -44,6 +44,10 @@ export {
   type SceneNarrationRef,
 } from "./compiler/scene-partition.js";
 export {
+  compileSoundtrack,
+  MASKING_LIMIT,
+} from "./compiler/soundtrack.js";
+export {
   checkVoiceBindings,
   narrationTextHash,
 } from "./compiler/voice-binding.js";
@@ -106,6 +110,18 @@ export type {
   TtsSynthesisResult,
 } from "./production/tts-provider.js";
 export {
+  applyProfile,
+  type OverrideConflict,
+  type ProfileApplyOptions,
+  type ProfileApplyPlan,
+  type ProfileApplyResult,
+  type ProfileChange,
+  type ProfileEffect,
+  planProfileApply,
+} from "./profile/apply.js";
+export {
+  type BuiltProfileLock,
+  buildProfileLock,
   type CreatedProject,
   type CreateProjectOptions,
   createProject,
@@ -226,5 +242,10 @@ export {
   TransitionSchema,
   TypographyRoleSchema,
 } from "./schema/scene.js";
+export {
+  type MusicTrack,
+  type Soundtrack,
+  SoundtrackSchema,
+} from "./schema/soundtrack.js";
 export type { Source } from "./schema/source.js";
 export { SourceSchema } from "./schema/source.js";

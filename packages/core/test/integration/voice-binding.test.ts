@@ -87,7 +87,7 @@ describe("checkVoiceBindings", () => {
     );
   });
 
-  it("errors when the clip's voice style differs from the profile's", () => {
+  it("warns when the clip's voice style differs from the profile's (production escalates it)", () => {
     const source = bind(bothBound(), "voice-context", {
       textSha256: narrationTextHash(CONTEXT_TEXT),
       voiceStyleSignature: "some-other-voice",
@@ -96,6 +96,7 @@ describe("checkVoiceBindings", () => {
     expect(issues).toContainEqual(
       expect.objectContaining({
         code: "VOICE_STYLE_MISMATCH",
+        severity: "warning",
         entityId: "context",
       }),
     );

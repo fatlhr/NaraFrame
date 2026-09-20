@@ -77,11 +77,11 @@ export const checkVoiceBindings = (source: PlanSource): Issue[] => {
       issues.push(
         bindingIssue(
           "VOICE_STYLE_MISMATCH",
-          "error",
+          "warning",
           index,
           block.id,
           `Audio asset ${asset.id} was generated with voice style "${signature}", but the profile now uses "${source.profile.production.voiceStyleSignature}".`,
-          "Regenerate the block with the profile's voice style, or update the profile deliberately.",
+          "Regenerate the block with the profile's voice style before final export, or update the profile deliberately.",
         ),
       );
     }

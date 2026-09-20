@@ -161,9 +161,19 @@ export const checkProductionReadiness = (
   }
 
   for (const issue of compileIssues) {
-    if (issue.code !== "VOICE_BINDING_MISSING") continue;
+    if (
+      issue.code !== "VOICE_BINDING_MISSING" &&
+      issue.code !== "VOICE_STYLE_MISMATCH"
+    )
+      continue;
     const inScope = !closure || issue.entityId === closure.blockId;
     issues.push({ ...issue, severity: inScope ? "error" : "info" });
+  }
+
+  for (const issue of compileIssues) {
+    if (issue.code === "SOUNDTRACK_ASSET_PLANNED") {
+      issues.push({ ...issue, severity: "error" });
+    }
   }
 
   if (closure) issues.push(...outOfScopeGaps(source, closure.sceneId));

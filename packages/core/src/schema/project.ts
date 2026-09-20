@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { IdSchema, SchemaVersionSchema, VersionSchema } from "./primitives.js";
+import {
+  ConfigPathSchema,
+  IdSchema,
+  SchemaVersionSchema,
+  VersionSchema,
+} from "./primitives.js";
+import { SoundtrackSchema } from "./soundtrack.js";
 
 const DesignFormatSchema = z
   .object({
@@ -27,6 +33,13 @@ export const ProjectConfigSchema = z
       .object({ design: DesignFormatSchema, draft: DraftFormatSchema })
       .strict(),
     safetyMaxDurationMs: z.literal(180_000),
+    /**
+     * Explicit project overrides of profile settings, by dotted config path.
+     * Only paths the profile declares overridable are accepted.
+     */
+    overrides: z.record(ConfigPathSchema, z.unknown()).optional(),
+    /** One optional music bed plus scene-anchored effects; never changes the timeline. */
+    soundtrack: SoundtrackSchema.optional(),
   })
   .strict();
 

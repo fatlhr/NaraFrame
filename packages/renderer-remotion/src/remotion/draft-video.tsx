@@ -15,6 +15,7 @@ import {
   motionStyleFor,
   sceneTransitionStateFor,
 } from "./motion.js";
+import { musicGainAt } from "./soundtrack-gain.js";
 import { fontFamilyForRole } from "./typography.js";
 
 const rgba = (hex: string, opacity: number): string => {
@@ -396,6 +397,44 @@ const TransitionFrame = ({
   );
 };
 
+const SoundtrackLayer = ({ draft }: { draft: CompiledDraft }) => {
+  const soundtrack = draft.soundtrack;
+  if (!soundtrack) return null;
+  const source = (assetId: string): string | null => {
+    const asset = draft.assets[assetId];
+    return !asset || asset.kind === "png" || asset.kind === "placeholder"
+      ? null
+      : staticFile(asset.publicPath);
+  };
+  const music = soundtrack.music;
+  const musicSource = music ? source(music.assetId) : null;
+  return (
+    <>
+      {music && musicSource ? (
+        <Audio
+          src={musicSource}
+          startFrom={music.trimStartFrames}
+          loop={music.loop}
+          volume={(frame) => musicGainAt(music, frame, draft.totalFrames)}
+        />
+      ) : null}
+      {soundtrack.sfx.map((effect) => {
+        const src = source(effect.assetId);
+        if (!src) return null;
+        return (
+          <Sequence
+            key={effect.id}
+            from={effect.startFrame}
+            name={`sfx-${effect.id}`}
+          >
+            <Audio src={src} volume={effect.volume} />
+          </Sequence>
+        );
+      })}
+    </>
+  );
+};
+
 const CaptionLayer = ({ draft }: { draft: CompiledDraft }) => {
   const captions = draft.captions;
   if (!captions) return null;
@@ -482,6 +521,7 @@ export const DraftVideo = (draft: CompiledDraft) => (
         </Sequence>
       );
     })}
+    <SoundtrackLayer draft={draft} />
     {draft.mode === "draft" && (
       <div
         style={{

@@ -23,6 +23,7 @@ import {
   compileSceneNarration,
   type ScopedNarration,
 } from "./scoped-narration.js";
+import { compileSoundtrack } from "./soundtrack.js";
 import { checkVariety, type VarietyScene } from "./variety.js";
 import { checkVoiceBindings } from "./voice-binding.js";
 
@@ -1021,6 +1022,22 @@ export const compileDraft = (
     narrationTimeline?.totalDurationMs !== null
       ? Math.ceil(((narrationTimeline?.totalDurationMs ?? 0) * fps) / 1000)
       : renderCursor;
+  const soundtrack = compileSoundtrack({
+    project: source.project,
+    assets: source.assets,
+    fps,
+    totalFrames,
+    sceneStarts: new Map(scenes.map((scene) => [scene.id, scene.startFrame])),
+    narrationWindows: (narrationClips?.clips ?? []).map((clip) => ({
+      startFrame: clip.startFrame,
+      endFrame: clip.startFrame + clip.durationInFrames,
+    })),
+    includeMusic: requestedScope.type === "project",
+  });
+  issues.push(...soundtrack.issues);
+  if (soundtrack.issues.some((entry) => entry.severity === "error")) {
+    return { ok: false, issues: sortIssues(issues) };
+  }
   const draftCandidate = {
     schemaVersion: 1 as const,
     mode,
@@ -1036,7 +1053,7 @@ export const compileDraft = (
     label:
       mode === "final"
         ? ("FINAL" as const)
-        : narrationClips?.clips.length
+        : narrationClips?.clips.length || soundtrack.value
           ? ("DRAFT • WITH AUDIO" as const)
           : ("DRAFT • NO AUDIO" as const),
     sourceRevision,
@@ -1050,6 +1067,7 @@ export const compileDraft = (
     scenes,
     ...(narrationClips ? { narration: narrationClips } : {}),
     ...(compiledCaptions ? { captions: compiledCaptions } : {}),
+    ...(soundtrack.value ? { soundtrack: soundtrack.value } : {}),
   };
   const draftWithKey = {
     ...draftCandidate,
