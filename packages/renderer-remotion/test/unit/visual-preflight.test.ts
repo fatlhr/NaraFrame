@@ -818,7 +818,7 @@ describe("M2.4.3 preflight", () => {
     expect(report.issues.map((i) => i.code)).toContain("PATH_INVALID");
   });
 
-  it("measures a counted layer at the widest value it shows", () => {
+  it("measures a counted layer at each count's start and end values", () => {
     // "9" fits in one line; "1.000.000" at the same size does not.
     const layer = text({
       id: "figure",

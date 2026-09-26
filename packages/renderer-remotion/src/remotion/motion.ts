@@ -127,7 +127,11 @@ export const countedTextFor = (
   return formatCount(value, format);
 };
 
-/** Every string a counted layer can show at its widest, for measurement. */
+/**
+ * The start and end text of every count beat on a layer, for measurement.
+ * Intermediate values are not listed: a count whose middle values are wider
+ * than both its endpoints is not caught.
+ */
 export const countedTextVariants = (scene: Scene, layerId: string): string[] =>
   scene.beats.flatMap((beat) =>
     beat.action === "count" && beat.targetId === layerId

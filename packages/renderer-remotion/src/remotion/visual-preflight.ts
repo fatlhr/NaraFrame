@@ -719,9 +719,8 @@ export const resolveVisualPreflight = (
         return;
       }
 
-      // A counted layer is measured at every value it can show at its
-      // widest, not only the settled text, so a count cannot overflow
-      // mid-window unnoticed.
+      // A counted layer is measured at each count's start and end text as
+      // well as its settled text. Intermediate values are not measured.
       const settled = fitText(draft, layer);
       const metrics =
         countedTextVariants(scene, layer.id)
