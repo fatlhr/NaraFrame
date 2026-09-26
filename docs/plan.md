@@ -453,8 +453,8 @@ No source `examples/` directory is needed.
 
 | Task | Expected inspectable output | Status |
 |---|---|---|
-| M2.4.1 | Font/SVG recovery; matched frame and 2–3s motion study; reference-fidelity 6–10s Medan opening | READY_FOR_REVIEW — opening owner-approved 2026-09-21 (build `536f182ba54b-d7c57043-698`); supervisor CHANGES_REQUESTED 2026-09-26 (exit overlap validation), fix implemented; not integrated |
-| M2.4.2 | Distinct 6–10s LBC opening on frozen engine/skill; headline/camera edit and undo | Held until M2.4.1 acceptance/integration |
+| M2.4.1 | Font/SVG recovery; matched frame and 2–3s motion study; reference-fidelity 6–10s Medan opening | INTEGRATED — opening owner-approved 2026-09-21 (build `536f182ba54b-d7c57043-698`); exit overlap fix after supervisor review; verify + E2E passed on the final candidate; squash-merged via PR #12 (2026-09-26) |
+| M2.4.2 | Distinct 6–10s LBC opening on frozen engine/skill; headline/camera edit and undo | Not started — unblocked by M2.4.1 integration; starts from updated `main` |
 | M2.4.3 | River-history framing, shipping route, moving ships and population/data explanation | Held until early LBC transfer passes |
 | M2.4.4 | Approximately 67.5s Medan, full reference comparison and approved export | Held until story features pass |
 | M2.4.5 | Distinct 30s LBC first full draft, four ordinary revisions and close-out | Held until full Medan gate passes |
@@ -561,7 +561,7 @@ Update the owning checklist only with command/artifact evidence and the required
 
 **`pnpm test:e2e`: passed.** 6 files / **9 tests**, 654.7 s, run serially on its own, exit 0. Includes font readiness in the frame render context (valid and broken face), reference projects, scoped preview reuse, owner flow and soundtrack mix, all under `naraframe-draft/8`.
 
-**Integration.** Committed with explicit paths, pushed, and opened a PR against `main`; squash-merged after the gates above. No agent or tool identity in commit or PR metadata, per AGENTS.md. The PR number is recorded in the tracker row. Generated preview/output under `work/` is git-ignored and not part of the change.
+**Integration.** Committed with explicit paths, pushed, and opened a PR against `main`; squash-merged after the gates above. No agent or tool identity in commit or PR metadata, per AGENTS.md. PR #12, https://github.com/fatlhr/NaraFrame/pull/12. Generated preview/output under `work/` is git-ignored and not part of the change.
 
 
 ##### Exit overlap-validation fix — 2026-09-26
