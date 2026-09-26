@@ -139,7 +139,7 @@ const spanStyleFor = (
   return {};
 };
 
-const LayerView = ({
+export const LayerView = ({
   draft,
   layer,
   localFrame,
@@ -194,8 +194,12 @@ const LayerView = ({
           overflow: "hidden",
         }}
       >
-        {layer.spans
-          ? layer.spans.map((span, index) => (
+        {layer.spans ? (
+          // One wrapper, so the column box has a single child and the runs
+          // flow and wrap as one line of text — the layout preflight measures.
+          // Spans placed directly in the column became one line each.
+          <div>
+            {layer.spans.map((span, index) => (
               <span
                 // biome-ignore lint/suspicious/noArrayIndexKey: runs are positional
                 key={`${layer.id}-span-${index}`}
@@ -208,8 +212,11 @@ const LayerView = ({
               >
                 {span.text}
               </span>
-            ))
-          : layer.text}
+            ))}
+          </div>
+        ) : (
+          layer.text
+        )}
       </div>
     );
   }
