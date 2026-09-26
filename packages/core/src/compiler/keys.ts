@@ -13,7 +13,8 @@ import { narrationTextHash } from "./voice-binding.js";
 // 7: positive depth zoom and camera-aware required-text preflight.
 // 8: the exit beat fades elements out, so a held pose is no longer the
 //    last frame of a shot that used to keep everything on screen.
-export const RENDER_ENGINE = "naraframe-draft/8";
+// 9: headline spans flow inline in one text box instead of one line per run.
+export const RENDER_ENGINE = "naraframe-draft/9";
 
 /**
  * Finds a retained voice clip for a block: the spoken text (whitespace

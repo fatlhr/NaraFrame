@@ -576,6 +576,16 @@ The frozen skill procedure was followed in order: `doctor`, `schema` (camera mov
 
 **Follow-up, separate small task (not part of M2.4.2).** Fix the rich-text defect before `spans` are used again: render a headline's spans as inline runs within one text flow instead of stacked flex items, keep preflight measuring the same layout as rendering, add a regression with a trailing run (for example a final "."), and bump `RENDER_ENGINE` because pixels change. Until then, authors should keep an accented word as its own text layer coloured with a `palette.*` token, as the trial did.
 
+**Follow-up done — rich-text span fix, 2026-09-26** (branch `fix-inline-headline-spans`, separate from the M2.4.2 trial).
+
+- *Reproduced on the real render path first.* Throwaway project `work/visual-parity/span-probe` renders "Progres anak kelihatan." twice: with spans (runs `"Progres anak "`, accented `"kelihatan"`, `"."`) and as plain text. On `naraframe-draft/8`, build `dcaa10655fb4-29179687-8a6`, the span version lost its final "." while the plain version kept it, and preflight reported nothing.
+- *Fix.* `LayerView` in `draft-video.tsx` now wraps the runs in one element, so the column text box has a single child and the runs flow and wrap as one line of text, which is the layout preflight already measured. The no-spans path is unchanged. `LayerView` is exported as a test seam; no other runtime change. `RENDER_ENGINE` moves to `naraframe-draft/9` because pixels change.
+- *Proof after the fix.* The same probe renders fresh as build `1190b21796b5-891a5531-698` (`reusedFromBuildId: null`): "kelihatan." keeps its period, the unstyled "." sits directly after the gold word on the same line, and both versions wrap identically.
+- *Regression.* `packages/renderer-remotion/test/unit/text-spans-render.test.ts` renders `LayerView` with `react-dom/server` (already a renderer dependency, nothing installed) and checks the markup: one wrapper holding all three runs, the accent colour only on its own word, the trailing "." present as an unstyled run, and plain text unchanged. With the wrapper temporarily replaced by a fragment, the structural case fails (1 failed / 2 passed); restored, all pass.
+- *The M2.4.2 trial is untouched.* Its project, first draft and revisions stay on `naraframe-draft/8` as recorded; nothing under `work/visual-parity/lbc*` was rendered or edited for this fix, and the retained MP4 checksums are unchanged.
+- *Gates.* `pnpm verify`: 25 unit files / **217 tests**, 29 integration files / **240 tests**, clean. Serial `pnpm test:e2e`: 6 files / **9 tests**, 645.7 s, exit 0. Integrated through a PR squash-merged into `main` under the owner's order (fix → real render → regression → integration), no agent identity in Git metadata.
+
+
 
 #### Handoff record — M2.4.1 (integrated)
 
