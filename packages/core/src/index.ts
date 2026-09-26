@@ -59,6 +59,7 @@ export {
   checkVoiceBindings,
   narrationTextHash,
 } from "./compiler/voice-binding.js";
+export { type CountFormat, formatCount } from "./count-format.js";
 export {
   type LoadedPlanProject,
   loadPlanProject,

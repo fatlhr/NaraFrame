@@ -1,3 +1,4 @@
+import { formatCount } from "../count-format.js";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
 import { hashValue } from "../project/hash.js";
 import type { CompiledAsset, CompiledDraft } from "../schema/compiled.js";
@@ -17,7 +18,11 @@ import { checkContrast } from "./contrast.js";
 import { computeAssemblyKey } from "./keys.js";
 import { resolveNarrationTimeline } from "./narration-timeline.js";
 import { checkSourceProvenance } from "./provenance.js";
-import { partitionScenes, type SceneNarrationRef } from "./scene-partition.js";
+import {
+  partitionScenes,
+  type SceneNarrationRef,
+  sceneLocalRange,
+} from "./scene-partition.js";
 import {
   captionStyleFor,
   compileSceneNarration,
@@ -189,6 +194,14 @@ const scaleLayer = (layer: Layer, scaleX: number, scaleY: number): Layer => {
         x: layer.transform.x * scaleX,
         y: layer.transform.y * scaleY,
       },
+      ...(layer.billboard
+        ? {
+            billboard: {
+              x: layer.billboard.x * scaleX,
+              y: layer.billboard.y * scaleY,
+            },
+          }
+        : {}),
     };
   }
 
@@ -204,6 +217,12 @@ const scaleLayer = (layer: Layer, scaleX: number, scaleY: number): Layer => {
         ? { padding: scaleInsets(layer.padding, scaleX, scaleY) }
         : {}),
     };
+  }
+
+  if (layer.type === "path") {
+    // Stroke width and dashes are viewBox units; the viewBox is laid onto the
+    // scaled frame, so they scale with it and need no conversion here.
+    return { ...layer, frame: scaleFrame(layer.frame, scaleX, scaleY) };
   }
 
   return {
@@ -287,6 +306,17 @@ const resolveLayerAppearance = (layer: Layer, render: RenderTokens): Layer => {
         layer.shape === "circle"
           ? Math.min(layer.frame.width, layer.frame.height) / 2
           : (layer.cornerRadius ?? render.appearance?.radius.medium ?? 44),
+    };
+  }
+
+  if (layer.type === "path") {
+    return {
+      ...layer,
+      stroke: {
+        ...layer.stroke,
+        color: resolveColor(layer.stroke.color, render) ?? layer.stroke.color,
+      },
+      ...(layer.fill ? { fill: resolveColor(layer.fill, render) } : {}),
     };
   }
 
@@ -509,6 +539,17 @@ const scaleBeat = (
     };
   }
 
+  // Draw and follow fractions and counted values carry no geometry.
+  if (beat.action === "draw") {
+    return { ...common, action: beat.action, params: beat.params };
+  }
+  if (beat.action === "follow") {
+    return { ...common, action: beat.action, params: beat.params };
+  }
+  if (beat.action === "count") {
+    return { ...common, action: beat.action, params: beat.params };
+  }
+
   return { ...common, action: beat.action, params: beat.params };
 };
 
@@ -602,9 +643,12 @@ const validateLayerFrames = (
     if (!frame) return;
     const right = frame.x + frame.width;
     const bottom = frame.y + frame.height;
-    const isWorldScenery =
-      layer.type !== "text" &&
-      (layer.space === "world" || worldMemberIds.has(layer.id));
+    const inWorld = layer.space === "world" || worldMemberIds.has(layer.id);
+    // World scenery may extend past the canvas. World text may too when a
+    // camera frames the scene: its screen position is the camera's, and the
+    // renderer's preflight checks required text on screen frame by frame.
+    const cameraFramed = inWorld && scene.camera !== undefined;
+    const isWorldScenery = inWorld && (layer.type !== "text" || cameraFramed);
     if (
       !isWorldScenery &&
       (frame.x < 0 || frame.y < 0 || right > width || bottom > height)
@@ -622,6 +666,7 @@ const validateLayerFrames = (
 
     if (
       layer.type === "text" &&
+      !cameraFramed &&
       (frame.x < safeZone.left ||
         frame.y < safeZone.top ||
         right > width - safeZone.right ||
@@ -642,10 +687,24 @@ const validateLayerFrames = (
   return issues;
 };
 
-type MotionProperty = "opacity" | "x" | "y" | "scale" | "rotationDeg";
+type MotionProperty =
+  | "opacity"
+  | "x"
+  | "y"
+  | "scale"
+  | "rotationDeg"
+  | "draw"
+  | "text";
 
 const beatProperties = (beat: Beat): MotionProperty[] => {
+  if (beat.action === "draw") return ["draw"];
+  if (beat.action === "count") return ["text"];
+  if (beat.action === "follow") {
+    return beat.params.orient ? ["x", "y", "rotationDeg"] : ["x", "y"];
+  }
   if (beat.action === "reveal") {
+    // Like an exit, a reveal writes an axis only when it travels.
+    if (!beat.params.distance) return ["opacity"];
     return [
       "opacity",
       beat.params.direction === "left" || beat.params.direction === "right"
@@ -671,11 +730,229 @@ const beatProperties = (beat: Beat): MotionProperty[] => {
   return Object.keys(beat.params.to) as MotionProperty[];
 };
 
+/** Where each beat and camera move starts, after phrase anchors resolve. */
+interface ResolvedStarts {
+  beats: number[];
+  moves: number[];
+}
+
+/**
+ * Resolves phrase-anchored beats and camera moves against the scene's own
+ * measured narration. Without audio for the scene's block (a silent draft, or
+ * a block still planned) every motion keeps its authored `startMs`.
+ */
+const resolveAnchoredStarts = (
+  source: PlanSource,
+  scene: Scene,
+  sceneIndex: number,
+): ResolvedStarts & { issues: Issue[] } => {
+  const issues: Issue[] = [];
+  const authored: ResolvedStarts = {
+    beats: scene.beats.map((beat) => beat.startMs),
+    moves: scene.camera?.moves.map((move) => move.startMs) ?? [],
+  };
+  const anchored =
+    scene.beats.some((beat) => beat.at) ||
+    (scene.camera?.moves.some((move) => move.at) ?? false);
+  if (!anchored || !source.narration || !scene.narration) {
+    return { ...authored, issues };
+  }
+  const refs: SceneNarrationRef[] = source.scenes.scenes.flatMap((candidate) =>
+    candidate.narration
+      ? [
+          {
+            sceneId: candidate.id,
+            blockId: candidate.narration.blockId,
+            ...(candidate.narration.phraseId
+              ? { phraseId: candidate.narration.phraseId }
+              : {}),
+          },
+        ]
+      : [],
+  );
+  const range = sceneLocalRange(source.narration, refs, scene.id);
+  if (!range.ok) return { ...authored, issues };
+  const block = source.narration.blocks.find(
+    (candidate) => candidate.id === range.value.blockId,
+  );
+  const phrases = block && "phrases" in block ? block.phrases : [];
+  const resolve = (
+    at: { phraseId: string; offsetMs?: number | undefined } | undefined,
+    startMs: number,
+    path: string,
+    label: string,
+  ): number => {
+    if (!at) return startMs;
+    const phrase = phrases.find((candidate) => candidate.id === at.phraseId);
+    if (!phrase) {
+      issues.push(
+        compileIssue(
+          "BEAT_PHRASE_UNKNOWN",
+          `${path}/at/phraseId`,
+          `${label} is anchored to phrase ${at.phraseId}, which block ${range.value.blockId} does not have.`,
+          "error",
+          "Anchor it to a measured phrase of the scene's own block.",
+        ),
+      );
+      return startMs;
+    }
+    const resolved =
+      phrase.startMs + (at.offsetMs ?? 0) - range.value.localStartMs;
+    if (
+      phrase.startMs < range.value.localStartMs ||
+      phrase.startMs >= range.value.localEndMs ||
+      resolved < 0
+    ) {
+      issues.push(
+        compileIssue(
+          "BEAT_PHRASE_OUTSIDE_SCENE",
+          `${path}/at`,
+          `${label} is anchored to phrase ${at.phraseId}, which does not start a moment inside scene ${scene.id}.`,
+          "error",
+          "Anchor it to a phrase the scene covers, or change the offset.",
+        ),
+      );
+      return startMs;
+    }
+    return resolved;
+  };
+  return {
+    beats: scene.beats.map((beat, beatIndex) =>
+      resolve(
+        beat.at,
+        beat.startMs,
+        `/scenes/${sceneIndex}/beats/${beatIndex}`,
+        `Beat ${beat.id}`,
+      ),
+    ),
+    moves:
+      scene.camera?.moves.map((move, moveIndex) =>
+        resolve(
+          move.at,
+          move.startMs,
+          `/scenes/${sceneIndex}/camera/moves/${moveIndex}`,
+          `Camera move ${move.id}`,
+        ),
+      ) ?? [],
+    issues,
+  };
+};
+
+/**
+ * Static checks a draw, follow or count beat needs beyond its schema: a path
+ * laid onto its frame without distortion, a followed path that does not move
+ * away from its follower, and a counted layer whose text is the settled value.
+ * Settling is judged in the order the renderer plays the beats, after phrase
+ * anchors resolve, so a retimed count cannot leave stale text behind.
+ */
+const validatePathsAndCounts = (
+  scene: Scene,
+  sceneIndex: number,
+  fps: number,
+  starts: ResolvedStarts,
+): Issue[] => {
+  if (scene.visual.type !== "composition") return [];
+  const issues: Issue[] = [];
+  const layers = scene.visual.layers;
+  layers.forEach((layer, layerIndex) => {
+    if (layer.type !== "path") return;
+    const scaleX = layer.frame.width / layer.viewBox.width;
+    const scaleY = layer.frame.height / layer.viewBox.height;
+    if (Math.abs(scaleX - scaleY) / Math.max(scaleX, scaleY) > 0.01) {
+      issues.push(
+        compileIssue(
+          "PATH_VIEWBOX_ASPECT",
+          `/scenes/${sceneIndex}/visual/layers/${layerIndex}/frame`,
+          `Path ${layer.id}'s frame and viewBox have different aspect ratios, so its stroke would be distorted.`,
+          "error",
+          "Give the frame the viewBox's aspect ratio.",
+        ),
+      );
+    }
+  });
+  const counts = scene.beats
+    .map((beat, beatIndex) => ({ beat, beatIndex }))
+    .filter(
+      (
+        entry,
+      ): entry is {
+        beat: Extract<Beat, { action: "count" }>;
+        beatIndex: number;
+      } => entry.beat.action === "count",
+    );
+  // The renderer plays counts by start frame, a tie going to the later beat.
+  const startFrameOf = (beatIndex: number): number =>
+    msToFrameOffset(
+      starts.beats[beatIndex] ?? scene.beats[beatIndex]?.startMs ?? 0,
+      fps,
+    );
+  const lastCount = new Map<string, (typeof counts)[number]>();
+  for (const entry of counts) {
+    const previous = lastCount.get(entry.beat.targetId);
+    if (
+      !previous ||
+      startFrameOf(previous.beatIndex) <= startFrameOf(entry.beatIndex)
+    ) {
+      lastCount.set(entry.beat.targetId, entry);
+    }
+  }
+  for (const { beat, beatIndex } of lastCount.values()) {
+    const layer = layers.find((candidate) => candidate.id === beat.targetId);
+    if (layer?.type !== "text") continue;
+    const settled = formatCount(beat.params.to, beat.params);
+    if (layer.text !== settled) {
+      issues.push(
+        compileIssue(
+          "COUNT_TEXT_MISMATCH",
+          `/scenes/${sceneIndex}/beats/${beatIndex}/params/to`,
+          `Text layer ${layer.id} reads "${layer.text}" but its count settles on "${settled}".`,
+          "error",
+          "Set the layer's text to the counted value exactly as formatted.",
+        ),
+      );
+    }
+  }
+
+  // A follower rides the path's declared geometry. A path that is rotated,
+  // or that its own beats move, scale or turn, would be drawn somewhere its
+  // follower is not; that combination is refused rather than rendered wrong.
+  scene.beats.forEach((beat, beatIndex) => {
+    if (beat.action !== "follow") return;
+    const path = layers.find((layer) => layer.id === beat.params.pathId);
+    if (path?.type !== "path") return;
+    const mover = scene.beats.find(
+      (other) =>
+        other.targetId === path.id &&
+        beatProperties(other).some(
+          (property) =>
+            property === "x" ||
+            property === "y" ||
+            property === "scale" ||
+            property === "rotationDeg",
+        ),
+    );
+    if (path.rotationDeg === 0 && !mover) return;
+    issues.push(
+      compileIssue(
+        "FOLLOW_PATH_TRANSFORMED",
+        `/scenes/${sceneIndex}/beats/${beatIndex}/params/pathId`,
+        mover
+          ? `Beat ${beat.id} follows path ${path.id}, which beat ${mover.id} moves; followers do not yet ride a moving path.`
+          : `Beat ${beat.id} follows path ${path.id}, which is rotated ${path.rotationDeg} degrees; followers do not yet ride a rotated path.`,
+        "error",
+        "Draw the route in its final position in the path data, keep the path's rotation at 0 and give it no beats that move, scale or turn it.",
+      ),
+    );
+  });
+  return issues;
+};
+
 const validateMotionWindows = (
   scene: Scene,
   sceneIndex: number,
   fps: number,
   sceneFrames: number,
+  starts: ResolvedStarts,
 ): Issue[] => {
   const issues: Issue[] = [];
   const writes = new Map<
@@ -683,18 +960,24 @@ const validateMotionWindows = (
     Array<{ start: number; end: number; modern: boolean }>
   >();
   scene.beats.forEach((beat, beatIndex) => {
+    const startMs = starts.beats[beatIndex] ?? beat.startMs;
     for (const property of beatProperties(beat)) {
       const key = `${beat.targetId}:${property}`;
       const current = {
-        start: msToFrameOffset(beat.startMs, fps),
+        start: msToFrameOffset(startMs, fps),
         end:
-          msToFrameOffset(beat.startMs, fps) +
+          msToFrameOffset(startMs, fps) +
           msToDurationFrames(beat.durationMs, fps),
         // Actions introduced with explicit endpoint semantics are conflict
         // checked; overlaps among the original presets stay accepted so
         // existing projects keep compiling. `exit` belongs to the first group:
         // two writes to one opacity in the same window have no defined result.
-        modern: beat.action === "transform" || beat.action === "exit",
+        modern:
+          beat.action === "transform" ||
+          beat.action === "exit" ||
+          beat.action === "draw" ||
+          beat.action === "follow" ||
+          beat.action === "count",
       };
       const conflict = writes
         .get(key)
@@ -719,8 +1002,13 @@ const validateMotionWindows = (
     }
   });
 
+  const moveStart = (moveIndex: number): number =>
+    msToFrameOffset(
+      starts.moves[moveIndex] ?? scene.camera?.moves[moveIndex]?.startMs ?? 0,
+      fps,
+    );
   scene.camera?.moves.forEach((move, moveIndex) => {
-    const start = msToFrameOffset(move.startMs, fps);
+    const start = moveStart(moveIndex);
     const end = start + msToDurationFrames(move.durationMs, fps);
     if (end > sceneFrames) {
       issues.push(
@@ -734,11 +1022,10 @@ const validateMotionWindows = (
     const conflict = scene.camera?.moves
       .slice(0, moveIndex)
       .find(
-        (other) =>
+        (other, otherIndex) =>
           start <
-            msToFrameOffset(other.startMs, fps) +
-              msToDurationFrames(other.durationMs, fps) &&
-          end > msToFrameOffset(other.startMs, fps),
+            moveStart(otherIndex) + msToDurationFrames(other.durationMs, fps) &&
+          end > moveStart(otherIndex),
       );
     if (conflict) {
       issues.push(
@@ -1145,8 +1432,17 @@ export const compileDraft = (
       renderCursor = endFrame;
     }
     issues.push(...validateLayerFrames(scene, sceneIndex, source));
+    const starts = resolveAnchoredStarts(source, scene, sceneIndex);
+    issues.push(...starts.issues);
+    issues.push(...validatePathsAndCounts(scene, sceneIndex, fps, starts));
     issues.push(
-      ...validateMotionWindows(scene, sceneIndex, fps, durationInFrames),
+      ...validateMotionWindows(
+        scene,
+        sceneIndex,
+        fps,
+        durationInFrames,
+        starts,
+      ),
     );
     const layout =
       scene.visual.type === "composition"
@@ -1161,7 +1457,10 @@ export const compileDraft = (
     varietyEntries.push({ scene, sceneIndex, resolvedLayers: layout.layers });
 
     const beats = scene.beats.map((beat, beatIndex) => {
-      const beatStartFrame = msToFrameOffset(beat.startMs, fps);
+      const beatStartFrame = msToFrameOffset(
+        starts.beats[beatIndex] ?? beat.startMs,
+        fps,
+      );
       const beatDurationInFrames = msToDurationFrames(beat.durationMs, fps);
       if (beatStartFrame + beatDurationInFrames > durationInFrames) {
         issues.push(
@@ -1205,9 +1504,12 @@ export const compileDraft = (
                 y: scene.camera.initial.y * scaleY,
                 zoom: scene.camera.initial.zoom,
               },
-              moves: scene.camera.moves.map((move) => ({
+              moves: scene.camera.moves.map((move, moveIndex) => ({
                 id: move.id,
-                startFrame: msToFrameOffset(move.startMs, fps),
+                startFrame: msToFrameOffset(
+                  starts.moves[moveIndex] ?? move.startMs,
+                  fps,
+                ),
                 durationInFrames: msToDurationFrames(move.durationMs, fps),
                 to: {
                   x: move.to.x * scaleX,

@@ -212,6 +212,51 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
         .strict(),
     })
     .strict(),
+  z
+    .object({
+      ...CompiledBeatBaseShape,
+      action: z.literal("draw"),
+      params: z
+        .object({
+          from: z.number().min(0).max(1).optional(),
+          to: z.number().min(0).max(1).optional(),
+          easingPreset: EasingPresetSchema.optional(),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...CompiledBeatBaseShape,
+      action: z.literal("follow"),
+      params: z
+        .object({
+          pathId: IdSchema,
+          from: z.number().min(0).max(1).optional(),
+          to: z.number().min(0).max(1).optional(),
+          orient: z.boolean().optional(),
+          easingPreset: EasingPresetSchema.optional(),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...CompiledBeatBaseShape,
+      action: z.literal("count"),
+      params: z
+        .object({
+          from: z.number(),
+          to: z.number(),
+          decimals: z.number().int().min(0).max(3).optional(),
+          grouping: z.enum(["none", ".", ",", " "]).optional(),
+          prefix: z.string().max(24).optional(),
+          suffix: z.string().max(24).optional(),
+          easingPreset: EasingPresetSchema.optional(),
+        })
+        .strict(),
+    })
+    .strict(),
 ]);
 
 const CompiledScopeSchema = z.discriminatedUnion("type", [

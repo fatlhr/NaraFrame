@@ -141,6 +141,47 @@ const ShapeLayerSchema = z
   })
   .strict();
 
+const PathViewBoxSchema = z
+  .object({
+    minX: z.number(),
+    minY: z.number(),
+    width: z.number().positive(),
+    height: z.number().positive(),
+  })
+  .strict();
+
+/**
+ * A line the scene can draw and move things along: a route, a river course,
+ * a trend. `d` is SVG path data in `viewBox` units, and the viewBox is laid
+ * onto `frame` without distortion (the compiler rejects a mismatched aspect
+ * ratio), so stroke widths and dashes are in the same units as the path. It
+ * is plain geometry, not markup: only path data is accepted.
+ */
+const PathLayerSchema = z
+  .object({
+    id: IdSchema,
+    type: z.literal("path"),
+    d: z
+      .string()
+      .trim()
+      .min(1)
+      .max(20000)
+      .regex(
+        /^[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\-\s]+$/u,
+        "Path data may contain only SVG path commands and numbers",
+      ),
+    viewBox: PathViewBoxSchema,
+    frame: FrameSchema,
+    stroke: z
+      .object({ color: ColorValueSchema, width: z.number().positive() })
+      .strict(),
+    fill: ColorValueSchema.optional(),
+    dash: z.tuple([z.number().positive(), z.number().positive()]).optional(),
+    lineCap: z.enum(["butt", "round", "square"]).optional(),
+    ...LayerPresentationShape,
+  })
+  .strict();
+
 const GroupLayerSchema = z
   .object({
     id: IdSchema,
@@ -184,9 +225,23 @@ const GroupLayerSchema = z
     slot: IdSchema.optional(),
     space: z.enum(["world", "overlay"]).optional(),
     parallax: z.number().min(0).max(2).optional(),
+    /**
+     * Pins a world group to one world point without scaling it with the
+     * camera: the point follows the camera, the group keeps its design size.
+     * A map label stays readable while the map zooms under it. The point is
+     * in the same design coordinates as the members' frames.
+     */
+    billboard: z.object({ x: z.number(), y: z.number() }).strict().optional(),
   })
   .strict()
   .superRefine((group, context) => {
+    if (group.billboard && group.space !== "world") {
+      context.addIssue({
+        code: "custom",
+        message: "A billboard pins a world group; set space to world",
+        path: ["billboard"],
+      });
+    }
     if (group.layout && group.layout.type !== "absolute" && !group.frame) {
       context.addIssue({
         code: "custom",
@@ -200,6 +255,7 @@ export const LayerSchema = z.discriminatedUnion("type", [
   TextLayerSchema,
   ImageLayerSchema,
   ShapeLayerSchema,
+  PathLayerSchema,
   GroupLayerSchema,
 ]);
 
@@ -228,11 +284,26 @@ export const SceneVisualSchema = z.discriminatedUnion("type", [
   CompositionVisualSchema,
 ]);
 
+/**
+ * Ties a motion to a measured phrase of the scene's narration block. When the
+ * block has audio, the start is the phrase's measured start plus `offsetMs`,
+ * relative to where the scene begins; `startMs` stays the local time used by
+ * silent drafts. There is no word-level timing: a phrase is the finest
+ * anchor the measured audio supports.
+ */
+export const PhraseAnchorSchema = z
+  .object({
+    phraseId: IdSchema,
+    offsetMs: z.number().int().min(-10000).max(60000).optional(),
+  })
+  .strict();
+
 const BeatBaseShape = {
   id: IdSchema,
   targetId: IdSchema,
   startMs: NonNegativeIntegerSchema,
   durationMs: PositiveIntegerSchema,
+  at: PhraseAnchorSchema.optional(),
 };
 
 const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);
@@ -324,12 +395,78 @@ const TransformBeatSchema = z
   })
   .strict();
 
+/**
+ * Draws a path layer from one fraction of its length to another. Before its
+ * first draw a path stands at that draw's starting fraction, so a route meant
+ * to be drawn is not visible in full before it is drawn.
+ */
+const DrawBeatSchema = z
+  .object({
+    ...BeatBaseShape,
+    action: z.literal("draw"),
+    params: z
+      .object({
+        from: z.number().min(0).max(1).optional(),
+        to: z.number().min(0).max(1).optional(),
+        easingPreset: EasingPresetSchema.optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
+/**
+ * Moves a layer's centre along a path layer in the same plane. When it is the
+ * first beat to move the layer, the layer waits at the path's starting point
+ * before the window, so a follower never jumps onto its route.
+ */
+const FollowBeatSchema = z
+  .object({
+    ...BeatBaseShape,
+    action: z.literal("follow"),
+    params: z
+      .object({
+        pathId: IdSchema,
+        from: z.number().min(0).max(1).optional(),
+        to: z.number().min(0).max(1).optional(),
+        orient: z.boolean().optional(),
+        easingPreset: EasingPresetSchema.optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
+/**
+ * Counts a number in a text layer. The layer's `text` must be the settled
+ * value exactly as formatted, so measurement, captions and every static check
+ * read what the viewer ends on.
+ */
+const CountBeatSchema = z
+  .object({
+    ...BeatBaseShape,
+    action: z.literal("count"),
+    params: z
+      .object({
+        from: z.number(),
+        to: z.number(),
+        decimals: z.number().int().min(0).max(3).optional(),
+        grouping: z.enum(["none", ".", ",", " "]).optional(),
+        prefix: z.string().max(24).optional(),
+        suffix: z.string().max(24).optional(),
+        easingPreset: EasingPresetSchema.optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
 export const BeatSchema = z.discriminatedUnion("action", [
   ExitBeatSchema,
   RevealBeatSchema,
   EmphasizeBeatSchema,
   FocusBeatSchema,
   TransformBeatSchema,
+  DrawBeatSchema,
+  FollowBeatSchema,
+  CountBeatSchema,
 ]);
 
 const CameraPoseSchema = z
@@ -351,6 +488,7 @@ export const CameraSchema = z
           durationMs: PositiveIntegerSchema,
           to: CameraPoseSchema,
           easingPreset: EasingPresetSchema.optional(),
+          at: PhraseAnchorSchema.optional(),
         })
         .strict(),
     ),
@@ -570,6 +708,71 @@ export const ScenesSchema = z
               "Beat target must resolve to its scene or one of its layers",
             path: ["scenes", sceneIndex, "beats", beatIndex, "targetId"],
           });
+        }
+
+        const target = layersById.get(beat.targetId);
+        const grouped = (id: string) =>
+          layers.some(
+            (layer) => layer.type === "group" && layer.memberIds.includes(id),
+          );
+        if (beat.action === "draw" && target?.type !== "path") {
+          context.addIssue({
+            code: "custom",
+            message: "A draw beat targets a path layer",
+            path: ["scenes", sceneIndex, "beats", beatIndex, "targetId"],
+          });
+        }
+        if (beat.action === "count") {
+          if (target?.type !== "text" || target.spans) {
+            context.addIssue({
+              code: "custom",
+              message: "A count beat targets a text layer without spans",
+              path: ["scenes", sceneIndex, "beats", beatIndex, "targetId"],
+            });
+          }
+        }
+        if (beat.action === "follow") {
+          const path = layersById.get(beat.params.pathId);
+          if (
+            !target ||
+            target.type === "group" ||
+            target.type === "path" ||
+            grouped(target.id)
+          ) {
+            context.addIssue({
+              code: "custom",
+              message:
+                "A follow beat moves an ungrouped text, image or shape layer",
+              path: ["scenes", sceneIndex, "beats", beatIndex, "targetId"],
+            });
+          }
+          if (path?.type !== "path" || grouped(path.id)) {
+            context.addIssue({
+              code: "custom",
+              message: "A follow beat's pathId names an ungrouped path layer",
+              path: [
+                "scenes",
+                sceneIndex,
+                "beats",
+                beatIndex,
+                "params",
+                "pathId",
+              ],
+            });
+          } else if (
+            target &&
+            target.type !== "group" &&
+            ((target.space === "world") !== (path.space === "world") ||
+              (path.space === "world" &&
+                (target.parallax ?? 1) !== (path.parallax ?? 1)))
+          ) {
+            context.addIssue({
+              code: "custom",
+              message:
+                "A follower and its path must share one plane: the same space and parallax",
+              path: ["scenes", sceneIndex, "beats", beatIndex, "targetId"],
+            });
+          }
         }
       });
 

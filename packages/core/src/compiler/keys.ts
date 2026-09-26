@@ -14,7 +14,8 @@ import { narrationTextHash } from "./voice-binding.js";
 // 8: the exit beat fades elements out, so a held pose is no longer the
 //    last frame of a shot that used to keep everything on screen.
 // 9: headline spans flow inline in one text box instead of one line per run.
-export const RENDER_ENGINE = "naraframe-draft/9";
+// 10: path layers, and draw, follow and count beats paint new motion.
+export const RENDER_ENGINE = "naraframe-draft/10";
 
 /**
  * Finds a retained voice clip for a block: the spoken text (whitespace

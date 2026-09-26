@@ -712,6 +712,84 @@ describe("atomic preview publication", () => {
     expect(await readdir(join(root, "preview", "builds"))).toEqual([]);
   });
 
+  it("keeps a beat ending at a scene boundary in its owning scene", () => {
+    const boundaryDraft = structuredClone(draft);
+    const first = boundaryDraft.scenes[0];
+    const next = boundaryDraft.scenes[1];
+    if (!first || !next) throw new Error("Boundary fixture needs two scenes");
+    first.beats = [
+      {
+        id: "boundary-exit",
+        targetId: first.id,
+        action: "exit",
+        startFrame: 0,
+        durationInFrames: first.endFrame - first.startFrame,
+        params: {},
+      },
+    ];
+    const frames = selectCheckedFrames(boundaryDraft, []);
+    const settled = frames.find((frame) =>
+      frame.reasons.includes("semantic-beat-settled:exit:boundary-exit"),
+    );
+    expect(settled).toMatchObject({
+      frame: first.endFrame - 1,
+      sceneId: first.id,
+    });
+    expect(
+      frames.find((frame) => frame.frame === next.startFrame),
+    ).toMatchObject({
+      sceneId: next.id,
+      reasons: expect.arrayContaining(["scene-entry"]),
+    });
+    for (const frame of frames) {
+      const owner = boundaryDraft.scenes.find(
+        (scene) => scene.id === frame.sceneId,
+      );
+      expect(owner).toBeDefined();
+      expect(frame.frame).toBeGreaterThanOrEqual(owner?.startFrame ?? Infinity);
+      expect(frame.frame).toBeLessThan(owner?.endFrame ?? -Infinity);
+    }
+  });
+
+  it("retains the source offset when clamping a scoped scene's final beat", () => {
+    const scoped = structuredClone(draft);
+    const scene = scoped.scenes[1];
+    if (!scene) throw new Error("Scoped fixture needs a second scene");
+    const sourceStartFrame = scene.startFrame;
+    const sourceEndFrame = scene.endFrame;
+    const duration = sourceEndFrame - sourceStartFrame;
+    scene.startFrame = 0;
+    scene.endFrame = duration;
+    scene.beats = [
+      {
+        id: "scoped-exit",
+        targetId: scene.id,
+        action: "exit",
+        startFrame: 0,
+        durationInFrames: duration,
+        params: {},
+      },
+    ];
+    scoped.scenes = [scene];
+    scoped.totalFrames = duration;
+    scoped.scope = {
+      type: "scene",
+      sceneId: scene.id,
+      sourceStartFrame,
+      sourceEndFrame,
+    };
+    const frames = selectCheckedFrames(scoped, []);
+    expect(
+      frames.find((frame) =>
+        frame.reasons.includes("semantic-beat-settled:exit:scoped-exit"),
+      ),
+    ).toMatchObject({
+      frame: duration - 1,
+      sourceFrame: sourceEndFrame - 1,
+      sceneId: scene.id,
+    });
+  });
+
   it("selects at least one checked frame per scene and each semantic beat", () => {
     const frames = selectCheckedFrames(draft, []);
     for (const scene of draft.scenes) {

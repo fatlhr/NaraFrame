@@ -2,6 +2,10 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 const alias = {
+  // Before the package alias, which would otherwise swallow the subpath.
+  "@naraframe/core/count-format": fileURLToPath(
+    new URL("./packages/core/src/count-format.ts", import.meta.url),
+  ),
   "@naraframe/cli": fileURLToPath(
     new URL("./packages/cli/src/index.ts", import.meta.url),
   ),
