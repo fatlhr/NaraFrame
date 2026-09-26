@@ -5,6 +5,8 @@ import type {
 } from "@naraframe/core";
 import { staticFile } from "remotion";
 
+export const FONT_RENDER_FAILURE = "NARAFRAME_FONT_UNAVAILABLE:";
+
 /**
  * The one bounded exception to "the profile has a single font family":
  * `role: "display"` (and the scene-level "text" visual, which is always a
@@ -13,13 +15,24 @@ import { staticFile } from "remotion";
  * so what's drawn matches what's measured) and visual-preflight.ts (so
  * measurement and the FONT_NOT_LOADED check test the same family).
  */
+/**
+ * The face a role is set in. A role's own `fontFamily` wins, then the legacy
+ * display override, then the profile family. Resolution order is shared with
+ * measurement, so a preflight check never measures a different face than the
+ * one that renders.
+ */
 export const fontFamilyForRole = (
   render: RenderTokens,
   role: TypographyRole | undefined,
-): string =>
-  role === "display" && render.typography.displayFontFamily
+): string => {
+  const roleFamily = role
+    ? render.typography.roles?.[role]?.fontFamily
+    : undefined;
+  if (roleFamily) return roleFamily;
+  return role === "display" && render.typography.displayFontFamily
     ? render.typography.displayFontFamily
     : render.typography.fontFamily;
+};
 
 /**
  * Registers each bundled profile font with the page before any measurement
@@ -34,8 +47,10 @@ export const fontFamilyForRole = (
  */
 export const loadBundledFonts = async (
   fonts: CompiledDraft["fonts"],
+  options: { requireAllFaces?: boolean } = {},
 ): Promise<Set<string>> => {
   const loaded = new Set<string>();
+  const failed: string[] = [];
   await Promise.all(
     fonts.map(async (font) => {
       try {
@@ -48,9 +63,15 @@ export const loadBundledFonts = async (
         document.fonts.add(face);
         loaded.add(font.family);
       } catch {
-        // Left out of `loaded` on purpose — see the doc comment above.
+        failed.push(`${font.family} ${font.weight}`);
       }
     }),
   );
+  // Browser font matching can synthesize a missing weight from another face
+  // in the family. Track individual load failures rather than trusting that
+  // family membership or document.fonts.check proves every file loaded.
+  if (options.requireAllFaces && failed.length > 0) {
+    throw new Error(`${FONT_RENDER_FAILURE} ${failed.sort().join(", ")}`);
+  }
   return loaded;
 };

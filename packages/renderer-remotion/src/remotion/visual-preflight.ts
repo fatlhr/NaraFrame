@@ -5,6 +5,7 @@ import {
   type GroupTransform,
   groupScreenTransformFor,
   motionStateFor,
+  planeTransformFor,
   type SceneTransitionState,
   sceneTransitionStateFor,
 } from "./motion.js";
@@ -69,19 +70,104 @@ const textStyle = (layer: Extract<Layer, { type: "text" }>) => ({
   overflowPolicy: layer.overflowPolicy ?? "error",
 });
 
+/**
+ * The weight a character is actually painted in. An accented or strong run is
+ * set heavier than the rest of the headline, so measuring the whole string at
+ * one weight under-reports its width and lets a line overflow unnoticed.
+ * Kept in step with `spanStyleFor` in the renderer.
+ */
+const spanWeights = (
+  layer: Extract<Layer, { type: "text" }>,
+  baseWeight: number,
+): number[] => {
+  const weights = new Array<number>(layer.text.length).fill(baseWeight);
+  if (!layer.spans) return weights;
+  let cursor = 0;
+  for (const span of layer.spans) {
+    const weight =
+      span.emphasis === "accent"
+        ? Math.min(900, baseWeight + 100)
+        : span.emphasis === "strong"
+          ? Math.min(900, baseWeight + 200)
+          : baseWeight;
+    for (let index = 0; index < span.text.length; index += 1) {
+      weights[cursor + index] = weight;
+    }
+    cursor += span.text.length;
+  }
+  return weights;
+};
+
 const measureWidth = (
   text: string,
   draft: CompiledDraft,
   layer: Extract<Layer, { type: "text" }>,
   fontSize: number,
-): number =>
-  measureText({
-    text,
-    fontFamily: fontFamilyForRole(draft.profile.render, layer.role),
-    fontSize,
-    fontWeight: layer.fontWeight ?? 700,
-    letterSpacing: `${layer.letterSpacing ?? 0}px`,
-  }).width;
+  weightsByCharacter?: number[],
+): number => {
+  const fontFamily = fontFamilyForRole(draft.profile.render, layer.role);
+  const letterSpacing = `${layer.letterSpacing ?? 0}px`;
+  const baseWeight = layer.fontWeight ?? 700;
+  if (!weightsByCharacter) {
+    return measureText({
+      text,
+      fontFamily,
+      fontSize,
+      fontWeight: baseWeight,
+      letterSpacing,
+    }).width;
+  }
+  // Measure each run at the weight it is painted in, then add the widths.
+  let total = 0;
+  let run = "";
+  let runWeight = weightsByCharacter[0] ?? baseWeight;
+  const flush = () => {
+    if (!run) return;
+    total += measureText({
+      text: run,
+      fontFamily,
+      fontSize,
+      fontWeight: runWeight,
+      letterSpacing,
+    }).width;
+    run = "";
+  };
+  for (let index = 0; index < text.length; index += 1) {
+    const weight = weightsByCharacter[index] ?? baseWeight;
+    if (weight !== runWeight) {
+      flush();
+      runWeight = weight;
+    }
+    run += text[index];
+  }
+  flush();
+  return total;
+};
+
+/** Splits a paragraph into words, carrying each word's per-character weights. */
+const wordsWithWeights = (
+  paragraph: string,
+  weights: number[],
+  offset: number,
+): Array<{ text: string; weights: number[] }> => {
+  const words: Array<{ text: string; weights: number[] }> = [];
+  let index = 0;
+  while (index < paragraph.length) {
+    if (/\s/u.test(paragraph[index] ?? "")) {
+      index += 1;
+      continue;
+    }
+    const start = index;
+    while (index < paragraph.length && !/\s/u.test(paragraph[index] ?? "")) {
+      index += 1;
+    }
+    words.push({
+      text: paragraph.slice(start, index),
+      weights: weights.slice(offset + start, offset + index),
+    });
+  }
+  return words;
+};
 
 const wrapText = (
   text: string,
@@ -89,27 +175,56 @@ const wrapText = (
   draft: CompiledDraft,
   layer: Extract<Layer, { type: "text" }>,
   fontSize: number,
+  weights?: number[],
 ): { lines: string[]; unbreakableOverflow: boolean } => {
   const lines: string[] = [];
   let unbreakableOverflow = false;
+  const baseWeight = layer.fontWeight ?? 700;
+  let paragraphOffset = 0;
   for (const paragraph of text.split("\n")) {
+    const offset = paragraphOffset;
+    paragraphOffset += paragraph.length + 1;
     if (paragraph.length === 0) {
       lines.push("");
       continue;
     }
-    const words = paragraph.trim().split(/\s+/u);
+    const words = weights
+      ? wordsWithWeights(paragraph, weights, offset)
+      : paragraph
+          .trim()
+          .split(/\s+/u)
+          .map((word) => ({ text: word, weights: [] as number[] }));
     let line = "";
+    let lineWeights: number[] = [];
     for (const word of words) {
-      const candidate = line ? `${line} ${word}` : word;
-      if (measureWidth(candidate, draft, layer, fontSize) <= withinWidth) {
+      const candidate = line ? `${line} ${word.text}` : word.text;
+      const candidateWeights = weights
+        ? line
+          ? [...lineWeights, baseWeight, ...word.weights]
+          : [...word.weights]
+        : undefined;
+      if (
+        measureWidth(candidate, draft, layer, fontSize, candidateWeights) <=
+        withinWidth
+      ) {
         line = candidate;
+        lineWeights = candidateWeights ?? [];
         continue;
       }
       if (line) lines.push(line);
-      if (measureWidth(word, draft, layer, fontSize) > withinWidth) {
+      if (
+        measureWidth(
+          word.text,
+          draft,
+          layer,
+          fontSize,
+          weights ? word.weights : undefined,
+        ) > withinWidth
+      ) {
         unbreakableOverflow = true;
       }
-      line = word;
+      line = word.text;
+      lineWeights = [...word.weights];
     }
     if (line) lines.push(line);
   }
@@ -127,7 +242,14 @@ const metricsAt = (
   if (width <= 0 || height <= 0) {
     return { fontSize, lines: [], contentHeight: 0, overflow: true };
   }
-  const wrapped = wrapText(layer.text, width, draft, layer, fontSize);
+  const wrapped = wrapText(
+    layer.text,
+    width,
+    draft,
+    layer,
+    fontSize,
+    layer.spans ? spanWeights(layer, layer.fontWeight ?? 700) : undefined,
+  );
   const contentHeight = wrapped.lines.length * fontSize * style.lineHeight;
   return {
     fontSize,
@@ -177,18 +299,19 @@ const textRectangle = (
 const transformedRectangle = (
   rectangle: Rectangle,
   state: ReturnType<typeof motionStateFor>,
-): Rectangle => ({
-  x:
-    rectangle.x +
-    state.translateX -
-    rectangle.width * (state.scale - 1) * state.anchor.x,
-  y:
-    rectangle.y +
-    state.translateY -
-    rectangle.height * (state.scale - 1) * state.anchor.y,
-  width: rectangle.width * state.scale,
-  height: rectangle.height * state.scale,
-});
+  bounds: Rectangle = rectangle,
+  rotationDeg = 0,
+): Rectangle =>
+  applyGroupTransform(
+    rectangle,
+    {
+      ...state,
+      rotationDeg: rotationDeg + state.rotationDeg,
+      anchorX: state.anchor.x,
+      anchorY: state.anchor.y,
+    },
+    bounds,
+  );
 
 const intersects = (left: Rectangle, right: Rectangle): boolean =>
   left.x < right.x + right.width &&
@@ -332,11 +455,20 @@ const framesForScene = (
   add(Math.floor(duration * 0.25), "scene-settled");
   add(duration - 1, "scene-final");
   scene.beats.forEach((beat) => {
+    add(beat.startFrame, `beat-start:${beat.id}`);
     add(
       beat.startFrame + Math.floor(beat.durationInFrames / 2),
       `beat-peak:${beat.id}`,
     );
     add(beat.startFrame + beat.durationInFrames, `beat-settled:${beat.id}`);
+  });
+  scene.camera?.moves.forEach((move) => {
+    add(move.startFrame, `camera-start:${move.id}`);
+    add(
+      move.startFrame + Math.floor(move.durationInFrames / 2),
+      `camera-mid:${move.id}`,
+    );
+    add(move.startFrame + move.durationInFrames, `camera-settled:${move.id}`);
   });
   return [...local.entries()].map(([frame, reasons]) => ({
     frame: scene.startFrame + frame,
@@ -625,9 +757,30 @@ export const resolveVisualPreflight = (
         if (!bounds) return rectangle;
         return applyGroupTransform(rectangle, transform, bounds);
       })();
+      const planeOwner =
+        group ?? scene.layers.find((layer) => layer.id === layerId);
+      const plane = planeTransformFor(
+        draft,
+        scene,
+        planeOwner?.space,
+        planeOwner?.parallax,
+        localFrame,
+      );
+      const withPlane = {
+        x:
+          plane.originX +
+          (withGroup.x - plane.originX) * plane.scale +
+          plane.translateX,
+        y:
+          plane.originY +
+          (withGroup.y - plane.originY) * plane.scale +
+          plane.translateY,
+        width: withGroup.width * plane.scale,
+        height: withGroup.height * plane.scale,
+      };
       const sceneState = sceneTransitionStateFor(draft, sceneIndex, localFrame);
       return applySceneTransition(
-        withGroup,
+        withPlane,
         sceneState,
         draft.width,
         draft.height,
@@ -672,7 +825,12 @@ export const resolveVisualPreflight = (
               continue;
             const layerRectangle = rectangleOnScreen(
               layer.id,
-              transformedRectangle(textRectangle(layer, metrics), state),
+              transformedRectangle(
+                textRectangle(layer, metrics),
+                state,
+                layer.frame,
+                layer.rotationDeg,
+              ),
               localFrame,
             );
             const pair = `${cue.id}:${layer.id}`;
@@ -696,6 +854,7 @@ export const resolveVisualPreflight = (
       }
     }
     const checkedPairs = new Set<string>();
+    const checkedClipping = new Set<string>();
     for (const frame of frames.filter((item) => item.sceneId === scene.id)) {
       const localFrame = frame.frame - scene.startFrame;
       textLayers.forEach((left, leftIndex) => {
@@ -712,9 +871,35 @@ export const resolveVisualPreflight = (
           return;
         const leftRectangle = rectangleOnScreen(
           left.id,
-          transformedRectangle(textRectangle(left, leftMetrics), leftState),
+          transformedRectangle(
+            textRectangle(left, leftMetrics),
+            leftState,
+            left.frame,
+            left.rotationDeg,
+          ),
           localFrame,
         );
+        if (
+          (scene.camera ||
+            scene.beats.some((beat) => beat.action === "transform")) &&
+          !checkedClipping.has(left.id) &&
+          (leftRectangle.x < -0.5 ||
+            leftRectangle.y < -0.5 ||
+            leftRectangle.x + leftRectangle.width > draft.width + 0.5 ||
+            leftRectangle.y + leftRectangle.height > draft.height + 0.5)
+        ) {
+          checkedClipping.add(left.id);
+          issues.push(
+            issueFor(
+              "TEXT_OUTSIDE_CANVAS",
+              sceneIndex,
+              scene.layers.indexOf(left),
+              left.id,
+              `Text layer ${left.id} is outside the canvas at frame ${frame.frame}.`,
+              "Adjust camera framing or object travel so required text remains visible.",
+            ),
+          );
+        }
 
         const targets = new Set([
           ...textLayers.slice(leftIndex + 1).map((layer) => layer.id),
@@ -748,6 +933,8 @@ export const resolveVisualPreflight = (
                 ? textRectangle(target, targetMetrics)
                 : target.frame,
               targetState,
+              target.frame,
+              target.rotationDeg,
             ),
             localFrame,
           );

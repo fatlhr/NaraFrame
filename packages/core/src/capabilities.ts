@@ -27,11 +27,19 @@ export interface CapabilityRegistry {
   /** Motion vocabulary. */
   beats: string[];
   beatCameras: string[];
+  compositionMotion: string[];
   transitions: string[];
   /** Colour slots a scene may name instead of a literal hex. */
   paletteTokens: string[];
+  /** What a headline run may mean; the profile decides how it looks. */
+  textEmphasis: string[];
   /** Media the loader accepts, by asset kind. */
-  media: { images: string[]; audio: string[]; fonts: string[] };
+  media: {
+    images: string[];
+    vectors: string[];
+    audio: string[];
+    fonts: string[];
+  };
   /** Audio features the compiler and renderer wire up. */
   audio: string[];
   /** Forms deliberately not implemented, with the reason. */
@@ -74,7 +82,11 @@ const enumOf = (schema: z.ZodType): string[] => {
     .sort();
 };
 
-const assetKinds = (): { images: string[]; audio: string[] } => {
+const assetKinds = (): {
+  images: string[];
+  vectors: string[];
+  audio: string[];
+} => {
   const json = JSON.stringify(
     z.toJSONSchema(AssetManifestSchema, { target: "draft-2020-12" }),
   );
@@ -91,7 +103,8 @@ const assetKinds = (): { images: string[]; audio: string[] } => {
   }
   return {
     images: [...kinds].filter((kind) => kind === "png").sort(),
-    audio: [...kinds].filter((kind) => kind !== "png").sort(),
+    vectors: [...kinds].filter((kind) => kind === "svg").sort(),
+    audio: [...kinds].filter((kind) => kind !== "png" && kind !== "svg").sort(),
   };
 };
 
@@ -111,6 +124,12 @@ export const capabilityRegistry = (): CapabilityRegistry => {
     groupLayouts: ["absolute", "grid", "stack"],
     beats: optionsOf(BeatSchema, ["oneOf"], "action"),
     beatCameras: ["pan", "push", "zoom"],
+    compositionMotion: [
+      "camera-framing",
+      "camera-moves",
+      "parallax",
+      "world-overlay",
+    ],
     transitions: optionsOf(TransitionSchema, ["oneOf"]),
     paletteTokens: [
       "palette.accent",
@@ -118,10 +137,15 @@ export const capabilityRegistry = (): CapabilityRegistry => {
       "palette.surface",
       "palette.text",
     ],
-    media: { images: assets.images, audio: assets.audio, fonts: fontKinds() },
+    textEmphasis: ["accent", "quiet", "strong"],
+    media: {
+      images: assets.images,
+      vectors: assets.vectors,
+      audio: assets.audio,
+      fonts: fontKinds(),
+    },
     audio: ["captions", "music", "narration", "sfx", "ducking"].sort(),
     unsupported: [
-      { name: "svg", reason: "No decode or sanitisation test has been run." },
       { name: "video-asset", reason: "No decode or timing test has been run." },
       {
         name: "jpeg",

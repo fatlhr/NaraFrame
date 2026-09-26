@@ -57,13 +57,33 @@ const LayerPresentationShape = {
   rotationDeg: z.number(),
   zIndex: z.number().int(),
   slot: IdSchema.optional(),
+  space: z.enum(["world", "overlay"]).optional(),
+  parallax: z.number().min(0).max(2).optional(),
 };
+
+/**
+ * A run inside a headline. `emphasis` is what the run means, not how it is
+ * painted: the profile decides what an accented or quiet run looks like, so
+ * the same source reads correctly under a different visual identity.
+ */
+const TextSpanSchema = z
+  .object({
+    text: z.string().min(1),
+    emphasis: z.enum(["accent", "strong", "quiet"]).optional(),
+  })
+  .strict();
 
 const TextLayerSchema = z
   .object({
     id: IdSchema,
     type: z.literal("text"),
     text: z.string().min(1),
+    /**
+     * Optional typographic detail for the same string. When present its runs
+     * must join back to `text`, so every measurement, caption and check that
+     * reads `text` keeps working and a legacy layer needs no migration.
+     */
+    spans: z.array(TextSpanSchema).min(1).optional(),
     frame: FrameSchema,
     role: TypographyRoleSchema.optional(),
     fontSize: z.number().min(12).max(320).optional(),
@@ -79,7 +99,18 @@ const TextLayerSchema = z
     avoidLayerIds: z.array(IdSchema).max(20).optional(),
     ...LayerPresentationShape,
   })
-  .strict();
+  .strict()
+  .superRefine((layer, context) => {
+    if (!layer.spans) return;
+    const joined = layer.spans.map((span) => span.text).join("");
+    if (joined !== layer.text) {
+      context.addIssue({
+        code: "custom",
+        message: "Text spans must join back to the layer's text exactly",
+        path: ["spans"],
+      });
+    }
+  });
 
 const ImageLayerSchema = z
   .object({
@@ -151,6 +182,8 @@ const GroupLayerSchema = z
       .strict(),
     zIndex: z.number().int(),
     slot: IdSchema.optional(),
+    space: z.enum(["world", "overlay"]).optional(),
+    parallax: z.number().min(0).max(2).optional(),
   })
   .strict()
   .superRefine((group, context) => {
@@ -246,11 +279,83 @@ const FocusBeatSchema = z
   })
   .strict();
 
+/**
+ * Takes an element off screen. The mirror of `reveal`: opacity falls to zero
+ * over the window and stays there, so a shot can finish a statement instead
+ * of holding every element it ever introduced. Frame-derived like the rest,
+ * so seeking straight to a late frame gives the same hidden pose as playing
+ * to it.
+ */
+const ExitBeatSchema = z
+  .object({
+    ...BeatBaseShape,
+    action: z.literal("exit"),
+    params: z
+      .object({
+        direction: z.enum(["up", "down", "left", "right"]).optional(),
+        distance: z.number().nonnegative().optional(),
+        easingPreset: EasingPresetSchema.optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
+const TransformBeatSchema = z
+  .object({
+    ...BeatBaseShape,
+    action: z.literal("transform"),
+    params: z
+      .object({
+        to: z
+          .object({
+            x: z.number().optional(),
+            y: z.number().optional(),
+            scale: z.number().positive().optional(),
+            rotationDeg: z.number().optional(),
+          })
+          .strict()
+          .refine(
+            (value) => Object.values(value).some((item) => item !== undefined),
+            "Transform must write at least one property",
+          ),
+        easingPreset: EasingPresetSchema.optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
 export const BeatSchema = z.discriminatedUnion("action", [
+  ExitBeatSchema,
   RevealBeatSchema,
   EmphasizeBeatSchema,
   FocusBeatSchema,
+  TransformBeatSchema,
 ]);
+
+const CameraPoseSchema = z
+  .object({
+    x: z.number(),
+    y: z.number(),
+    zoom: z.number().positive().min(0.25).max(4),
+  })
+  .strict();
+
+export const CameraSchema = z
+  .object({
+    initial: CameraPoseSchema,
+    moves: z.array(
+      z
+        .object({
+          id: IdSchema,
+          startMs: NonNegativeIntegerSchema,
+          durationMs: PositiveIntegerSchema,
+          to: CameraPoseSchema,
+          easingPreset: EasingPresetSchema.optional(),
+        })
+        .strict(),
+    ),
+  })
+  .strict();
 
 const TransitionDurationSchema = z.number().int().min(200).max(1200);
 
@@ -301,6 +406,7 @@ export const SceneSchema = z
     durationMs: PositiveIntegerSchema,
     visual: SceneVisualSchema,
     beats: z.array(BeatSchema),
+    camera: CameraSchema.optional(),
     transition: TransitionSchema,
     narration: SceneNarrationSchema.optional(),
     carriesFactualClaim: z.boolean().optional(),
@@ -329,6 +435,13 @@ export const ScenesSchema = z
         });
       }
       sceneIds.add(scene.id);
+      if (scene.camera && scene.visual.type !== "composition") {
+        context.addIssue({
+          code: "custom",
+          message: "Explicit camera requires a composition visual",
+          path: ["scenes", sceneIndex, "camera"],
+        });
+      }
 
       const layers =
         scene.visual.type === "composition" ? scene.visual.layers : [];
@@ -441,6 +554,14 @@ export const ScenesSchema = z
           });
         }
         beatIds.add(beat.id);
+        if (beat.action === "transform" && beat.targetId === scene.id) {
+          context.addIssue({
+            code: "custom",
+            message:
+              "Transform beats target a layer or group; use camera for world framing",
+            path: ["scenes", sceneIndex, "beats", beatIndex, "targetId"],
+          });
+        }
 
         if (beat.targetId !== scene.id && !layersById.has(beat.targetId)) {
           context.addIssue({
@@ -450,6 +571,18 @@ export const ScenesSchema = z
             path: ["scenes", sceneIndex, "beats", beatIndex, "targetId"],
           });
         }
+      });
+
+      const cameraMoveIds = new Set<string>();
+      scene.camera?.moves.forEach((move, moveIndex) => {
+        if (cameraMoveIds.has(move.id)) {
+          context.addIssue({
+            code: "custom",
+            message: "Camera move IDs must be unique within a scene",
+            path: ["scenes", sceneIndex, "camera", "moves", moveIndex, "id"],
+          });
+        }
+        cameraMoveIds.add(move.id);
       });
     });
   });

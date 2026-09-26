@@ -6,12 +6,15 @@ import {
   RelativeAudioPathSchema,
   RelativeFontPathSchema,
   RelativePngPathSchema,
+  RelativeSvgPathSchema,
   SchemaVersionSchema,
   Sha256Schema,
   VersionSchema,
 } from "./primitives.js";
 import { RenderTokensSchema } from "./profile.js";
 import { FocalPointSchema, LayerSchema } from "./scene.js";
+
+const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);
 
 /** A bundled profile font ready to register before measurement/preflight. */
 export const CompiledFontSchema = z
@@ -52,6 +55,31 @@ export const CompiledTransitionSchema = z.discriminatedUnion("type", [
     .strict(),
 ]);
 
+const CompiledCameraSchema = z
+  .object({
+    initial: z
+      .object({ x: z.number(), y: z.number(), zoom: z.number().positive() })
+      .strict(),
+    moves: z.array(
+      z
+        .object({
+          id: IdSchema,
+          startFrame: NonNegativeIntegerSchema,
+          durationInFrames: PositiveIntegerSchema,
+          to: z
+            .object({
+              x: z.number(),
+              y: z.number(),
+              zoom: z.number().positive(),
+            })
+            .strict(),
+          easingPreset: EasingPresetSchema.optional(),
+        })
+        .strict(),
+    ),
+  })
+  .strict();
+
 const CompiledAssetSchema = z.discriminatedUnion("kind", [
   z
     .object({
@@ -65,6 +93,23 @@ const CompiledAssetSchema = z.discriminatedUnion("kind", [
       kind: z.enum(["mp3", "wav", "m4a"]),
       publicPath: RelativeAudioPathSchema,
       sha256: Sha256Schema,
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal("svg"),
+      publicPath: RelativeSvgPathSchema,
+      sha256: Sha256Schema,
+      /** Sanitised inner markup, ready to inline. */
+      body: z.string(),
+      viewBox: z
+        .object({
+          minX: z.number(),
+          minY: z.number(),
+          width: z.number().positive(),
+          height: z.number().positive(),
+        })
+        .strict(),
     })
     .strict(),
   z
@@ -94,8 +139,6 @@ const CompiledBeatBaseShape = {
   startFrame: NonNegativeIntegerSchema,
   durationInFrames: PositiveIntegerSchema,
 };
-
-const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);
 
 export const CompiledBeatSchema = z.discriminatedUnion("action", [
   z
@@ -137,6 +180,38 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
         .strict(),
     })
     .strict(),
+  z
+    .object({
+      ...CompiledBeatBaseShape,
+      action: z.literal("exit"),
+      params: z
+        .object({
+          direction: z.enum(["up", "down", "left", "right"]).optional(),
+          distance: z.number().nonnegative().optional(),
+          easingPreset: EasingPresetSchema.optional(),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...CompiledBeatBaseShape,
+      action: z.literal("transform"),
+      params: z
+        .object({
+          to: z
+            .object({
+              x: z.number().optional(),
+              y: z.number().optional(),
+              scale: z.number().positive().optional(),
+              rotationDeg: z.number().optional(),
+            })
+            .strict(),
+          easingPreset: EasingPresetSchema.optional(),
+        })
+        .strict(),
+    })
+    .strict(),
 ]);
 
 const CompiledScopeSchema = z.discriminatedUnion("type", [
@@ -171,6 +246,7 @@ const CompiledSceneSchema = z
     visual: CompiledVisualSchema,
     layers: z.array(LayerSchema),
     beats: z.array(CompiledBeatSchema),
+    camera: CompiledCameraSchema.optional(),
     /** How this scene exits into the next one; `cut` on the last scene. */
     transitionOut: CompiledTransitionSchema,
     /**

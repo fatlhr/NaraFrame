@@ -13,6 +13,7 @@ import {
   selectComposition,
 } from "@remotion/renderer";
 import { VERSION as remotionVersion } from "remotion";
+import { FONT_RENDER_FAILURE } from "./remotion/typography.js";
 import {
   type VisualPreflightReport,
   visualPreflightProperty,
@@ -77,6 +78,16 @@ export class VisualPreflightError extends Error {
     this.issues = issues;
   }
 }
+
+/** Reads the font families out of a render failure raised in the browser. */
+const fontFailureFrom = (error: unknown): string | null => {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  const marker = message.indexOf(FONT_RENDER_FAILURE);
+  if (marker === -1) return null;
+  const rest = message.slice(marker + FONT_RENDER_FAILURE.length).trim();
+  // Remotion wraps the message; keep the first line, which carries the faces.
+  return rest.split("\n")[0]?.trim() || "unknown family";
+};
 
 export const isVisualPreflightError = (
   error: unknown,
@@ -187,6 +198,24 @@ export const renderDraft = async ({
   } catch (error) {
     if (signal?.aborted) {
       throw interrupted();
+    }
+    const families = fontFailureFrom(error);
+    if (families) {
+      // A face that never became usable in the frame context is a source
+      // problem with a fix the author can act on, not an opaque renderer
+      // fault, so it is reported as one instead of a redacted system error.
+      throw new VisualPreflightError([
+        {
+          code: "FONT_NOT_LOADED",
+          severity: "error",
+          responsible: "user",
+          artifact: "profile.lock.json",
+          path: "/assets",
+          message: `The render context could not use the bundled font(s): ${families}.`,
+          suggestion:
+            "Check that each declared font asset is a valid font file whose hash matches, then preview again.",
+        },
+      ]);
     }
     throw error;
   } finally {

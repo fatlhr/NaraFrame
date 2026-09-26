@@ -1,11 +1,11 @@
 # NaraFrame MVP Product and Technical Specification
 
-Status: Active product contract; M0.9 visual-fidelity correction approved
+Status: Active product contract; reference-first M2.4 recovery approved; first opening rejected, recovery not implemented
 
-Revision: 0.4
+Revision: 0.6
 
-Date: 2026-09-14
-Implementation status: M0.1–M0.8 verified; M0.9 planned; M1 paused until the M0.9 gate passes
+Date: 2026-09-20
+Implementation status: M0, M1, and M2.1–M2.3 retain recorded delivery evidence on main at `7b232c9`. M2.4.1 has an unmerged implementation at `9747193`; Fatih rejected its first opening, then accepted the recovered static direction. Supervisor recovery now includes a rendered 3-second camera/parallax/object-motion study awaiting owner review; this is not full opening acceptance. The supplied 8.9-second recording has been sampled; full reference playback, remaining integration gates, pixel repeatability and comparative costs remain open in `docs/plan.md`. M3 waits for visual and generalisation gates.
 
 ## 1. Summary
 
@@ -30,6 +30,8 @@ The MVP is successful when:
 - a complete project can produce a reviewable preview, contact sheet, report, and final MP4;
 - the same pinned inputs can reproduce the same compiled project and frame pixels in a pinned runtime;
 - revisions do not require editing renderer implementation code.
+
+Visual quality is a first-class product goal alongside revision control and reuse. M2.4 must demonstrate competitive visual storytelling against the owner's Medan/Bang Motion reference and transfer it to a different topic. Technical validity alone does not make a video publishable; NF-AC-16/17 define the new visual and revision gates.
 
 ## 3. Product principles
 
@@ -59,11 +61,23 @@ Authors choose semantic visual forms and actions. Raw animation keyframes are no
 
 ### NF-PR-07: Measured extensibility
 
-MVP favors a small tested capability set. Unsupported recurring needs become reusable engine capabilities after pilot evidence. Arbitrary per-project React/TSX scenes are excluded.
+MVP favors tested, composable capabilities. A named benchmark or recurring production need can justify new visual vocabulary even when no existing validator reports an error. M2.4 is the approved expansion for the Medan reference. Arbitrary per-project React/TSX scenes are excluded.
 
 ### NF-PR-08: Layout-safe output
 
 Declared geometry and appearance MUST render predictably. Required text may not silently clip, overflow, or collide with other required text. Image masking must match its declared shape. Automatic text fitting, when requested, is bounded by the active profile's minimum readable size; otherwise the build fails with an actionable issue.
+
+### NF-PR-09: Visual storytelling without over-control
+
+Composition, illustration, motion, continuity, and explanatory clarity are judged from the output. Automated aesthetic heuristics are advisory, not a substitute for that review. Negative space, restrained motion, and simple cuts are legitimate choices. Hard creative restrictions apply only when intentionally declared by the owner/profile; safety, source integrity, and required-text readability remain technical constraints.
+
+### NF-PR-10: Reference-first visual delivery
+
+When a working visual reference exists, preserve its demonstrated artwork, typography, framing, and choreography in a bounded engineering comparison before redesigning them or expanding a generic capability catalogue. Adapt the required mechanisms as trusted reusable renderer code; reference/project content remains local data. Port only the mechanisms needed by the active shot and expose the minimum editable inputs through the existing source/compiled boundary. Do not implement the whole planned vocabulary before producing a visible comparison.
+
+An opening that retains reference quality proves runtime fidelity, not creative superiority or cross-topic generalisation. Immediately follow its acceptance with a different-topic opening on a frozen engine, before expanding the complete reference video. All claims still require the final NF-AC-16/17 gates.
+
+Future GUI compatibility means stable editable identities and source data; it is not a reason to design a universal animation editor in advance. If faithful motion cannot fit the authorised data contract, record the exact missing mechanism and seek a scope decision instead of substituting an inferior effect or loading project code.
 
 ## 4. Scope boundary
 
@@ -113,6 +127,8 @@ The core does not own:
 The NaraFrame skill owns the operating procedure used by Codex. It MUST:
 
 - read the selected profile direction;
+- establish art direction before scene authoring: concept, identifiable explanatory objects, framing, typography, surface/depth, movement, and relationships between shots;
+- use relevant working starters, reference mechanisms, and supported reusable composition patterns; choose a pattern for the story rather than inheriting its example artwork or scene order;
 - use provider/tool capabilities available to the current agent;
 - check production readiness and budget before external generation;
 - reuse valid assets, record operation receipts, and limit generation retries;
@@ -124,11 +140,17 @@ The NaraFrame skill owns the operating procedure used by Codex. It MUST:
 
 The skill MUST NOT duplicate the authoritative project schema or write `.naraframe/compiled.json` directly.
 
+The skill MUST NOT default every brief to image-in-card plus text, inherit a reference's shot order as a universal template, or require the user to specify every animation parameter. It may iterate within the authorised brief without repeated micro-approvals. Material editorial choices, paid operations, and final-export approval retain their existing boundaries.
+
+The controlled Medan fidelity experiment is an explicit exception to changing a reference's look: keep its selected artwork, fonts, composition, and timing fixed to isolate renderer losses. Record provenance and licence obligations; do not present adaptation as original creative work. Ordinary briefs, including LBC, derive their own visual language from their profile and subject.
+
+Keep operational discovery compact: reuse known runtime/capability context while its version is unchanged, read only relevant authoritative schema sections, and do not reload full planning history for every creative revision. Before a large implementation batch, show a representative frame and short motion study. Within the M2.4 recovery, allow at most two internal visual correction passes per review checkpoint, then show the result or the specific blocker. Do not impose micro-approval for every object. These are authoring procedures, not new CLI commands.
+
 ## 5. Users and operating modes
 
 ### 5.1 Primary user
 
-Fatih is the first creator/user. MVP installation and workflows may assume comfort with Codex, JSON, terminal, and local files. Subsequent users with similar skills are in scope; this is not an assumption about every AI user.
+Fatih remains the first operator; installation and the manual route may assume familiarity with Codex, JSON, terminal, and local files. The approved M2.4 product direction also supports users who do not understand the schema: ordinary creative requests and revisions go through the agent. This is a usability requirement, not a claim that novice onboarding has already been validated or a mandate to build a GUI now.
 
 ### NF-UX-01: Technical-user ergonomics
 
@@ -137,6 +159,10 @@ Document command inputs/defaults/output paths and configuration fields. Errors i
 ### NF-UX-02: Shared skill/manual workflow
 
 Skill and manual routes use the same project format, validation rules, revision tracking, and artifact reuse. Users may switch between them within one project. Reuse installed runtime, profiles, and capability configuration across projects. Chat is convenient, not mandatory for every change.
+
+### NF-UX-03: Plain-language revisions and future GUI authoring
+
+Users can request changes such as “slow down the camera”, “replace this object”, or “change the visual identity” without learning JSON or writing code. The agent maps them to stable scene/object/text/camera/motion identities, reports the affected scope, and uses the existing edit/undo path. Source remains structured data editable by a future GUI; neither opaque executable scenes nor user-authored keyframes are required. Manual JSON control remains available, not mandatory for ordinary revisions. No GUI, mandatory wizard, or new nondeveloper study is added by M2.4.
 
 ### 5.2 Primary mode: chat-first
 
@@ -217,6 +243,14 @@ Distinguish prepared-media diagnostics, no-new-spend visual draft, and narrated 
 - Receipts survive undo/cache clean and contain no credentials. Each JSONL record has `schemaVersion`; production metadata is validated locally, while execution and policy enforcement belong to the skill/orchestration helper outside renderer/provider-free core.
 
 This is auditable workflow accounting, not universal hard billing enforcement over agent tools. Local rendering still uses compute/storage; host subscription and asset/font/voice usage rights are separate costs. Recheck the pinned Remotion license and intended distribution model before release. No free-video, exact cost/video, or unlimited included-quota promise is made.
+
+### NF-CO-02: Separate development effort from content-production effort
+
+M2.4 records engine development, content authoring, owner-requested revisions, and render/verification compute separately. For each trial retain the engine/skill version, brief, time to first visible result, elapsed/active time when measured, internal correction count, render count, renderer-change count, and owner interventions (creative feedback versus setup/coordination). Agent-operated CLI commands are not counted as manual user actions.
+
+Record input/output/cached token usage and cost only when the host/provider supplies actual usage evidence, with its source and scope. Otherwise label them unavailable; schema bytes, line counts, subscription access, and zero media-generation calls are not token counts or zero total cost. Existing provider receipts remain authoritative for paid media, without adding a host-billing collector to core.
+
+Content trials freeze implementation first. Do not compare a run that develops the engine to a reference run that only authors content and call the difference a per-video cost. Do not claim cheaper/faster than Bang Motion without comparable measured work. Routine revisions must not require the user to carry detailed review notes between agents; engineering handoffs are separate from the product's chat-first flow.
 
 ## 7. System architecture
 
@@ -311,7 +345,7 @@ The root artifacts above are an editable working copy. Managed preview/render co
 
 ### NF-PJ-01: Schema versioning
 
-Every machine-readable source artifact MUST declare `schemaVersion` (each event for JSONL). MVP reads schema version 1 only. Unsupported versions fail with a migration-oriented message; no migration command is required until a later schema exists. Spec revision 0.4 is a design revision, not a deployed schema migration.
+Every machine-readable source artifact MUST declare `schemaVersion` (each event for JSONL). MVP reads schema version 1 only. Unsupported versions fail with a migration-oriented message; no migration command is required until a later schema exists. Spec revision 0.6 is a design revision, not a deployed schema migration. M2.4 extensions must be additive: old version-1 inputs retain their coordinate/default behavior; older engines may reject new capabilities explicitly rather than silently ignoring them.
 
 ### NF-PJ-02: State derivation
 
@@ -337,6 +371,8 @@ profiles/current-issues/
 ```
 
 `direction.md` is read by the agent. It contains editorial approach, storytelling rules, visual language, asset guidance, factual-review checkpoints, and anti-patterns.
+
+Creative direction supplies defaults and preferences rather than a mandatory scene template. Do not convert every design recommendation into a locked choice menu. Existing explicit locks remain authoritative until the user changes them.
 
 `profile.json` is machine-resolved. It has separate `render` and provider-neutral `production` sections. It contains:
 
@@ -444,11 +480,13 @@ Text layers select a profile typography role such as `display`, `heading`, `body
 - `error` is the default and blocks preview when required copy does not fit;
 - `shrink` may reduce type only to the profile's minimum readable size, then fails if the content still does not fit.
 
-Silent clipping and unbounded auto-shrink are prohibited. Text measurement uses the actual loaded font, size, weight, line height, letter spacing, and box width. Font readiness is part of renderer preflight.
+Silent clipping and unbounded auto-shrink are prohibited. Text measurement uses the actual loaded font, size, weight, line height, letter spacing, and box width. Font readiness is required both in renderer preflight and in every browser context that paints output frames. A successful metadata/preflight font load does not establish render-context readiness. Verify the actual role face and weight in rendered frames, including a missing/corrupt-font failure; mocked measurements alone cannot close this requirement.
 
 Image and shape layers may declare corner radius, stroke, and shadow using bounded tokens or validated numeric values. Image crop uses `fit` plus an optional normalized focal point. The rendered media wrapper clips to the same declared geometry so rounded images cannot remain visually square.
 
-Groups remain non-recursive in the initial implementation and may use `absolute`, `stack`, or `grid` layout with bounded padding, gap, and alignment. Existing schema-version-1 projects remain readable: omitted fields resolve through profile and engine defaults instead of acquiring project-specific renderer code.
+Groups are non-recursive through M2.3 and may use `absolute`, `stack`, or `grid` layout with bounded padding, gap, and alignment. M2.4 adds explicit parent–child grouping, local transforms, clipping, and reusable composition definitions. Existing schema-version-1 projects remain readable: omitted fields preserve legacy coordinates/defaults instead of acquiring project-specific renderer code.
+
+M2.4 adds rich-text spans for emphasis and highlights and font-family selection per typography role. Measurement and rendering MUST use the same resolved spans, fonts, and styling; text effects must not change wrapping unpredictably. Local passive SVG and native path layers supply illustrations, lines, curves, and filled shapes. Independently animated illustration parts have separate stable object IDs rather than arbitrary DOM selectors or executable SVG animations.
 
 ### 11.5 Semantic beats
 
@@ -480,11 +518,24 @@ easingPreset
 
 Raw keyframes, arbitrary CSS/JS animation, and arbitrary executable components are excluded.
 
+M2.4 extends the vocabulary with object translation/rotation/scale, enter/exit, path drawing, path following, count-up/data growth, and text stagger/highlight. These are bounded semantic actions, not a free-form animation language. Each action declares its target and timing. Sequential actions preserve their preceding resolved end state; overlapping writes to the same target property are rejected with a source-targeted issue. Independent properties can animate together. Every pose is evaluated from the frame, without playback-order state. Text stagger is decorative unless verified word timing is explicitly referenced.
+
 ### 11.6 Camera continuity and transitions
 
 M0 uses `cut`. M0.9 may add a bounded overlap or object-wipe transition only when the LBC benchmark demonstrates the need; later recipes may add `push` and `mask`. Transitions occur within existing visual intervals and MUST NOT alter the resolved narration timeline duration.
 
 `focus` can move a whole scene or declared group as a camera/world rig around a bounded focal anchor. Authors select semantic presets and targets, not raw keyframes, arbitrary CSS/JS animation, or GSAP timelines. Scene-to-scene continuity SHOULD preserve a visual through-line when the content supports one; it must not force the same motion template onto unrelated topics.
+
+### 11.7 M2.4 composition, camera, and integration contract
+
+- Reusable object/world definitions live in authoritative source data and are instantiated with stable identities and explicit per-shot changes. Reject cyclic or unresolved group/composition references. Shared definitions do not depend on the previous scene having played.
+- Separate camera-affected world content from screen-space overlays such as headline/captions. Cameras support explicit target framing, sequential moves, and parallax. World labels follow their objects; declared screen overlays remain fixed.
+- Add object-driven transitions and focus handoffs when required by the Medan sequence. They operate inside existing narration intervals, preserve audio duration, and explicitly include neighbouring visual dependencies in scoped previews.
+- Preflight and rendering share the same nested transforms, camera projection, clipping, and motion states. Intentional world content outside the camera is not automatically a safe-zone error. Check required content in its intended visible states and report sampled coverage honestly.
+- Scene/assembly keys include the resolved shared compositions, vectors, fonts, camera/motion, and transition dependencies. A shared edit invalidates every dependent scene, not unrelated audio or illustrations. Bump the render-engine identity whenever changed rendering can change pixels.
+- `schema.capabilities` grows only after each new source-to-render path is implemented and tested. Existing CLI commands, source transactions, approval identities, and atomic publication remain the public workflow.
+
+These are target contracts, not a claim that the complete vocabulary is implemented. M2.4.1 already has partial SVG/rich-text code with open review findings. Implement the minimum coherent camera/world/object/type slice required to retain opening quality first; the original layer-by-layer schedule is superseded by NF-PR-10. Extend remaining mechanisms only with the shots that need them.
 
 ## 12. Narration-driven timeline
 
@@ -621,6 +672,10 @@ Origin-specific provenance:
 - `bundled`: NaraFrame/profile source and version required.
 
 SVG content MUST be sanitized or rendered through an isolation approach proven by the spike. Asset hashes are verified before compile/render.
+
+For M2.4, accept only a validated passive SVG subset. Reject scripts, event handlers, `foreignObject`, built-in animation, external references, and unsafe embedded content. Permit validated local gradients and clipping; asset-local IDs must not collide between instances. Preparation may convert unsupported art into supported passive assets, but loading/rendering must not silently discard unsafe content or execute it. Supported SVG must preserve visible root presentation attributes, text content, gradients, and clipping. Unsupported visible features must fail explicitly or undergo an explicit checked preparation step; they must not disappear under a successful import. Validate every URL-bearing paint/reference form, including external URLs wrapped in CSS-style `url(...)`, and reject executable content. Do not treat regex acceptance as browser-parsing equivalence.
+
+Profile-dependent media MUST retain its style binding through edits and undo. After a relevant profile change, missing binding is unknown compatibility, not a match. Report it as needs-production/review and require an explicit recorded retention/rebinding decision or replacement before final export; do not invent provenance or silently claim old media was regenerated.
 
 ## 16. Compiler and deterministic contract
 
@@ -822,6 +877,8 @@ Wall-clock metadata is excluded from the deterministic fingerprint.
 
 Automated checks do not establish motion quality. MVP skill requires review of preview video and contact sheet before final rendering unless explicitly waived by the user. Review covers actual corner masking, type hierarchy, text collision/overflow, crop and focal-point intent, motion continuity, and whether each shot communicates one dominant statement. A technically valid preview may still fail this visual gate.
 
+M2.4 uses early matched-frame and short-motion review before broad implementation, followed by full playback against the Medan reference using NF-AC-16. Retain the rejected first opening and compare the recovered opening against the actual reference, not merely against that weak attempt. A frame/contact sheet cannot certify motion; a playback baseline remains required. Full NF-QA-01 preview publication remains the public acceptance path; internal stills or short motion studies are diagnostic artifacts and must not be presented as approved full builds. No new browser editor or still-only CLI is required by this revision. Transition counts, viewpoint counts, and panel dead-space warnings are diagnostic hints, not evidence of attractive motion or permission to remove intentional negative space. Aesthetic recommendations remain advisory unless the owner intentionally configured a hard creative restriction.
+
 ## 21. Security and trust boundaries
 
 - Project JSON, Markdown, SVG, media, and agent-produced content are untrusted inputs.
@@ -848,7 +905,9 @@ Contact sheet: renderer stills plus a proven image-composition library
 
 All `remotion` and `@remotion/*` packages MUST use the same exact version. No browser Studio/Vite application is created in MVP.
 
-M0.9 may add the exact-version-matched `@remotion/layout-utils` package for deterministic text measurement and fitting. NaraFrame does not adopt Bang Motion's HTML/GSAP/CDN runtime; Bang Motion is a composition and review reference only, preserving NaraFrame's declarative, offline, deterministic Remotion pipeline.
+M0.9 may add the exact-version-matched `@remotion/layout-utils` package for deterministic text measurement and fitting. The historical policy treating Bang Motion only as a composition/review reference is superseded for M2.4. Its working starter/camera/timeline/object/type mechanisms may be adapted into trusted, versioned Remotion runtime modules. The engine must not load arbitrary project HTML/JS/GSAP timelines, embed a reference player, or flatten the reference into video/images to claim parity. Keep project-specific artwork/choreography in data, preserve the core/renderer boundary, and keep render-time assets/fonts/dependencies local. Pin the upstream revision and retain applicable copyright/licence notices for adapted code; reference artwork/fonts have their own provenance and rights.
+
+M2.4 may add exact-version-matched `@remotion/paths` to the renderer for path drawing/following. Core continues to store and validate renderer-independent data. This approved dependency direction is not an instruction to install packages during the documentation-only stage.
 
 M0 includes a narrow spike to lock supported versions and the formats/settings needed for its first draft. M1/M2 extend the tested matrix as narrated/video/illustrated recipes need it. Current local installations are evidence for development availability, not product requirements. Create the initial lockfile with an ordinary install, then verify frozen reinstall; do not request frozen install before a lockfile exists.
 
@@ -872,7 +931,7 @@ The renderer defaults to a 180-second safety limit to catch accidental timestamp
 - Production capability recipe, budget/receipts, block-local voice revision, and source edit/undo.
 - Technical and visual QA evidence, including the corrective LBC parity benchmark.
 
-Delivery gates are M0 first 15–30s visual draft through skill/CLI, M0.9 visual-fidelity correction using the LBC benchmark, M1 narrated pilot with budget and reversible spoken edits, M2 reference projects/profile variation/scoped preview/music/SFX/needed recipes, and M3 owner dogfooding/reliability evidence. Each gate includes safety for the features it introduces. M0 remains complete for its original technical draft scope, but M1 may not start until M0.9 proves safe typography, masks, and revision-tolerant layout. Detailed sequencing and milestone evidence live in `docs/plan.md`.
+Delivery gates are M0 first visual draft, M0.9 fidelity correction, M0.10 initial visual growth, M1 narrated revision, M2.1–M2.3 scoped preview/profile/audio/reference scenarios, M2.4 competitive visual storytelling and cross-topic revision, then M3 owner dogfooding/reliability evidence. Earlier gates retain their recorded historical scope. M2.4 is inserted after delivered M2.3; M3 must wait for NF-AC-16/17. Detailed sequencing and evidence live in `docs/plan.md`.
 
 ## 25. Explicit non-goals
 
@@ -891,7 +950,7 @@ Delivery gates are M0 first 15–30s visual draft through skill/CLI, M0.9 visual
 - frame-level render resume;
 - schema migration tooling before a second schema version exists;
 - byte-identical encoded video across different runtime environments;
-- guided novice onboarding, mandatory starter-profile selection, or no-JSON/no-terminal acceptance;
+- guided novice onboarding, mandatory starter-profile selection, or removal of the manual JSON/terminal route; NF-UX-03 still requires ordinary agent-mediated revisions without schema knowledge;
 - generic billing service, concurrent generation scheduler, distributed cache, or automatic source-history pruning.
 
 ## 26. Acceptance criteria
@@ -994,6 +1053,22 @@ Using the same LBC source intent and local assets as the direct-Remotion referen
 - crop/focal-point, stroke, shadow, and padding changes are expressible through profile/project artifacts;
 - Fatih accepts the full silent video plus the frames around seconds 8, 15, 21, and 27 as sufficiently faithful for NaraFrame to resume M1.
 
+### NF-AC-16: Competitive Medan visual storytelling
+
+**Early fidelity gate (M2.4.1):** compare the same 6–10s opening interval (the current reference boundary is 0–6.4s) at equivalent display size and matched times. Keep reference artwork, typography, framing and choreography as the control; document every unavoidable conversion or omission. Review an initial representative frame and 2–3s motion study before completing the opening. Both sides may be muted for the visual comparison; retain the original narrative schedule. Fatih must judge no relevant dimension worse, including within-shot continuity. A simplified replacement illustration, a clip of the reference, or a test-only composition bypassing public project authoring does not pass. This gate permits a faithful adaptation; it does not satisfy the full superiority criterion.
+
+**Full benchmark gate (M2.4.4):** use the owner's Medan reference, the same narration audio/content, and approximately its 67.5-second duration. Preserve reference source/audio hashes and review actual playback; reading HTML is not visual acceptance. Compare at equivalent display size and matched narrative moments, recording resolution/fps/encoding differences. Do not treat the reference script's factual claims as independently verified by this visual benchmark.
+
+Fatih rates five dimensions as worse/equal/better: composition/typography, illustration, motion/timing, continuity, and explanatory clarity. The gate requires no dimension worse and at least two better, with concrete scene/time observations. Inspect full playback and representative frames; no stand-ins or project-specific executable renderer code may satisfy the gate. Record owner approval and source/build identities. This is a benchmark-specific judgement, not universal superiority over Bang Motion.
+
+### NF-AC-17: Cross-topic first draft and approachable revisions
+
+**Early transfer gate (M2.4.2):** immediately after the recovered Medan opening is accepted and integrated, freeze the renderer, compiler/schema, CLI, bundled runtime/recipes, and skill revision. From one LBC brief and its existing assets, create a distinct 6–10s silent opening. Only project/profile/artwork data may change; no renderer code, new executable scene, or implementation/skill patch is allowed during the trial. Retain the first delivered draft before owner feedback and demonstrate a headline change and camera-speed change with undo. Fatih must consider the opening worth developing into a publication candidate. Failure blocks longer Medan work; record the missing capability and obtain a bounded recovery decision rather than silently patching the frozen engine.
+
+**Full transfer gate (M2.4.5):** freeze the updated implementation again after the Medan build and extend the retained LBC project into a 30-second silent draft with a distinct visual language. The opening trial and the complete-video trial are separate records. If engine/skill changes after the first freeze affect it, rerun the opening regression on the second freeze before judging the full video. Do not copy the Medan shot order or patch renderer code for LBC. Retain the first delivered draft before owner feedback; log internal correction passes, elapsed time, external generation, and subsequent revisions under NF-CO-02. “One brief” allows internal agent iteration; it does not mean one model call or promise equal effort to the unmeasured Bang Motion run.
+
+Fatih accepts the first draft as a plausible publication candidate, subject to normal editorial revisions. Exercise plain-language headline, camera-speed, object, and identity changes through the normal edit/preview/undo path. Preserve unaffected assets, validate shared dependencies and profile bindings, and explain any production impact. If renderer changes are required, the frozen-engine generalisation test has failed: retain that first result, obtain a scoped correction decision, protect the generic fix, and restart the affected trial from a clean source baseline on a new freeze. LBC uses `preview --draft`; silent final export is not added. M3 cannot start until NF-AC-16 and NF-AC-17 have evidence.
+
 All acceptance criteria above are requirements, not passed tests. Current implementation/runtime evidence is tracked in `docs/refine-spec.md` and `docs/plan.md`.
 
 ## 27. Post-MVP evidence gate
@@ -1014,4 +1089,10 @@ The first GUI may edit text/narration, asset selection and crop/transform, scene
 - Remotion text measurement: https://www.remotion.dev/docs/layout-utils/measure-text
 - Remotion text fitting: https://www.remotion.dev/docs/layout-utils/fit-text
 - Remotion transition sequencing: https://www.remotion.dev/docs/transitions/transitionseries
-- Bang Motion composition reference, pinned review snapshot: https://github.com/bangtutorial/bang-motion/tree/0f1bd1103835890354496d009af62885fe0a05d5
+- Bang Motion historical review snapshot: https://github.com/bangtutorial/bang-motion/tree/0f1bd1103835890354496d009af62885fe0a05d5
+- Bang Motion working explainer starter: https://github.com/bangtutorial/bang-motion/blob/main/assets/starter-explainer.html
+- Bang Motion art direction and visual verification: https://github.com/bangtutorial/bang-motion/blob/main/SKILL.md
+- Bang Motion architecture and visual failure patterns: https://github.com/bangtutorial/bang-motion/blob/main/references/architecture.md and https://github.com/bangtutorial/bang-motion/blob/main/references/anti-ppt.md
+- Remotion metadata/render context distinction: https://www.remotion.dev/docs/calculate-metadata
+
+The moving upstream links identify mechanisms reviewed on 2026-09-20; execution must resolve and record the exact revision used for adaptation rather than assuming it is the historical snapshot.

@@ -5,7 +5,15 @@ import type { NarrationBlock } from "../schema/narration.js";
 import { narrationTextHash } from "./voice-binding.js";
 
 /** Bump when a renderer change can alter pixels for identical input. */
-export const RENDER_ENGINE = "naraframe-draft/2";
+// 3: inline vector artwork and per-span headline weights changed the pixels.
+// 4: bundled faces are now loaded in the frame render context, so type that
+//    previously rendered in a substituted face renders in the bundled one.
+// 5: preserve SVG root clipping/transforms and reject failed sibling font faces.
+// 6: explicit camera/world parallax and sequential opaque object transforms.
+// 7: positive depth zoom and camera-aware required-text preflight.
+// 8: the exit beat fades elements out, so a held pose is no longer the
+//    last frame of a shot that used to keep everything on screen.
+export const RENDER_ENGINE = "naraframe-draft/8";
 
 /**
  * Finds a retained voice clip for a block: the spoken text (whitespace
@@ -118,6 +126,7 @@ export const computeSceneRenderKeys = (
           visual: scene.visual,
           layers: scene.layers,
           beats: scene.beats,
+          camera: scene.camera,
           transitionOut: scene.transitionOut,
         },
         durationInFrames: scene.endFrame - scene.startFrame,

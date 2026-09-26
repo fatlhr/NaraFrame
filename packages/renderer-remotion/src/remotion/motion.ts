@@ -9,7 +9,7 @@ const clamp = {
 
 const easingFor = (
   preset: "linear" | "smooth" | "snappy" | undefined,
-  action: "reveal" | "emphasize" | "focus",
+  action: "reveal" | "exit" | "emphasize" | "focus" | "transform" | "camera",
 ) => {
   if (preset === "linear") return Easing.linear;
   if (preset === "smooth") return Easing.inOut(Easing.cubic);
@@ -24,6 +24,7 @@ export interface MotionState {
   translateX: number;
   translateY: number;
   scale: number;
+  rotationDeg: number;
   anchor: { x: number; y: number };
 }
 
@@ -38,10 +39,55 @@ export const motionStateFor = (
     translateX: 0,
     translateY: 0,
     scale: 1,
+    rotationDeg: 0,
     anchor: { x: 0.5, y: 0.5 },
   };
 
+  const transformPose = scene.beats
+    .filter((item) => item.action === "transform" && item.targetId === targetId)
+    .sort((left, right) => left.startFrame - right.startFrame)
+    .reduce(
+      (pose, beat) => {
+        if (beat.action !== "transform" || localFrame < beat.startFrame)
+          return pose;
+        const progress = interpolate(
+          localFrame,
+          [beat.startFrame, beat.startFrame + beat.durationInFrames],
+          [0, 1],
+          {
+            ...clamp,
+            easing: easingFor(beat.params.easingPreset, beat.action),
+          },
+        );
+        return {
+          x:
+            beat.params.to.x === undefined
+              ? pose.x
+              : pose.x + (beat.params.to.x - pose.x) * progress,
+          y:
+            beat.params.to.y === undefined
+              ? pose.y
+              : pose.y + (beat.params.to.y - pose.y) * progress,
+          scale:
+            beat.params.to.scale === undefined
+              ? pose.scale
+              : pose.scale + (beat.params.to.scale - pose.scale) * progress,
+          rotationDeg:
+            beat.params.to.rotationDeg === undefined
+              ? pose.rotationDeg
+              : pose.rotationDeg +
+                (beat.params.to.rotationDeg - pose.rotationDeg) * progress,
+        };
+      },
+      { x: 0, y: 0, scale: 1, rotationDeg: 0 },
+    );
+  state.translateX = transformPose.x;
+  state.translateY = transformPose.y;
+  state.scale = transformPose.scale;
+  state.rotationDeg = transformPose.rotationDeg;
+
   for (const beat of scene.beats.filter((item) => item.targetId === targetId)) {
+    if (beat.action === "transform") continue;
     const progress = interpolate(
       localFrame,
       [beat.startFrame, beat.startFrame + beat.durationInFrames],
@@ -56,6 +102,18 @@ export const motionStateFor = (
       if (beat.params.direction === "down") state.translateY -= offset;
       if (beat.params.direction === "left") state.translateX += offset;
       if (beat.params.direction === "right") state.translateX -= offset;
+    }
+
+    if (beat.action === "exit") {
+      // The mirror of reveal. `interpolate` clamps, so every frame after the
+      // window reads progress 1 and the element stays hidden however the
+      // renderer arrives at that frame.
+      state.opacity *= 1 - progress;
+      const offset = progress * (beat.params.distance ?? 0);
+      if (beat.params.direction === "up") state.translateY -= offset;
+      if (beat.params.direction === "down") state.translateY += offset;
+      if (beat.params.direction === "left") state.translateX -= offset;
+      if (beat.params.direction === "right") state.translateX += offset;
     }
 
     if (beat.action === "emphasize") {
@@ -108,9 +166,79 @@ export const groupScreenTransformFor = (
     translateX: group.transform.x + motion.translateX,
     translateY: group.transform.y + motion.translateY,
     scale: group.transform.scale * motion.scale,
-    rotationDeg: group.transform.rotationDeg,
+    rotationDeg: group.transform.rotationDeg + motion.rotationDeg,
     anchorX: motion.anchor.x,
     anchorY: motion.anchor.y,
+  };
+};
+
+export interface CameraState {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
+export const cameraStateFor = (
+  scene: CompiledDraft["scenes"][number],
+  localFrame: number,
+): CameraState => {
+  if (!scene.camera) return { x: 0, y: 0, zoom: 1 };
+  let pose: CameraState = scene.camera.initial;
+  for (const move of [...scene.camera.moves].sort(
+    (left, right) => left.startFrame - right.startFrame,
+  )) {
+    if (localFrame < move.startFrame) break;
+    const progress = interpolate(
+      localFrame,
+      [move.startFrame, move.startFrame + move.durationInFrames],
+      [0, 1],
+      {
+        ...clamp,
+        easing: easingFor(move.easingPreset, "camera"),
+      },
+    );
+    pose = {
+      x: pose.x + (move.to.x - pose.x) * progress,
+      y: pose.y + (move.to.y - pose.y) * progress,
+      zoom: pose.zoom + (move.to.zoom - pose.zoom) * progress,
+    };
+    if (progress < 1) break;
+  }
+  return pose;
+};
+
+export interface PlaneTransform {
+  translateX: number;
+  translateY: number;
+  scale: number;
+  originX: number;
+  originY: number;
+}
+
+export const planeTransformFor = (
+  draft: CompiledDraft,
+  scene: CompiledDraft["scenes"][number],
+  space: "world" | "overlay" | undefined,
+  parallax: number | undefined,
+  localFrame: number,
+): PlaneTransform => {
+  if (space !== "world") {
+    return {
+      translateX: 0,
+      translateY: 0,
+      scale: 1,
+      originX: draft.width / 2,
+      originY: draft.height / 2,
+    };
+  }
+  const depth = parallax ?? 1;
+  const camera = cameraStateFor(scene, localFrame);
+  return {
+    translateX: -camera.x * depth,
+    translateY: -camera.y * depth,
+    scale: camera.zoom ** depth,
+    originX: draft.width / 2,
+    originY: draft.height / 2,
   };
 };
 
@@ -266,6 +394,7 @@ export const motionStyleFor = (
     opacity: state.opacity,
     translate: `${state.translateX}px ${state.translateY}px`,
     scale: state.scale,
+    rotate: `${state.rotationDeg}deg`,
     transformOrigin: `${state.anchor.x * 100}% ${state.anchor.y * 100}%`,
   };
 };

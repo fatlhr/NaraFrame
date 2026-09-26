@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { SanitizedSvg } from "../asset/svg-sanitize.js";
 import {
   type Issue,
   issuesFromZodError,
@@ -16,6 +17,12 @@ import { type Scenes, ScenesSchema } from "./scene.js";
 
 export interface PlanSource {
   project: ProjectConfig;
+  /**
+   * Vector artwork already read from disk and checked, keyed by asset id.
+   * The loader fills this in; the compiler refuses an SVG asset without it
+   * rather than inlining markup nobody validated.
+   */
+  vectors?: Record<string, SanitizedSvg>;
   profile: ProfileLock;
   scenes: Scenes;
   assets: AssetManifest;
@@ -348,6 +355,9 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
     ok: true,
     value: {
       project,
+      ...(container.vectors
+        ? { vectors: container.vectors as Record<string, SanitizedSvg> }
+        : {}),
       profile,
       scenes,
       assets,

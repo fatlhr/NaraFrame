@@ -3,6 +3,7 @@ import {
   IdSchema,
   RelativeAudioPathSchema,
   RelativePngPathSchema,
+  RelativeSvgPathSchema,
   SchemaVersionSchema,
   Sha256Schema,
 } from "./primitives.js";
@@ -35,8 +36,19 @@ const PlannedAudioAssetSchema = z
   })
   .strict();
 
+const PlannedVectorAssetSchema = z
+  .object({
+    id: IdSchema,
+    status: z.literal("planned"),
+    kind: z.literal("svg"),
+    purpose: z.string().trim().min(1),
+    intendedOrigin: AssetOriginTypeSchema,
+  })
+  .strict();
+
 const PlannedAssetSchema = z.union([
   PlannedPngAssetSchema,
+  PlannedVectorAssetSchema,
   PlannedAudioAssetSchema,
 ]);
 
@@ -82,7 +94,29 @@ const ReadyAudioAssetSchema = z
   })
   .strict();
 
-const ReadyAssetSchema = z.union([ReadyPngAssetSchema, ReadyAudioAssetSchema]);
+/** Vector artwork. It is passive data: the loader refuses anything runnable. */
+const ReadyVectorAssetSchema = z
+  .object({
+    id: IdSchema,
+    status: z.literal("ready"),
+    kind: z.literal("svg"),
+    path: RelativeSvgPathSchema,
+    sha256: Sha256Schema,
+    origin: z
+      .object({
+        type: AssetOriginTypeSchema,
+        source: z.string().trim().min(1).optional(),
+        license: z.string().trim().min(1).optional(),
+      })
+      .strict(),
+  })
+  .strict();
+
+const ReadyAssetSchema = z.union([
+  ReadyPngAssetSchema,
+  ReadyAudioAssetSchema,
+  ReadyVectorAssetSchema,
+]);
 
 export const AssetSchema = z.union([PlannedAssetSchema, ReadyAssetSchema]);
 

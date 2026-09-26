@@ -12,7 +12,14 @@ const EVIDENCE: Record<string, string[]> = {
   visuals: ["text", "media", "composition"],
   layers: ["text", "image", "shape", "group"],
   groupLayouts: ["absolute", "stack", "grid"],
-  beats: ["reveal", "emphasize", "focus"],
+  // motion-transitions, visual-preflight and compile-draft-m0-10 exercise these.
+  beats: ["reveal", "exit", "emphasize", "focus", "transform"],
+  compositionMotion: [
+    "camera-framing",
+    "camera-moves",
+    "parallax",
+    "world-overlay",
+  ],
   beatCameras: ["push", "pan", "zoom"],
   transitions: ["cut", "push-through", "mask-reveal", "match-cut"],
   paletteTokens: [
@@ -22,6 +29,7 @@ const EVIDENCE: Record<string, string[]> = {
     "palette.accent",
   ],
   audio: ["narration", "captions", "music", "sfx", "ducking"],
+  textEmphasis: ["accent", "strong", "quiet"],
 };
 
 describe("capability registry", () => {
@@ -36,6 +44,7 @@ describe("capability registry", () => {
   it("advertises only the media the asset schema accepts", () => {
     expect(registry.media).toEqual({
       images: ["png"],
+      vectors: ["svg"],
       audio: ["m4a", "mp3", "wav"],
       fonts: ["ttf", "otf", "woff2"],
     });
@@ -46,6 +55,7 @@ describe("capability registry", () => {
       ...registry.visuals,
       ...registry.layers,
       ...registry.media.images,
+      ...registry.media.vectors,
       ...registry.media.audio,
       ...registry.media.fonts,
     ]);
@@ -55,9 +65,10 @@ describe("capability registry", () => {
     }
   });
 
-  it("keeps svg and video out until their decode tests exist", () => {
+  it("keeps video out until its decode test exists", () => {
     const names = registry.unsupported.map((entry) => entry.name);
-    expect(names).toContain("svg");
     expect(names).toContain("video-asset");
+    // SVG left this list in M2.4.1, once import, sanitising and render existed.
+    expect(names).not.toContain("svg");
   });
 });

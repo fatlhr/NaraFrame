@@ -55,26 +55,61 @@ const compileIssue = (
 
 const compiledAssets = (source: PlanSource): Record<string, CompiledAsset> =>
   Object.fromEntries(
-    source.assets.assets.map((asset) => [
-      asset.id,
-      asset.status === "ready"
-        ? asset.kind === "png"
-          ? {
+    source.assets.assets.flatMap((asset): Array<[string, CompiledAsset]> => {
+      if (asset.status !== "ready") {
+        return [
+          [
+            asset.id,
+            {
+              kind: "placeholder" as const,
+              assetId: asset.id,
+              label: asset.purpose,
+            },
+          ],
+        ];
+      }
+      if (asset.kind === "png") {
+        return [
+          [
+            asset.id,
+            {
               kind: "png" as const,
               publicPath: asset.path,
               sha256: asset.sha256,
-            }
-          : {
-              kind: asset.kind,
-              publicPath: asset.path,
-              sha256: asset.sha256,
-            }
-        : {
-            kind: "placeholder" as const,
-            assetId: asset.id,
-            label: asset.purpose,
+            },
+          ],
+        ];
+      }
+      if (asset.kind === "svg") {
+        const vector = source.vectors?.[asset.id];
+        // An unresolved vector is reported by compileDraft; leaving it out
+        // here keeps the compiled draft free of unchecked markup.
+        return vector
+          ? [
+              [
+                asset.id,
+                {
+                  kind: "svg" as const,
+                  publicPath: asset.path,
+                  sha256: asset.sha256,
+                  body: vector.body,
+                  viewBox: vector.viewBox,
+                },
+              ],
+            ]
+          : [];
+      }
+      return [
+        [
+          asset.id,
+          {
+            kind: asset.kind,
+            publicPath: asset.path,
+            sha256: asset.sha256,
           },
-    ]),
+        ],
+      ];
+    }),
   );
 
 /**
@@ -433,8 +468,45 @@ const scaleBeat = (
     };
   }
 
+  if (beat.action === "exit") {
+    // Its drift is a design-space distance, scaled like a reveal's.
+    const distanceScale =
+      beat.params.direction === "left" || beat.params.direction === "right"
+        ? scaleX
+        : scaleY;
+    return {
+      ...common,
+      action: beat.action,
+      params: {
+        ...beat.params,
+        ...(beat.params.distance === undefined
+          ? {}
+          : { distance: beat.params.distance * distanceScale }),
+      },
+    };
+  }
+
   if (beat.action === "emphasize") {
     return { ...common, action: beat.action, params: beat.params };
+  }
+
+  if (beat.action === "transform") {
+    return {
+      ...common,
+      action: beat.action,
+      params: {
+        ...beat.params,
+        to: {
+          ...beat.params.to,
+          ...(beat.params.to.x !== undefined
+            ? { x: beat.params.to.x * scaleX }
+            : {}),
+          ...(beat.params.to.y !== undefined
+            ? { y: beat.params.to.y * scaleY }
+            : {}),
+        },
+      },
+    };
   }
 
   return { ...common, action: beat.action, params: beat.params };
@@ -518,6 +590,11 @@ const validateLayerFrames = (
   const issues: Issue[] = [];
   const { width, height } = source.project.format.design;
   const safeZone = source.profile.render.safeZone;
+  const worldMemberIds = new Set(
+    scene.visual.layers.flatMap((layer) =>
+      layer.type === "group" && layer.space === "world" ? layer.memberIds : [],
+    ),
+  );
 
   scene.visual.layers.forEach((layer, layerIndex) => {
     const framePath = `/scenes/${sceneIndex}/visual/layers/${layerIndex}/frame`;
@@ -525,7 +602,13 @@ const validateLayerFrames = (
     if (!frame) return;
     const right = frame.x + frame.width;
     const bottom = frame.y + frame.height;
-    if (frame.x < 0 || frame.y < 0 || right > width || bottom > height) {
+    const isWorldScenery =
+      layer.type !== "text" &&
+      (layer.space === "world" || worldMemberIds.has(layer.id));
+    if (
+      !isWorldScenery &&
+      (frame.x < 0 || frame.y < 0 || right > width || bottom > height)
+    ) {
       issues.push(
         compileIssue(
           "LAYER_OUTSIDE_CANVAS",
@@ -556,6 +639,119 @@ const validateLayerFrames = (
     }
   });
 
+  return issues;
+};
+
+type MotionProperty = "opacity" | "x" | "y" | "scale" | "rotationDeg";
+
+const beatProperties = (beat: Beat): MotionProperty[] => {
+  if (beat.action === "reveal") {
+    return [
+      "opacity",
+      beat.params.direction === "left" || beat.params.direction === "right"
+        ? "x"
+        : "y",
+    ];
+  }
+  if (beat.action === "exit") {
+    // An exit always writes opacity, and writes an axis only when it drifts.
+    const direction = beat.params.direction;
+    if (!direction || !beat.params.distance) return ["opacity"];
+    return [
+      "opacity",
+      direction === "left" || direction === "right" ? "x" : "y",
+    ];
+  }
+  if (beat.action === "emphasize") return ["scale"];
+  if (beat.action === "focus") {
+    if (beat.params.camera === "pan") return ["x"];
+    if (beat.params.camera === "push") return ["y", "scale"];
+    return ["scale"];
+  }
+  return Object.keys(beat.params.to) as MotionProperty[];
+};
+
+const validateMotionWindows = (
+  scene: Scene,
+  sceneIndex: number,
+  fps: number,
+  sceneFrames: number,
+): Issue[] => {
+  const issues: Issue[] = [];
+  const writes = new Map<
+    string,
+    Array<{ start: number; end: number; modern: boolean }>
+  >();
+  scene.beats.forEach((beat, beatIndex) => {
+    for (const property of beatProperties(beat)) {
+      const key = `${beat.targetId}:${property}`;
+      const current = {
+        start: msToFrameOffset(beat.startMs, fps),
+        end:
+          msToFrameOffset(beat.startMs, fps) +
+          msToDurationFrames(beat.durationMs, fps),
+        // Actions introduced with explicit endpoint semantics are conflict
+        // checked; overlaps among the original presets stay accepted so
+        // existing projects keep compiling. `exit` belongs to the first group:
+        // two writes to one opacity in the same window have no defined result.
+        modern: beat.action === "transform" || beat.action === "exit",
+      };
+      const conflict = writes
+        .get(key)
+        ?.find(
+          (other) =>
+            (current.modern || other.modern) &&
+            current.start < other.end &&
+            current.end > other.start,
+        );
+      if (conflict) {
+        issues.push(
+          compileIssue(
+            "MOTION_PROPERTY_OVERLAP",
+            `/scenes/${sceneIndex}/beats/${beatIndex}`,
+            `Beat ${beat.id} overlaps another write to ${property} on ${beat.targetId}.`,
+            "error",
+            "Keep writes to the same target property sequential; independent properties may overlap.",
+          ),
+        );
+      }
+      writes.set(key, [...(writes.get(key) ?? []), current]);
+    }
+  });
+
+  scene.camera?.moves.forEach((move, moveIndex) => {
+    const start = msToFrameOffset(move.startMs, fps);
+    const end = start + msToDurationFrames(move.durationMs, fps);
+    if (end > sceneFrames) {
+      issues.push(
+        compileIssue(
+          "CAMERA_MOVE_OUTSIDE_SCENE",
+          `/scenes/${sceneIndex}/camera/moves/${moveIndex}`,
+          `Camera move ${move.id} ends after scene ${scene.id}.`,
+        ),
+      );
+    }
+    const conflict = scene.camera?.moves
+      .slice(0, moveIndex)
+      .find(
+        (other) =>
+          start <
+            msToFrameOffset(other.startMs, fps) +
+              msToDurationFrames(other.durationMs, fps) &&
+          end > msToFrameOffset(other.startMs, fps),
+      );
+    if (conflict) {
+      issues.push(
+        compileIssue(
+          "CAMERA_MOVE_OVERLAP",
+          `/scenes/${sceneIndex}/camera/moves/${moveIndex}`,
+          `Camera move ${move.id} overlaps camera move ${conflict.id}.`,
+          "error",
+          "Keep camera moves sequential so each move starts from the preceding resolved pose.",
+        ),
+      );
+    }
+  });
   return issues;
 };
 
@@ -949,6 +1145,9 @@ export const compileDraft = (
       renderCursor = endFrame;
     }
     issues.push(...validateLayerFrames(scene, sceneIndex, source));
+    issues.push(
+      ...validateMotionWindows(scene, sceneIndex, fps, durationInFrames),
+    );
     const layout =
       scene.visual.type === "composition"
         ? resolveGroupLayouts(
@@ -998,6 +1197,30 @@ export const compileDraft = (
           ? layout.layers.map((layer) => scaleLayer(layer, scaleX, scaleY))
           : [],
       beats,
+      ...(scene.camera
+        ? {
+            camera: {
+              initial: {
+                x: scene.camera.initial.x * scaleX,
+                y: scene.camera.initial.y * scaleY,
+                zoom: scene.camera.initial.zoom,
+              },
+              moves: scene.camera.moves.map((move) => ({
+                id: move.id,
+                startFrame: msToFrameOffset(move.startMs, fps),
+                durationInFrames: msToDurationFrames(move.durationMs, fps),
+                to: {
+                  x: move.to.x * scaleX,
+                  y: move.to.y * scaleY,
+                  zoom: move.to.zoom,
+                },
+                ...(move.easingPreset
+                  ? { easingPreset: move.easingPreset }
+                  : {}),
+              })),
+            },
+          }
+        : {}),
       transitionOut: compileTransition(scene.transition, fps),
       ...(requestedScope.type === "scene"
         ? scopedTransitionHandles(source, sceneIndex, durationInFrames, fps)
