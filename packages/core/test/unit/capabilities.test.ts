@@ -12,7 +12,14 @@ const EVIDENCE: Record<string, string[]> = {
   visuals: ["text", "media", "composition"],
   layers: ["text", "image", "shape", "group"],
   groupLayouts: ["absolute", "stack", "grid"],
-  beats: ["reveal", "emphasize", "focus"],
+  // motion-transitions, visual-preflight and compile-draft-m0-10 exercise these.
+  beats: ["reveal", "exit", "emphasize", "focus", "transform"],
+  compositionMotion: [
+    "camera-framing",
+    "camera-moves",
+    "parallax",
+    "world-overlay",
+  ],
   beatCameras: ["push", "pan", "zoom"],
   transitions: ["cut", "push-through", "mask-reveal", "match-cut"],
   paletteTokens: [

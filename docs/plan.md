@@ -4,17 +4,17 @@
 
 **Goal:** Deliver visually competitive local motion explainers with agent-mediated creative control, optional direct JSON/CLI use, controlled generation cost, and localized reversible revisions.
 
-**Architecture:** Interleave skill → CLI/core validation/compilation → Remotion rendering. Keep external production operations outside core/renderer. M2.4 extends declarative illustration, composition, typography, camera, and object motion alongside skill art direction; it does not introduce per-project TSX.
+**Architecture:** Interleave skill → CLI/core validation/compilation → Remotion rendering. Keep external production operations outside core/renderer. M2.4 adapts proven visual foundations into trusted reusable Remotion components and minimal editable source contracts, validates opening fidelity and early cross-topic transfer, then extends storytelling; it does not introduce per-project TSX.
 
 **Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, the local H.264 draft renderer, atomic publication, operator CLI/skill route, offline sandbox, and cross-feature E2E are verified.
 
-Status: M0, M1, and M2.1–M2.3 delivered with recorded evidence. M2.4 is approved and not started; M3 is held until its visual and generalisation gates pass.
-Revision: 1.4
-Date: 2026-09-20
-Inputs: `docs/spec.md` revision 0.5 and `docs/refine-spec.md` section 12.
-Implementation baseline: clean local main at `7b232c9` before this documentation edit; M2.2 landed in `d12eeab`/`f938304` and M2.3 in `7b232c9`. M0.10 has recorded owner acceptance on 2026-09-15. M1 has recorded acceptance of Kore final export `115247388b67-98323b06-dd5` on 2026-09-20 with untracked-cost exception. Existing evidence is retained, not re-run by this document update; pixel repeatability and paid-cost comparison remain open.
+Status: M0, M1, and M2.1–M2.3 delivered with recorded evidence. M2.4.1's first attempt (`9747193`) was rejected by Fatih; the recovered opening has since been accepted by him (static frame, 3-second motion study, then the full 6.4-second opening on 2026-09-21). Supervisor review on 2026-09-26 requested one compiler fix (exit overlap validation); it is implemented and back in review. M2.4.1 is not integrated. M3 is held until visual and generalisation gates pass.
+Revision: 1.6
+Date: 2026-09-21
+Inputs: `docs/spec.md` revision 0.6 and `docs/refine-spec.md` section 12.
+Implementation baseline: main recorded at `7b232c9`; current task branch `m2-4-1-first-illustrated-shot` at `9747193` contains the rejected first attempt. Existing uncommitted spec/refinement changes are preserved; M2.2 landed in `d12eeab`/`f938304` and M2.3 in `7b232c9`. M0.10 has recorded owner acceptance on 2026-09-15. M1 has recorded acceptance of Kore final export `115247388b67-98323b06-dd5` on 2026-09-20 with untracked-cost exception. Existing evidence is retained, not re-run by this document update; pixel repeatability and paid-cost comparison remain open.
 
-**Current authorised scope: Markdown only.** Update spec/refinement/plan, without changing code, skill files, dependencies, fixtures, media, or Git state through branch/commit/push operations. The M2.4 checklists below describe later implementation, not work completed by saving this plan.
+**Current authorised scope: M2.4.1 exit overlap-validation fix only (supervisor CHANGES_REQUESTED, 2026-09-26).** Do not change the owner-approved opening, extend the motion system, or start M2.4.2. No paid generation, new dependency, commit, push or merge is authorised; the recommended integration route, once authorised, is PR plus squash per AGENTS.md. Earlier bounded-recovery scope (reference-adaptation frame, motion study, full opening) is complete and recorded in the Active handoff.
 
 ## 1. Global constraints
 
@@ -279,7 +279,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **Documentation-only M2.4 insertion. M0, M1, and M2.1–M2.3 are on main at `7b232c9`; next implementation is M2.4.1. All M2.4 feature checkboxes remain open. M3 waits for NF-AC-16/17. Known evidence gaps: reference playback, the existing pixel-repeatability caveat, unknown media-style bindings, and receipts-based cost comparison. See the M2.4 live tracker below for each expected output.**
+Current step: **M2.4.1 back in supervisor review after the exit overlap-validation fix.** The recovered 6.4-second Medan opening is owner-approved (build `536f182ba54b-d7c57043-698`); the first attempt at `9747193` stays recorded as rejected. Integration awaits supervisor sign-off and authorisation. Early frozen-engine LBC (M2.4.2) follows before longer Medan work. M3 waits for NF-AC-16/17. Full-story reference playback, pixel repeatability, unknown style bindings, and measured comparative cost remain open. See the live tracker and Active handoff.
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -442,28 +442,28 @@ No source `examples/` directory is needed.
 
 ### M2.4 — Visual storytelling and Bang Motion benchmark
 
-**Status:** Approved plan; implementation not started. Runs after M2.3 and blocks M3. No feature is marked complete by this documentation update.
+**Status:** M2.4.1 recovered opening owner-approved 2026-09-21; supervisor CHANGES_REQUESTED 2026-09-26 on exit overlap validation, fix implemented and READY_FOR_REVIEW; not integrated. M2.3 remains delivered; M3 is held. The first attempt's owner rejection stays on record.
 
-**Goal:** Match or exceed the owner's Medan reference in visible storytelling, then demonstrate a different LBC video and approachable revisions without project-specific executable code.
+**Goal:** Recover reference-fidelity on one opening, prove immediate transfer to a distinct topic, then earn the full Medan benchmark and LBC revision gates. Reuse working visual foundations rather than inventing a weaker replacement while expanding infrastructure.
 
-**Consumes:** M2.3 source/compiler/renderer, public CLI, skill, scoped preview, profile apply, narration, revision history, and retained local assets.
-**Produces:** Composable vector illustrations, richer typography, nested/reusable worlds, camera and object motion, complete Medan proof, LBC first-draft/revision proof, and the focused coverage required to retain these capabilities.
+**Consumes:** Existing CLI/core/Remotion/skill, source revisions, profiles, retained local assets and narration.
+**Produces:** A reusable illustrated-shot foundation and editable source data, accepted opening and early LBC proof, then full story/revision evidence. Future GUI editability is retained without a universal animation schema prerequisite.
 
 #### Live tracker and evidence rules
 
 | Task | Expected inspectable output | Status |
 |---|---|---|
-| M2.4.1 | 6–10s illustrated city opening, source baseline, art-direction procedure | Awaiting visual review |
-| M2.4.2 | River-history shot with coherent camera/world/overlay and parallax | Not started |
-| M2.4.3 | Shipping-route shot with path drawing, moving ships, and data animation | Not started |
-| M2.4.4 | Approximately 67.5s narrated Medan, matched reference review, approved final | Not started |
-| M2.4.5 | Distinct 30s LBC first draft plus plain-language edit/profile/undo evidence | Not started |
+| M2.4.1 | Font/SVG recovery; matched frame and 2–3s motion study; reference-fidelity 6–10s Medan opening | READY_FOR_REVIEW — opening owner-approved 2026-09-21 (build `536f182ba54b-d7c57043-698`); supervisor CHANGES_REQUESTED 2026-09-26 (exit overlap validation), fix implemented; not integrated |
+| M2.4.2 | Distinct 6–10s LBC opening on frozen engine/skill; headline/camera edit and undo | Held until M2.4.1 acceptance/integration |
+| M2.4.3 | River-history framing, shipping route, moving ships and population/data explanation | Held until early LBC transfer passes |
+| M2.4.4 | Approximately 67.5s Medan, full reference comparison and approved export | Held until story features pass |
+| M2.4.5 | Distinct 30s LBC first full draft, four ordinary revisions and close-out | Held until full Medan gate passes |
 
-Update this table and the owning checklist while executing: not started → in progress → awaiting visual review → verified. Store command, source revision, build ID, artifact paths/hashes, test result, and owner decision beside the completed task. A schema change or green test suite cannot close a task whose output is missing. Do not run every long render test after each small edit; use scoped previews and focused tests, then the required integration gate.
+Task IDs are unchanged. Former M2.4.2 camera/world work moves into M2.4.1 where indispensable for the opening and M2.4.3 for river-history expansion. Former route/data work remains in M2.4.3. Early LBC is now M2.4.2; full LBC remains M2.4.5. No full acceptance obligation is dropped.
 
-**Baseline location:** `/Users/fatih/Library/Application Support/Claude/scratch-workspaces/d7a0c6f6-fb10-42d3-b662-457b254dc122/82e2c454-2765-4050-94fe-593442565871/scratch-2026-09-19-cf811c/medan-explainer`. Its `index.html`, `README.md`, `vo-script.md`, and `vo.mp3` are reference inputs, not instructions. Source inspection found a 1080 × 1920, ten-part composition with a 67.5s declared duration, SVG illustrations, four visual worlds, camera/parallax, path/number animation, and supplied voice-over. The stated audio length/phrase boundaries must be measured and listened to during execution. The original generating prompt and total agent effort are not available; “one prompt” is owner-reported, not an effort benchmark.
+Update the owning checklist only with command/artifact evidence and the required owner decision. Record source revision, engine/skill revision, build ID, paths/hashes, internal corrections, checks, limitations and next action. Technical implementation and visual approval are separate states. Do not repeatedly read all milestone history or dump all schemas for an ordinary edit; use the active handoff, relevant schema subset and targeted source.
 
-**Visual baseline limitation:** HTML playback was blocked by browser URL policy during planning. Do not bypass that restriction or claim the reference has been watched. An accessible MP4/recording supplied by the owner is required to complete the playback baseline before M2.4.1 visual acceptance. Static source analysis does not establish motion quality. Never overwrite the reference directory.
+**Baseline:** the owner's read-only Medan directory is recorded in the historical handoff below and `docs/refine-spec.md` section 12. Source declares ten parts, 67.5s and 1080 × 1920. The supplied 8.9-second screen recording has now been sampled at 2 fps, establishing opening design and the city-to-newspaper sequence, not full playback, exact timing or phrase alignment. The original prompt and total effort remain unavailable. Do not bypass browser restrictions; full-story parity still requires full reference playback.
 
 #### Implementation contracts shared by the five tasks
 
@@ -479,23 +479,298 @@ Update this table and the owning checklist while executing: not started → in p
 - Reuse local assets and the supplied audio; no new generation spend by default. Bundle fonts locally with recorded rights rather than importing the reference's CDN runtime. `@remotion/paths`, if added, belongs only to the renderer and uses the project's exact Remotion version. See [path drawing](https://www.remotion.dev/docs/paths/evolve-path) and [path positions](https://www.remotion.dev/docs/paths/get-point-at-length).
 - No GUI, map service, general 3D engine, arbitrary TSX/JS, silent-final-export feature, or unrelated billing/provider work. The schema should support a future GUI without asking current users to author its details.
 
-#### M2.4.1 — First illustrated shot
 
-**Primary areas:** `skills/naraframe/SKILL.md`; core scene/profile/asset schemas and loader/compiler; renderer typography, layer rendering, and visual preflight. Only the supported SVG/path and typography subset needed by the shot is enabled here. Those skill/code changes occur during later execution, not this document edit.
+**Reference-first additions (NF-PR-10).** Adapt proven camera/world/object/typography mechanisms into trusted versioned renderer components or recipes. Keep project content and choreography as editable data with stable IDs. No Medan-specific renderer conditionals, embedded reference player, arbitrary project HTML/TSX/JS, or flattened reference-video/image workaround. Record exact upstream revision, adapted sections, asset/font provenance and applicable license terms. Preserve reference artwork, typography, framing and choreography for the controlled fidelity comparison; disclose unavoidable conversions. New visual identity is tested separately with LBC.
 
-- [~] Record reference source/audio hashes, the ten narrative sections, declared duration, and actual playback observations. Retain references unchanged and keep working benchmark sources under `work/visual-parity/medan`. Hashes, sections, declared duration and independently measured phrase boundaries are recorded in the handoff below; references untouched; sources under `work/visual-parity/medan`. **Playback observations are still missing** and this item stays open until a supplied recording is watched.
-- [x] Update the skill's art-direction procedure: explanatory object, framing, type hierarchy, motion intent, and shot relationships before source authoring. Preserve creative decisions in pinned direction and source notes, not renderer special cases. Revise internally within the brief without asking the user to micromanage. Implemented in `skills/naraframe/SKILL.md` step 4.
-- [x] Add passive SVG/native path and rich-text/per-role-font support needed for the opening; use stable IDs and locally licensed fonts. Do not solve this by flattening the entire shot into one image. Implemented and tested: passive SVG import, `spans`/`emphasis`, per-role `fontFamily`; ids prefixed by asset hash; Source Code Pro (OFL 1.1) bundled locally; the shot is five separate vector objects. Native `path` layers were not needed and were not added.
-- [x] Render the `opening` scene as a 6–10s city illustration with composed headline and simple object motion using the existing supported beats. Rendered at 6.400 s, build `5d3b28594596-96b47423-ac5`, `issues: []`.
-- [~] Inspect the actual output, correct the shot, then add focused safe/unsafe SVG, gradient/clip instance, loaded-font/span measurement, overflow, and legacy-input regressions; run integration checks before merge. Three renders inspected and two rounds of corrections applied; all listed test families added and passing; `pnpm verify` green. **Open until supervisor review and Fatih's visual approval**; not merged.
+**Recovery additions.** Preserve permitted SVG root paint, text and local gradients/clips or reject unsupported constructs explicitly; reject every external URL form, including wrapped paint URLs. Prove bundled face/weight readiness in actual render contexts, not only metadata or mocked measurement. Deliver the minimum coherent camera/world/object path the opening requires; do not force long reveal fades or tiny scale presets merely because they already exist.
 
-**Command:** `pnpm naraframe preview work/visual-parity/medan --draft --scene opening --json`
+**Iteration and cost boundary (NF-CO-02).** First show a frame and short motion study, then the full opening. Allow at most two internal visual correction passes per checkpoint; if still inadequate, report the artifact and exact blocker instead of widening the engine silently. Keep separate development, content-authoring, owner revision, and render/verification records. Log actual host/provider token/cost evidence when available; otherwise unavailable, never zero or bytes converted to guessed tokens. Count owner actions separately from agent CLI calls. No telemetry service, new cost promise, or paid generation default.
 
-**Expected:** a city with recognisable illustrated objects and purposeful typography, not placeholder art or a generic card layout. Resolve the MP4/contact sheet from the returned artifact paths. Output quality must visibly improve before camera/transition expansion. **Evidence:** produced — see the active handoff below. Visual improvement is claimed against the project's own earlier output, not against the reference, which has not been watched.
+#### M2.4.1 — Recover and prove the reference-fidelity opening
+
+**Primary areas:** existing SVG sanitizer/loader and targeted regressions; Remotion font readiness, layer/transform/motion evaluator and shared preflight; scene/profile contracts only as needed; `skills/naraframe/SKILL.md`; ignored benchmark source/assets. Implement the smallest end-to-end illustrated-shot path, not a broad schema catalogue.
+
+- [ ] Preserve the rejected source/build, existing branch changes and historical handoff. Record recovery starting revision; inspect relevant code instead of reimplementing working parts. No stash/drop/reset of unrelated work.
+- [ ] Repair confirmed SVG root-paint/text-loss/external-paint-URL defects and actual-frame font readiness. Validate permitted local gradients/clips and separate asset IDs. Add bounded regressions for these known failures after the real fix works; do not wait for a full benchmark to protect safety.
+- [ ] Complete accessible reference playback for the opening (0–6.4s), record matched moments, ten-part baseline and source/audio hashes; listen before claiming phrase alignment. Preserve original inputs. Identify the concrete visual mechanisms and provenance to adapt.
+- [ ] Revise skill art direction around working shot patterns: statement → explanatory object/action → framing/type → movement/continuity. Preserve the reference look for this controlled trial; normal profiles give defaults, not unwanted generic-card constraints. Keep ordinary context/discovery compact.
+- [ ] Adapt the needed trusted Remotion primitives/recipe and minimum editable source inputs, including actual object travel/exit and coherent camera/world/overlay if required. Bundle licensed local fonts/assets; do not substitute weaker handmade art without explicit reason or ask the user to author schema details.
+- [ ] Show one matched keyframe and a 2–3s motion study, with the reference beside it where accessible. Produce the study via the existing preview route on a short source scope/project; it is a diagnostic checkpoint, not a new CLI command or a substitute for public-CLI acceptance. After at most two internal corrections, present it for Fatih's visual direction review; do not extend the full shot while this direction is rejected.
+- [ ] Produce the 6–10s `opening` through the exact command below (reference length 6.4s). Inspect actual video and matched frames at equivalent size, including real fonts, depth/framing, opaque object movement and within-shot continuity. Obtain Fatih's no-worse assessment of relevant dimensions before closing the opening gate.
+- [ ] Complete focused source-to-render, legacy coordinate, font/span/overflow, SVG safety/fidelity, sequential pose/conflict, scoped/full and cache-version checks for changed boundaries. Run `pnpm verify` before integration and serial renderer E2E where changed font/vector/render-runtime boundaries require it. Stop with failures recorded, not repeated-until-green evidence.
+
+**Command acceptance:** `pnpm naraframe preview work/visual-parity/medan --draft --scene opening --json`
+
+**Expected:** recognisable reference-quality city artwork, correct typography, deliberate framing and meaningful camera/object movement. No generic replacement blocks, long fade-as-travel workaround, or improvement judged only against the rejected attempt. Fidelity is not originality or generalisation. Full-video “at least two better” remains M2.4.4; no claim of full NF-AC-16 completion here.
 
 #### Active handoff — M2.4.1
 
-**Status:** READY_FOR_REVIEW. Implemented and tested; **not visually approved** and **not integrated**.
+**Supervisor status — 2026-09-26: TECHNICALLY_READY for final integration gates.** The exit overlap finding is closed. Supervisor inspected the compiler change and all six regression cases, freshly ran six focused files / **80 tests** (passed) and the TypeScript core/renderer/CLI build (passed). The original independent source-compiler probes now reject both `exit` + `reveal` and `exit` + `exit` with `MOTION_PROPERTY_OVERLAP`; sequential, independent-property and legacy-only cases pass the regression suite. Previous CHANGES_REQUESTED evidence is retained in the fix record below. This scoped technical sign-off is not a fresh full-suite pass, milestone completion, or merge authorisation: final-candidate `pnpm verify` and `pnpm test:e2e` remain required, with the 2026-09-21 full results kept as implementer-reported history. Keep the owner-approved opening unchanged. Do not start M2.4.2 before authorised integration. Recommended integration remains PR/squash per AGENTS.md. No commit, push or merge was performed during this review.
+
+**Implementer status:** Final-candidate gates passed 2026-09-26; integrating via PR + squash under owner direction (record below). M2.4.1 remains open; the supervisor status above is the controlling one until the supervisor updates it. The implementer earlier wrote TECHNICALLY_READY here, which is a supervisor-only state under the coordination rule below; corrected on 2026-09-26. Fatih approved the full 6.4-second opening build `536f182ba54b-d7c57043-698` on 2026-09-21 ("approve dari aku"). This is the owner's visual acceptance of the opening shot. It is not supervisor sign-off, not a passing integration gate, and not merge authorisation. Fatih accepted the static direction ("cukup dan terlihat sama persis") and, on 2026-09-21 after receiving the two cloud-hosted review MP4s, accepted the 3-second motion study ("sudah oke"). Study build `67cb9fb19695-51ffa299-f9b` uses camera/parallax and opaque object travel through the public CLI; source and renderer remain editable and topic-independent. Static/rejected checkpoints are preserved. This accepts the study's direction, not full opening or benchmark parity. Full opening, broader review and integration gates remain pending. Task HEAD `9747193`, recorded main baseline `7b232c9`; no commit, merge or push.
+
+**Required next execution:** run the final-candidate integration gates, then obtain explicit Git integration authorisation. The exit overlap fix has supervisor sign-off; the full opening is already assembled and owner-approved according to the handoff. Do not rebuild or redesign it for this compiler-only finding. Do not jump to M2.4.3 or rebuild the full Medan story. M2.4.2 is the mandatory next transfer gate after integration, not optional final-stage testing.
+
+**Supervisor findings:** see `docs/refine-spec.md` section 12, VS-02/08–11. Preserve rejected build `5d3b28594596-96b47423-ac5`, source revision `ac7be815bcf955ab3278ec7d9e1c87d1a814d64f1fbbeb1f84ccd033f2a27e93`, MP4 SHA-256 `f108dbe925c073fa8087dbfa25aad6ec22faa086f2f204cab3c80759c0d4ad6e`, and contact-sheet SHA-256 `aca671a2bf7a11ec5229c3c2b9585a4134fc9fea393a1ba6123a7c2b81b24c81`. Near-zero cached-build timings do not measure fresh rendering. Owner-reported token dissatisfaction is retained; exact tokens/cost are unavailable.
+
+**Coordination:** one writer at a time. Implementer records IMPLEMENTING, then READY_FOR_REVIEW and stops at the requested checkpoint. Supervisor explicitly sets IN_REVIEW, then CHANGES_REQUESTED or TECHNICALLY_READY with evidence. TECHNICALLY_READY is not Fatih's visual approval or merge authorization. Claude learns review has started by reading this handoff when instructed/resumed; this file is not an automatic notification or polling system. No concurrent edits, automated waiting, or new coordination file is required. Record owner decision separately before closing the task; proceed to the next numbered task only after required acceptance/integration and trunk sync under project rules and applicable authorization.
+
+**Handoff evidence fields:** active checkpoint; exact changes and source/engine/skill revision; command and artifact path/hash; observed visual differences; checks actually run; reference-playback status; internal versus owner corrections; development versus authoring/render effort; actual usage or unavailable; blocker and next action. Keep it compact.
+
+##### Supervisor checkpoint — 2026-09-21
+
+- [x] Inspect the supplied recording as an 18-frame sequence (2 fps): centered serif headline, yellow emphasis, layered muted city, Malay motif, three explanatory road signs, followed by the newspaper/stamp. This is not full-speed motion acceptance or full-story playback. The clip starts after title entry; its original timeline offset is estimated.
+- [x] Produce and inspect a static reference adaptation through the public CLI. Eleven passive SVG layers retain separate illustration objects; headline and road-sign labels remain native editable text. No reference screenshot, executable project code, paid generation or new dependency is used. Google Fonts OFL files are local, including Fraunces optical-size 144 / weight 600. Source attribution and unresolved public-redistribution rights are recorded in the project's `provenance.json`.
+- [x] Owner accepts this frame: "cukup dan terlihat sama persis", followed by "lanjut". This accepts the static direction only.
+- [x] Produce the 3-second motion study: public CLI build `67cb9fb19695-51ffa299-f9b`, 90 frames, inspected sampled sequence, focused checks below.
+- [x] Owner accepts the study's motion direction: "sudah oke", 2026-09-21, after cloud delivery of the study and comparison. Full opening, one-prompt authoring and cross-topic generalisation remain unproved.
+
+**Active feature — short motion study:** command `node packages/cli/dist/index.js preview work/visual-parity/medan-motion-study --draft --scene opening --json` under the pinned Node. Expected output: 3 seconds, retained artwork/type, one coherent camera move with depth-dependent parallax, screen-fixed headline and opaque pin travel; no scene fade masquerading as motion. World sign labels must remain attached to their sign plane. Add only explicit camera framing/moves, world/overlay plane metadata and bounded object transform actions needed for this shot. Defaults preserve existing coordinates; frame-derived shared transforms serve rendering and preflight, sequential moves retain end poses, overlapping same-property writes fail. Preserve static output; no new plan or project-specific renderer branch. Stop at study review, not full opening or merge.
+
+**Actual command:** pinned Node 24.20.0 runs `packages/cli/dist/index.js preview work/visual-parity/medan-fidelity-frame --draft --scene opening --json`. This uses the public CLI directly because the ambient pnpm does not match the repository pin; no package-manager replacement was installed. Output is a 15-frame / 0.5-second diagnostic hold at 540 × 960 / 30 fps, not the completed opening.
+
+**Result:** fresh build `756b6958b781-13491d1f-243`, source `d80fca81a0520b3d3b5005beddc1a6c9d462b4d0e8e1e31747c89ef8be48f64b`, engine `naraframe-draft/5`, no cached build reuse. Inspect `work/visual-parity/medan-fidelity-frame/reference-vs-engine.png` (reference left, engine right) and `frame-review.png`; the latter SHA-256 is `a65ef9f50633f4ec3d91b2e12092c7e057278e56ff2e6362c63a25117dd224e7`. MP4 at `preview/builds/756b6958b781-13491d1f-243/preview.mp4`, SHA-256 `b1f398d881d07e9702b9433eb6bba8ad4a5fe1af81c873c119586e9db750502c`. The original rejected artifacts are unchanged.
+
+**Observed differences and limits:** headline family/optical size, highlight, street signs, layered city and ornament now follow the reference. Building/window details, grain, exact highlight geometry and framing still differ. The draft watermark remains. There are four contrast warnings: the SVG sign backdrop is not understood by the contrast model, and the keyword's text box extends past its highlight rectangle although visible glyphs sit on yellow. The right sign label also triggers a profile safe-zone warning; it is visibly readable but close to the edge. These warnings are retained, not suppressed or counted as a clean production gate. No motion-quality or superiority claim is made.
+
+**Reference evidence:** recording `/Users/fatih/Personal/Screenshots/Screen Recording 2026-09-21 at 01.04.30.mov`, 1018 × 1808 / 60 fps / 8.9 s, SHA-256 `088b1360df772ce42a3742e76bd51e7b7edd6e611f1fcb36955f130006549366`. Its contact sheet and first frame are under `work/visual-parity/reference-recording/`. Reference HTML hash stays `b7cc95df3b0f1eeb55f2b0a53f8fec527b561a9c1eb52574053b92eb0e52a78b`; no browser-policy workaround was used.
+
+**Technical checks from supervisor recovery:** 93 focused tests across 7 files, TypeScript build and focused Biome checks passed before artwork authoring. Static authoring did not change the engine further. The earlier font E2E rerun had an unresolved generic failure on its valid-font case; standalone direct/public CLI and exact-fixture probes subsequently rendered successfully, but that does not turn the failed suite into a pass. Full `pnpm verify` and `pnpm test:e2e` remain mandatory before integration. No merge readiness is claimed.
+
+**Effort:** two successful 15-frame renders; two additional preview invocations stopped at measured text overflow/collision before rendering, and initial source validation caught schema/label bounds mistakes. One visual correction after inspecting the first render: static optical font, highlight size and pin pose. Final render command reported 4.873 seconds; this is render-command time, not total development/authoring time. Token/cost and complete wall-clock authoring time are unavailable. No paid provider was invoked. Skill unchanged; automatic authoring improvements remain unproved.
+
+##### Motion-study execution evidence — 2026-09-21
+
+**Output:** `work/visual-parity/medan-motion-study/preview/builds/67cb9fb19695-51ffa299-f9b/preview.mp4`, SHA-256 `f8a811ea76b2a0c653f4779a0ad2120fe13c758182592378fc5d1fbb0a316001`. Source `0490ea9951a36f27b4bac59377b57e9e4d44b14e7dc63ac6fac915ac8ae01d3c`, assembly `67cb9fb19695e06fbf33c802e31b6f2948c1d06f21e4d9d3306b1c0d01364bfb`, renderer `naraframe-draft/7`, fresh render, `reusedFromBuildId: null`. ffprobe confirms H.264, 540 × 960, 30 fps, 90 frames, 3.000 s and no audio stream. Command: pinned Node executes `packages/cli/dist/index.js preview work/visual-parity/medan-motion-study --draft --scene opening --json`.
+
+**Observed:** sampled frames at 0.5-second intervals show camera drift, depth-dependent city movement, sign labels staying on their plane, fixed headline, and opaque pin travel left then back. World SVG viewboxes have horizontal overscan to avoid exposed artwork edges. `motion-review-contact.png` and `reference-vs-motion.mp4` are comparison artifacts in the study project; the latter places the supplied recording's first 3 seconds left and NaraFrame right. They are not timestamp-verified matched choreography: reference headline exit is not reproduced in this component study. No full opening or motion-parity approval is claimed.
+
+**Editable contract delivered:** optional `scene.camera.initial` and sequential timed `moves` (x/y viewport offsets and zoom); explicit `space: world` with `parallax` on a layer or flat group, omitted/overlay stays screen-fixed. Group members inherit their parent's plane and are projected once. `transform` beats write explicit endpoint offsets for x/y/scale/rotation, preserve prior per-property endpoints, and do not imply a fade. New conflicting property writes and overlapping camera windows are rejected after frame quantisation. Legacy-only beat combinations retain previous behavior. Required text is checked through the same object/group/camera transforms as rendering at diagnostic sample frames. Off-camera world scenery is permitted; moving required text beyond canvas produces an error. This is not nested-world reuse, path following, or phrase-anchor timing delivery.
+
+**Checks:** TypeScript build passed. Four focused files passed **60 tests**, including source-coordinate scaling, scoped/full scene camera equivalence with a preceding scene, camera cache invalidation, overlapping motion rejection, direct frame seeking with sequential endpoints, independent property motion, positive depth zoom, parent world-label collision and animated text clipping. `biome check` on the 12 touched motion-related source/test files passed without warnings. These use real pure motion/compiler logic plus existing mocked text measurement; MP4 render supplies separate browser runtime evidence. Full verify, renderer E2E, broader review and previous font E2E rerun are still pending before integration.
+
+**Process/effort:** the helper stopped mid-implementation at a reported usage limit; supervisor continued the saved partial changes, corrected compiled-schema placement, connected shared preflight and plane z-order, then rendered before adding focused tests. Two successful 90-frame renders (first engine /6, final /7); no visual correction after the first rendered study, one technical hardening pass. Final render command reported 10.049 s, not total authoring/development time. Paid providers/dependencies: none added. Actual token/cost and complete authoring wall time unavailable. Four existing SVG/highlight contrast warnings and the right-label safe-zone warning remain visible. Static fidelity output and rejected attempts remain unchanged. Skill/art-direction automation and full integration are not marked complete.
+
+##### Final-candidate gates and integration — 2026-09-26
+
+**Direction.** After the exit overlap-validation fix, the owner directed: run `pnpm verify` and `pnpm test:e2e` on the final candidate, report, and once both pass integrate through PR + squash per AGENTS.md.
+
+**Candidate.** Branch `m2-4-1-first-illustrated-shot`: commit `9747193` plus the full working tree at that point (all M2.4.1 source, tests, and the M2.4 spec/refine-spec/plan revisions). `origin/main` was `7b232c9` and already contained in the branch, so no rebase was needed and the tested tree is the integrated tree. Runtime: Node 24.20.0 and pnpm 12.3.4 as pinned.
+
+**`pnpm verify`: passed.** Biome, TypeScript build, 24 unit files / **214 tests**, 29 integration files / **240 tests** (the 234 of 2026-09-21 plus the six exit-overlap cases), second typecheck. 13.5 s.
+
+**`pnpm test:e2e`: passed.** 6 files / **9 tests**, 654.7 s, run serially on its own, exit 0. Includes font readiness in the frame render context (valid and broken face), reference projects, scoped preview reuse, owner flow and soundtrack mix, all under `naraframe-draft/8`.
+
+**Integration.** Committed with explicit paths, pushed, and opened a PR against `main`; squash-merged after the gates above. No agent or tool identity in commit or PR metadata, per AGENTS.md. The PR number is recorded in the tracker row. Generated preview/output under `work/` is git-ignored and not part of the change.
+
+
+##### Exit overlap-validation fix — 2026-09-26
+
+**Finding (supervisor, CHANGES_REQUESTED).** Overlapping `exit` + `reveal` and `exit` + `exit` writes to the same target's opacity compiled with `ok: true` and no `MOTION_PROPERTY_OVERLAP`. Cause: `validateMotionWindows` only compares two windows on a shared property when at least one of them is `modern`, and only `transform` set `modern`. My earlier record claimed exit already took part in the rule; it did not.
+
+**Reproduced before fixing** on the built package, by compiling the approved opening's source with substituted beats on `headline`:
+
+| Beats on one target | Before | After |
+|---|---|---|
+| `reveal` 0–1000 ms + `exit` 500–1500 ms | `ok: true` | `ok: false`, `MOTION_PROPERTY_OVERLAP` |
+| `exit` 0–1000 ms + `exit` 500–1500 ms | `ok: true` | `ok: false`, `MOTION_PROPERTY_OVERLAP` |
+| `reveal` 0–1000 ms then `exit` 1500–2000 ms | `ok: true` | `ok: true` |
+| `reveal` + `reveal` overlapping (legacy-only) | `ok: true` | `ok: true` |
+
+**Change.** One line in `packages/core/src/compiler/compile-draft.ts`: `modern: beat.action === "transform" || beat.action === "exit"`, with a comment giving the rule. Overlaps among the original presets (`reveal`, `emphasize`, `focus`) are still accepted, so existing projects keep compiling. No schema, renderer, motion or visual change; `RENDER_ENGINE` stays `naraframe-draft/8` because compiled output and pixels are unchanged.
+
+**Regression coverage.** New `describe("compileDraft — exit beat overlap validation")` in `packages/core/test/integration/compile-draft-m0-10.test.ts`, six cases: exit+reveal overlap rejected (and the issue names `opacity`); exit+exit overlap rejected; an exit's drift overlapping a transform on the same axis rejected; reveal then exit sequential accepted; a fade-only exit overlapping emphasize (scale) and a transform (x) accepted as independent properties; overlapping reveal+reveal still accepted. Verified that the tests bite: with the fix temporarily reverted, exactly the two supervisor cases fail (2 failed / 16 passed); fix restored.
+
+**Approved opening unaffected.** `validate work/visual-parity/medan-opening --stage plan` passes with source revision `e67c56cbb968d74e…`, identical to approved build `536f182ba54b-d7c57043-698`; only the known artwork warnings (`CONTRAST_INSUFFICIENT`, `TEXT_OUTSIDE_SAFE_ZONE`). Its exits run 5.5–5.92 s and 6.3–6.4 s, after every other write to the same properties, so the stricter rule does not touch it. No re-render.
+
+**Checks actually run.** TypeScript build (`tsc -b` core, renderer, CLI) clean. Six focused files, **80 tests**, passed: motion-transitions, capabilities, visual-preflight, compile-draft-m0-10, render-engine-identity, visual-schema (74 before plus the 6 new). `biome check` clean on both touched files. Full `pnpm verify` and `pnpm test:e2e` were not rerun for this one-line compiler change; the last full runs (2026-09-21) are implementer-reported history, and both remain required on the final candidate before authorised integration.
+
+**Not done.** No commit, push or merge. Recommended integration route per the supervisor is PR plus squash (AGENTS.md); not authorised in this pass. The opening's visuals, the motion system and M2.4.2 were not touched. Token and cost figures are **unavailable**.
+
+
+##### Supervisor decision on the exit gap — relayed 2026-09-26
+
+**Received.** The supervisor's decision on the reported exit gap was: add an `exit` beat at small scope with the five conditions recorded above (5.5 s statement exit, 6.3 s pin exit, hidden after the window including direct seek, one opacity shared by renderer and preflight without globally disabling text checks, renderer identity bump); then implement → render the opening → focused regression tests → review; no camera extension and no new animation system; M2.4.1 stays open.
+
+**Already done before this relay.** All of it was implemented on 2026-09-21 under the owner's matching instruction and is recorded in "Exit beat and re-rendered opening" below: build `536f182ba54b-d7c57043-698`, engine `naraframe-draft/8`, three `exit` motion tests, full `verify` and serial `test:e2e` green. No code was changed for this relay.
+
+**Recorded difference, not resolved: an empty yellow bar on screen.** The supervisor observed that the marker appears as a yellow block sliding in before the keyword. That is visible in the build, roughly 1.00–1.46 s: `highlight-wipe` runs 1.00–1.46 s and `keyword-in` only starts at 1.46 s. It is a direct consequence of the second internal correction, which ordered the marker before the keyword because the keyword is dark ink and read as "emrawut" while an unfinished sweep crossed it. Swapping the order back reintroduces that defect. The reference avoids both with a `scaleX` wipe that grows the marker under an already-visible word; this engine has no axis-only scale and no clip reveal, so neither ordering matches it. The exit beat does not affect this. Per the supervisor, word stagger and the marker sweep are deferred and stay listed as differences against the reference; no workaround was authored.
+
+
+##### Integration gates — 2026-09-21
+
+**Owner approval.** Fatih approved the full 6.4-second opening, build `536f182ba54b-d7c57043-698`, on 2026-09-21. This covers the opening shot's visuals and motion. It is not supervisor sign-off and not merge authorisation.
+
+**`pnpm verify`: passed.** Biome, TypeScript build, 24 unit files / **214 tests**, 29 integration files / **234 tests**, second typecheck. First full run since the renderer identity moved `naraframe-draft/4` → `/8`; nothing was left broken by those bumps.
+
+**`pnpm test:e2e`: passed.** 6 files / **9 tests**, 635 s, run serially on its own. This includes `font-readiness`, whose valid-font case previously failed with an unresolved generic error; it passes here, so that open item is closed by a real run rather than by a standalone probe. It also re-covers scoped preview reuse, reference projects, the owner flow and the soundtrack mix under the new engine.
+
+**State.** Nothing committed. Branch `m2-4-1-first-illustrated-shot`, HEAD still `9747193`, working tree carries every change. No push, merge or upload.
+
+**Remaining before M2.4.1 can be called complete:** supervisor review of this handoff, and integration authorisation. Open items that are recorded and not blockers: the five plan-stage artwork warnings (contrast model cannot see the SVG backdrop behind sign text; right label near the safe-zone edge), sentence-level rather than word-level text entry, marker slide instead of a `scaleX` wipe (visible as an empty yellow bar for roughly 1.00–1.46 s before the keyword arrives), and reference playback still limited to the 8.9 s recording that starts after title entry.
+
+
+##### Exit beat and re-rendered opening — 2026-09-21
+
+**Owner decision implemented.** Fatih approved adding an `exit` beat at small scope: headline, keyword and highlight leave together from 5.5 s, the pin from 6.3 s, elements stay hidden once the window has passed including a direct seek, renderer and preflight share one opacity, text checks are not globally disabled, and the renderer identity moves so old cache cannot be reused.
+
+**Change.** `exit` is the mirror of `reveal`, and nothing more.
+
+| File | Change |
+|---|---|
+| `packages/core/src/schema/scene.ts` | `ExitBeatSchema`: optional `direction`, optional `distance`, optional `easingPreset` |
+| `packages/core/src/schema/compiled.ts` | compiled `exit` variant |
+| `packages/core/src/compiler/compile-draft.ts` | `exit` claims `opacity`, and an axis only when it actually drifts, so it takes part in the existing overlap rule; its distance is scaled to draft space like a reveal's |
+
+> **Correction, 2026-09-26.** The claim in the row above was wrong. Declaring exit's properties did not by itself enable overlap rejection: `validateMotionWindows` only compares windows when one side is `modern`, and only `transform` was. The supervisor found `exit`+`reveal` and `exit`+`exit` overlaps compiling with `ok: true`. Fixed in the record "Exit overlap-validation fix" below.
+| `packages/core/src/compiler/keys.ts` | `RENDER_ENGINE` `naraframe-draft/7` → `naraframe-draft/8` |
+| `packages/renderer-remotion/src/remotion/motion.ts` | `state.opacity *= 1 - progress` plus the optional drift |
+| tests | three `exit` cases in `motion-transitions.test.ts`; `capabilities.test.ts` now expects `exit` in the published beat list |
+
+**Hidden after the window, from any frame.** `exit` reads only the beat window and the frame being drawn, and `interpolate` clamps, so every frame after the window resolves to opacity 0 with no memory of earlier frames. Tested directly: frame 191 and frame 60 both evaluate to 0 for a beat whose window ends at frame 45, with no frames rendered before them.
+
+**One opacity, shared.** Preflight does not carry its own visibility model: `visual-preflight.ts` calls the same `motionStateFor` in five places and already gates each frame-sampled text check on `opacityOnScreen(...) < 0.9`. An exited layer therefore stops being checked for collision and canvas bounds at the frames where it is invisible, and only at those frames. Nothing was disabled globally: the static overflow, minimum-size and font checks still run for every text layer, and a visible layer is still checked exactly as before.
+
+**Cache.** `naraframe-draft/8`. The same project input now compiles to assembly `536f182ba54b…`, which no earlier build carries; the render reported `reusedFromBuildId: null`.
+
+**Re-rendered opening.** `work/visual-parity/medan-opening/preview/builds/536f182ba54b-d7c57043-698/preview.mp4`, SHA-256 `fd0f3b1ad169e75ede3e…`. Source `e67c56cbb968d74e6298712fc422e4ef…`, engine `naraframe-draft/8`, fresh render. ffprobe: 192 frames, 6.400 s, 540 × 960, 30 fps, no audio. Command, pinned Node 24.20.0 on the public CLI:
+
+```
+/opt/homebrew/opt/node@24/bin/node packages/cli/dist/index.js \
+  preview work/visual-parity/medan-opening --draft --scene opening --json
+```
+
+The shot now matches the reference's scene-1 timeline end to end: pin in 0.3 s, sentence 0.7 s, marker 1.0 s, keyword 1.46 s, pin reading the street, statement out 5.5 s, pin out 6.3 s, cut at 6.4 s.
+
+**Checks actually run.** `validate --stage plan` before rendering. Inspected `opening-exit-window.png` (frames 160–191): the sentence, its marker and the keyword lift and fade together and are gone by roughly 5.9 s, and the pin is mid-fade at the final frame, which is what the reference's `popOut` at 6.3 s does before its own cut. Six focused test files, **74 tests**, passed: motion, capabilities, visual preflight, M0.10 compile, render-engine identity and visual schema. `biome check` clean on the package tree. TypeScript build clean. The five plan-stage warnings are unchanged and still the known artwork ones. Full `pnpm verify` and `pnpm test:e2e`, and the pending font E2E rerun, remain the integration gate.
+
+**Renders and corrections.** One render for this change, no visual correction pass needed after it. Earlier in the same session the opening itself took three attempts and the two allowed correction passes, recorded above.
+
+**Not claimed.** No motion parity, no owner visual approval of the full opening, M2.4.1 not complete. No commit, push, merge or upload; no dependency or paid generation. Token and cost figures are **unavailable**.
+
+
+##### Full opening execution evidence — 2026-09-21
+
+**Output:** `work/visual-parity/medan-opening/preview/builds/c74100140ff2-e2f55cd9-79b/preview.mp4`, SHA-256 `e64d87b124191bf9877e…`. Source `bef024292a535eb8f2f16d920876553026acd1deb9d93f50fd74391313ec4874`, assembly `c74100140ff2a07a27271f72017406a41bfa0db5e2f6f7a1d68c8a2664f40efd`, renderer `naraframe-draft/7`, `reusedFromBuildId: null`. ffprobe: H.264, 540 × 960, 30 fps, 192 frames, 6.400 s, no audio stream.
+
+**Command.** Pinned Node 24.20.0 runs the public CLI directly, because the ambient shell has no `pnpm` on PATH and its default Node is 22.23.2; no package manager was installed or replaced.
+
+```
+/opt/homebrew/opt/node@24/bin/node packages/cli/dist/index.js \
+  preview work/visual-parity/medan-opening --draft --scene opening --json
+```
+
+**Project.** New `work/visual-parity/medan-opening/`, copied from the accepted study so artwork, fonts, profile and `provenance.json` are unchanged. The accepted study project and its build `67cb9fb19695-51ffa299-f9b` are untouched as the checkpoint. Only `scenes.json` (duration, camera, beats, note) and `naraframe.json` (id, title) differ. No renderer, schema, compiler or skill change was made in this pass; no project code, no reference screenshot or video stands in for an object.
+
+**Choreography, against the reference shot.** The reference scene-1 timeline is `popIn(aPinR1, 0.3)`, `say('s1', 0.7, 'up')` with 0.09 s word stagger and the highlight marker at `at + n×0.09 + 0.35`, then `unsay('s1', 5.5)` and `popOut(aPinR1, 6.3)` before the 6.4 s cut. What was authored:
+
+| Reference | This opening |
+|---|---|
+| pin in, 0.3 s | `pin-in` reveal, 0.30–0.82 s |
+| sentence in, 0.7 s | `headline-in` reveal, 0.70–1.50 s |
+| marker wipe, ≈1.32 s | `highlight-wipe` reveal from the left, 1.00–1.46 s |
+| keyword settled with the sentence | `keyword-in` reveal, 1.46–1.98 s, then `keyword-hit` emphasize 2.05–2.51 s |
+| — (our accepted study direction) | camera drift to x 95 / zoom 1.030 over 0–3.3 s, then easing back to x 46 / y −12 / zoom 1.048 over 3.4–6.4 s |
+| — (our accepted study direction) | pin travels left 0.9–2.3 s, returns 2.5–4.2 s, settles 4.5–6.3 s |
+| headline out, 5.5 s | **not reproduced** |
+| pin out, 6.3 s | **not reproduced** |
+
+**Gap that blocks exact choreography.** The engine has four beat actions: `reveal`, `emphasize`, `focus`, `transform`. None of them removes an element. `transform` writes x/y/scale/rotation endpoints and explicitly does not imply a fade, and moving required text off-canvas is an error, so an exit cannot be faked by translation either. The reference's headline exit at 5.5 s and pin exit at 6.3 s are therefore held on screen instead. Smallest options, in ascending cost, for a decision rather than a unilateral change:
+
+1. An `exit` beat mirroring `reveal` (opacity 1→0 with an optional direction/distance). Smallest and symmetric with what exists.
+2. An optional `opacity` endpoint on `transform`'s `to`, reusing the existing sequential-endpoint and conflict rules.
+3. Per-layer visibility windows in source. Largest, and it overlaps the timeline authority the compiler already holds.
+
+A second, smaller gap: the reference staggers the sentence word by word and wipes the marker with `scaleX`. This engine reveals a text layer as one block and has no axis-only scale, so the sentence lands together and the marker slides in rather than wiping. Recorded, not worked around.
+
+**Checks actually run.** `validate --stage plan` before rendering. The first render was refused by the real check with `TEXT_OUTSIDE_CANVAS`: the one-way camera drift pushed `label-begal` off the canvas at frame 191. Corrected by making the second camera move ease back rather than continue. Inspected `opening-contact.png` (12 frames, every 16th) and `opening-keyword-window.png` (frames 24–60): text readable, sign labels stay attached to their planes through the parallax, movement is continuous with no jump at the camera hand-off at 3.4 s, no exposed artwork edges, framing consistent. The five plan-stage warnings are the ones already recorded for this artwork — three sign-label and one keyword `CONTRAST_INSUFFICIENT` where the contrast model cannot see the SVG backdrop behind the text, and the right label's `TEXT_OUTSIDE_SAFE_ZONE`. They are unchanged and not suppressed. No test suite was run: this pass changed project data only. Full `pnpm verify` and `pnpm test:e2e` remain the integration gate, together with the still-pending font E2E rerun.
+
+**Corrections and renders.** Three render attempts: one refused by the canvas check, two rendered. Two internal visual correction passes, the limit for this checkpoint: (1) the camera easing back so the left sign label stays in frame; (2) ordering the marker before the keyword, because the keyword is dark ink meant to sit on yellow and read as "emrawut" while the sweep was still crossing it. Final render command reported 16.3 s wall clock, which is render time, not authoring time.
+
+**Not claimed.** No motion parity with the reference, no full-speed matched comparison, no owner visual approval, and M2.4.1 is not complete. Reference playback evidence remains the supplied recording only, which starts after title entry, so its offset against the source timeline stays estimated. Token and cost figures are **unavailable**; no per-task provider record is exposed to the implementer. No commit, push, merge or upload; no dependency, paid generation or new plan document.
+
+
+##### Implementer recovery record — supervisor findings 1–4 (historical)
+
+**Where this ran.** Branch `m2-4-1-first-illustrated-shot`, HEAD `9747193`, nothing committed. The implementer reported that a previous recovery narrative was overwritten during a plan revision; this attribution has not been independently established. The code changes survived in the working tree and are included below. This record is written into the existing Active handoff, not a new file.
+
+**Working tree changed by this pass**
+
+| File | Change |
+|---|---|
+| `packages/core/src/asset/svg-sanitize.ts` | shared attribute path for root and children; XML character-data handling |
+| `packages/core/src/compiler/keys.ts` | `RENDER_ENGINE` → `naraframe-draft/4` |
+| `packages/renderer-remotion/src/remotion/draft-video.tsx` | font readiness enforced, failure cancels the render |
+| `packages/renderer-remotion/src/render-draft.ts` | translates a font failure into a directed source issue |
+| `packages/core/test/unit/svg-sanitize.test.ts` | double-escaping expectation corrected; entity/CDATA/root cases added (38 cases) |
+| `packages/core/test/unit/render-engine-identity.test.ts` | new |
+| `packages/cli/test/e2e/font-readiness.test.ts` | new |
+
+**Finding 1 — root bypassed reference validation. Closed.** The root's attributes were collected by a separate code path that never ran the URL checks or the id rewriting. Both paths now call one `sanitizeAttributes`, and the dangerous forms are judged before the root filter narrows what is kept, so a handler on the root is refused rather than quietly dropped. Probe on the built package:
+
+| Root attribute | Before | Now |
+|---|---|---|
+| `fill="url(https://example.invalid/a.svg#g)"` | `ok:true` | refused `SVG_EXTERNAL_REFERENCE` |
+| `stroke="url(data:image/svg+xml,x)"` | accepted | refused `SVG_EXTERNAL_REFERENCE` |
+| `fill="url(#g)"` with the gradient renamed | kept `url(#g)`, dangling | rewritten `url(#probe-g)` |
+| `fill="url(#missing)"` | accepted | refused `SVG_REFERENCE_UNRESOLVED` |
+| `onload="alert(1)"` | accepted (silently dropped) | refused `SVG_UNSAFE` |
+| `style="fill:red"` | accepted | refused `SVG_UNSAFE` |
+
+**Finding 2 — text was corrupted. Closed.** Character data is now resolved to the characters it means and escaped once, instead of escaping the source again. CDATA inside `<text>` is kept as the artwork's literal wording rather than discarded; comments are still removed because they are not drawn. An entity this parser cannot resolve without a DTD is refused as `SVG_UNSUPPORTED_ENTITY` instead of being printed, and a numeric reference to an undrawable code point is refused the same way. No DTD, custom entity or external entity is enabled.
+
+| Input inside `<text>` | Before | Now |
+|---|---|---|
+| `A &amp; B` | `A &amp;amp; B` | `A &amp; B` (one ampersand) |
+| `caf&#233; &#x2014; 50%` | literal reference text | `café — 50%` |
+| `<![CDATA[KOPI & TEH]]>` | dropped, wording lost | `KOPI &amp; TEH` |
+| `a &nbsp; b` | printed literally | refused `SVG_UNSUPPORTED_ENTITY` |
+| `a&#0;b` | — | refused `SVG_UNSUPPORTED_ENTITY` |
+
+The test that asserted the double-escaped form was wrong and was corrected, not loosened.
+
+**Finding 3 — renderer identity. Closed.** `RENDER_ENGINE` is `naraframe-draft/4`; the comment records that bundled faces now load in the frame context, so type that previously rendered substituted renders differently. The same project input now compiles to assembly key `8e3f35ca2e9b…`, which no existing build directory carries (`5d3b28594596`, `823c0877653d`, `b00666ce2b1a`, `ef866689de27`, `2ef27e0a9d78`), so the old renderer cache cannot be matched. A fresh preview confirmed it end to end: `reusedFromBuildId: null`, new build `8e3f35ca2e9b-2fefe436-c15`. Media generation is unaffected: `generationKeyForBlock` derives from spoken text and voice style only, which `render-engine-identity.test.ts` pins by producing the same key across two sources whose render tokens and engine string differ.
+
+**Finding 4 — font failures were swallowed. Closed.** `useBundledFonts` now reads the result of `loadBundledFonts`, and additionally checks each declared face with `document.fonts.check` at its weight, because a registered family can still be unusable. Any failure calls `cancelRender`; `continueRender` is only reached when every declared face is ready. The node side recognises the failure and raises it as a `FONT_NOT_LOADED` source issue rather than a redacted `SYSTEM_ERROR`, so the message names the face the author must fix.
+
+Proven in the render context, not in measurement:
+
+```
+node packages/cli/dist/index.js preview work/visual-parity/font-probe-ok     --draft --rerender --json
+node packages/cli/dist/index.js preview work/visual-parity/font-probe-broken --draft --rerender --json
+```
+
+- valid face → `success: true`, `readiness: draft-only`
+- unparseable face → `success: false`, `readiness: invalid`, `error FONT_NOT_LOADED — The render context could not use the bundled font(s): NaraFrame Probe Display 700.`
+
+`packages/cli/test/e2e/font-readiness.test.ts` keeps both: the failure case builds its own corrupt face so it is self-contained, and the success case uses a local OFL face and skips where that file is absent. 15-frame projects, 15 s for the pair.
+
+**Commands actually run in this pass**
+
+```
+node packages/cli/dist/index.js preview work/visual-parity/medan --draft --scene opening --json
+node packages/cli/dist/index.js preview work/visual-parity/font-probe-{ok,broken} --draft --rerender --json
+pnpm exec vitest run --project unit --project integration svg-sanitize vector-assets visual-preflight visual-schema capabilities render-engine-identity
+pnpm exec vitest run --project e2e font-readiness
+```
+
+Results: 6 files / 84 tests passing for the touched suites; 2 e2e font cases passing; Medan opening build `8e3f35ca2e9b-2fefe436-c15`, source revision `f61f9dd5e57083d8`, `issues: []`, MP4 sha256 `ac6f51b5d0783049…`. One 192-frame render in this pass, plus three 15-frame probes.
+
+**Checks deliberately not run.** Full `pnpm verify` and full `pnpm test:e2e`. Both remain the integration gate before merge, and the renderer change in finding 4 is behavioural, so both must pass before this branch is integrated.
+
+**Still open.**
+
+1. Reference playback remains unavailable. No MP4, MOV, WEBM or GIF exists in or beside the reference directory; the browser restriction was not bypassed and no motion comparison is claimed.
+2. Reference provenance and asset rights for a fidelity adaptation are undecided.
+3. No visual approval. The rejected first attempt and its artefacts are preserved; this pass claims no visual improvement and did not re-render old artwork to chase one.
+4. Minimum camera/world/object motion for the opening (VS-03) is not implemented. It belongs to M2.4.1 when the shot needs it; the next visual step is a single reference-adaptation frame for review, then a motion study.
+
+**Effort and usage.** Development, probing and regression tests were separate steps; no artwork authoring in this pass. Token and cost figures are **unavailable**: no per-task provider record is exposed to the implementer.
+
+
+#### Historical first-attempt evidence — M2.4.1 (rejected)
+
+**Historical implementer handoff:** originally READY_FOR_REVIEW; subsequently **rejected by Fatih**. The following change/test descriptions record what the implementer reported, not a fresh supervisor verification. Font readiness and safe SVG claims are superseded by the review findings in `docs/refine-spec.md` section 12. Preserve source/artifacts; do not use this record to check recovery tasks complete.
 
 **Git snapshot.** Branch `m2-4-1-first-illustrated-shot`, cut from `main` at `7b232c9` (= `origin/main`). The M2.4 documentation revision was already uncommitted on the working tree at cut time and was carried onto the branch unchanged; nothing was stashed, reverted, or discarded. An unrelated pre-existing stash (`M3.1 word-level timing enforcement`) was left untouched. Nothing pushed, nothing merged.
 
@@ -508,7 +783,7 @@ Update this table and the owning checklist while executing: not started → in p
 | `vo-script.md` | `aab96c5987f83f27b506bc9d06f5f7334578d0e106bae2e0df7357aa307133d4` | Ten numbered paragraphs plus a source list |
 | `README.md` | `2936e3734812f065c87c1f75b41a56bca9c7c4b5b0285a90f7c14dcc3827e98f` | Declares 67.5 s total and the scene starts below |
 
-Independently measured with `ffmpeg silencedetect=noise=-30dB:d=0.6`: speech ends at 6.00 · 13.03 · 21.70 · 25.89 · 30.16 · 35.71 · 41.90 · 51.54 · 58.21 · 61.28 s and resumes at 6.79 · 13.73 · 22.46 · 26.52 · 30.83 · 36.44 · 42.68 · 52.36 · 59.00 · 62.08 s. Eleven speech runs for ten paragraphs: section 4 contains an internal sentence pause at 25.89–26.52 s. This confirms the README's stated scene starts (0 · 6.4 · 13.4 · 22.1 · 30.5 · 36.1 · 42.3 · 52.0 · 58.4 · 61.7). The declared 67.5 s exceeds the measured 66.576 s audio by 0.92 s, so the full sequence needs an explicit terminal pause in M2.4.4 rather than a stretched voice track.
+Independently measured with `ffmpeg silencedetect=noise=-30dB:d=0.6`: speech ends at 6.00 · 13.03 · 21.70 · 25.89 · 30.16 · 35.71 · 41.90 · 51.54 · 58.21 · 61.28 s and resumes at 6.79 · 13.73 · 22.46 · 26.52 · 30.83 · 36.44 · 42.68 · 52.36 · 59.00 · 62.08 s. Eleven speech runs for ten paragraphs: section 4 contains an internal sentence pause at 25.89–26.52 s. These intervals numerically align with the README's stated scene starts (0 · 6.4 · 13.4 · 22.1 · 30.5 · 36.1 · 42.3 · 52.0 · 58.4 · 61.7). This does not establish phrase alignment by listening. The declared 67.5 s exceeds the measured 66.576 s audio by 0.92 s, so the full sequence needs an explicit terminal pause in M2.4.4 rather than a stretched voice track.
 
 **Playback gap — open.** The reference has been read as source only. Its `index.html` has **not** been played and its motion has **not** been watched; the browser URL restriction recorded during planning was respected and not worked around. Static source analysis does not establish motion quality, so no motion comparison against the reference is claimed here, and the visual baseline for M2.4.1 acceptance remains incomplete until an MP4 or recording is supplied.
 
@@ -562,87 +837,93 @@ pnpm naraframe preview work/visual-parity/medan --draft --scene opening --json
 **Known gaps, not yet resolved.**
 
 1. Reference playback is still unwatched, so no motion-quality comparison is claimed.
-2. No visual approval. Fatih has not assessed this shot; NF-AC-16 is untouched.
+2. Fatih subsequently assessed and rejected this shot. NF-AC-16 remains unmet.
 3. The illustration is orthographic. There is no perspective or vanishing point, so the street reads as a side-on band rather than a street receding from the viewer.
-4. Layer frames must stay inside the design canvas, so world scenery cannot bleed past the edges. The becak therefore settles in frame instead of exiting. World-versus-overlay placement and off-camera scenery are M2.4.2 work and were deliberately not started.
+4. Layer frames must stay inside the design canvas, so world scenery cannot bleed past the edges. The becak therefore settles in frame instead of exiting. World-versus-overlay placement and off-camera scenery were deferred under the old M2.4.2 scope; the revised M2.4.1 now brings forward the minimum needed for faithful opening choreography.
 5. Native `path` layers were not added; the opening is served by imported SVG assets. The checklist allows either, and only what the shot needed was enabled.
 6. A faint warm ellipse on the upper road still reads slightly smudged at draft size.
 7. Only the draft format was rendered. No final render, no audio, no narration binding for this shot.
 
 
-#### M2.4.2 — Camera and layered world
 
-**Primary areas:** core group/composition/camera compilation and scoped dependency resolution; renderer transform/motion evaluator and shared preflight geometry. Split focused geometry helpers out of the existing renderer/compiler as needed, without an unrelated refactor.
+#### M2.4.2 — Early frozen-engine LBC transfer
 
-- [ ] Implement nested/reusable compositions, explicit camera framing, world versus overlay placement, and sequential camera moves while preserving old source coordinates.
-- [ ] Add parallax and world-attached labels; retain screen-space headline/captions. Resolve reused world instances deterministically for each shot.
-- [ ] Build `river-history`, moving from river detail to a wider explanatory view; keep an illustrated subject in focus while its context changes.
-- [ ] Compare selected-scene and full-project framing, then add cycle/ownership, nested transform, camera-boundary, off-camera scenery, label attachment, and dependency-key regressions; run integration checks before merge.
+**Primary areas:** existing skill and public CLI, new LBC project/profile/source data only. Freeze compiler, renderer, schemas, CLI, trusted recipes and skill at the accepted revision before the trial.
 
-**Command:** `pnpm naraframe preview work/visual-parity/medan --draft --scene river-history --json`
+- [ ] Record the freeze and one LBC brief; use existing assets under read-only `/Users/fatih/Code/Playground/lbc_kimi`. Create a distinct 6–10s opening under `work/visual-parity/lbc`, not a Medan palette swap. Do not consult the old direct-Remotion composition as an implementation shortcut.
+- [ ] Produce and retain the first delivered opening before feedback, recording internal corrections and available effort/usage separately from M2.4.1 engine development. One brief permits bounded internal iteration, not one model call.
+- [ ] Ask Fatih whether the independent direction is worth developing as an LBC video. Then perform ordinary “change headline” and “slow camera” requests through source edits, scoped preview and undo, with no user coding or runtime/skill modifications.
+- [ ] Prove unchanged assets/audio are reused and unknown media-style bindings stay explicit. Preserve original and revised drafts; complete focused edit/undo/source compatibility checks after the manual path.
+- [ ] Record early transfer acceptance and integration evidence before longer Medan work. A needed runtime/skill patch fails this freeze: record the gap and seek a bounded reusable correction decision, then rerun a separately recorded fresh trial. Do not silently patch and call it generalisation.
 
-**Expected:** camera movement explains spatial context, labels remain attached, and the overlay remains readable. Starting directly at any sampled frame gives the same pose as full playback. **Evidence:** not yet produced.
+**Command acceptance:** `pnpm naraframe preview work/visual-parity/lbc --draft --scene opening --json`
 
-#### M2.4.3 — Objects explain the information
+**Expected:** a different, credible LBC visual direction, obtained by source/profile changes on the frozen foundation; headline/camera revisions and undo work. This is the early NF-AC-17 gate, not the final 30s publication-candidate gate. Failure holds M2.4.3–5.
 
-**Primary areas:** core beat/timing/path contracts and compiler; renderer object/path/text motion and numeric display.
+#### M2.4.3 — Extend river, route and data storytelling
 
-- [ ] Implement draw-path, follow-path, count-up/data growth, object transform, and enter/exit with compatible target validation and property-conflict detection.
-- [ ] Add phrase-anchored timing alongside local scene times; preserve narration duration and do not require or fabricate per-word timestamps.
-- [ ] Build `shipping-route`: reveal the route, move ships along it, and animate the associated figure. Exercise comparative data growth in the population shot. Add text stagger/highlight only where it supports those statements.
-- [ ] Inspect both shots and their speech alignment; add path endpoints, count endpoints, sequential-state, conflict, phrase-retiming, and text-stability tests afterward. Run integration checks before merge.
+**Primary areas:** core reusable composition, scoped dependencies and beat/phrase contracts; shared renderer geometry, path/object/data motion. Retain the opening foundation; grow only what these stories need.
 
-**Command:** `pnpm naraframe preview work/visual-parity/medan --draft --scene shipping-route --json`
+- [ ] Build `river-history` with nested/reusable world data, explicit detail-to-context framing, parallax and object-attached labels; retain readable screen overlay. Preserve legacy coordinates and reject cycles/duplicate ownership.
+- [ ] Build `shipping-route`: draw a route, move an opaque ship along it, and animate the associated figure. Add population comparison through visual data growth, not numbers alone.
+- [ ] Add only missing draw-path/follow-path/count-up/transform/enter-exit/text-highlight capabilities required by these outputs. Keep all poses frame-derived, sequential end states retained and overlapping property writes explicitly rejected.
+- [ ] Bind required narrative beats to verified phrase anchors alongside local times; no fabricated word synchronization. Inspect actual audio alignment and both scene/full framing.
+- [ ] After manual acceptance, add focused nested transform, path/count endpoints, conflict/retiming, text stability and dependency/cache regressions. Run required integration checks. If runtime changes since early LBC, rerun its retained opening/revisions as regression evidence on the new version; do not claim this is the original frozen trial.
 
-**Expected:** the route, direction of travel, and quantities are legible through objects, not only through captions. Same-frame evaluation must not depend on playback order. **Evidence:** not yet produced.
+**Command acceptance:** `pnpm naraframe preview work/visual-parity/medan --draft --scene river-history --json` and `pnpm naraframe preview work/visual-parity/medan --draft --scene shipping-route --json`. Record the population scene's actual ID and public scoped-preview command alongside its evidence.
+
+**Expected:** spatial context, direction and magnitudes become understandable through objects. World labels stay attached and scoped previews match full-video poses without prior playback.
 
 #### M2.4.4 — Full Medan with continuity
 
-**Primary areas:** renderer transitions and scoped/full composition; core transition dependencies/timeline; benchmark source data and the existing preview/final CLI path.
+**Primary areas:** source story/illustrations, transition dependencies and renderer focus/object continuity, existing narration/preview/final route.
 
-- [ ] Add object-driven transitions and focus handoffs needed by the sequence. Do not impose a quota of transition types. Include both sides' dependencies when a transition needs adjacent visual content.
-- [ ] Compose the full ten-part narrative with the shared engine vocabulary. Medan-specific drawings, data, colours, and choreography stay in project source/assets, never conditional renderer code.
-- [ ] Import the user's unchanged audio master as one narration block with measured phrase references, checking the script against actual speech. Explain its larger spoken-revision scope. Probe the duration; use an explicit terminal pause if needed to reach approximately 67.5s, not a stretched voice track or invented phrase timings.
-- [ ] Produce full preview/contact sheet; compare to the reference at equivalent display size and matched narrative moments. Record format differences. Review on-screen factual claims separately before public use; this is not automatic fact-checking.
-- [ ] Obtain Fatih's five-dimension NF-AC-16 assessment. After approval of the current full preview, render via the existing `--approve-preview` flow with the actual returned build ID; retain source/build/hash evidence.
-- [ ] Add boundary, scoped-neighbour, unchanged-audio-duration, immutable-publication, and cache-version regressions after the real path works. Run integration checks before merge.
+- [ ] Compose the ten-part narrative with shared capabilities; all Medan drawings, data and choreography remain source/assets. Add only required object/focus handoffs, no transition quota or Medan runtime branch.
+- [ ] Import the unchanged audio master with verified phrase references; explain its larger spoken-content revision scope. Recheck duration/listen: the recorded 66.576s audio needs an explicit approximately 0.924s terminal hold for 67.5s, not stretching or fabricated phrase timestamps.
+- [ ] Produce full preview/contact sheet and inspect all scenes plus transitions. Compare matched narrative moments at equivalent size. Opening fidelity was a controlled starting experiment, not a ban on subsequent evidence-backed improvements.
+- [ ] Record Fatih's five-dimension assessment: none worse, at least two better than the reference. Document scene/time examples and factual-claim checks needed before publication.
+- [ ] After explicit approval of the current full preview, export through the existing `--approve-preview` flow using its real build ID. Retain source/audio/build hashes.
+- [ ] Add focused transition-boundary/scoped-neighbour/audio-duration/publication/cache tests after the real path; run integration checks before merge.
 
-**Commands:** `pnpm naraframe validate work/visual-parity/medan --stage production --json` then `pnpm naraframe preview work/visual-parity/medan --json`; final rendering follows explicit current-preview approval.
+**Command acceptance:** `pnpm naraframe validate work/visual-parity/medan --stage production --json`, then `pnpm naraframe preview work/visual-parity/medan --json`; final export requires current-preview approval.
 
-**Expected:** approximately 67.5s with changing pace, explanatory illustrations, readable type, and coherent shot relationships. Pixel identity with the reference is not required. No stand-in can count as accepted illustration. **Evidence:** not yet produced.
+**Expected:** approximately 67.5s with varied pace, strong illustration, purposeful motion and coherent explanation. Full NF-AC-16 gate, not universal superiority over Bang Motion. Pixel identity is not required.
 
-#### M2.4.5 — Generalisation and simple revisions
+#### M2.4.5 — Full LBC, revisions and close-out
 
-**Primary areas:** skill/manual authoring through public CLI; LBC benchmark source; revision/profile/media-binding integration. The renderer vocabulary is frozen for the first-draft test.
+**Primary areas:** skill/public CLI, LBC source/profile and existing revision/media-binding system. Freeze the then-current engine/compiler/schema/CLI/recipes/skill again; record this separately from M2.4.2.
 
-- [ ] Record the frozen engine revision, then run the skill from one LBC brief using existing assets from `/Users/fatih/Code/Playground/lbc_kimi`. Keep that project read-only. Create a distinct 30s visual direction under `work/visual-parity/lbc`, introducing LBC through its WhatsApp CTA without copying Medan's narrative layout or accessing the old direct-Remotion composition as an implementation shortcut.
-- [ ] Retain the first delivered draft before owner feedback; log internal corrections, elapsed time, and external operations. One brief permits internal agent iteration and does not imply one model call.
-- [ ] Ask Fatih to assess it as a publication candidate. Use the earlier LBC/direct-Remotion output as a secondary review reference only after retaining this independent first draft.
-- [ ] Exercise plain-language requests to change a headline, slow a camera move, replace an object, and apply another visual identity. Translate requests into source edits, show affected scope, preview, and undo without the user writing JSON or code.
-- [ ] Verify new vector/shared-world/profile dependencies participate in revision, reuse, and undo. After a relevant profile change, unknown media-style bindings require explicit recorded retention/rebinding review or replacement before final; never silently infer compatibility. Preserve known unrelated media and receipts.
-- [ ] After the manual path works, add targeted cross-topic, affected/unaffected-key, media-binding, override/undo, and old-project compatibility tests. Run `pnpm verify` and serial `pnpm test:e2e` for the M2.4 close-out.
+- [ ] Extend the retained LBC direction to a distinct 30s introduction through WhatsApp CTA using existing assets. Preserve early trial source/build and the new first full draft before owner feedback. If the runtime changed, retain early-opening regression evidence on this freeze.
+- [ ] Record authoring time, internal corrections, user interventions, render/verification work and available actual usage. No hidden renderer changes or reuse of old direct-Remotion code; that output may be a review reference after the independent draft exists.
+- [ ] Obtain Fatih's assessment of the retained full first draft as a plausible publication candidate.
+- [ ] Exercise ordinary requests: change headline, slow camera, replace object, change visual identity. Show affected scope, preview and undo through normal source transactions without user code.
+- [ ] Verify shared/vector/camera/font/transition dependencies, known media reuse, profile overrides and reversible binding decisions. Unknown media style must require explicit retention/rebinding review or replacement before final, never silent compatibility.
+- [ ] Complete focused cross-topic/revision/undo/legacy regressions, `pnpm verify` and serial `pnpm test:e2e` for close-out. Record failures and known pixel-repeatability limits honestly.
 
-**Command:** `pnpm naraframe preview work/visual-parity/lbc --draft --json`
+**Command acceptance:** `pnpm naraframe preview work/visual-parity/lbc --draft --json`
 
-**Expected:** distinct 30s LBC silent preview, usable from one brief and revisable without renderer changes. A renderer patch during this trial fails the frozen-engine generalisation test; record the gap, implement/protect the reusable correction, then rerun the trial from a fresh project. LBC does not add silent final export. **Evidence:** not yet produced.
+**Expected:** distinct 30s silent preview and ordinary revisions on a frozen foundation. Silent final export remains excluded. A runtime/skill patch invalidates this trial: report the gap, obtain a scoped correction decision and retain a separately recorded retrial. No retrospective “first draft” after hidden fixes.
 
 #### Visual acceptance, tests, and exit gate
 
 | Dimension | Owner assessment |
 |---|---|
-| Composition and typography | Clear focus, deliberate framing, readable hierarchy |
-| Illustration | Relevant, convincing objects without placeholder substitution |
-| Motion | Purposeful movement and timing |
-| Continuity | Legible relationships between shots rather than slide resets |
-| Explanation | Visuals improve understanding of the information |
+| Composition and typography | Focus, deliberate framing, readable hierarchy and actual font fidelity |
+| Illustration | Relevant convincing objects, not placeholder substitution |
+| Motion | Purpose, timing and coherent camera/object choreography |
+| Continuity | Within-shot spatial consistency and, for full video, legible shot relationships |
+| Explanation | Objects make information easier to understand |
 
-For Medan, record worse/equal/better against the reference for every row, with scene/time examples. **NF-AC-16 passes only when no dimension is worse and at least two are better, as judged by Fatih.** This is not a universal competitor ranking. **NF-AC-17 passes when the retained LBC first draft is accepted as a publication candidate and ordinary revisions work without user coding or project-specific renderer changes.**
+**Early gates:** M2.4.1 requires Fatih's no-worse assessment against the matched accessible reference opening after frame/study approval; M2.4.2 requires a distinct LBC direction worth developing plus frozen-engine revision proof. Neither gate alone passes full NF-AC-16/17.
 
-Every feature follows model → real path → visible output/manual acceptance → focused automated coverage → integration checks. Run `pnpm verify` before integration, and full serial renderer E2E at M2.4 close-out or when changed runtime boundaries require it. Existing pixel-repeatability failures remain visible; do not retry until green and call the issue fixed. Isolate any regression introduced by the new motion path from the existing caveat, and do not claim NF-CP-03 is satisfied without matching evidence.
+**Full gates:** NF-AC-16 requires full Medan no worse in all five dimensions and at least two better, judged by Fatih with scene/time evidence. NF-AC-17 requires the retained LBC first full draft to be a publication candidate and ordinary revisions without user coding or runtime patches during the frozen trial.
 
-Record actual timings, internal/owner correction counts, generation calls, reuse, and known/unknown cost. No invented speed or savings threshold. Review full video plus representative frames; sampled preflight cannot certify every frame or replace the owner gate.
+Follow model → real path → visible output/manual acceptance → focused tests → integration. Known security/correctness fixes receive proportionate immediate regression protection after the fixed path works; do not front-load broad testing or postpone all tests to milestone end. Run `pnpm verify` before integration and serial full renderer E2E at close-out or when changed runtime boundaries require it. Do not rerun the full suite for each decorative adjustment. Existing pixel-repeatability failures remain open until independently evidenced fixed; no retry-until-green or blanket determinism claim.
 
-**Exit gate:** NF-AC-16/17 accepted, five task outputs and revision evidence retained, no unverified new capability advertised, focused/integration/runtime results recorded with unresolved limits explicit. M3 stays pending until this gate passes. Historical M2.3 completion is not revoked, but does not satisfy M2.4.
+Use a lightweight handoff record, not new infrastructure, for NF-CO-02. Compare like-for-like content trials, not NaraFrame engine development against one competitor content run. Preserve unknown usage/cost, fresh render versus cache reuse, owner versus agent actions, and internal versus feedback-driven corrections. No cheaper/faster claim without measurement.
+
+**Exit gate:** all five outputs accepted with source/build/revision evidence; NF-AC-16/17 passed; new capabilities advertised only after real-path proof and focused protection; required integration/runtime checks recorded and unresolved constraints explicit. M3 remains pending until this gate passes. Historical M2.3 completion is not revoked.
+
 
 ## 8. M3 — Owner dogfooding and release evidence
 
@@ -706,8 +987,9 @@ Record actual timings, internal/owner correction counts, generation calls, reuse
 | NF-AC-04/05/06/07 | M1.2/3 edits/failures; M3.1/2 determinism and visual QA |
 | NF-AC-12 | M1.2 partial voice and continuity evidence |
 | NF-AC-15 | M0.9 LBC visual-fidelity parity gate; M0.10 slide-ceiling gate |
-| NF-PR-09, NF-UX-03, NF-AC-16/17 | M2.4.1 art direction/first shot, M2.4.4 Medan visual benchmark, M2.4.5 cross-topic plain-language revision; required before M3 |
-| M2.4 scene/vector/camera/motion and cache contract | M2.4.1–4 source-to-render capabilities and focused protection; M2.4.5 frozen-engine/generalisation and revision gates |
+| NF-PR-09/10, NF-UX-03, NF-AC-16/17 | M2.4.1 reference-fidelity recovery; M2.4.2 early frozen-engine transfer; M2.4.4 full Medan and M2.4.5 full LBC/revisions; required before M3 |
+| NF-CO-02 | Separate development/authoring/render/owner effort and available actual usage in each M2.4 handoff; matched comparisons only, unknown is not zero |
+| M2.4 scene/vector/camera/motion and cache contract | M2.4.1 minimal coherent shot and SVG/font recovery; M2.4.3/4 story extension; M2.4.2/5 frozen-engine generalisation/revision gates |
 | NF-CO-01 cost visibility (extended) | M1.1 per-build cost report; M1.3 measured reuse ratio |
 | Editorial sourcing policy | M1.2 checkable claim provenance (`SOURCE_MISSING`) |
 
@@ -733,9 +1015,11 @@ Record actual timings, internal/owner correction counts, generation calls, reuse
 | VF-06 | Semantic scene/group camera continuity | M0.9.6 |
 | VF-07 | Visual foundation moved ahead of narration | M0.9 exit gate before M1.1 |
 | VS-01/02 | Restore visual competition; art direction plus passive vector/rich text | M2.4.1 |
-| VS-03/04 | Nested/reusable worlds, camera and explanatory object motion | M2.4.2/3/4 |
-| VS-05 | Plain-language revision with measured dependency/profile effects | M2.4.5 |
-| VS-06/07 | Honest playback/first-draft evidence and one consistent live plan | M2.4.1/4/5; documentation-only status correction |
+| VS-03/04 | Minimum coherent opening world/camera brought forward, then reusable river/route/data storytelling | M2.4.1/3/4 |
+| VS-05 | Plain-language revision with measured dependency/profile effects | M2.4.2 early and M2.4.5 full |
+| VS-06/07 | Honest playback/first-draft evidence, early transfer and consistent rejected status | M2.4.1/2/4/5; documentation status correction |
+| VS-08/09 | Reference-first adaptation and SVG safety/fidelity recovery | M2.4.1 |
+| VS-10/11 | Early bounded visual checkpoint, compact skill context and separated factual effort/usage | M2.4.1–5; NF-CO-02 |
 
 ## 10. Revision acceptance matrix
 
@@ -756,10 +1040,13 @@ Every edit uses the same source transaction and preserves spend/receipts across 
 
 ## 11. Runtime decisions and evidence register
 
-Rows retain evidence from their named implementation dates. Current M1 and M2.1–M2.3 closure is recorded in sections 6–7; older rows saying a later feature was pending describe that earlier checkpoint. The pixel-repeatability caveat is still open. M2.4 has no new runtime evidence in this documentation update.
+Rows retain evidence from their named implementation dates. Current M1 and M2.1–M2.3 closure is recorded in sections 6–7; older rows saying a later feature was pending describe that earlier checkpoint. The pixel-repeatability caveat is still open. M2.4.1 has a rejected first-attempt artifact and prior supervisor findings recorded below; this documentation update runs no new product render or test.
 
 | Decision / measurement | Current status | Required before |
 |---|---|---|
+| M2.4.1 first attempt and owner rejection | Unmerged `9747193`; 6.4s build `5d3b28594596-96b47423-ac5` rejected by Fatih. Historical tests are implementer-reported, not re-run here. Recovery fixes and visual parity are unverified. | M2.4.1 recovery and owner acceptance |
+| M2.4.1 SVG/font review | Prior source/frame/probe review found root-paint/text loss, accepted wrapped external paint URL and missing proof of font readiness in actual frame contexts. See refine-spec section 12. | Actual fixed-path and regression evidence |
+| Medan reference playback and effort comparison | Source/hashes and reported audio probe retained; reference playback/phrase listening still incomplete. Exact competitor prompt/effort and owner-reported token usage unavailable. | Matched visual baseline and any comparative claims |
 | Node/pnpm/TypeScript/React/Remotion/Zod/Vitest/Biome | M0.1 verified on 2026-09-08: 24.20.0 / 12.3.4 / 7.0.2 / 19.2.8 / 4.0.521 / 4.5.4 / 5.0.0 / 2.5.12. Install, frozen install, package graph, tests, typecheck, and build passed. M0.2 additionally proved the basic Remotion bundle/select/render path with the pinned stack. | M0.8 broader hardening |
 | Lockfile | `pnpm-lock.yaml` SHA-256 `047e2a98a570ad9a171b4fdba9d8bf297dedfc357986e9ec8b1de49dd3694b82` | Recheck after dependency changes |
 | Browser and FFmpeg exact paths/versions | Rechecked at M0 exit in the retained M0.8 report: Node `24.20.0`, Darwin `24.6.0` arm64, Remotion `4.0.521`, Google Chrome `152.0.7977.83` at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`, and FFmpeg/FFprobe `7.1.1` at `/opt/homebrew/bin`. | Recheck after runtime changes |

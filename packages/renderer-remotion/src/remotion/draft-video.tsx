@@ -1,8 +1,12 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
 import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useState } from "react";
 import {
   AbsoluteFill,
   Audio,
+  cancelRender,
+  continueRender,
+  delayRender,
   Img,
   Sequence,
   staticFile,
@@ -13,10 +17,15 @@ import {
   groupScreenTransformFor,
   motionStateFor,
   motionStyleFor,
+  planeTransformFor,
   sceneTransitionStateFor,
 } from "./motion.js";
 import { musicGainAt } from "./soundtrack-gain.js";
-import { fontFamilyForRole } from "./typography.js";
+import {
+  FONT_RENDER_FAILURE,
+  fontFamilyForRole,
+  loadBundledFonts,
+} from "./typography.js";
 
 const rgba = (hex: string, opacity: number): string => {
   const channels = [1, 3, 5].map((start) =>
@@ -149,9 +158,9 @@ const LayerView = ({
     width: layer.frame.width,
     height: layer.frame.height,
     opacity: layer.opacity * motion.opacity,
-    rotate: `${layer.rotationDeg}deg`,
     translate: `${motion.translateX}px ${motion.translateY}px`,
     scale: motion.scale,
+    rotate: `${layer.rotationDeg + motion.rotationDeg}deg`,
     zIndex: layer.zIndex,
     transformOrigin: `${motion.anchor.x * 100}% ${motion.anchor.y * 100}%`,
     boxSizing: "border-box",
@@ -242,6 +251,44 @@ const LayerView = ({
         {...(layer.focalPoint ? { focalPoint: layer.focalPoint } : {})}
       />
     </div>
+  );
+};
+
+const PlaneView = ({
+  draft,
+  scene,
+  localFrame,
+  space,
+  parallax,
+  zIndex,
+  children,
+}: {
+  draft: CompiledDraft;
+  scene: CompiledDraft["scenes"][number];
+  localFrame: number;
+  space: "world" | "overlay" | undefined;
+  parallax: number | undefined;
+  zIndex: number;
+  children: ReactNode;
+}) => {
+  const transform = planeTransformFor(
+    draft,
+    scene,
+    space,
+    parallax,
+    localFrame,
+  );
+  return (
+    <AbsoluteFill
+      style={{
+        translate: `${transform.translateX}px ${transform.translateY}px`,
+        zIndex,
+        scale: transform.scale,
+        transformOrigin: `${transform.originX}px ${transform.originY}px`,
+      }}
+    >
+      {children}
+    </AbsoluteFill>
   );
 };
 
@@ -405,23 +452,41 @@ const SceneView = ({
   return (
     <AbsoluteFill style={sceneMotion}>
       {topLevelLayers.map((layer) => (
-        <LayerView
+        <PlaneView
           draft={draft}
           key={layer.id}
-          layer={layer}
-          localFrame={localFrame}
           scene={scene}
-        />
+          localFrame={localFrame}
+          space={layer.space}
+          parallax={layer.parallax}
+          zIndex={layer.zIndex}
+        >
+          <LayerView
+            draft={draft}
+            layer={layer}
+            localFrame={localFrame}
+            scene={scene}
+          />
+        </PlaneView>
       ))}
       {groups.map((group) => (
-        <GroupView
+        <PlaneView
           draft={draft}
-          group={group}
           key={group.id}
-          layersById={layersById}
-          localFrame={localFrame}
           scene={scene}
-        />
+          localFrame={localFrame}
+          space={group.space}
+          parallax={group.parallax}
+          zIndex={group.zIndex}
+        >
+          <GroupView
+            draft={draft}
+            group={group}
+            layersById={layersById}
+            localFrame={localFrame}
+            scene={scene}
+          />
+        </PlaneView>
       ))}
     </AbsoluteFill>
   );
@@ -549,62 +614,121 @@ const CaptionLayer = ({ draft }: { draft: CompiledDraft }) => {
   );
 };
 
-export const DraftVideo = (draft: CompiledDraft) => (
-  <AbsoluteFill
-    style={{
-      backgroundColor: draft.profile.render.palette.background,
-      fontFamily: draft.profile.render.typography.fontFamily,
-      overflow: "hidden",
-    }}
-  >
-    {draft.scenes.map((scene, sceneIndex) => (
-      <Sequence
-        durationInFrames={scene.endFrame - scene.startFrame}
-        from={scene.startFrame}
-        key={scene.id}
-        name={scene.id}
-      >
-        <TransitionFrame draft={draft} sceneIndex={sceneIndex}>
-          <SceneView draft={draft} scene={scene} />
-        </TransitionFrame>
-      </Sequence>
-    ))}
-    <CaptionLayer draft={draft} />
-    {draft.narration?.clips.map((clip) => {
-      const asset = draft.assets[clip.assetId];
-      if (!asset || asset.kind === "png" || asset.kind === "placeholder")
-        return null;
-      return (
+/**
+ * Registers the project's bundled faces in the context that draws the frames.
+ *
+ * `calculateMetadata` runs in its own context, so a face added there is not
+ * necessarily present in a frame render tab: the tab falls back to a system
+ * face and the shot silently ships in the wrong typeface. Loading here, and
+ * holding the render until the faces are ready, is what makes a role font a
+ * guarantee rather than a hope.
+ */
+/**
+ * Marks a font failure so the node side can turn it back into a source issue.
+ * Only the message survives the browser boundary, so the reason travels in it.
+ */
+
+const useBundledFonts = (fonts: CompiledDraft["fonts"]): void => {
+  const [handle] = useState(() => delayRender("Loading bundled fonts"));
+  useEffect(() => {
+    let cancelled = false;
+    loadBundledFonts(fonts, { requireAllFaces: true })
+      .then(async (loaded) => {
+        await document.fonts.ready;
+        const missing = fonts.filter((font) => !loaded.has(font.family));
+        if (missing.length > 0) {
+          // A frame drawn in a substituted face is a silently wrong render,
+          // so the render stops and names the faces that never arrived.
+          throw new Error(
+            `${FONT_RENDER_FAILURE} ${missing
+              .map((font) => `${font.family} ${font.weight}`)
+              .join(", ")}`,
+          );
+        }
+        // A registered family can still be the wrong weight, so each declared
+        // face is checked at the size the browser was asked to prepare.
+        const unusable = fonts.filter(
+          (font) =>
+            !document.fonts.check(`${font.weight} 16px "${font.family}"`),
+        );
+        if (unusable.length > 0) {
+          throw new Error(
+            `${FONT_RENDER_FAILURE} ${unusable
+              .map((font) => `${font.family} ${font.weight}`)
+              .join(", ")}`,
+          );
+        }
+        if (!cancelled) continueRender(handle);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        cancelRender(error instanceof Error ? error : new Error(String(error)));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [fonts, handle]);
+};
+
+export const DraftVideo = (draft: CompiledDraft) => {
+  useBundledFonts(draft.fonts);
+  return (
+    <AbsoluteFill
+      style={{
+        backgroundColor: draft.profile.render.palette.background,
+        fontFamily: draft.profile.render.typography.fontFamily,
+        overflow: "hidden",
+      }}
+    >
+      {draft.scenes.map((scene, sceneIndex) => (
         <Sequence
-          key={clip.blockId}
-          from={clip.startFrame}
-          durationInFrames={clip.durationInFrames}
-          name={`audio-${clip.blockId}`}
+          durationInFrames={scene.endFrame - scene.startFrame}
+          from={scene.startFrame}
+          key={scene.id}
+          name={scene.id}
         >
-          <Audio
-            src={staticFile(asset.publicPath)}
-            startFrom={clip.trimStartFrames ?? 0}
-          />
+          <TransitionFrame draft={draft} sceneIndex={sceneIndex}>
+            <SceneView draft={draft} scene={scene} />
+          </TransitionFrame>
         </Sequence>
-      );
-    })}
-    <SoundtrackLayer draft={draft} />
-    {draft.mode === "draft" && (
-      <div
-        style={{
-          position: "absolute",
-          left: 44,
-          right: 44,
-          bottom: 34,
-          color: draft.profile.render.palette.accent,
-          fontSize: 18,
-          fontWeight: 800,
-          letterSpacing: 2,
-          textAlign: "center",
-        }}
-      >
-        {draft.label}
-      </div>
-    )}
-  </AbsoluteFill>
-);
+      ))}
+      <CaptionLayer draft={draft} />
+      {draft.narration?.clips.map((clip) => {
+        const asset = draft.assets[clip.assetId];
+        if (!asset || asset.kind === "png" || asset.kind === "placeholder")
+          return null;
+        return (
+          <Sequence
+            key={clip.blockId}
+            from={clip.startFrame}
+            durationInFrames={clip.durationInFrames}
+            name={`audio-${clip.blockId}`}
+          >
+            <Audio
+              src={staticFile(asset.publicPath)}
+              startFrom={clip.trimStartFrames ?? 0}
+            />
+          </Sequence>
+        );
+      })}
+      <SoundtrackLayer draft={draft} />
+      {draft.mode === "draft" && (
+        <div
+          style={{
+            position: "absolute",
+            left: 44,
+            right: 44,
+            bottom: 34,
+            color: draft.profile.render.palette.accent,
+            fontSize: 18,
+            fontWeight: 800,
+            letterSpacing: 2,
+            textAlign: "center",
+          }}
+        >
+          {draft.label}
+        </div>
+      )}
+    </AbsoluteFill>
+  );
+};

@@ -1,6 +1,11 @@
 import type { CompiledDraft, CompiledTransition } from "@naraframe/core";
 import { describe, expect, it } from "vitest";
-import { sceneTransitionStateFor } from "../../src/remotion/motion.js";
+import {
+  cameraStateFor,
+  motionStateFor,
+  planeTransformFor,
+  sceneTransitionStateFor,
+} from "../../src/remotion/motion.js";
 
 const baseRender: CompiledDraft["profile"]["render"] = {
   palette: {
@@ -50,6 +55,107 @@ const draftWithScenes = (
   assets: {},
   fonts: [],
   scenes,
+});
+
+describe("camera and opaque transform study", () => {
+  it("retains sequential endpoints and allows independent simultaneous properties when seeking", () => {
+    const scene = sceneOf("a", 0, 90, { type: "cut" });
+    scene.beats = [
+      {
+        id: "first",
+        targetId: "pin",
+        action: "transform",
+        startFrame: 0,
+        durationInFrames: 20,
+        params: { to: { x: 100 }, easingPreset: "linear" },
+      },
+      {
+        id: "second",
+        targetId: "pin",
+        action: "transform",
+        startFrame: 30,
+        durationInFrames: 20,
+        params: { to: { x: 160 }, easingPreset: "linear" },
+      },
+      {
+        id: "rise",
+        targetId: "pin",
+        action: "transform",
+        startFrame: 0,
+        durationInFrames: 50,
+        params: { to: { y: -50 }, easingPreset: "linear" },
+      },
+    ];
+    const draft = draftWithScenes([scene]);
+    expect(motionStateFor(draft, scene, "pin", 40)).toMatchObject({
+      translateX: 130,
+      translateY: -40,
+      opacity: 1,
+    });
+    expect(motionStateFor(draft, scene, "pin", 25)).toMatchObject({
+      translateX: 100,
+      translateY: -25,
+      opacity: 1,
+    });
+    expect(motionStateFor(draft, scene, "pin", 89)).toMatchObject({
+      translateX: 160,
+      translateY: -50,
+      opacity: 1,
+    });
+    expect(motionStateFor(draft, scene, "pin", 0).translateX).toBe(0);
+  });
+  it("keeps overlays fixed and projects world depth from the same camera pose", () => {
+    const scene = sceneOf("a", 0, 90, { type: "cut" });
+    scene.camera = {
+      initial: { x: 0, y: 0, zoom: 1 },
+      moves: [
+        {
+          id: "pan",
+          startFrame: 0,
+          durationInFrames: 30,
+          to: { x: 100, y: 20, zoom: 2 },
+          easingPreset: "linear",
+        },
+        {
+          id: "settle",
+          startFrame: 40,
+          durationInFrames: 20,
+          to: { x: 160, y: 40, zoom: 1 },
+          easingPreset: "linear",
+        },
+      ],
+    };
+    const draft = draftWithScenes([scene]);
+    expect(cameraStateFor(scene, 50)).toEqual({ x: 130, y: 30, zoom: 1.5 });
+    expect(planeTransformFor(draft, scene, "overlay", 1, 50)).toMatchObject({
+      translateX: 0,
+      translateY: 0,
+      scale: 1,
+    });
+    expect(planeTransformFor(draft, scene, "world", 0.5, 50)).toMatchObject({
+      translateX: -65,
+      translateY: -15,
+      scale: Math.sqrt(1.5),
+    });
+    scene.camera.initial.zoom = 0.25;
+    expect(
+      planeTransformFor(draft, scene, "world", 2, 0).scale,
+    ).toBeGreaterThan(0);
+  });
+  it("preserves legacy coordinates without a camera or transform beat", () => {
+    const scene = sceneOf("a", 0, 90, { type: "cut" });
+    const draft = draftWithScenes([scene]);
+    expect(motionStateFor(draft, scene, "pin", 42)).toMatchObject({
+      translateX: 0,
+      translateY: 0,
+      scale: 1,
+      rotationDeg: 0,
+      opacity: 1,
+    });
+    expect(
+      planeTransformFor(draft, scene, undefined, undefined, 42),
+    ).toMatchObject({ translateX: 0, translateY: 0, scale: 1 });
+  });
 });
 
 describe("sceneTransitionStateFor — identity cases", () => {
@@ -271,5 +377,68 @@ describe("sceneTransitionStateFor — match-cut", () => {
 
     const atEntryEnd = sceneTransitionStateFor(draft, 1, 15);
     expect(atEntryEnd.scale).toBeCloseTo(1, 5);
+  });
+});
+
+describe("exit beat", () => {
+  const exitDraft = (params: Record<string, unknown> = {}) => {
+    const scene = sceneOf("opening", 0, 192, { type: "cut" });
+    scene.beats = [
+      {
+        id: "headline-out",
+        targetId: "headline",
+        action: "exit",
+        startFrame: 30,
+        durationInFrames: 15,
+        params,
+      },
+    ] as CompiledDraft["scenes"][number]["beats"];
+    const draft = draftWithScenes([scene]);
+    return { draft, scene };
+  };
+
+  it("fades an element out across its window and leaves it hidden afterwards", () => {
+    const { draft, scene } = exitDraft({ easingPreset: "linear" });
+    const at = (frame: number) =>
+      motionStateFor(draft, scene, "headline", frame).opacity;
+    expect(at(29)).toBeCloseTo(1);
+    expect(at(37)).toBeGreaterThan(0.1);
+    expect(at(37)).toBeLessThan(0.9);
+    expect(at(45)).toBeCloseTo(0);
+  });
+
+  it("stays hidden when a late frame is evaluated directly", () => {
+    // Seeking straight to a late frame must give the same hidden pose as
+    // playing there; nothing may depend on the frames before it.
+    const { draft, scene } = exitDraft({ easingPreset: "linear" });
+    expect(motionStateFor(draft, scene, "headline", 191).opacity).toBeCloseTo(
+      0,
+    );
+    expect(motionStateFor(draft, scene, "headline", 60).opacity).toBeCloseTo(0);
+  });
+
+  it("drifts only when asked, and in the direction asked", () => {
+    const still = exitDraft({ easingPreset: "linear" });
+    expect(
+      motionStateFor(still.draft, still.scene, "headline", 45).translateY,
+    ).toBeCloseTo(0);
+
+    const up = exitDraft({
+      direction: "up",
+      distance: 40,
+      easingPreset: "linear",
+    });
+    expect(
+      motionStateFor(up.draft, up.scene, "headline", 45).translateY,
+    ).toBeCloseTo(-40);
+
+    const right = exitDraft({
+      direction: "right",
+      distance: 40,
+      easingPreset: "linear",
+    });
+    expect(
+      motionStateFor(right.draft, right.scene, "headline", 45).translateX,
+    ).toBeCloseTo(40);
   });
 });

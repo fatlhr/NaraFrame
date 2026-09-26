@@ -70,6 +70,260 @@ const buildSource = (
   assets: { schemaVersion: 1, assets: [] },
 });
 
+describe("motion-study source-to-compile", () => {
+  const motionScene = (): Scene => ({
+    id: "study",
+    narrativeRole: "hook",
+    durationMs: 3000,
+    transition: { type: "cut" },
+    visual: {
+      type: "composition",
+      layers: [
+        {
+          id: "pin",
+          type: "shape",
+          shape: "circle",
+          fill: "#ffffff",
+          frame: { x: 100, y: 500, width: 100, height: 100 },
+          opacity: 1,
+          rotationDeg: 0,
+          zIndex: 0,
+          space: "world",
+        },
+      ],
+    },
+    camera: {
+      initial: { x: 0, y: 0, zoom: 1 },
+      moves: [
+        {
+          id: "pan",
+          startMs: 0,
+          durationMs: 2000,
+          to: { x: 100, y: 20, zoom: 1.1 },
+        },
+      ],
+    },
+    beats: [
+      {
+        id: "travel",
+        targetId: "pin",
+        action: "transform",
+        startMs: 0,
+        durationMs: 1000,
+        params: { to: { x: 200, y: 40 } },
+      },
+    ],
+  });
+  it("scales coordinates and preserves scoped camera and motion; camera invalidates render key", () => {
+    const source = buildSource([
+      scene({ id: "lead", durationMs: 1000 }),
+      motionScene(),
+    ]);
+    const full = compileDraft(source);
+    expect(full.ok).toBe(true);
+    if (!full.ok) return;
+    const compiledScene = full.value.scenes[1];
+    if (!compiledScene) throw new Error("Missing compiled study scene");
+    expect(compiledScene.camera?.moves[0]?.to).toEqual({
+      x: 50,
+      y: 10,
+      zoom: 1.1,
+    });
+    expect(compiledScene.beats[0]?.params).toMatchObject({
+      to: { x: 100, y: 20 },
+    });
+    const scoped = compileDraft(source, { type: "scene", sceneId: "study" });
+    expect(scoped.ok).toBe(true);
+    if (scoped.ok) {
+      expect(scoped.value.scenes[0]?.camera).toEqual(compiledScene.camera);
+      expect(scoped.value.scenes[0]?.beats).toEqual(compiledScene.beats);
+      expect(scoped.value.scenes[0]?.startFrame).toBe(0);
+      expect(compiledScene.startFrame).toBe(30);
+    }
+    const changed = structuredClone(source);
+    const changedMove = changed.scenes.scenes[1]?.camera?.moves[0];
+    if (!changedMove) throw new Error("Missing camera move fixture");
+    changedMove.to.x = 150;
+    const next = compileDraft(changed);
+    expect(next.ok).toBe(true);
+    if (next.ok)
+      expect(next.value.assemblyKey).not.toBe(full.value.assemblyKey);
+  });
+  it("rejects same-property conflicts but accepts independent properties", () => {
+    const scene = motionScene();
+    scene.beats.push({
+      id: "rotate",
+      targetId: "pin",
+      action: "transform",
+      startMs: 0,
+      durationMs: 1000,
+      params: { to: { rotationDeg: 15 } },
+    });
+    expect(compileDraft(buildSource([scene])).ok).toBe(true);
+    const secondBeat = scene.beats[1];
+    if (!secondBeat) throw new Error("Missing beat fixture");
+    secondBeat.params = { to: { x: 300 } };
+    const result = compileDraft(buildSource([scene]));
+    expect(result.ok).toBe(false);
+    expect(result.issues.map((i) => i.code)).toContain(
+      "MOTION_PROPERTY_OVERLAP",
+    );
+  });
+  it("rejects camera overlaps and camera moves beyond scene duration", () => {
+    const scene = motionScene();
+    if (!scene.camera) throw new Error("Missing camera fixture");
+    scene.camera.moves.push({
+      id: "bad",
+      startMs: 1000,
+      durationMs: 3000,
+      to: { x: 0, y: 0, zoom: 1 },
+    });
+    const result = compileDraft(buildSource([scene]));
+    expect(result.ok).toBe(false);
+    expect(result.issues.map((i) => i.code)).toEqual(
+      expect.arrayContaining([
+        "CAMERA_MOVE_OVERLAP",
+        "CAMERA_MOVE_OUTSIDE_SCENE",
+      ]),
+    );
+  });
+});
+
+describe("compileDraft — exit beat overlap validation", () => {
+  type Beat = Scene["beats"][number];
+
+  /** One composition scene with a single text target, and the given beats. */
+  const exitScene = (beats: Beat[]): Scene => ({
+    id: "opening",
+    narrativeRole: "hook",
+    durationMs: 3000,
+    transition: { type: "cut" },
+    visual: {
+      type: "composition",
+      layers: [
+        {
+          id: "headline",
+          type: "text",
+          text: "Headline",
+          frame: { x: 80, y: 200, width: 900, height: 200 },
+          opacity: 1,
+          rotationDeg: 0,
+          zIndex: 0,
+        },
+      ],
+    },
+    beats,
+  });
+
+  const reveal = (id: string, startMs: number, durationMs: number): Beat => ({
+    id,
+    targetId: "headline",
+    action: "reveal",
+    startMs,
+    durationMs,
+    params: { direction: "up", distance: 40 },
+  });
+  const exit = (
+    id: string,
+    startMs: number,
+    durationMs: number,
+    params: Extract<Beat, { action: "exit" }>["params"] = {},
+  ): Beat => ({
+    id,
+    targetId: "headline",
+    action: "exit",
+    startMs,
+    durationMs,
+    params,
+  });
+
+  const overlapCodes = (beats: Beat[]) => {
+    const result = compileDraft(buildSource([exitScene(beats)]));
+    return {
+      ok: result.ok,
+      overlaps: result.issues.filter(
+        (issue) => issue.code === "MOTION_PROPERTY_OVERLAP",
+      ),
+    };
+  };
+
+  it("rejects an exit that overlaps a reveal on the same target's opacity", () => {
+    const result = overlapCodes([
+      reveal("in", 0, 1000),
+      exit("out", 500, 1000),
+    ]);
+    expect(result.ok).toBe(false);
+    expect(result.overlaps).toHaveLength(1);
+    expect(result.overlaps[0]?.message).toContain("opacity");
+  });
+
+  it("rejects two exits that overlap on the same target", () => {
+    const result = overlapCodes([
+      exit("out-a", 0, 1000),
+      exit("out-b", 500, 1000),
+    ]);
+    expect(result.ok).toBe(false);
+    expect(result.overlaps.length).toBeGreaterThan(0);
+  });
+
+  it("rejects an exit whose drift overlaps a transform on the same axis", () => {
+    const result = overlapCodes([
+      {
+        id: "lift",
+        targetId: "headline",
+        action: "transform",
+        startMs: 0,
+        durationMs: 1000,
+        params: { to: { y: -30 } },
+      },
+      exit("out", 500, 1000, { direction: "up", distance: 60 }),
+    ]);
+    expect(result.ok).toBe(false);
+    expect(result.overlaps[0]?.message).toContain(" y ");
+  });
+
+  it("accepts a reveal followed by an exit when the windows are sequential", () => {
+    expect(
+      overlapCodes([reveal("in", 0, 1000), exit("out", 1500, 500)]),
+    ).toEqual({
+      ok: true,
+      overlaps: [],
+    });
+  });
+
+  it("accepts an exit alongside motion on independent properties", () => {
+    // A fade-only exit writes opacity; emphasize writes scale and a transform
+    // here writes x. None of them touches what the others write.
+    expect(
+      overlapCodes([
+        exit("out", 500, 1000),
+        {
+          id: "pulse",
+          targetId: "headline",
+          action: "emphasize",
+          startMs: 500,
+          durationMs: 1000,
+          params: { scale: 1.05 },
+        },
+        {
+          id: "slide",
+          targetId: "headline",
+          action: "transform",
+          startMs: 500,
+          durationMs: 1000,
+          params: { to: { x: 40 } },
+        },
+      ]),
+    ).toEqual({ ok: true, overlaps: [] });
+  });
+
+  it("keeps accepting overlaps among the original presets, which existing projects rely on", () => {
+    expect(
+      overlapCodes([reveal("in-a", 0, 1000), reveal("in-b", 500, 1000)]),
+    ).toEqual({ ok: true, overlaps: [] });
+  });
+});
+
 describe("compileDraft — M0.10 transition boundary validation", () => {
   it("accepts a project whose transitions fit within both neighbouring scenes", () => {
     const source = buildSource([

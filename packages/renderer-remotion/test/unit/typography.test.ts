@@ -1,6 +1,51 @@
-import type { RenderTokens } from "@naraframe/core";
-import { describe, expect, it } from "vitest";
-import { fontFamilyForRole } from "../../src/remotion/typography.js";
+import type { CompiledDraft, RenderTokens } from "@naraframe/core";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  fontFamilyForRole,
+  loadBundledFonts,
+} from "../../src/remotion/typography.js";
+
+describe("per-face font readiness", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  const setup = (failBold: boolean) => {
+    vi.stubGlobal(
+      "FontFace",
+      class {
+        weight: string;
+        constructor(
+          _family: string,
+          _src: string,
+          options: { weight: string },
+        ) {
+          this.weight = options.weight;
+        }
+        async load() {
+          if (failBold && this.weight === "700") throw new Error("broken bold");
+          return this;
+        }
+      },
+    );
+    vi.stubGlobal("document", { fonts: { add: vi.fn(), check: () => true } });
+    return [400, 700].map((weight) => ({
+      family: "Shared Face",
+      weight,
+      publicPath: `${weight}.ttf`,
+    })) as CompiledDraft["fonts"];
+  };
+
+  it("rejects a broken weight even when another face registers the same family", async () => {
+    await expect(
+      loadBundledFonts(setup(true), { requireAllFaces: true }),
+    ).rejects.toThrow("NARAFRAME_FONT_UNAVAILABLE: Shared Face 700");
+  });
+
+  it("loads both valid faces and preserves the family-based preflight interface", async () => {
+    await expect(
+      loadBundledFonts(setup(false), { requireAllFaces: true }),
+    ).resolves.toEqual(new Set(["Shared Face"]));
+  });
+});
 
 const baseRender: RenderTokens = {
   palette: {

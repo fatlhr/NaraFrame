@@ -27,6 +27,7 @@ export interface CapabilityRegistry {
   /** Motion vocabulary. */
   beats: string[];
   beatCameras: string[];
+  compositionMotion: string[];
   transitions: string[];
   /** Colour slots a scene may name instead of a literal hex. */
   paletteTokens: string[];
@@ -123,6 +124,12 @@ export const capabilityRegistry = (): CapabilityRegistry => {
     groupLayouts: ["absolute", "grid", "stack"],
     beats: optionsOf(BeatSchema, ["oneOf"], "action"),
     beatCameras: ["pan", "push", "zoom"],
+    compositionMotion: [
+      "camera-framing",
+      "camera-moves",
+      "parallax",
+      "world-overlay",
+    ],
     transitions: optionsOf(TransitionSchema, ["oneOf"]),
     paletteTokens: [
       "palette.accent",

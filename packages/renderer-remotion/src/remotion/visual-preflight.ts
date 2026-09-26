@@ -5,6 +5,7 @@ import {
   type GroupTransform,
   groupScreenTransformFor,
   motionStateFor,
+  planeTransformFor,
   type SceneTransitionState,
   sceneTransitionStateFor,
 } from "./motion.js";
@@ -298,18 +299,19 @@ const textRectangle = (
 const transformedRectangle = (
   rectangle: Rectangle,
   state: ReturnType<typeof motionStateFor>,
-): Rectangle => ({
-  x:
-    rectangle.x +
-    state.translateX -
-    rectangle.width * (state.scale - 1) * state.anchor.x,
-  y:
-    rectangle.y +
-    state.translateY -
-    rectangle.height * (state.scale - 1) * state.anchor.y,
-  width: rectangle.width * state.scale,
-  height: rectangle.height * state.scale,
-});
+  bounds: Rectangle = rectangle,
+  rotationDeg = 0,
+): Rectangle =>
+  applyGroupTransform(
+    rectangle,
+    {
+      ...state,
+      rotationDeg: rotationDeg + state.rotationDeg,
+      anchorX: state.anchor.x,
+      anchorY: state.anchor.y,
+    },
+    bounds,
+  );
 
 const intersects = (left: Rectangle, right: Rectangle): boolean =>
   left.x < right.x + right.width &&
@@ -453,11 +455,20 @@ const framesForScene = (
   add(Math.floor(duration * 0.25), "scene-settled");
   add(duration - 1, "scene-final");
   scene.beats.forEach((beat) => {
+    add(beat.startFrame, `beat-start:${beat.id}`);
     add(
       beat.startFrame + Math.floor(beat.durationInFrames / 2),
       `beat-peak:${beat.id}`,
     );
     add(beat.startFrame + beat.durationInFrames, `beat-settled:${beat.id}`);
+  });
+  scene.camera?.moves.forEach((move) => {
+    add(move.startFrame, `camera-start:${move.id}`);
+    add(
+      move.startFrame + Math.floor(move.durationInFrames / 2),
+      `camera-mid:${move.id}`,
+    );
+    add(move.startFrame + move.durationInFrames, `camera-settled:${move.id}`);
   });
   return [...local.entries()].map(([frame, reasons]) => ({
     frame: scene.startFrame + frame,
@@ -746,9 +757,30 @@ export const resolveVisualPreflight = (
         if (!bounds) return rectangle;
         return applyGroupTransform(rectangle, transform, bounds);
       })();
+      const planeOwner =
+        group ?? scene.layers.find((layer) => layer.id === layerId);
+      const plane = planeTransformFor(
+        draft,
+        scene,
+        planeOwner?.space,
+        planeOwner?.parallax,
+        localFrame,
+      );
+      const withPlane = {
+        x:
+          plane.originX +
+          (withGroup.x - plane.originX) * plane.scale +
+          plane.translateX,
+        y:
+          plane.originY +
+          (withGroup.y - plane.originY) * plane.scale +
+          plane.translateY,
+        width: withGroup.width * plane.scale,
+        height: withGroup.height * plane.scale,
+      };
       const sceneState = sceneTransitionStateFor(draft, sceneIndex, localFrame);
       return applySceneTransition(
-        withGroup,
+        withPlane,
         sceneState,
         draft.width,
         draft.height,
@@ -793,7 +825,12 @@ export const resolveVisualPreflight = (
               continue;
             const layerRectangle = rectangleOnScreen(
               layer.id,
-              transformedRectangle(textRectangle(layer, metrics), state),
+              transformedRectangle(
+                textRectangle(layer, metrics),
+                state,
+                layer.frame,
+                layer.rotationDeg,
+              ),
               localFrame,
             );
             const pair = `${cue.id}:${layer.id}`;
@@ -817,6 +854,7 @@ export const resolveVisualPreflight = (
       }
     }
     const checkedPairs = new Set<string>();
+    const checkedClipping = new Set<string>();
     for (const frame of frames.filter((item) => item.sceneId === scene.id)) {
       const localFrame = frame.frame - scene.startFrame;
       textLayers.forEach((left, leftIndex) => {
@@ -833,9 +871,35 @@ export const resolveVisualPreflight = (
           return;
         const leftRectangle = rectangleOnScreen(
           left.id,
-          transformedRectangle(textRectangle(left, leftMetrics), leftState),
+          transformedRectangle(
+            textRectangle(left, leftMetrics),
+            leftState,
+            left.frame,
+            left.rotationDeg,
+          ),
           localFrame,
         );
+        if (
+          (scene.camera ||
+            scene.beats.some((beat) => beat.action === "transform")) &&
+          !checkedClipping.has(left.id) &&
+          (leftRectangle.x < -0.5 ||
+            leftRectangle.y < -0.5 ||
+            leftRectangle.x + leftRectangle.width > draft.width + 0.5 ||
+            leftRectangle.y + leftRectangle.height > draft.height + 0.5)
+        ) {
+          checkedClipping.add(left.id);
+          issues.push(
+            issueFor(
+              "TEXT_OUTSIDE_CANVAS",
+              sceneIndex,
+              scene.layers.indexOf(left),
+              left.id,
+              `Text layer ${left.id} is outside the canvas at frame ${frame.frame}.`,
+              "Adjust camera framing or object travel so required text remains visible.",
+            ),
+          );
+        }
 
         const targets = new Set([
           ...textLayers.slice(leftIndex + 1).map((layer) => layer.id),
@@ -869,6 +933,8 @@ export const resolveVisualPreflight = (
                 ? textRectangle(target, targetMetrics)
                 : target.frame,
               targetState,
+              target.frame,
+              target.rotationDeg,
             ),
             localFrame,
           );

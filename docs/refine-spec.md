@@ -1,9 +1,9 @@
 # NaraFrame MVP — Adversarial Spec Refinement
 
-Status: M0 complete. M0.9 corrective runtime/automated gates pass and Fatih accepted the rerendered LBC build on 2026-09-14; M1.1 is unpaused.
+Status: M0, M1, and M2.1–M2.3 have recorded delivery evidence on main at `7b232c9`. M2.4.1 has an unmerged implementation at `9747193`, but its opening was rejected by Fatih. Reference-first recovery is approved for planning; recovery execution and both visual gates remain open. M3 is held.
 
-Date: 2026-09-14
-Reviewed artifacts: `docs/spec.md` revisions 0.1–0.3 plus the LBC engine/direct-Remotion benchmark; active baseline is revision 0.4.
+Date: 2026-09-20
+Reviewed artifacts: historical spec/LBC reviews; M2.3 recorded delivery evidence; the owner's Medan/Bang Motion source reference; the rejected M2.4.1 source, retained output frames, and sanitizer probes. Active specification is revision 0.6. The original review was Markdown-only; the 2026-09-21 evidence update in section 12 records subsequent authorised technical recovery, recording inspection and a diagnostic static render. Current execution evidence lives in `docs/plan.md`.
 
 The user approved the AR follow-up changes after clarifying the initial technical-user target. AR-01 is withdrawn; AR-02–14 are accepted-for-spec. No runtime, usability, voice-quality, or cost test is marked passed by this document update. The temporary dated review/revision-plan files were absorbed into spec/refinement/plan/discovery and removed; this file retains their finding IDs and rationale.
 
@@ -41,7 +41,7 @@ Consequences:
 - The follow-up review checked that Remotion frame ranges use inclusive endpoints; NaraFrame's half-open ranges need an adapter. Local bundle serving requires distinguishing loopback from external network: https://www.remotion.dev/docs/renderer/render-media
 - Renderer license eligibility is distinct from unrestricted redistribution of a derivative engine. Recheck the license of the selected version and intended distribution model before release: https://github.com/remotion-dev/remotion/blob/main/LICENSE.md
 
-These sources inform contracts, not proof that NaraFrame can execute them. No current provider prices, verified voice route, or bill-per-video measurement is available.
+These sources informed the original contracts, not runtime proof. Later prepared-voice/export evidence is recorded in `docs/plan.md` sections 6–7; live provider pricing and measured paid cost comparison remain unavailable.
 
 ## 4. Historical RF findings: revision 0.1 → 0.2
 
@@ -388,15 +388,16 @@ Demonstrate these with the feature that needs them, not as one broad prerequisit
 4. M1: one real Indonesian narration/phrase-timing recipe, block joins/partial voice replacement, final H.264/AAC sample coverage, and ledger tests before paid generation.
 5. M1: staged source revisions/manual edits/undo recover safely without erasing usage history.
 6. M2: additional SVG/video/audio/font formats only after their safety/decode tests; scoped preview and profile apply/rollback.
-7. M3: full video/audio review, owner mixed-route dogfooding, repeatability and measured usage/latency. Sampled preflight cannot prove every frame safe.
+7. M2.4: recover the rejected opening through reference-fidelity proof (M2.4.1), immediately test a distinct frozen-engine LBC opening (M2.4.2), then extend river/shipping/data storytelling (M2.4.3), full Medan (M2.4.4), and full LBC/revisions (M2.4.5). NF-AC-16/17 must pass before M3.
+8. M3: full video/audio review, owner mixed-route dogfooding, repeatability and measured usage/latency. Sampled preflight cannot prove every frame safe.
 
 If a required gate fails, stop the affected milestone and resolve it or explicitly narrow the approved scope. Do not mark it passed because the requirement was written down.
 
 ## 7. Current refinement verdict
 
-The accepted design preserves one interleaved skill/core pipeline plus direct CLI/JSON use for Fatih. The former novice-target criticism was a reviewer scope error, not a product flaw. Remaining revisions target affordable local edits, earlier previews, production readiness, source recovery, and a working slice before a large visual registry.
+The accepted design preserves one interleaved skill/core pipeline and optional direct CLI/JSON control. AR-01 remains withdrawn as a historical reviewer scope error. The owner's new M2.4 direction explicitly adds ordinary revisions without schema knowledge and data suitable for a future GUI (NF-UX-03), without adding a GUI or mandatory novice-onboarding study.
 
-Spec 0.4 is the approved design baseline. `docs/plan.md` contains the M0–M3 roadmap, the verified M0 implementation record, and the expanded M0.9 corrective task; there is no second planning layer. M0.1–M0.8 are implemented. M0.9 now implements and verifies the declarative appearance/layout contract, profile visual tokens, exact masked primitives, loaded-font preflight, and shared semantic motion geometry. The corrected LBC preview and automated gates pass; M0.9 still blocks M1.1 until Fatih accepts the full video and the four previously rejected moments. Owner active time was not instrumented and is explicitly recorded as unavailable. Narration, usage/cost, durable source transactions, and final workflow evidence remain future milestones.
+Spec 0.6 is the approved reference-first recovery design baseline. `docs/plan.md` contains delivered M0–M2.3 evidence and the expanded M2.4 insertion; there is no second planning layer. Core revision/profile/preview/accounting capabilities are useful foundations, but neither green checks nor completed technical milestones establish competitive visual quality. Medan parity and a distinct LBC first draft are new acceptance obligations, not already-passed outcomes. Existing pixel-repeatability and measured paid-cost gaps remain explicit.
 
 M0.6 evidence: the exact Node 24.20.0/pnpm 12.3.4 runtime passed public `doctor`, `schema`, `create`, `validate --stage plan`, `status`, and `preview --draft` contracts. In the review-fix rerun, human and JSON `create` commands succeeded in `work/m0-6-review-created-human` and `work/m0-6-review-created-json`; a real human full preview published current immutable build `41b6900277c8-a2b28188-998`, while JSON scoped `preview --draft --scene hook --json` published `93da18cf5a91-fad10874-1fd`. Both use source revision `09b2333daa03081bc485868915d413d09556a22e81fa95a93c84cb48c8e7f531`; their project/scoped fingerprints are `41b6900277c8ed8533002fbaadecf8cd9b39a9cae4d758d344d6389f6ec63d7d` and `93da18cf5a91a64feff9909d5b4f62984391d534cdfbb3cc654118d9e0edf7f2`. The review proves cancellation after durable pointer preparation cannot replace the pointer and cleans its temporary file. Public status now rejects corrupt pointer hashes, unsafe symlinks, tampered artifact content, invalid scope unions, and inconsistent manifest/report/frames metadata before returning paths; valid scene scopes remain supported. SIGTERM and SIGINT interruption both resolve to 130. Focused CLI checks passed 3 unit/17 integration tests; final verification passed unit 9/9 and integration 31/31. The skill was unchanged in the review.
 
@@ -522,6 +523,8 @@ Proof: cross-document checks for this revision; later M3 runtime/usage evidence 
 
 Lifecycle: proposed → accepted-for-spec → implemented → verified, or deferred-with-reason / withdrawn-with-reason. Design acceptance does not skip implementation and verification states.
 
+**Historical M0 checkpoint:** the AR table below preserves its original implementation snapshot, including tasks then pending M1/M2. It is not the current delivery tracker. Current M0–M2.3 delivery is recorded in `docs/plan.md` sections 6–7, and the new M2.4 disposition is in section 12 below. No prior test outcome is newly asserted by updating this file.
+
 | Finding | Severity | Design status | Implementation | Verification |
 |---|---|---|---|---|
 | AR-01 | Withdrawn | User-target assumption retracted | Not applicable | No novice gate |
@@ -539,7 +542,7 @@ Lifecycle: proposed → accepted-for-spec → implemented → verified, or defer
 | AR-13 | Medium | Accepted-for-spec | External-egress/build atomicity/sampled QA implemented for M0 | M0 runtime and failure injection verified; later audio scope pending |
 | AR-14 | Medium | Accepted; document consistency corrected | Milestone/evidence lifecycle in active use | M0 runtime evidence recorded; later milestones pending |
 
-Each active finding above has its requirement/scenario and milestone under section 8 and `docs/plan.md` section 9. Exact commands, source/build IDs, output hashes/paths, test dates, and human review notes are recorded as execution supplies evidence. M0 has verified silent-draft evidence; narrated-video and measured per-video cost evidence do not yet exist.
+Each finding above has its requirement/scenario and milestone under section 8 and `docs/plan.md` section 9. At that historical checkpoint only silent-draft evidence existed. M1 now records a narrated final and spoken revision, with cost explicitly untracked; measured paid-cost comparison remains open. Use the dated milestone sections for current source/build IDs, artifacts, tests, and owner decisions.
 
 ## 10. Documentation consolidation check — 2026-09-07
 
@@ -576,10 +579,79 @@ The evidence is a failing visual baseline. Existing schema, deterministic-frame,
 
 ### 11.3 External-reference disposition
 
-The Remotion reference confirms that text fitting/measurement and transition sequencing can remain inside the existing renderer architecture. Use exact-version-matched `@remotion/layout-utils`; do not duplicate browser text metrics in core. Bang Motion's pinned snapshot `0f1bd1103835890354496d009af62885fe0a05d5` contributes composition practices—style brief before coding, shot rundown, one shot/one dominant statement, camera/world continuity, and keyframe screenshot review. Its HTML/GSAP/CDN runtime is not adopted because it conflicts with NaraFrame's offline, deterministic, declarative Remotion boundary.
+The Remotion reference confirms that text fitting/measurement and transition sequencing can remain inside the existing renderer architecture. Use exact-version-matched `@remotion/layout-utils`; do not duplicate browser text metrics in core. Bang Motion's pinned snapshot `0f1bd1103835890354496d009af62885fe0a05d5` contributes composition practices—style brief before coding, shot rundown, one shot/one dominant statement, camera/world continuity, and keyframe screenshot review. That historical decision excluded adoption of its HTML/CDN runtime. Section 12 now explicitly permits adapting its proven artwork/composition/choreography mechanisms into trusted, versioned Remotion code. GSAP is not inherently non-deterministic; the excluded boundary is arbitrary executable project code and external render-time dependencies, not learning from its implementation.
 
 ### 11.4 Approved decision and proof boundary
 
 Fatih approved the M0.9 corrective direction on 2026-09-14. The accepted approach is to expand the declarative profile/layer/layout contract and renderer preflight. A renderer-only patch was rejected as too brittle, while a custom TSX escape hatch was rejected because it would make revisions and agent operation project-specific.
 
-Design status is accepted-for-spec and the original failing baseline remains immutable. Corrective build `16abeb583bc2-f524eec1-914` now has real rounded image masks, no required-text overlap/clipping/out-of-frame content at the sampled states, clear typography roles, bounded copy reflow/failure behavior, and a structured `TEXT_COLLISION` failure probe. Its output/hash/runtime and gate evidence are recorded in `docs/plan.md`. M0.9 passes only after Fatih accepts the full video plus frames around seconds 8, 15, 21, and 27. Direct Remotion is a reference target, not a requirement for pixel identity.
+The original failing baseline remains immutable. Earlier corrective build `16abeb583bc2-f524eec1-914` demonstrated masks, layout, and the structured failure probe. The subsequent reverified build `16abeb583bc2-086fdfc0-b9f` was accepted by Fatih on 2026-09-14; its exact hashes and runtime evidence are in `docs/plan.md`. M0.9 is closed for fidelity, not competitive visual storytelling. M0.10 has separate recorded acceptance on 2026-09-15. The new Medan reference creates the M2.4 quality gate without rewriting those historical decisions.
+
+## 12. Medan reference and reference-first recovery — 2026-09-20
+
+### 12.1 Evidence and limits
+
+The owner supplied `/Users/fatih/Library/Application Support/Claude/scratch-workspaces/d7a0c6f6-fb10-42d3-b662-457b254dc122/82e2c454-2765-4050-94fe-593442565871/scratch-2026-09-19-cf811c/medan-explainer`. Its `index.html`, `README.md`, and `vo-script.md` were inspected; `vo.mp3` is present. Source inspection identifies ten narrative parts, 1080 × 1920, declared 67.5s, illustrated city/river/landmark/sea worlds, camera/parallax, world labels, Fraunces/Space Grotesk, path-following ships, numbers, and object/focus transitions. These are source observations, not playback proof or historical fact-checking. One-prompt production is owner-reported; original prompt, generation history, and exact effort are unavailable.
+
+Main remains the recorded M2.3 baseline `7b232c9`. The unmerged M2.4.1 implementation `9747193` adds passive SVG, spans, and per-role fonts; describing current SVG as entirely unsupported is obsolete. Its 6.4s opening build `5d3b28594596-96b47423-ac5` exists and was rejected by Fatih. Technical additions do not establish safe SVG handling, correct rendered fonts, competitive visuals, or usability.
+
+The previous handoff records reference hashes and audio probing: 66.576s audio versus 67.5s declared video. Silence intervals can agree numerically with scene starts without verifying phrase meaning or synchronization by listening. Keep the reference unchanged. Browser URL policy blocked local HTML playback; no bypass was attempted. An accessible MP4/recording is still needed for matched motion comparison. Bounded font/SVG recovery and static mapping may proceed, but do not invest in a full visual port or claim parity while this baseline is missing.
+
+| Evidence class | What is established | What is not established |
+|---|---|---|
+| Source inspection | Existing shot replaces reference art/fonts and explicit choreography with different flat artwork and preset focus/reveal; street scale reaches about 1.06 and row about 1.0384 over 5.2s. Becak movement uses a long fade/reveal, not independent opaque travel and exit. | Exact perceived motion quality of the unwatched reference |
+| Retained NaraFrame frames/contact sheet | Weak illustrated identity/framing and a label appearing serif rather than the intended mono; owner rejected the result | Every-frame safety or an independently measured browser font diagnosis |
+| Font loading source | Bundled font loading is in `calculateMetadata`, not established in actual frame render contexts. Remotion documents metadata execution in a separate tab. | A passed measurement mock does not prove rendered face/weight readiness |
+| Read-only sanitizer probes | Root `fill` was discarded; SVG `text` content disappeared while accepted; `fill="url(https://example.invalid/paint.svg#g)"` survived validation. No network request was made. | Existing safe/unsafe tests do not prove the accepted SVG subset safe or visually faithful |
+| Implementer test report | Handoff reports 175 unit, 231 integration, and serial E2E 7/7 passing for the first attempt | Supervisor did not rerun those suites in this documentation revision; they did not prevent owner rejection or the newly identified defects |
+| Workflow/usage evidence | Schema discovery returned 58,501 bytes containing seven schemas in the prior review. Owner reports tens of thousands of tokens and excessive effort. | Bytes are not tokens; precise model usage, total cost, and comparative savings are unavailable |
+
+The rejected MP4 reused previously rendered pixels from build `5d3b28594596-c69d1338-b68`; a near-zero reuse/report duration is not a fresh-render benchmark. Preserve the first attempt, its revisions, and measured versus reported evidence separately.
+
+### 12.2 Findings and accepted disposition
+
+| Finding | Evidence / risk | Accepted correction | Delivery and state |
+|---|---|---|---|
+| VS-01 — High | Prior policy excluded expressive competition; technical success was mistaken for visual progress | Competitive output judged by Fatih; aesthetic rules advisory unless intentionally locked | NF-PR-09, NF-AC-16; policy changed, visual gate open |
+| VS-02 — High | SVG/spans/fonts exist partially, but fidelity and font readiness are defective | Preserve or explicitly reject supported SVG semantics; prove actual rendered role fonts and spans | M2.4.1 recovery; not verified |
+| VS-03 — High | Flat groups/preset focus cannot reproduce coherent camera/world/overlay choreography | Bring the minimum nested/world/camera/opaque-object motion needed by the opening into its vertical slice; extend reusable framing in river history | M2.4.1/3; not verified |
+| VS-04 — High | Reveal/focus presets are not a substitute for explanatory route/data/object movement | Add only story-required semantic motion and frame-derived choreography | M2.4.3/4; pending |
+| VS-05 — High | New illustrated data must stay editable; unknown media-style bindings can masquerade as compatible | Source-only plain-language edits, explicit binding review/replacement, dependency-aware reuse and undo | M2.4.2 early proof and M2.4.5 close-out |
+| VS-06 — High | Generalisation was deferred until after a complete 67.5s benchmark | Freeze runtime/skill immediately after opening acceptance and test distinct 6–10s LBC before extending Medan | NF-AC-17; M2.4.2, then full trial M2.4.5 |
+| VS-07 — Medium | Headers said not started while handoff said ready and owner had rejected it | Current status CHANGES_REQUESTED; preserve first attempt as historical evidence, not active approval | This documentation correction; runtime recovery open |
+| VS-08 — High | Recreating inferior art and building a broad schema first discarded advantages of the working reference | Controlled reference-fidelity adaptation before original redesign or wider abstractions | NF-PR-10; M2.4.1 |
+| VS-09 — High | Accepted SVG loses visual meaning and permits a wrapped external paint URL | Reject all forbidden external forms; preserve permitted root paint/text/local gradients/clips or fail explicitly; add regressions | M2.4.1 technical recovery before acceptance |
+| VS-10 — High | CLI-heavy context and late user review spend effort before proving design | Select relevant contracts, reusable working patterns, one frame and short motion checkpoint, at most two internal correction passes per checkpoint before reporting | Skill changes during M2.4.1 execution; output-first owner loop |
+| VS-11 — Medium | Development tokens, authoring effort, rendering and owner actions are mixed together | Lightweight separate records; actual usage only where host/provider evidence exists; unavailable is not zero | NF-CO-02; all M2.4 tasks |
+
+### 12.3 Approved architecture and transferable lessons
+
+Retain core + trusted Remotion renderer and editable declarative project data. The owner has approved reference-first recovery, not a switch to executable projects. Adapt working visual mechanisms into reusable, versioned renderer components/recipes with source provenance; artwork, object IDs, text, framing, timing, and profile choices remain data. Do not load the reference HTML/GSAP player, embed arbitrary project TSX/JS, flatten the reference into a backdrop/video, or introduce Medan-specific conditionals.
+
+For the first controlled comparison, retain the reference's identifiable artwork, type hierarchy, framing and choreography as closely as permitted by asset rights and offline availability. Record necessary conversions/substitutions. This is a fidelity experiment, not a claim of original design. Do not choose new inferior artwork merely to appear different. If the contract cannot represent the required shot without a major expansion, stop with the exact gap and request a scoped decision rather than quietly downgrading the visual.
+
+A minimum coherent illustrated shot takes precedence over a universal schema. Add camera/world/object motion in M2.4.1 if needed to reproduce that shot; move later capability work only when a story actually needs it. GUI compatibility requires structured editable decisions, not an exhaustive animation language today.
+
+| Reference | Transfer into NaraFrame | Do not adopt blindly |
+|---|---|---|
+| [Bang Motion skill](https://github.com/bangtutorial/bang-motion/blob/main/SKILL.md) | Concrete art direction and a short create–inspect–correct loop | Prompt length or mandatory style prescriptions as a quality guarantee |
+| [Working explainer starter](https://github.com/bangtutorial/bang-motion/blob/main/assets/starter-explainer.html) | A functioning camera/world/object foundation; inspect actual mechanisms before rebuilding them | Its executable HTML/CDN runtime as project input |
+| [Architecture](https://github.com/bangtutorial/bang-motion/blob/main/references/architecture.md) and [explainer guidance](https://github.com/bangtutorial/bang-motion/blob/main/references/explainer.md) | Frame/time-derived poses, spatial continuity, statement-to-object-action mapping, early frame verification | A fixed sequence of scenes for unrelated topics |
+| [Anti-slide guidance](https://github.com/bangtutorial/bang-motion/blob/main/references/anti-ppt.md) | Slow image scale plus card entry is not automatically explanatory motion | Universal density/movement quotas that override story needs |
+| [Remotion metadata lifecycle](https://www.remotion.dev/docs/calculate-metadata) | Ensure fonts are ready in actual render contexts as well as measurement | Assuming metadata-tab loading guarantees font availability in frame tabs |
+
+The earlier source snapshot `0f1bd1103835890354496d009af62885fe0a05d5` remains historical. Moving upstream links are references, not a reproducible pin: record the exact revision and applicable licenses when adapting code/assets. No ownership or redistribution rights are inferred merely from a local file. Reuse existing local assets first, no new paid generation by default, and keep Remotion dependencies out of core. Local schematic maps are sufficient; GUI, hosted maps, general 3D, silent final export and unrelated billing infrastructure stay excluded.
+
+### 12.4 Acceptance, economy and handoff
+
+M2.4.1 first repairs bounded SVG/font blockers with proportionate regression checks. Then inspect a matched keyframe and 2–3s motion study before a 6–10s public-CLI opening. At most two internal visual correction passes per checkpoint, then present the result or precise blocker; do not expand the engine indefinitely before Fatih sees it. The opening gate requires no worse relevant dimensions against the accessible reference segment, including within-shot continuity. It does not yet require the final video's two improved dimensions.
+
+M2.4.2 freezes compiler, renderer, schema, CLI, trusted recipes and skill before a fresh one-brief LBC 6–10s opening. Only project/profile/source data may change. Preserve first draft before feedback; prove headline and slower-camera revisions plus undo. Fatih must judge the distinct direction worth developing. Failure blocks longer Medan work; a runtime patch invalidates the trial and requires an explicit correction/retrial record.
+
+After story extension, NF-AC-16 still requires full Medan to be no worse in composition/typography, illustration, motion, continuity and explanation, and better in at least two, judged by Fatih with matched scene/time evidence. M2.4.5 freezes the then-current engine again for a 30s LBC first-full-draft and four ordinary revisions. Preserve early versus final trial records; rerun early LBC regression if intervening engine work changed runtime. NF-AC-17 remains a publication-candidate assessment plus no user coding for revisions.
+
+Each feature follows real path → visible output/manual acceptance → focused tests → integration, with bounded safety regressions when fixing known defects. Record development versus content-authoring effort, owner versus agent actions, rendering/verification time, internal versus owner corrections, reuse/provider calls, and available actual input/output/cached-token and cost evidence. Do not add a telemetry service or claim cheaper/faster before matched measurements exist.
+
+The active handoff and all checklists live in `docs/plan.md`. There is one writer at a time; READY_FOR_REVIEW means the implementer stops, not that review automatically happens. Supervisor technical readiness is not owner visual approval or merge authorization. The planning-only pass below has since been followed by owner-authorised supervisor recovery on 2026-09-21: technical follow-ups and one static reference-fidelity frame, awaiting owner review. The rejected output remains rejected; no integration or motion acceptance is implied.
+
+**2026-09-21 evidence update.** The owner supplied an 8.9-second recording; 18 sampled frames and an opening still now establish the reference's visual composition and city-to-newspaper sequence, not full-speed or full-story motion acceptance. Fatih accepted static build `756b6958b781-13491d1f-243`, which retains separate passive SVG layers, native editable text, and local Fraunces/Space Grotesk. Subsequent build `67cb9fb19695-51ffa299-f9b` is a 3-second motion study through the public CLI: explicit camera, world-plane parallax, fixed overlays and sequential opaque object transforms, with shared preflight geometry and 60 passing focused tests. Motion direction awaits owner review. Nested compositions, full opening, phrase synchronization, skill generalisation and integration are still open. Contrast analysis still does not understand the SVG road-sign backdrop; warnings and the right-hand label's safe-zone warning remain visible. This is supervised reference adaptation, not proof of cheap one-prompt design or benchmark superiority. Exact evidence lives in `docs/plan.md`; earlier playback-unavailable and planning-only statements are historical.

@@ -5,6 +5,8 @@ import type {
 } from "@naraframe/core";
 import { staticFile } from "remotion";
 
+export const FONT_RENDER_FAILURE = "NARAFRAME_FONT_UNAVAILABLE:";
+
 /**
  * The one bounded exception to "the profile has a single font family":
  * `role: "display"` (and the scene-level "text" visual, which is always a
@@ -45,8 +47,10 @@ export const fontFamilyForRole = (
  */
 export const loadBundledFonts = async (
   fonts: CompiledDraft["fonts"],
+  options: { requireAllFaces?: boolean } = {},
 ): Promise<Set<string>> => {
   const loaded = new Set<string>();
+  const failed: string[] = [];
   await Promise.all(
     fonts.map(async (font) => {
       try {
@@ -59,9 +63,15 @@ export const loadBundledFonts = async (
         document.fonts.add(face);
         loaded.add(font.family);
       } catch {
-        // Left out of `loaded` on purpose — see the doc comment above.
+        failed.push(`${font.family} ${font.weight}`);
       }
     }),
   );
+  // Browser font matching can synthesize a missing weight from another face
+  // in the family. Track individual load failures rather than trusting that
+  // family membership or document.fonts.check proves every file loaded.
+  if (options.requireAllFaces && failed.length > 0) {
+    throw new Error(`${FONT_RENDER_FAILURE} ${failed.sort().join(", ")}`);
+  }
   return loaded;
 };

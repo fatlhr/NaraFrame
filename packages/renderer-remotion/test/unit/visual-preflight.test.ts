@@ -96,6 +96,68 @@ afterEach(() => {
   Reflect.deleteProperty(globalThis, "document");
 });
 
+describe("camera preflight", () => {
+  it("checks a world label through its parent plane against fixed overlay text", () => {
+    const draft = draftWithScene([
+      text({
+        id: "fixed",
+        text: "A",
+        frame: { x: 100, y: 400, width: 80, height: 80 },
+      }),
+      text({
+        id: "label",
+        text: "B",
+        frame: { x: 300, y: 400, width: 80, height: 80 },
+      }),
+      {
+        id: "world-rig",
+        type: "group",
+        space: "world",
+        parallax: 1,
+        memberIds: ["label"],
+        transform: { x: 0, y: 0, scale: 1, rotationDeg: 0, opacity: 1 },
+        zIndex: 1,
+      },
+    ]);
+    const scene = draft.scenes[0];
+    if (!scene) throw new Error("Missing scene fixture");
+    scene.camera = {
+      initial: { x: 0, y: 0, zoom: 1 },
+      moves: [
+        {
+          id: "pan",
+          startFrame: 0,
+          durationInFrames: 30,
+          to: { x: 200, y: 0, zoom: 1 },
+          easingPreset: "linear",
+        },
+      ],
+    };
+    const { report } = resolveVisualPreflight(draft);
+    expect(report.issues.map((i) => i.code)).toContain("TEXT_COLLISION");
+    expect(
+      report.frames.some((f) => f.reasons.includes("camera-settled:pan")),
+    ).toBe(true);
+  });
+  it("reports required world text moved outside the canvas", () => {
+    const label = {
+      ...text({
+        id: "label",
+        text: "B",
+        frame: { x: 100, y: 400, width: 80, height: 80 },
+      }),
+      space: "world" as const,
+    };
+    const draft = draftWithScene([label]);
+    const scene = draft.scenes[0];
+    if (!scene) throw new Error("Missing scene fixture");
+    scene.camera = { initial: { x: 200, y: 0, zoom: 1 }, moves: [] };
+    expect(
+      resolveVisualPreflight(draft).report.issues.map((i) => i.code),
+    ).toContain("TEXT_OUTSIDE_CANVAS");
+  });
+});
+
 describe("resolveVisualPreflight — group transform folding", () => {
   it("flags a collision that only exists after the parent group's static transform is applied", () => {
     const layers: Layer[] = [
