@@ -1,4 +1,8 @@
-import { AssetManifestSchema, ScenesSchema } from "@naraframe/core";
+import {
+  AssetManifestSchema,
+  CompiledBeatSchema,
+  ScenesSchema,
+} from "@naraframe/core";
 import { describe, expect, it } from "vitest";
 
 const textLayer = () => ({
@@ -226,5 +230,63 @@ describe("visual source schema", () => {
     expect(
       AssetManifestSchema.safeParse(manifest("video", "mp4")).success,
     ).toBe(false);
+  });
+});
+
+describe("count label length (M2.4.4)", () => {
+  const withLabel = (label: { prefix?: string; suffix?: string }) => {
+    const document = sceneDocument();
+    const scene = document.scenes[0] as unknown as {
+      visual: { layers: Array<Record<string, unknown>> };
+      beats: unknown[];
+    };
+    scene.visual.layers = [
+      {
+        ...textLayer(),
+        text: `${label.prefix ?? ""}2013${label.suffix ?? ""}`,
+      },
+    ];
+    scene.beats = [
+      {
+        id: "year",
+        targetId: "copy",
+        action: "count",
+        startMs: 0,
+        durationMs: 1000,
+        params: { from: 1888, to: 2013, ...label },
+      },
+    ];
+    return ScenesSchema.safeParse(document);
+  };
+  const compiled = (label: { prefix?: string; suffix?: string }) =>
+    CompiledBeatSchema.safeParse({
+      id: "year",
+      targetId: "copy",
+      action: "count",
+      startFrame: 0,
+      durationInFrames: 30,
+      params: { from: 1888, to: 2013, ...label },
+    });
+
+  it("accepts a prose prefix such as the facilities label", () => {
+    // 25 characters: the reference's "kereta bandara pertama · "
+    expect(withLabel({ prefix: "kereta bandara pertama · " }).success).toBe(
+      true,
+    );
+    expect(withLabel({ prefix: "x".repeat(48) }).success).toBe(true);
+    expect(withLabel({ suffix: "x".repeat(48) }).success).toBe(true);
+  });
+
+  it("still bounds a prefix and a suffix", () => {
+    expect(withLabel({ prefix: "x".repeat(49) }).success).toBe(false);
+    expect(withLabel({ suffix: "x".repeat(49) }).success).toBe(false);
+  });
+
+  it("keeps the compiled beat in step with the source limit", () => {
+    expect(
+      compiled({ prefix: "x".repeat(48), suffix: "x".repeat(48) }).success,
+    ).toBe(true);
+    expect(compiled({ prefix: "x".repeat(49) }).success).toBe(false);
+    expect(compiled({ suffix: "x".repeat(49) }).success).toBe(false);
   });
 });
