@@ -279,7 +279,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. M2.4.5 frozen trial remains BLOCKED_CONFIRMED on its original freeze. B1 correction M2.4.5a is TECHNICALLY_READY after supervisor review; PR opened to `main`, not merged; the retrial waits for integration and a new freeze.** Separate follow-up: `draft-project.test.ts` copies the shared `samples/krakatau-draft`, including transient `.naraframe/attempts/reuse-*` directories that `computeReuse` creates and removes; one ENOENT failure is consistent with a race between parallel test files, but the triggering test and root cause are unproven and the flake is not fixed. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
+Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; a documentation-only PR from `m2-4-5-retrial` is open, not merged.** Separate follow-up: `draft-project.test.ts` copies the shared `samples/krakatau-draft`, including transient `.naraframe/attempts/reuse-*` directories that `computeReuse` creates and removes; one ENOENT failure is consistent with a race between parallel test files, but the triggering test and root cause are unproven and the flake is not fixed. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -458,8 +458,8 @@ No source `examples/` directory is needed.
 | M2.4.3 | River-history framing, shipping route, moving ships and population/data explanation | INTEGRATED — squash-merged via PR #15 (2026-09-27) after supervisor technical sign-off (serial E2E 9/9 on `94fe4b0`; later commits documentation only) and Fatih's visual approval and merge authorisation. Earlier 8/9 runs and the open repeatability/timeout questions are kept in the handoff record; follow-up issue #16. Project `work/visual-parity/medan-story`; "ke-4" claim blocked for publication |
 | M2.4.4 | Approximately 67.5s Medan, full reference comparison and approved export | TECHNICAL PART INTEGRATED via PR #17 (`cf9411f`, 2026-09-27): ten scenes, production-ready preview `18a2906ac565-9566e37d-8e1`, count-label limit. **Not complete:** the NF-AC-16 visual gate, further comparison/polish and the approved export stay DEFERRED by owner decision; the spoken "ke-4" claim still blocks publication |
 | M2.4.4b | Spatial authoring guide and timing diagnostics (inserted 2026-09-27 by the priority change; before M2.4.5) | INTEGRATED — squash-merged via PR #18 (2026-09-27) after supervisor TECHNICALLY_READY FOR MERGE on head `30d5e4b` and Fatih's approval; the merge adds only this handoff documentation. Separate follow-up: shared-fixture test isolation (unproven race, not fixed) |
-| M2.4.5a | B1 correction outside the frozen trial (approved by Fatih 2026-09-27, option a): soundtrack-only full draft preview publishes with its AAC audio | TECHNICALLY_READY — supervisor review 2026-09-27: 14 integration tests and the targeted soundtrack-only E2E passed independently; implementer full verify and serial E2E logs accepted. Branch `m2-4-5a-soundtrack-preview-metadata` from `f065e4d`; committed and PR opened to `main`, not merged. Retrial waits for integration and a new freeze |
-| M2.4.5 | Frozen end-to-end authoring/revision trial on a copy of the LBC project (rescoped by Fatih 2026-09-27): short example, headline/camera/object/profile revisions, undo, asset/audio reuse | BLOCKED_CONFIRMED — supervisor reproduced B1 at the metadata assertion boundary; full soundtrack-only draft preview cannot publish. Trial stopped before the revisions; branch `m2-4-5-frozen-trial` from `f065e4d`, uncommitted. Awaiting owner decision; NF-AC-17 visual/publication judgement and export stay DEFERRED |
+| M2.4.5a | B1 correction outside the frozen trial (approved by Fatih 2026-09-27, option a): soundtrack-only full draft preview publishes with its AAC audio | CLOSED / INTEGRATED — PR #19 squash `159ed08`, verified 2026-09-27. Reviewed implementation unchanged; task branch deleted locally/remotely, main synced. M2.4.5 retrial requires a separately recorded new freeze |
+| M2.4.5 | Frozen end-to-end authoring/revision trial on a copy of the LBC project (rescoped by Fatih 2026-09-27): short example, headline/camera/object/profile revisions, undo, asset/audio reuse | Retrial TECHNICALLY_READY on freeze 2 (`159ed08`), supervisor review 2026-09-27; branch `m2-4-5-retrial`; documentation-only PR opened to `main`, not merged. Public revisions/undo and independent artifact/hash audit accepted with recorded gaps. Attempt 1 BLOCKED_CONFIRMED on `f065e4d`, kept unchanged. Technical trial only; NF-AC-17 visual/publication judgement and export stay DEFERRED |
 
 Task IDs are unchanged. Former M2.4.2 camera/world work moves into M2.4.1 where indispensable for the opening and M2.4.3 for river-history expansion. Former route/data work remains in M2.4.3. Early LBC is now M2.4.2; full LBC remains M2.4.5. No full acceptance obligation is dropped.
 
@@ -1206,6 +1206,10 @@ pnpm naraframe preview work/visual-parity/medan --draft --scene opening --json
 
 #### Active handoff — M2.4.5a
 
+**Supervisor closure — 2026-09-27: CLOSED / INTEGRATED.** Independently checked live PR #19: MERGED at `2026-09-27T14:05:44Z`, head `3cb2868d40f3853b37b96ffce2ea06a565ee541b`, squash `159ed0874cd8a789d13ba3d6dd24fad4711b4d12`. Squash and branch-head trees are identical (`10a06af1b1547a444e82c57f599c7c32e27c9cea`); diff from reviewed `7416384` touches only `docs/plan.md` (+8 lines). Squash metadata has no agent identity/trailer. Live remote `main`, local HEAD/main and origin/main all match `159ed08`; task branch is absent locally and from remote heads. Failed-trial branch `m2-4-5-frozen-trial` remains at `f065e4d`. Working tree was clean before this closure entry. Corrected stale Current step/tracker text that still said "not merged"; historical reviews below remain unchanged. No tests or renders rerun, no implementation/skill/test/Git mutation. This closure update itself is local and uncommitted.
+
+**Next step for M2.4.5 (not executed by supervisor):** start a separately identified retrial from merged main `159ed08`, recording commit/package tree/skill tree/skill SHA-256 and unchanged render identity, and rebuild the pinned runtime output. Preserve failed attempt source, revisions, builds and logs at `work/visual-parity/lbc-trial` with its original `f065e4d` freeze; do not overwrite or relabel it successful. Use a separate retrial directory and document its initial source provenance. Carry out the approved bounded public skill/CLI authoring, headline/camera/object/profile revisions, undo and media-reuse checks. Record new evidence independently of attempt 1; stop on another engine/skill blocker. No need to reopen art direction, visual benchmark or export scope; those gates remain DEFERRED. Integration of B1 alone does not complete M2.4.5 or M2.
+
 **Integration record — 2026-09-27 (implementer).** Fatih approved integration. The supervisor's integration review below was committed to the branch as documentation only (`docs/plan.md`). No implementation, test or render change after the reviewed head `7416384`; the four fingerprints were rechecked before the merge. PR #19 was squash-merged into `main` using the head-commit guard; the task branch was deleted and `main` synced. The M2.4.5 trial has not resumed. It needs a new freeze recorded from the merged `main` first. The Miss Ayu worktree and the old stash were not touched.
 
 **Supervisor integration review — 2026-09-27: TECHNICALLY_READY FOR MERGE, awaiting explicit Fatih approval.** Live [PR #19](https://github.com/fatlhr/NaraFrame/pull/19) is OPEN, non-draft, base `main`, head `m2-4-5a-soundtrack-preview-metadata` at `7416384b0d6d61993ebef154e1b34e691ce22ab1`, MERGEABLE/CLEAN, with no registered checks. Local HEAD and remote-tracking branch match that live SHA; parent is `f065e4d65b37d35b2414e91d8943f52b450632fe`. The live PR and local commit both contain exactly the five scoped files. Author is Fatih, with no agent identity/trailer or generated artifact in the commit.
@@ -1264,16 +1268,111 @@ pnpm naraframe preview work/visual-parity/medan --draft --scene opening --json
 
 - [x] Freeze the engine and skill: record the main commit, package and skill tree hashes, the skill file hash and `RENDER_ENGINE`; rebuild `dist` from that tree. Any needed engine/skill change is recorded as a blocker and the trial stops there; no silent fix during a trial claimed as frozen.
 - [x] Copy the existing LBC project (source and assets, no previews or revision history) to `work/visual-parity/lbc-trial`. The original `work/visual-parity/lbc` and its baseline build `118a48d27119-74598617-246` stay untouched. The Miss Ayu worktree and the old stash are out of scope.
-- [ ] Author a short example on the copy using only the skill, `schema --json` and the CLI, validating before any preview. Long enough to exercise the flow; no 30-second target or publication polish.
-- [ ] Through public commands only (`edit` from a staging directory with `--expect`, `profile apply` with `--dry-run` first, `undo`, `status`, scoped `preview`): revise a headline, slow a camera move, replace an object, change the profile, undo. Record each revision ID, the files changed, `data.reuse` and the scope that needed a new render. Do not re-render scenes the change does not affect.
-- [ ] Reuse existing assets and suitable existing audio; no paid provider call and no change to any audio master. Show which assets and audio survived each revision unchanged. What the reuse report or the output cannot prove is reported as a gap, not as a pass.
-- [ ] Focused checks where the trial exposes something, then `pnpm verify` before review. Serial `pnpm test:e2e` only if the runtime changes, which would invalidate the frozen trial anyway.
+- [x] Author a short example on the copy using only the skill, `schema --json` and the CLI, validating before any preview. Long enough to exercise the flow; no 30-second target or publication polish. Done in attempt 1 (`visit-route`), reapplied unchanged in the retrial; see the retrial handoff for provenance.
+- [x] Through public commands only (`edit` from a staging directory with `--expect`, `profile apply` with `--dry-run` first, `undo`, `status`, scoped `preview`): revise a headline, slow a camera move, replace an object, change the profile, undo. Record each revision ID, the files changed, `data.reuse` and the scope that needed a new render. Do not re-render scenes the change does not affect.
+- [x] Reuse existing assets and suitable existing audio; no paid provider call and no change to any audio master. Show which assets and audio survived each revision unchanged. What the reuse report or the output cannot prove is reported as a gap, not as a pass.
+- [x] Focused checks where the trial exposes something, then `pnpm verify` before review. Serial `pnpm test:e2e` only if the runtime changes, which would invalidate the frozen trial anyway.
 
-**Command acceptance:** the sequence recorded in the handoff below: `validate --stage plan`, `edit`, `profile apply --dry-run` / `profile apply`, `undo`, `status` and `preview work/visual-parity/lbc-trial --draft [--scene <id>] --json`, with the revision IDs, reuse data, build IDs and changed source they produce.
+**Command acceptance:** the sequence recorded in the handoff below: `validate --stage plan`, `edit`, `profile apply --dry-run` / `profile apply`, `undo`, `status` and `preview work/visual-parity/lbc-retrial --draft [--scene <id>] --json`, with the revision IDs, reuse data, build IDs and changed source they produce. The earlier `lbc-trial` directory remains the immutable failed attempt, not the retrial command target.
 
 **Expected:** every requested revision and the undo go through normal source transactions without user code or an engine/skill patch; unaffected scenes are not re-rendered; asset reuse is shown and audio reuse is either shown or reported as a gap. Any blocker is recorded with its reproduction and the trial stops at that point.
 
 #### Active handoff — M2.4.5
+
+**Integration note — 2026-09-27 (implementer).** Nothing changed after the supervisor's retrial TECHNICALLY_READY except this note and the tracker wording. The change is documentation only: `docs/plan.md` is the only file committed, and it carries the supervisor's local wording corrections. Nothing under `work/`, no render, and no implementation, test or skill change is included. The suite and the renders were not rerun for this documentation change. A PR was opened to `main` on Fatih's instruction; it is not merged. The failed attempt, the replay provenance, the retrial evidence and every recorded gap stay as written. F1–F5 and the next milestone are not started; they are separate decisions. M2 is not complete, and the deferred visual, publication and export gates are not passed.
+
+**Supervisor retrial status — 2026-09-27: TECHNICALLY_READY (after IN_REVIEW), bounded technical trial only.** No blocking findings. Recommend documentation-only integration; do not mark all of M2 complete or treat deferred visual/publication/export gates as passed. No engine/skill/test/Git changes or renders by the supervisor; only this plan/handoff was updated.
+
+- **Independent freeze/provenance audit:** HEAD and origin/main are `159ed08`; package tree, skill tree and skill file SHA match Freeze 2. No packages/skills diff; Freeze 1 to 2 changes only PR #19. Original LBC and failed-attempt current source/media files all match their recorded revision hashes, with pointers respectively `118a48d27119-74598617-246` and `2dcce997f37b-25714ca3-a0d`. Retrial's first three edits have the same content revisions as attempt 1, consistent with declared replay rather than fresh authoring. This is current integrity evidence, not a historical filesystem-access audit.
+- **Independent revision/build audit:** parsed all 38 saved command events, checked parent chains for 11 revision records and recomputed hashes for 121 referenced source/media objects. Checked all eight successful preview MP4 hashes against manifests and matched build IDs/source revisions to events; two rejected preflights are correctly reported as failures. Source scene diffs match the claimed headline, camera and object edits. Isolated revisions used the affected scene scope; full runs establish the initial audio-bearing composition and accumulated/profile-wide edits. No evidence of unrelated scoped renders; this does not claim automatic per-scene caching inside every full render.
+- **Independent undo/reuse audit:** four undo events return to `01299580`; current scenes are byte-identical to the object-replacement stage, profile is `lbc-daylight@0.1.0`, original fonts are restored with their hashes. The final full MP4 is byte-identical to R1 and records reuse of `afb3fe1121bb-c122894e-895`. All SVG/PNG/music revision hashes agree where present. Independently hashed the encoded AAC stream of all four full builds with ffmpeg stream-copy: each is `53f2057d6ef7a7ee5b82683e1cabbc71`. This proves retained audio content, not reuse-provider accounting or narration reuse. Those stated gaps remain open.
+- **Observed versus reported:** inspected camera/object comparison sheets and the before/after report-card crops, supporting the specific visual changes and F1's readability problem; no full playback, visual benchmark or PSNR recomputation. Recomputed event totals: 38 calls, 165308 ms total, 163413 ms preview time. These are command durations, not total authoring time or cost. Full verify log shows 244 unit / 273 integration with lint/typecheck/build; accepted as implementer evidence, not rerun. No E2E rerun needed for this source-only retrial on the same accepted runtime. Dist rebuild, exclusive public-CLI access, no provider calls/user intervention, and mutation-free chronology remain implementer-reported rather than independently observed.
+- **Non-blocking F1–F5:** F1 warrants a separate targeted diagnostic task: report-card text became nearly unreadable without warning, then readable dark text raised the wrong-background warning. The final selected state restores LBC styling, so this does not block this non-publication trial. F2 shows preflight friction, not a failure of the documented compile-time/preview boundary; earlier/batched diagnostics are a candidate, not a proven one-pass remedy. F3 is expected one-transaction-per-undo behavior, with optional workflow improvements later. F4 is conservative full-project soundtrack invalidation/reuse reporting; the observation alone does not prove a cache defect. F5 warnings belong to the subsequently undone profile state; the final successful full event has no issues. Unknown media-style compatibility and final-export enforcement are not proven by draft-only profile previews.
+- **Documentation precision corrected in this review:** acceptance command now targets `lbc-retrial`, not the retained failed project; finite PSNR is not described as pixel identity; F2's proposed dry-run benefit is qualified. After undo, there was a status check with plan valid and preview stale, not a fresh `validate` command: it returned to the already validated revision `01299580`, then correctly regenerated the selection via full preview reuse. That is sufficient for this artifact-based technical acceptance, but the handoff must not claim an additional command was run.
+
+**Retrial handoff — 2026-09-27 (implementer): READY_FOR_REVIEW.** Branch `m2-4-5-retrial` from `origin/main` `159ed0874cd8a789d13ba3d6dd24fad4711b4d12`, uncommitted; only `docs/plan.md` changed in Git. No engine, compiler, renderer, schema, CLI or skill change during the retrial. The Miss Ayu worktree and the old stash were not touched. Evidence lives under `work/m2-4-5r/` (event JSON per command, stage directories, frames) and `work/gate-logs/m2-4-5r/`; both are gitignored.
+
+*Freeze 2.*
+
+| Item | Value |
+|---|---|
+| main commit | `159ed0874cd8a789d13ba3d6dd24fad4711b4d12` (M2.4.5a squash) |
+| `packages/` tree | `cd6678e42ff22e08302879e42a7ec30a04b7ae03` |
+| `skills/` tree | `661ae569b339a20897a3e253aadaabb79d3bdf30` (same as freeze 1) |
+| `skills/naraframe/SKILL.md` SHA-256 | `314d45739851aeb56b1710a3d469e5f1e7c22473134cc4e4cc66debe3c9dfeca` (same) |
+| `RENDER_ENGINE` | `naraframe-draft/10` (same) |
+| Runtime | Node 24.20.0, pnpm 12.3.4; `dist` rebuilt from this tree |
+
+`main` had not moved since the M2.4.5a closure. Freeze 1 → freeze 2 differs only by PR #19: `packages/cli/src/preview-build.ts`, `packages/cli/src/runner.ts`, two CLI test files and `docs/plan.md`.
+
+*Retained attempt 1.*
+- `work/visual-parity/lbc-trial` still holds its seven revision entries, current revision `c85131c1…` and scoped build `2dcce997f37b-25714ca3-a0d`.
+- Its logs are in `work/m2-4-5/`.
+- The original `work/visual-parity/lbc` was re-hashed after the retrial: unchanged, pointer still `118a48d27119-74598617-246`.
+
+*Retrial source and provenance.* Directory `work/visual-parity/lbc-retrial`.
+- It is a fresh copy of the original LBC source and assets (starting revision `174d41ea…`, the M2.4.2 source), not a copy of attempt 1.
+- The short example is not new authoring. The three staged edits from attempt 1 were reapplied verbatim through `edit`, with `validate --stage plan` after each:
+  - `work/m2-4-5/stage-01-author`: the `visit-route` scene, authored in attempt 1 from the skill, schema and CLI;
+  - `stage-02-safezone`;
+  - `stage-03-music`: a copy of the existing synthetic bed `93f1b4b5…`.
+- They produced the same content-addressed revisions as attempt 1: `0d4a5c81`, then `e795866f` (the same safe-zone warning was cleared again), then `c85131c1`.
+- The retrial does not claim a new first draft or new artwork; all images are the existing LBC assets.
+
+*Revision sequence.* Authoring/edit/profile stages went through `edit --from <stage> --expect <sourceRevision>` or `profile apply`, followed by `validate --stage plan` before previewing that source revision. Four undo commands later restored the already validated revision `01299580`; `status` then reported plan valid and preview stale, and the final full preview reused R1. No separate post-undo validate event was recorded.
+
+| Step | Revision | Change | `data.reuse` images / scenes unchanged | Preview (scope, build) |
+|---|---|---|---|---|
+| R0 | `c85131c1` | example + music, as above | 2/2 · 0/2 (adding the soundtrack marks both scenes changed) | full `f49019cda6d6-78b7a94b-3d5`: `DRAFT • WITH AUDIO`, `muted: false`, h264 12.500 s + aac, 26.1 s. The B1 case now publishes |
+| 1 headline | `03f4150b` | `statement-1` → "Tutor datang, anak belajar di rumah." | 2/2 · 1/2 | `--scene opening` `f497a5c066d8-99418340-1d3`; frame at 3.5 s checked |
+| 2 slower camera | `1d27100d` | `lean-to-report` 1600+3400 → 1600+4400 ms; `settle` 5000+3000 → 6000+2000 ms | 2/2 · 1/2 | `--scene opening` `1aebd4dc3560-9cec9fce-d86`. Implementer-measured PSNR against revision 1 at 1.0 / 3.3 / 5.0 / 7.9 s = 49.0 / 18.5 / 23.7 / 44.8 dB: very similar before the move, lagging in the middle, converging toward the same settle pose; finite PSNR does not establish pixel identity |
+| 3 replace object | `01299580` | `tutor-dot` shape → round `tutor-badge` image of the existing `tutor-dan-siswa` photo on the same `follow` | 2/2 · 1/2 | `--scene visit-route` `a88817f60b02-f8119bea-876`; the photo waits at the route start, travels and lands at home |
+| full before profile | `01299580` | none | none | full R1 `afb3fe1121bb-c122894e-895`, with audio |
+| 4 profile | `c28bb650` | `profile apply current-issues`, after `--dry-run`: 49 changes, effects including `revalidate-layout`, no conflicts, two LBC fonts removed | none | full preview **rejected by preflight**: 6 `TEXT_OVERFLOW` (Arial 800 display at 128 px), 3 `IMAGE_MASK_INVALID` (profile media radius 44 on 56 px check icons) |
+| 4b repair | `169a874e` | `overflowPolicy: "shrink"` on six long text layers; `cornerRadius: 0` on the check icons | 2/2 · 0/2 | full preview rejected: `TEXT_COLLISION` `statement-2a`/`2b`. The source boxes overlapped by 2 px (262 + 124 > 384), which the LBC fonts never exposed |
+| 4c repair | `1ce09ffe` | `statement-2a` height 124 → 122 | 2/2 · 1/2 | full R2 `7c7209a57cbc-c803012f-e93`, with audio; warnings only |
+| 4d repair | `f84139e7` | report rows get the card's literal ink `#101A37`: the profile's light `palette.text` was nearly invisible on the white card artwork | 2/2 · 1/2 | `--scene opening` `63a31c4974ef-6928bdcc-763`; rows readable |
+| 5 undo ×4 | back to `01299580` | `undo` four times: f84139e7 → 1ce09ffe → 169a874e → c28bb650 → 01299580 | — | full `afb3fe1121bb-046a722d-b23`: `reusedFromBuildId: afb3fe1121bb-c122894e-895` after 0.55 s; MP4 hash identical to R1 |
+
+After undo:
+- `profile.lock.json` is back to `lbc-daylight@0.1.0`.
+- `scenes.json` is byte-identical to the step 3 stage.
+- Both LBC font files are restored under `assets/profile/` with their hashes.
+- `status` reports plan `valid`.
+
+*Asset and audio reuse.* Table in `work/m2-4-5r/35-media-reuse.txt`, built from each revision's media list.
+- Across all 11 revisions:
+  - `check.svg`, `lbc-logo.svg`, `report-card.svg`, `orang-tua.png` and `tutor-dan-siswa.png` keep the same SHA-256 throughout;
+  - the music master `bed.mp3` keeps `93f1b4b5…` from the moment it was added;
+  - the two LBC fonts are absent only under `current-issues`.
+- The encoded AAC stream of all four full builds (R0, R1, R2 under the other profile, and the undo reuse) has the same MD5, `53f2057d…`; mean volume is −15.6 dB. No provider call, no audio master change.
+- **Gaps, reported rather than passed:**
+  - `data.reuse` counts only voice, PNG images and scenes. It says nothing about the music, SVG artwork or fonts; their reuse above comes from revision hashes and the builds, not from the reuse report.
+  - Voice reuse is not tested: the LBC project has no narration and no suitable existing voice.
+  - Scoped previews carry no music by design, so audio evidence comes from the full builds only.
+
+*Findings. None needs an engine or skill change to finish the trial.*
+- **F1 — the contrast diagnostic measures against the scene background, not what lies under the text.**
+  - Step 4c: light `palette.text` rows on the white report card were nearly unreadable, and no contrast warning was raised.
+  - Step 4d: after the fix, the readable dark rows got `CONTRAST_INSUFFICIENT` "1.09:1 against the background". The suggestion also says to size text at or above 24 px when it already is.
+  - This belongs to the deferred contrast and occlusion diagnostics. Nothing was weakened.
+- **F2 — a profile change can pass `validate --stage plan` and still fail preview preflight** (overflow, masks, collision). The skill says so, and the dry-run's `revalidate-layout` effect hints at it. It took three repair revisions; two full previews were rejected before a successful full preview, and the final contrast repair used a scoped preview. Earlier/batched layout preflight might reduce that feedback loop; detecting all dependent problems in one pass has not been demonstrated. This is a candidate for later, not a blocker.
+- **F3 — undoing a multi-revision change takes one `undo` per revision.** There is no "undo to revision". It worked, but four steps for one visual-identity change is friction.
+- **F4 — adding a soundtrack marks every scene as changed in `data.reuse`.** First seen in attempt 1, seen again here.
+- **F5 — profile warnings left on purpose.** Under `current-issues` the safe zone is 4 px narrower than LBC's 84 px margins, so eight `TEXT_OUTSIDE_SAFE_ZONE` warnings remained, plus `DURATION_OUTSIDE_PROFILE_RECOMMENDATION`. They were not repaired because the identity change was undone.
+
+*Effort.*
+- 38 CLI calls, 165.3 s in total by their own `durationMs`:
+  - 10 previews, 163.4 s, including two rejected by preflight;
+  - 9 edits, 1.0 s;
+  - 11 validates, 0.5 s;
+  - 2 profile, 4 undo and 2 status calls.
+- Internal corrections: 1 carried over from attempt 1 (the safe zone) plus 3 layout repairs after the profile change (4b, 4c, 4d).
+- User interventions: none. Owner time and host token cost were not measured.
+
+*Checks.* `pnpm verify` passed on freeze 2: Biome checked 156 files; typecheck/build; 244 unit and 273 integration tests (`work/gate-logs/m2-4-5r/verify-1.log`). Serial E2E not run: the runtime did not change during the trial, and freeze 2's E2E was the M2.4.5a gate (10/10).
+
+*Not claimed.* No visual benchmark, publication judgement or export (NF-AC-17 visual part and NF-AC-16 stay DEFERRED). The `current-issues` look was a revision exercise, not a design proposal. M2 is not complete.
 
 **Supervisor review — 2026-09-27: BLOCKED_CONFIRMED.** Stopping the frozen trial is correct: the defect is in CLI publication/integrity validation, part of the frozen engine boundary, not in the authored LBC source. No fix, test edit, render, Git mutation or continuation of the trial was performed in this review; only this handoff/tracker was updated.
 
