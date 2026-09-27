@@ -279,7 +279,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M2.4.2 in progress: a distinct 6–10 s LBC opening from one brief on the frozen `3133af8` foundation.** M2.4.1 is integrated (PR #12); its owner-approved Medan opening is build `536f182ba54b-d7c57043-698`. M3 waits for NF-AC-16/17. Full-story reference playback, pixel repeatability, unknown style bindings, and measured comparative cost remain open. See the live tracker and Active handoff.
+Current step: **M2.4.3 integrated (PR #15, squash-merged after supervisor sign-off and Fatih's approval, 2026-09-27); M2.4.4 not started.** M2.4.1 (PR #12) and M2.4.2 (PR #13) are integrated; the Medan story project is `work/visual-parity/medan-story`. The population scene's "ke-4" claim fails the BPS 2024 check and is blocked for publication. M3 waits for NF-AC-16/17. Full-story reference playback, pixel repeatability (issue #16 covers E2E failure logs and cancellation), unknown style bindings, and measured comparative cost remain open. See the live tracker and the M2.4.3 handoff record.
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -455,7 +455,7 @@ No source `examples/` directory is needed.
 |---|---|---|
 | M2.4.1 | Font/SVG recovery; matched frame and 2–3s motion study; reference-fidelity 6–10s Medan opening | INTEGRATED — opening owner-approved 2026-09-21 (build `536f182ba54b-d7c57043-698`); exit overlap fix after supervisor review; verify + E2E passed on the final candidate; squash-merged via PR #12 (2026-09-26) |
 | M2.4.2 | Distinct 6–10s LBC opening on frozen engine/skill; headline/camera edit and undo | INTEGRATED — early transfer TECHNICALLY_READY 2026-09-26, squash-merged via PR #13; rich-text span defect open as a separate small task |
-| M2.4.3 | River-history framing, shipping route, moving ships and population/data explanation | REVIEW FIXES VERIFIED — both supervisor findings closed; 86 focused tests passed independently. Final-candidate serial E2E evidence and owner visual acceptance remain pending. Branch `m2-4-3-river-route-data` from `7af87d9`; project `work/visual-parity/medan-story` |
+| M2.4.3 | River-history framing, shipping route, moving ships and population/data explanation | INTEGRATED — squash-merged via PR #15 (2026-09-27) after supervisor technical sign-off (serial E2E 9/9 on `94fe4b0`; later commits documentation only) and Fatih's visual approval and merge authorisation. Earlier 8/9 runs and the open repeatability/timeout questions are kept in the handoff record; follow-up issue #16. Project `work/visual-parity/medan-story`; "ke-4" claim blocked for publication |
 | M2.4.4 | Approximately 67.5s Medan, full reference comparison and approved export | Held until story features pass |
 | M2.4.5 | Distinct 30s LBC first full draft, four ordinary revisions and close-out | Held until full Medan gate passes |
 
@@ -503,16 +503,16 @@ Update the owning checklist only with command/artifact evidence and the required
 
 **Expected:** recognisable reference-quality city artwork, correct typography, deliberate framing and meaningful camera/object movement. No generic replacement blocks, long fade-as-travel workaround, or improvement judged only against the rejected attempt. Fidelity is not originality or generalisation. Full-video “at least two better” remains M2.4.4; no claim of full NF-AC-16 completion here.
 
-#### Active handoff — M2.4.3
+#### Handoff record — M2.4.3 (integrated)
 
-**Current status — 2026-09-27 (read this first; entries below are history, newest first).**
+**Final status — 2026-09-27: INTEGRATED (read this first; entries below are history, newest first).**
 
-- *Git.* Draft PR [fatlhr/NaraFrame#15](https://github.com/fatlhr/NaraFrame/pull/15) from `m2-4-3-river-route-data` (commit `eaaf800` plus follow-ups) to `main`, opened under Fatih's exception for 8/9 E2E. Not merged; no merge authorisation. M2.4.4 not started.
+- *Git.* INTEGRATED: [fatlhr/NaraFrame#15](https://github.com/fatlhr/NaraFrame/pull/15) marked ready and squash-merged into `main` on 2026-09-27 under Fatih's authorisation; task branch deleted afterwards. It was first opened as a Draft under Fatih's exception for 8/9 E2E. M2.4.4 not started.
 - *Owner.* Three scenes visually approved 2026-09-27; all 18 phrase texts confirmed by listening; population "ke-4" claim fails the BPS 2024 check and is blocked for publication.
-- *Supervisor.* The two 2026-09-27 findings (count settling order, follow on transformed paths) are fixed and verified. No technical sign-off for integration yet.
+- *Supervisor.* Technical sign-off, 2026-09-27: serial E2E 9/9 on `94fe4b0`; the only later change before merge (`12d9de6` and this record) is documentation. The two earlier findings (count settling order, follow on transformed paths) were fixed and verified first.
 - *Gates.* `pnpm verify` passed (235 unit, 263 integration). Serial E2E: 8/9 in runs 2 and 3 (scenario-3 timeout; `owner-flow` hash failure matching the open 2026-09-20 repeatability caveat), then **9/9 in run 4** on a recovered machine (below).
 - *Measurement wording, corrected 2026-09-27.* A counted layer is measured for overflow at each count beat's start and end text plus its settled text, not at every intermediate value. Skill, code comments and the test name now say so; the earlier "every value" wording in this handoff, the PR text and the commit message overstated it.
-- *Open work on this PR.* None technical. Merge decision is Fatih's (with supervisor sign-off); the harness follow-up is a separate issue.
+- *Follow-up.* [fatlhr/NaraFrame#16](https://github.com/fatlhr/NaraFrame/issues/16): keep CLI logs when an E2E command fails or times out, and audit cancellation by reproducing each stage. The run-2 timeout and the 2026-09-20 `owner-flow` repeatability caveat stay open; neither is claimed fixed.
 - *Hypothesis run, 2026-09-27 09:00–09:11 (`work/gate-logs/m2-4-3/run4/`).* Before the run the machine had recovered without intervention: PID 60970 and any `bloc` or VS Code process were gone (not killed by the implementer; no reboot, uptime 16 days), swap 2.1 of 3 GB, memory free 45%, disk 90% with 44 GB free; nothing was deleted. One serial `pnpm test:e2e --reporter=verbose` on HEAD `94fe4b0` with the full vitest output kept: **9/9 passed, 632.08 s**. Scenario 3 took 47.2 s (604 s timeout in run 2); `owner-flow` passed its frame-hash check in 147.1 s. A sidecar sampled swap, memory and render processes every 15 s: 27 samples, swap used 2,090–2,558 MB, memory free 37–49%; it missed 09:00:45–09:04:39 through a wrong process pattern (recorded in `resources.log`). This supports the memory-pressure hypothesis for the run-2 timeout without proving it. The `owner-flow` repeatability caveat from 2026-09-20 stays open: a pass here is weak evidence either way.
 
 **Scenario-3 timeout investigation — 2026-09-27, 01:37–01:45 (bounded to 20 minutes).** Evidence in `work/gate-logs/m2-4-3/`.
