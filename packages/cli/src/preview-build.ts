@@ -664,6 +664,11 @@ const assertMetadataShape = (
   }
 };
 
+// Narration and a soundtrack both put one AAC stream in the preview, so the
+// probe and the metadata checks must agree on this single predicate.
+const carriesAudio = (draft: CompiledDraft): boolean =>
+  Boolean(draft.narration || draft.soundtrack);
+
 const assertCompleteMetadata = (
   metadata: Record<string, unknown>,
   expectedBuildId: string,
@@ -695,9 +700,9 @@ const assertCompleteMetadata = (
     (metadata.render as Record<string, unknown>).durationInFrames !==
       draft.totalFrames ||
     (metadata.render as Record<string, unknown>).audio !==
-      (draft.narration ? "aac" : "none") ||
+      (carriesAudio(draft) ? "aac" : "none") ||
     (metadata.render as Record<string, unknown>).muted !==
-      !(draft.narration || draft.soundtrack) ||
+      !carriesAudio(draft) ||
     JSON.stringify(metadata.contactSheet) !==
       JSON.stringify(expectedContactSheet) ||
     !Array.isArray(metadata.checkedFrames) ||
@@ -809,7 +814,7 @@ const validateProbe = (
       "preview.mp4 does not match the expected H.264 render signature.",
     );
   }
-  const hasNarration = Boolean(draft.narration || draft.soundtrack);
+  const hasNarration = carriesAudio(draft);
   if (hasNarration) {
     if (audioStreams.length !== 1 || audioStreams[0]?.codec_name !== "aac") {
       throw new Error(
