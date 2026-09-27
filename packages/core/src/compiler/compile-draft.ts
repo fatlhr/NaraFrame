@@ -947,6 +947,37 @@ const validatePathsAndCounts = (
   return issues;
 };
 
+/**
+ * Timing diagnostics speak in the frames the compiler actually uses. A
+ * start becomes round(ms * fps / 1000) and a duration max(1, round(...)); the
+ * window runs from the start frame up to, not including, start + duration.
+ * These helpers turn a frame target back into the millisecond value that
+ * reaches it under that same rounding, so a suggestion can be copied as is.
+ */
+const frameSpan = (start: number, end: number): string =>
+  end - start <= 1 ? `frame ${start}` : `frames ${start}-${end - 1}`;
+
+/** Smallest whole millisecond whose start frame is at least `frame`. */
+const earliestStartMsFor = (frame: number, fps: number): number =>
+  Math.max(0, Math.ceil(((frame - 0.5) * 1000) / fps));
+
+/** Largest whole millisecond whose start frame is at most `frame`. */
+const latestStartMsFor = (frame: number, fps: number): number =>
+  Math.max(0, Math.ceil(((frame + 0.5) * 1000) / fps) - 1);
+
+/** Largest whole millisecond duration that rounds to at most `frames`. */
+const longestDurationMsFor = (frames: number, fps: number): number =>
+  Math.ceil(((frames + 0.5) * 1000) / fps) - 1;
+
+const anchorNote = (beat: Beat): string =>
+  beat.at ? ` (resolved from phrase ${beat.at.phraseId})` : "";
+
+/** The same start expressed as the field the author edits. */
+const startEdit = (beat: Beat, resolvedMs: number, targetMs: number): string =>
+  beat.at
+    ? `offsetMs ${(beat.at.offsetMs ?? 0) + (targetMs - resolvedMs)} on its phrase anchor`
+    : `startMs ${targetMs}`;
+
 const validateMotionWindows = (
   scene: Scene,
   sceneIndex: number,
@@ -957,13 +988,21 @@ const validateMotionWindows = (
   const issues: Issue[] = [];
   const writes = new Map<
     string,
-    Array<{ start: number; end: number; modern: boolean }>
+    Array<{
+      start: number;
+      end: number;
+      modern: boolean;
+      beatIndex: number;
+      startMs: number;
+    }>
   >();
   scene.beats.forEach((beat, beatIndex) => {
     const startMs = starts.beats[beatIndex] ?? beat.startMs;
     for (const property of beatProperties(beat)) {
       const key = `${beat.targetId}:${property}`;
       const current = {
+        beatIndex,
+        startMs,
         start: msToFrameOffset(startMs, fps),
         end:
           msToFrameOffset(startMs, fps) +
@@ -988,13 +1027,31 @@ const validateMotionWindows = (
             current.end > other.start,
         );
       if (conflict) {
+        const other = scene.beats[conflict.beatIndex] as Beat;
+        // Suggest moving whichever write starts later, or ending the earlier.
+        const [first, second] =
+          conflict.start <= current.start
+            ? [
+                { beat: other, window: conflict },
+                { beat, window: current },
+              ]
+            : [
+                { beat, window: current },
+                { beat: other, window: conflict },
+              ];
+        const moveTo = earliestStartMsFor(first.window.end, fps);
+        const room = second.window.start - first.window.start;
+        const shorten =
+          room >= 1
+            ? ` or end ${first.beat.id} by frame ${second.window.start - 1} (durationMs ${longestDurationMsFor(room, fps)} or less)`
+            : "";
         issues.push(
           compileIssue(
             "MOTION_PROPERTY_OVERLAP",
             `/scenes/${sceneIndex}/beats/${beatIndex}`,
-            `Beat ${beat.id} overlaps another write to ${property} on ${beat.targetId}.`,
+            `Beat ${beat.id} writes ${property} on ${beat.targetId} over ${frameSpan(current.start, current.end)}${anchorNote(beat)}, overlapping beat ${other.id}, which writes it over ${frameSpan(conflict.start, conflict.end)}${anchorNote(other)} (${fps} fps; starts round to the nearest frame).`,
             "error",
-            "Keep writes to the same target property sequential; independent properties may overlap.",
+            `Start ${second.beat.id} at frame ${first.window.end} or later (${startEdit(second.beat, second.window.startMs, moveTo)})${shorten}. Writes to one target property must be sequential after rounding; different properties may overlap.`,
           ),
         );
       }
@@ -1463,13 +1520,29 @@ export const compileDraft = (
       );
       const beatDurationInFrames = msToDurationFrames(beat.durationMs, fps);
       if (beatStartFrame + beatDurationInFrames > durationInFrames) {
+        const resolvedMs = starts.beats[beatIndex] ?? beat.startMs;
+        const room = durationInFrames - beatStartFrame;
+        const latestStart = latestStartMsFor(
+          durationInFrames - beatDurationInFrames,
+          fps,
+        );
+        const fixes = [
+          ...(room >= 1
+            ? [`durationMs ${longestDurationMsFor(room, fps)} or less`]
+            : []),
+          ...(durationInFrames - beatDurationInFrames >= 0
+            ? [`${startEdit(beat, resolvedMs, latestStart)} or earlier`]
+            : []),
+        ];
         issues.push(
           compileIssue(
             "BEAT_OUTSIDE_SCENE",
             `/scenes/${sceneIndex}/beats/${beatIndex}`,
-            `Beat ${beat.id} ends after scene ${scene.id}.`,
+            `Beat ${beat.id} on ${beat.targetId} runs over ${frameSpan(beatStartFrame, beatStartFrame + beatDurationInFrames)}${anchorNote(beat)}, but scene ${scene.id} has ${durationInFrames} frames (0-${durationInFrames - 1}) at ${fps} fps.`,
             "error",
-            "Keep the beat inside its owning scene and compile again.",
+            fixes.length > 0
+              ? `End it by frame ${durationInFrames - 1}: ${fixes.join(", or ")}.`
+              : `The beat is longer than the scene; shorten it to durationMs ${longestDurationMsFor(durationInFrames, fps)} or less and set ${startEdit(beat, resolvedMs, 0)}.`,
           ),
         );
       }
