@@ -322,9 +322,9 @@ describe("draw, follow and count beats (M2.4.3)", () => {
     );
     expect(overlaps.map((issue) => issue.message)).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("to x on ship"),
-        expect.stringContaining("to draw on route"),
-        expect.stringContaining("to text on figure"),
+        expect.stringContaining("writes x on ship"),
+        expect.stringContaining("writes draw on route"),
+        expect.stringContaining("writes text on figure"),
       ]),
     );
   });

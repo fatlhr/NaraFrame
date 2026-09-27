@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { LayerView } from "../../src/remotion/draft-video.js";
 import {
+  cameraStateFor,
   countedTextFor,
   countedTextVariants,
   drawnPathFor,
@@ -278,5 +279,111 @@ describe("billboard planes", () => {
     };
     expect(370 + pinned.translateX).toBeCloseTo(onWorld.x);
     expect(580 + pinned.translateY).toBeCloseTo(onWorld.y);
+  });
+});
+
+describe("skill spatial guide matches the plane transform (M2.4.4b)", () => {
+  // SKILL.md: screen = C + zoom^d * (P - C) - d * (x, y), C the canvas centre.
+  const onScreen = (
+    draft: CompiledDraft,
+    depth: number,
+    point: { x: number; y: number },
+  ) => {
+    const plane = planeTransformFor(draft, sceneOf(draft), "world", depth, 0);
+    return {
+      x:
+        plane.originX +
+        (point.x - plane.originX) * plane.scale +
+        plane.translateX,
+      y:
+        plane.originY +
+        (point.y - plane.originY) * plane.scale +
+        plane.translateY,
+    };
+  };
+  // Draft canvas 540 x 960, so C = (270, 480). The guide's framing recipe:
+  // to centre Q at zoom z, camera = z * (Q - C).
+  const Q = { x: 380, y: 575 };
+  const draft = draftWith([], {
+    initial: { x: 2 * (Q.x - 270), y: 2 * (Q.y - 480), zoom: 2 },
+    moves: [],
+  });
+
+  it("centres the framed point on the main plane", () => {
+    const screen = onScreen(draft, 1, Q);
+    expect(screen.x).toBeCloseTo(270);
+    expect(screen.y).toBeCloseTo(480);
+  });
+
+  it("scales by zoom^depth and moves by depth times the camera", () => {
+    const screen = onScreen(draft, 0.5, Q);
+    expect(screen.x).toBeCloseTo(270 + Math.SQRT2 * (Q.x - 270) - 0.5 * 220);
+    expect(screen.y).toBeCloseTo(480 + Math.SQRT2 * (Q.y - 480) - 0.5 * 190);
+  });
+
+  it("leaves depth 0 and overlay layers where they were drawn", () => {
+    expect(onScreen(draft, 0, Q)).toEqual(Q);
+    const overlay = planeTransformFor(draft, sceneOf(draft), "overlay", 1, 0);
+    expect([overlay.scale, overlay.translateX, overlay.translateY]).toEqual([
+      1, 0, 0,
+    ]);
+  });
+});
+
+describe("follow poses as the skill describes them (M2.4.4b)", () => {
+  const follow = (from: number, to: number, startFrame: number): Beat => ({
+    id: `sail-${startFrame}`,
+    targetId: "ship",
+    action: "follow",
+    startFrame,
+    durationInFrames: 30,
+    params: { pathId: "route", from, to, ...linear },
+  });
+
+  it("waits at the first follow's from point, not at the path start", () => {
+    // ship centre (20, 10); the path's quarter point is (200, 400)
+    const draft = draftWith([follow(0.25, 1, 30)]);
+    const state = motionStateFor(draft, sceneOf(draft), "ship", 0);
+    expect([state.translateX, state.translateY]).toEqual([180, 390]);
+  });
+
+  it("jumps onto the path for a follow that comes after a transform", () => {
+    const draft = draftWith([
+      {
+        id: "drift",
+        targetId: "ship",
+        action: "transform",
+        startFrame: 0,
+        durationInFrames: 10,
+        params: { to: { x: 50, y: 0 }, ...linear },
+      },
+      follow(0.5, 1, 30),
+    ]);
+    const scene = sceneOf(draft);
+    const before = motionStateFor(draft, scene, "ship", 29);
+    expect([before.translateX, before.translateY]).toEqual([50, 0]);
+    // No blend from (50, 0): the centre is on the path's midpoint (300, 400).
+    const at = motionStateFor(draft, scene, "ship", 30);
+    expect([at.translateX, at.translateY]).toEqual([280, 390]);
+  });
+});
+
+describe("camera interpolation as the skill describes it (M2.4.4b)", () => {
+  it("moves x, y and zoom along one progress, zoom linearly", () => {
+    const draft = draftWith([], {
+      initial: { x: 360, y: 440, zoom: 2 },
+      moves: [
+        {
+          id: "pull-back",
+          startFrame: 0,
+          durationInFrames: 60,
+          to: { x: 0, y: 0, zoom: 1 },
+          easingPreset: "linear",
+        },
+      ],
+    });
+    const mid = cameraStateFor(sceneOf(draft), 30);
+    // linear: 1.5, not the geometric sqrt(2)
+    expect(mid).toEqual({ x: 180, y: 220, zoom: 1.5 });
   });
 });
