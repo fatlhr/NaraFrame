@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./count-format": {
+      "types": "./dist/count-format.d.ts",
+      "import": "./dist/count-format.js"
     }
   },
   "dependencies": {

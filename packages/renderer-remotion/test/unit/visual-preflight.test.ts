@@ -765,3 +765,82 @@ describe("resolveVisualPreflight — rich text and per-role fonts", () => {
     expect(issuesFor(draftWithScene([legacy]))).toEqual([]);
   });
 });
+
+describe("M2.4.3 preflight", () => {
+  it("checks a rotated label by its outline, not the box around it", () => {
+    // A long label turned 41 degrees: its bounding box reaches the short
+    // label at its corner, but the text itself passes well clear of it.
+    const rotated = {
+      ...text({
+        id: "strait",
+        text: "SELAT MALAKA",
+        frame: { x: 100, y: 400, width: 290, height: 32 },
+        fontSize: 20,
+      }),
+      rotationDeg: 41,
+    };
+    const corner = text({
+      id: "country",
+      text: "MY",
+      frame: { x: 330, y: 330, width: 40, height: 30 },
+      fontSize: 20,
+    });
+    const clear = resolveVisualPreflight(draftWithScene([rotated, corner]));
+    expect(clear.report.issues.map((i) => i.code)).not.toContain(
+      "TEXT_COLLISION",
+    );
+    const onTheLine = text({
+      id: "country",
+      text: "MY",
+      frame: { x: 225, y: 400, width: 40, height: 30 },
+      fontSize: 20,
+    });
+    const hit = resolveVisualPreflight(draftWithScene([rotated, onTheLine]));
+    expect(hit.report.issues.map((i) => i.code)).toContain("TEXT_COLLISION");
+  });
+
+  it("reports a path with no drawable length", () => {
+    const { report } = resolveVisualPreflight(
+      draftWithScene([
+        {
+          id: "dot",
+          type: "path",
+          d: "M10 10",
+          viewBox: { minX: 0, minY: 0, width: 100, height: 100 },
+          frame: { x: 0, y: 0, width: 100, height: 100 },
+          stroke: { color: "#ffffff", width: 2 },
+          opacity: 1,
+          rotationDeg: 0,
+          zIndex: 0,
+        },
+      ]),
+    );
+    expect(report.issues.map((i) => i.code)).toContain("PATH_INVALID");
+  });
+
+  it("measures a counted layer at each count's start and end values", () => {
+    // "9" fits in one line; "1.000.000" at the same size does not.
+    const layer = text({
+      id: "figure",
+      text: "9",
+      frame: { x: 0, y: 0, width: 60, height: 30 },
+      fontSize: 20,
+    });
+    const { report } = resolveVisualPreflight(
+      draftWithScene(
+        [layer],
+        [
+          {
+            id: "count",
+            targetId: "figure",
+            action: "count",
+            startFrame: 0,
+            durationInFrames: 30,
+            params: { from: 1000000, to: 9, grouping: "." },
+          },
+        ],
+      ),
+    );
+    expect(report.issues.map((i) => i.code)).toContain("TEXT_OVERFLOW");
+  });
+});

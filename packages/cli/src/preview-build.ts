@@ -428,16 +428,21 @@ export const selectCheckedFrames = (
       "scene-representative",
     );
     add(scene.endFrame - 1, scene.id, "scene-final");
+    // A beat may end exactly where its scene ends; its settled frame is then
+    // the scene's last frame, not the next scene's first.
+    const withinScene = (frame: number) => Math.min(scene.endFrame - 1, frame);
     for (const beat of scene.beats) {
       add(
-        scene.startFrame +
-          beat.startFrame +
-          Math.floor(beat.durationInFrames / 2),
+        withinScene(
+          scene.startFrame +
+            beat.startFrame +
+            Math.floor(beat.durationInFrames / 2),
+        ),
         scene.id,
         `semantic-beat:${beat.action}:${beat.id}`,
       );
       add(
-        scene.startFrame + beat.startFrame + beat.durationInFrames,
+        withinScene(scene.startFrame + beat.startFrame + beat.durationInFrames),
         scene.id,
         `semantic-beat-settled:${beat.action}:${beat.id}`,
       );

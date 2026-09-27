@@ -14,6 +14,8 @@ import {
 } from "remotion";
 import { CAPTION_LINE_HEIGHT, captionPadding } from "./captions.js";
 import {
+  countedTextFor,
+  drawnPathFor,
   groupScreenTransformFor,
   motionStateFor,
   motionStyleFor,
@@ -215,8 +217,40 @@ export const LayerView = ({
             ))}
           </div>
         ) : (
-          layer.text
+          (countedTextFor(scene, layer.id, localFrame) ?? layer.text)
         )}
+      </div>
+    );
+  }
+
+  if (layer.type === "path") {
+    const drawn = drawnPathFor(scene, layer, localFrame);
+    const { minX, minY, width, height } = layer.viewBox;
+    return (
+      <div style={baseStyle}>
+        <svg
+          viewBox={`${minX} ${minY} ${width} ${height}`}
+          preserveAspectRatio="none"
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "block",
+            overflow: "visible",
+          }}
+          role="presentation"
+        >
+          {drawn ? (
+            <path
+              d={drawn}
+              fill={layer.fill ?? "none"}
+              stroke={layer.stroke.color}
+              strokeWidth={layer.stroke.width}
+              strokeDasharray={layer.dash ? layer.dash.join(" ") : undefined}
+              strokeLinecap={layer.lineCap ?? "round"}
+              strokeLinejoin="round"
+            />
+          ) : null}
+        </svg>
       </div>
     );
   }
@@ -267,6 +301,7 @@ const PlaneView = ({
   localFrame,
   space,
   parallax,
+  billboard,
   zIndex,
   children,
 }: {
@@ -275,6 +310,7 @@ const PlaneView = ({
   localFrame: number;
   space: "world" | "overlay" | undefined;
   parallax: number | undefined;
+  billboard?: { x: number; y: number } | undefined;
   zIndex: number;
   children: ReactNode;
 }) => {
@@ -284,6 +320,7 @@ const PlaneView = ({
     space,
     parallax,
     localFrame,
+    billboard,
   );
   return (
     <AbsoluteFill
@@ -484,6 +521,7 @@ const SceneView = ({
           localFrame={localFrame}
           space={group.space}
           parallax={group.parallax}
+          billboard={group.billboard}
           zIndex={group.zIndex}
         >
           <GroupView

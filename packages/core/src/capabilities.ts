@@ -125,6 +125,7 @@ export const capabilityRegistry = (): CapabilityRegistry => {
     beats: optionsOf(BeatSchema, ["oneOf"], "action"),
     beatCameras: ["pan", "push", "zoom"],
     compositionMotion: [
+      "billboard",
       "camera-framing",
       "camera-moves",
       "parallax",
@@ -144,7 +145,14 @@ export const capabilityRegistry = (): CapabilityRegistry => {
       audio: assets.audio,
       fonts: fontKinds(),
     },
-    audio: ["captions", "music", "narration", "sfx", "ducking"].sort(),
+    audio: [
+      "captions",
+      "music",
+      "narration",
+      "phrase-anchors",
+      "sfx",
+      "ducking",
+    ].sort(),
     unsupported: [
       { name: "video-asset", reason: "No decode or timing test has been run." },
       {

@@ -1,6 +1,146 @@
-import type { CompiledDraft, CompiledTransition, Layer } from "@naraframe/core";
+import type {
+  CompiledBeat,
+  CompiledDraft,
+  CompiledTransition,
+  Layer,
+} from "@naraframe/core";
+import { formatCount } from "@naraframe/core/count-format";
+import {
+  cutPath,
+  getLength,
+  getPointAtLength,
+  getTangentAtLength,
+} from "@remotion/paths";
 import type { CSSProperties } from "react";
 import { Easing, interpolate } from "remotion";
+
+type PathLayer = Extract<Layer, { type: "path" }>;
+type Scene = CompiledDraft["scenes"][number];
+
+const lengths = new Map<string, number>();
+
+/** Path length in viewBox units; parsing is the slow part, so it is cached. */
+export const pathLengthOf = (d: string): number => {
+  const known = lengths.get(d);
+  if (known !== undefined) return known;
+  const length = getLength(d);
+  lengths.set(d, length);
+  return length;
+};
+
+/**
+ * A point a fraction of the way along a path, on the page in the path's own
+ * plane (before the camera), with the direction of travel in degrees. The
+ * compiler guarantees the viewBox sits on the frame without distortion.
+ */
+export const pointAlongPath = (
+  layer: PathLayer,
+  fraction: number,
+): { x: number; y: number; angleDeg: number } => {
+  const length = pathLengthOf(layer.d);
+  const at = Math.max(0, Math.min(1, fraction)) * length;
+  const point = getPointAtLength(layer.d, at) ?? { x: 0, y: 0 };
+  const tangent = getTangentAtLength(layer.d, at) ?? { x: 1, y: 0 };
+  const scaleX = layer.frame.width / layer.viewBox.width;
+  const scaleY = layer.frame.height / layer.viewBox.height;
+  return {
+    x: layer.frame.x + (point.x - layer.viewBox.minX) * scaleX,
+    y: layer.frame.y + (point.y - layer.viewBox.minY) * scaleY,
+    angleDeg: (Math.atan2(tangent.y, tangent.x) * 180) / Math.PI,
+  };
+};
+
+/** The part of a path to paint at this frame; null when nothing is drawn. */
+export const drawnPathFor = (
+  scene: Scene,
+  layer: PathLayer,
+  localFrame: number,
+): string | null => {
+  const progress = drawProgressFor(scene, layer.id, localFrame);
+  if (progress >= 1) return layer.d;
+  if (progress <= 0) return null;
+  return cutPath(layer.d, pathLengthOf(layer.d) * progress);
+};
+
+const beatProgress = (beat: CompiledBeat, localFrame: number): number =>
+  interpolate(
+    localFrame,
+    [beat.startFrame, beat.startFrame + beat.durationInFrames],
+    [0, 1],
+    { ...clamp, easing: easingFor(beat.params.easingPreset, beat.action) },
+  );
+
+/**
+ * How much of a path is drawn. Sequential like every other written property:
+ * each draw continues from where the previous one settled unless it names its
+ * own start, and before the first draw the path stands at that draw's start.
+ */
+export const drawProgressFor = (
+  scene: Scene,
+  layerId: string,
+  localFrame: number,
+): number => {
+  const draws = scene.beats
+    .filter(
+      (beat): beat is Extract<CompiledBeat, { action: "draw" }> =>
+        beat.action === "draw" && beat.targetId === layerId,
+    )
+    .sort((left, right) => left.startFrame - right.startFrame);
+  const first = draws[0];
+  if (!first) return 1;
+  let value = first.params.from ?? 0;
+  for (const beat of draws) {
+    if (localFrame < beat.startFrame) break;
+    const from = beat.params.from ?? value;
+    const to = beat.params.to ?? 1;
+    value = from + (to - from) * beatProgress(beat, localFrame);
+  }
+  return value;
+};
+
+/**
+ * The text a counted layer shows at this frame, or null when nothing counts
+ * it. Before the first count it reads that count's start value.
+ */
+export const countedTextFor = (
+  scene: Scene,
+  layerId: string,
+  localFrame: number,
+): string | null => {
+  const counts = scene.beats
+    .filter(
+      (beat): beat is Extract<CompiledBeat, { action: "count" }> =>
+        beat.action === "count" && beat.targetId === layerId,
+    )
+    .sort((left, right) => left.startFrame - right.startFrame);
+  const first = counts[0];
+  if (!first) return null;
+  let value = first.params.from;
+  let format = first.params;
+  for (const beat of counts) {
+    if (localFrame < beat.startFrame) break;
+    value =
+      beat.params.from +
+      (beat.params.to - beat.params.from) * beatProgress(beat, localFrame);
+    format = beat.params;
+  }
+  return formatCount(value, format);
+};
+
+/**
+ * The start and end text of every count beat on a layer, for measurement.
+ * Intermediate values are not listed: a count whose middle values are wider
+ * than both its endpoints is not caught.
+ */
+export const countedTextVariants = (scene: Scene, layerId: string): string[] =>
+  scene.beats.flatMap((beat) =>
+    beat.action === "count" && beat.targetId === layerId
+      ? [
+          formatCount(beat.params.from, beat.params),
+          formatCount(beat.params.to, beat.params),
+        ]
+      : [],
+  );
 
 const clamp = {
   extrapolateLeft: "clamp" as const,
@@ -9,7 +149,16 @@ const clamp = {
 
 const easingFor = (
   preset: "linear" | "smooth" | "snappy" | undefined,
-  action: "reveal" | "exit" | "emphasize" | "focus" | "transform" | "camera",
+  action:
+    | "reveal"
+    | "exit"
+    | "emphasize"
+    | "focus"
+    | "transform"
+    | "draw"
+    | "follow"
+    | "count"
+    | "camera",
 ) => {
   if (preset === "linear") return Easing.linear;
   if (preset === "smooth") return Easing.inOut(Easing.cubic);
@@ -43,51 +192,103 @@ export const motionStateFor = (
     anchor: { x: 0.5, y: 0.5 },
   };
 
-  const transformPose = scene.beats
-    .filter((item) => item.action === "transform" && item.targetId === targetId)
-    .sort((left, right) => left.startFrame - right.startFrame)
-    .reduce(
-      (pose, beat) => {
-        if (beat.action !== "transform" || localFrame < beat.startFrame)
-          return pose;
-        const progress = interpolate(
-          localFrame,
-          [beat.startFrame, beat.startFrame + beat.durationInFrames],
-          [0, 1],
-          {
-            ...clamp,
-            easing: easingFor(beat.params.easingPreset, beat.action),
-          },
-        );
-        return {
-          x:
-            beat.params.to.x === undefined
-              ? pose.x
-              : pose.x + (beat.params.to.x - pose.x) * progress,
-          y:
-            beat.params.to.y === undefined
-              ? pose.y
-              : pose.y + (beat.params.to.y - pose.y) * progress,
-          scale:
-            beat.params.to.scale === undefined
-              ? pose.scale
-              : pose.scale + (beat.params.to.scale - pose.scale) * progress,
-          rotationDeg:
-            beat.params.to.rotationDeg === undefined
-              ? pose.rotationDeg
-              : pose.rotationDeg +
-                (beat.params.to.rotationDeg - pose.rotationDeg) * progress,
-        };
+  // Transform and follow beats write one sequential pose: each continues
+  // from where the previous settled. A follower placed by its first beat
+  // waits at the start of its path, so it never jumps onto the route.
+  const target = scene.layers.find((layer) => layer.id === targetId);
+  const pathOf = (pathId: string): PathLayer | undefined => {
+    const layer = scene.layers.find((candidate) => candidate.id === pathId);
+    return layer?.type === "path" ? layer : undefined;
+  };
+  const followPose = (
+    beat: Extract<CompiledBeat, { action: "follow" }>,
+    progress: number,
+  ): { x: number; y: number; rotationDeg: number } | null => {
+    const path = pathOf(beat.params.pathId);
+    if (!path || !target || target.type === "group") return null;
+    const from = beat.params.from ?? 0;
+    const to = beat.params.to ?? 1;
+    const point = pointAlongPath(path, from + (to - from) * progress);
+    return {
+      x: point.x - (target.frame.x + target.frame.width / 2),
+      y: point.y - (target.frame.y + target.frame.height / 2),
+      // Faces the way it travels, so a follower going back down its path
+      // turns around rather than reversing.
+      rotationDeg: point.angleDeg + (to < from ? 180 : 0),
+    };
+  };
+  const positionBeats = scene.beats
+    .filter(
+      (item) =>
+        (item.action === "transform" || item.action === "follow") &&
+        item.targetId === targetId,
+    )
+    .sort((left, right) => left.startFrame - right.startFrame);
+  const initialPose = { x: 0, y: 0, scale: 1, rotationDeg: 0 };
+  const firstFollow = positionBeats[0];
+  if (firstFollow?.action === "follow") {
+    const held = followPose(firstFollow, 0);
+    if (held) {
+      initialPose.x = held.x;
+      initialPose.y = held.y;
+      if (firstFollow.params.orient) initialPose.rotationDeg = held.rotationDeg;
+    }
+  }
+  const transformPose = positionBeats.reduce((pose, beat) => {
+    if (localFrame < beat.startFrame) return pose;
+    if (beat.action === "follow") {
+      const next = followPose(beat, beatProgress(beat, localFrame));
+      if (!next) return pose;
+      return {
+        scale: pose.scale,
+        x: next.x,
+        y: next.y,
+        rotationDeg: beat.params.orient ? next.rotationDeg : pose.rotationDeg,
+      };
+    }
+    if (beat.action !== "transform") return pose;
+    const progress = interpolate(
+      localFrame,
+      [beat.startFrame, beat.startFrame + beat.durationInFrames],
+      [0, 1],
+      {
+        ...clamp,
+        easing: easingFor(beat.params.easingPreset, beat.action),
       },
-      { x: 0, y: 0, scale: 1, rotationDeg: 0 },
     );
+    return {
+      x:
+        beat.params.to.x === undefined
+          ? pose.x
+          : pose.x + (beat.params.to.x - pose.x) * progress,
+      y:
+        beat.params.to.y === undefined
+          ? pose.y
+          : pose.y + (beat.params.to.y - pose.y) * progress,
+      scale:
+        beat.params.to.scale === undefined
+          ? pose.scale
+          : pose.scale + (beat.params.to.scale - pose.scale) * progress,
+      rotationDeg:
+        beat.params.to.rotationDeg === undefined
+          ? pose.rotationDeg
+          : pose.rotationDeg +
+            (beat.params.to.rotationDeg - pose.rotationDeg) * progress,
+    };
+  }, initialPose);
   state.translateX = transformPose.x;
   state.translateY = transformPose.y;
   state.scale = transformPose.scale;
   state.rotationDeg = transformPose.rotationDeg;
 
   for (const beat of scene.beats.filter((item) => item.targetId === targetId)) {
-    if (beat.action === "transform") continue;
+    if (
+      beat.action === "transform" ||
+      beat.action === "follow" ||
+      beat.action === "draw" ||
+      beat.action === "count"
+    )
+      continue;
     const progress = interpolate(
       localFrame,
       [beat.startFrame, beat.startFrame + beat.durationInFrames],
@@ -221,6 +422,7 @@ export const planeTransformFor = (
   space: "world" | "overlay" | undefined,
   parallax: number | undefined,
   localFrame: number,
+  billboard?: { x: number; y: number },
 ): PlaneTransform => {
   if (space !== "world") {
     return {
@@ -233,12 +435,28 @@ export const planeTransformFor = (
   }
   const depth = parallax ?? 1;
   const camera = cameraStateFor(scene, localFrame);
-  return {
+  const plane = {
     translateX: -camera.x * depth,
     translateY: -camera.y * depth,
     scale: camera.zoom ** depth,
     originX: draft.width / 2,
     originY: draft.height / 2,
+  };
+  if (!billboard) return plane;
+  // Carry the pinned point to where the camera puts it, at design size.
+  const screenX =
+    plane.originX +
+    (billboard.x - plane.originX) * plane.scale +
+    plane.translateX;
+  const screenY =
+    plane.originY +
+    (billboard.y - plane.originY) * plane.scale +
+    plane.translateY;
+  return {
+    ...plane,
+    translateX: screenX - billboard.x,
+    translateY: screenY - billboard.y,
+    scale: 1,
   };
 };
 

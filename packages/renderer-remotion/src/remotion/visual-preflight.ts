@@ -2,11 +2,12 @@ import type { CompiledDraft, Issue, Layer } from "@naraframe/core";
 import { measureText } from "@remotion/layout-utils";
 import { captionLayoutFor } from "./captions.js";
 import {
+  countedTextVariants,
   type GroupTransform,
   groupScreenTransformFor,
   motionStateFor,
+  pathLengthOf,
   planeTransformFor,
-  type SceneTransitionState,
   sceneTransitionStateFor,
 } from "./motion.js";
 import { fontFamilyForRole } from "./typography.js";
@@ -296,14 +297,15 @@ const textRectangle = (
   };
 };
 
-const transformedRectangle = (
+/** A layer's own rotation, scale and travel applied to a rectangle's corners. */
+const transformedQuad = (
   rectangle: Rectangle,
   state: ReturnType<typeof motionStateFor>,
   bounds: Rectangle = rectangle,
   rotationDeg = 0,
-): Rectangle =>
-  applyGroupTransform(
-    rectangle,
+): Point[] =>
+  transformPoints(
+    cornersOf(rectangle),
     {
       ...state,
       rotationDeg: rotationDeg + state.rotationDeg,
@@ -312,12 +314,6 @@ const transformedRectangle = (
     },
     bounds,
   );
-
-const intersects = (left: Rectangle, right: Rectangle): boolean =>
-  left.x < right.x + right.width &&
-  left.x + left.width > right.x &&
-  left.y < right.y + right.height &&
-  left.y + left.height > right.y;
 
 /**
  * Mirrors `GroupView`'s member-bounding-box math (draft-video.tsx) so the
@@ -346,39 +342,17 @@ const groupBoundsFor = (
   return { x: left, y: top, width: right - left, height: bottom - top };
 };
 
-/**
- * Folds a parent group's static transform + beat motion into a member's
- * already-transformed rectangle, so collision checks happen at the position
- * the layer actually renders at (see VF/M0.9.7 group-transform fix). Rotation
- * is handled by taking the axis-aligned bounding box of the rotated corners,
- * which never under-reports a real collision.
- */
-const applyGroupTransform = (
-  rectangle: Rectangle,
-  transform: GroupTransform,
-  bounds: Rectangle,
-): Rectangle => {
-  const originX = bounds.x + transform.anchorX * bounds.width;
-  const originY = bounds.y + transform.anchorY * bounds.height;
-  const radians = (transform.rotationDeg * Math.PI) / 180;
-  const cos = Math.cos(radians);
-  const sin = Math.sin(radians);
-  const corners: Array<[number, number]> = [
-    [rectangle.x, rectangle.y],
-    [rectangle.x + rectangle.width, rectangle.y],
-    [rectangle.x, rectangle.y + rectangle.height],
-    [rectangle.x + rectangle.width, rectangle.y + rectangle.height],
-  ];
-  const points = corners.map(([pointX, pointY]) => {
-    const localX = (pointX - originX) * transform.scale;
-    const localY = (pointY - originY) * transform.scale;
-    const rotatedX = localX * cos - localY * sin;
-    const rotatedY = localX * sin + localY * cos;
-    return [
-      originX + rotatedX + transform.translateX,
-      originY + rotatedY + transform.translateY,
-    ] as const;
-  });
+type Point = readonly [number, number];
+
+/** Corners in drawing order, so the result is a convex polygon. */
+const cornersOf = (rectangle: Rectangle): Point[] => [
+  [rectangle.x, rectangle.y],
+  [rectangle.x + rectangle.width, rectangle.y],
+  [rectangle.x + rectangle.width, rectangle.y + rectangle.height],
+  [rectangle.x, rectangle.y + rectangle.height],
+];
+
+const boundsOf = (points: readonly Point[]): Rectangle => {
   const xs = points.map((point) => point[0]);
   const ys = points.map((point) => point[1]);
   const minX = Math.min(...xs);
@@ -392,32 +366,58 @@ const applyGroupTransform = (
 };
 
 /**
- * Folds a scene-boundary transition (M0.10.2) into a rectangle the same way
- * `applyGroupTransform` folds a group's transform: the transition scales the
- * whole scene around an anchor fraction of the full canvas, so any layer's
- * rectangle checked during an active transition window must move with it.
- * `clipPath` (mask-reveal) is deliberately not folded — it clips paint, not
- * layout, so it cannot hide a real collision from this geometry check.
+ * Two convex polygons overlap unless some edge normal separates them. Used
+ * for text collisions, so a rotated label is checked by its real outline,
+ * not by the far larger box around it.
  */
-const applySceneTransition = (
-  rectangle: Rectangle,
-  state: SceneTransitionState,
-  width: number,
-  height: number,
-): Rectangle => {
-  if (state.scale === 1 && state.translateX === 0 && state.translateY === 0) {
-    return rectangle;
+const polygonsIntersect = (
+  left: readonly Point[],
+  right: readonly Point[],
+): boolean => {
+  for (const polygon of [left, right]) {
+    for (let index = 0; index < polygon.length; index += 1) {
+      const start = polygon[index] as Point;
+      const end = polygon[(index + 1) % polygon.length] as Point;
+      const axisX = start[1] - end[1];
+      const axisY = end[0] - start[0];
+      const project = (points: readonly Point[]) =>
+        points.map((point) => point[0] * axisX + point[1] * axisY);
+      const a = project(left);
+      const b = project(right);
+      if (
+        Math.max(...a) <= Math.min(...b) + 1e-9 ||
+        Math.max(...b) <= Math.min(...a) + 1e-9
+      ) {
+        return false;
+      }
+    }
   }
-  const originX = state.anchor.x * width;
-  const originY = state.anchor.y * height;
-  const x = originX + (rectangle.x - originX) * state.scale + state.translateX;
-  const y = originY + (rectangle.y - originY) * state.scale + state.translateY;
-  return {
-    x,
-    y,
-    width: rectangle.width * state.scale,
-    height: rectangle.height * state.scale,
-  };
+  return true;
+};
+
+/**
+ * Folds a parent group's static transform + beat motion into a member's
+ * already-transformed outline, so collision checks happen at the position
+ * the layer actually renders at (see VF/M0.9.7 group-transform fix).
+ */
+const transformPoints = (
+  points: readonly Point[],
+  transform: GroupTransform,
+  bounds: Rectangle,
+): Point[] => {
+  const originX = bounds.x + transform.anchorX * bounds.width;
+  const originY = bounds.y + transform.anchorY * bounds.height;
+  const radians = (transform.rotationDeg * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  return points.map(([pointX, pointY]) => {
+    const localX = (pointX - originX) * transform.scale;
+    const localY = (pointY - originY) * transform.scale;
+    return [
+      originX + localX * cos - localY * sin + transform.translateX,
+      originY + localX * sin + localY * cos + transform.translateY,
+    ] as const;
+  });
 };
 
 const captionIssue = (
@@ -654,6 +654,29 @@ export const resolveVisualPreflight = (
     issues.push(...panelDeadSpace(scene, sceneIndex));
     const textMetrics = new Map<string, TextMetrics>();
     scene.layers.forEach((layer, layerIndex) => {
+      if (layer.type === "path") {
+        // The schema accepts only path characters; whether they parse and
+        // have length is known only to the geometry the renderer uses.
+        let length = 0;
+        try {
+          length = pathLengthOf(layer.d);
+        } catch {
+          length = Number.NaN;
+        }
+        if (!(length > 0)) {
+          issues.push(
+            issueFor(
+              "PATH_INVALID",
+              sceneIndex,
+              layerIndex,
+              layer.id,
+              `Path ${layer.id} has no drawable length.`,
+              "Give the path valid SVG path data with at least one segment.",
+            ),
+          );
+        }
+        return;
+      }
       if (layer.type === "image") {
         const radius = layer.cornerRadius ?? 0;
         if (radius > Math.min(layer.frame.width, layer.frame.height) / 2) {
@@ -696,7 +719,13 @@ export const resolveVisualPreflight = (
         return;
       }
 
-      const metrics = fitText(draft, layer);
+      // A counted layer is measured at each count's start and end text as
+      // well as its settled text. Intermediate values are not measured.
+      const settled = fitText(draft, layer);
+      const metrics =
+        countedTextVariants(scene, layer.id)
+          .map((text) => fitText(draft, { ...layer, text }))
+          .find((candidate) => candidate.overflow) ?? settled;
       textMetrics.set(layer.id, metrics);
       if (!metrics.overflow && metrics.fontSize !== fontSize) {
         layer.fontSize = metrics.fontSize;
@@ -739,14 +768,14 @@ export const resolveVisualPreflight = (
     const groupBoundsById = new Map(
       groups.map((group) => [group.id, groupBoundsFor(scene, group)]),
     );
-    const rectangleOnScreen = (
+    const quadOnScreen = (
       layerId: string,
-      rectangle: Rectangle,
+      points: readonly Point[],
       localFrame: number,
-    ): Rectangle => {
+    ): Point[] => {
       const group = parentGroupOf.get(layerId);
       const withGroup = (() => {
-        if (!group) return rectangle;
+        if (!group) return points;
         const transform = groupScreenTransformFor(
           draft,
           scene,
@@ -754,8 +783,8 @@ export const resolveVisualPreflight = (
           localFrame,
         );
         const bounds = groupBoundsById.get(group.id);
-        if (!bounds) return rectangle;
-        return applyGroupTransform(rectangle, transform, bounds);
+        if (!bounds) return points;
+        return transformPoints(points, transform, bounds);
       })();
       const planeOwner =
         group ?? scene.layers.find((layer) => layer.id === layerId);
@@ -765,26 +794,29 @@ export const resolveVisualPreflight = (
         planeOwner?.space,
         planeOwner?.parallax,
         localFrame,
+        group?.billboard,
       );
-      const withPlane = {
-        x:
-          plane.originX +
-          (withGroup.x - plane.originX) * plane.scale +
-          plane.translateX,
-        y:
-          plane.originY +
-          (withGroup.y - plane.originY) * plane.scale +
-          plane.translateY,
-        width: withGroup.width * plane.scale,
-        height: withGroup.height * plane.scale,
-      };
       const sceneState = sceneTransitionStateFor(draft, sceneIndex, localFrame);
-      return applySceneTransition(
-        withPlane,
-        sceneState,
-        draft.width,
-        draft.height,
-      );
+      const originX = sceneState.anchor.x * draft.width;
+      const originY = sceneState.anchor.y * draft.height;
+      return withGroup.map(([pointX, pointY]) => {
+        const planeX =
+          plane.originX +
+          (pointX - plane.originX) * plane.scale +
+          plane.translateX;
+        const planeY =
+          plane.originY +
+          (pointY - plane.originY) * plane.scale +
+          plane.translateY;
+        return [
+          originX +
+            (planeX - originX) * sceneState.scale +
+            sceneState.translateX,
+          originY +
+            (planeY - originY) * sceneState.scale +
+            sceneState.translateY,
+        ] as const;
+      });
     };
     const opacityOnScreen = (
       layerId: string,
@@ -823,9 +855,9 @@ export const resolveVisualPreflight = (
               ) < 0.9
             )
               continue;
-            const layerRectangle = rectangleOnScreen(
+            const layerQuad = quadOnScreen(
               layer.id,
-              transformedRectangle(
+              transformedQuad(
                 textRectangle(layer, metrics),
                 state,
                 layer.frame,
@@ -836,7 +868,7 @@ export const resolveVisualPreflight = (
             const pair = `${cue.id}:${layer.id}`;
             if (
               checkedCaptionPairs.has(pair) ||
-              !intersects(captionBox, layerRectangle)
+              !polygonsIntersect(cornersOf(captionBox), layerQuad)
             )
               continue;
             checkedCaptionPairs.add(pair);
@@ -869,9 +901,9 @@ export const resolveVisualPreflight = (
           ) < 0.9
         )
           return;
-        const leftRectangle = rectangleOnScreen(
+        const leftQuad = quadOnScreen(
           left.id,
-          transformedRectangle(
+          transformedQuad(
             textRectangle(left, leftMetrics),
             leftState,
             left.frame,
@@ -879,9 +911,12 @@ export const resolveVisualPreflight = (
           ),
           localFrame,
         );
+        const leftRectangle = boundsOf(leftQuad);
         if (
           (scene.camera ||
-            scene.beats.some((beat) => beat.action === "transform")) &&
+            scene.beats.some(
+              (beat) => beat.action === "transform" || beat.action === "follow",
+            )) &&
           !checkedClipping.has(left.id) &&
           (leftRectangle.x < -0.5 ||
             leftRectangle.y < -0.5 ||
@@ -926,9 +961,9 @@ export const resolveVisualPreflight = (
             return;
           const targetMetrics =
             target.type === "text" ? textMetrics.get(target.id) : undefined;
-          const targetRectangle = rectangleOnScreen(
+          const targetQuad = quadOnScreen(
             target.id,
-            transformedRectangle(
+            transformedQuad(
               target.type === "text" && targetMetrics
                 ? textRectangle(target, targetMetrics)
                 : target.frame,
@@ -938,7 +973,7 @@ export const resolveVisualPreflight = (
             ),
             localFrame,
           );
-          if (!intersects(leftRectangle, targetRectangle)) return;
+          if (!polygonsIntersect(leftQuad, targetQuad)) return;
           checkedPairs.add(pair);
           issues.push(
             issueFor(

@@ -10,11 +10,24 @@ const registry = capabilityRegistry();
  */
 const EVIDENCE: Record<string, string[]> = {
   visuals: ["text", "media", "composition"],
-  layers: ["text", "image", "shape", "group"],
+  // path: compile-draft-m2-4-3 and path-count-motion.
+  layers: ["text", "image", "shape", "path", "group"],
   groupLayouts: ["absolute", "stack", "grid"],
-  // motion-transitions, visual-preflight and compile-draft-m0-10 exercise these.
-  beats: ["reveal", "exit", "emphasize", "focus", "transform"],
+  // motion-transitions, visual-preflight and compile-draft-m0-10 exercise these;
+  // draw, follow and count: compile-draft-m2-4-3 and path-count-motion.
+  beats: [
+    "reveal",
+    "exit",
+    "emphasize",
+    "focus",
+    "transform",
+    "draw",
+    "follow",
+    "count",
+  ],
+  // billboard: path-count-motion and compile-draft-m2-4-3.
   compositionMotion: [
+    "billboard",
     "camera-framing",
     "camera-moves",
     "parallax",
@@ -28,7 +41,8 @@ const EVIDENCE: Record<string, string[]> = {
     "palette.text",
     "palette.accent",
   ],
-  audio: ["narration", "captions", "music", "sfx", "ducking"],
+  // phrase-anchors: compile-draft-m2-4-3.
+  audio: ["narration", "captions", "music", "phrase-anchors", "sfx", "ducking"],
   textEmphasis: ["accent", "strong", "quiet"],
 };
 
