@@ -117,7 +117,12 @@ const createStagedBuild = async (
     | "mixed-runtime"
     | "label-audio-mismatch"
     | "mixed-timestamps" = "valid",
+  audio: {
+    draft?: CompiledDraft;
+    render?: { audio: "none" | "aac"; muted: boolean };
+  } = {},
 ): Promise<string> => {
+  const target = audio.draft ?? draft;
   const directory = join(root, `staged-${buildId}`);
   await mkdir(directory, { recursive: true });
   const mp4 =
@@ -128,7 +133,7 @@ const createStagedBuild = async (
           Buffer.from("ftyp"),
           Buffer.from("isom"),
         ]);
-  const expectedFrames = selectCheckedFrames(draft, []);
+  const expectedFrames = selectCheckedFrames(target, []);
   const checkedFrames =
     variant === "invalid-frame-shape"
       ? [{ frame: 1, reasons: [42] }]
@@ -146,14 +151,14 @@ const createStagedBuild = async (
   const metadata: Record<string, unknown> = {
     schemaVersion: 1,
     buildId,
-    sourceRevision: draft.sourceRevision,
-    assemblyKey: draft.assemblyKey,
-    mode: draft.mode,
-    scope: draft.scope,
-    timelineScope: draft.timelineScope,
+    sourceRevision: target.sourceRevision,
+    assemblyKey: target.assemblyKey,
+    mode: target.mode,
+    scope: target.scope,
+    timelineScope: target.timelineScope,
     label:
-      variant === "label-audio-mismatch" ? "DRAFT • WITH AUDIO" : draft.label,
-    profile: { id: draft.profile.id, version: draft.profile.version },
+      variant === "label-audio-mismatch" ? "DRAFT • WITH AUDIO" : target.label,
+    profile: { id: target.profile.id, version: target.profile.version },
     runtime: {
       node: "v24.20.0",
       os: { platform: "darwin", release: "fixture", architecture: "arm64" },
@@ -166,13 +171,12 @@ const createStagedBuild = async (
       ffmpeg: { executable: "/fixture/ffmpeg", version: "ffmpeg fixture" },
     },
     render: {
-      width: draft.width,
-      height: draft.height,
-      fps: draft.fps,
-      durationInFrames: draft.totalFrames,
+      width: target.width,
+      height: target.height,
+      fps: target.fps,
+      durationInFrames: target.totalFrames,
       codec: "h264",
-      audio: "none",
-      muted: true,
+      ...(audio.render ?? { audio: "none", muted: true }),
     },
     contactSheet,
     checkedFrames,
@@ -190,10 +194,10 @@ const createStagedBuild = async (
   const frames = json({
     schemaVersion: 1,
     buildId,
-    sourceRevision: draft.sourceRevision,
-    assemblyKey: draft.assemblyKey,
-    scope: draft.scope,
-    timelineScope: draft.timelineScope,
+    sourceRevision: target.sourceRevision,
+    assemblyKey: target.assemblyKey,
+    scope: target.scope,
+    timelineScope: target.timelineScope,
     contactSheet,
     frames: checkedFrames,
   });
@@ -612,6 +616,95 @@ describe("atomic preview publication", () => {
     expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
       previousPointer,
     );
+  });
+
+  it("publishes a soundtrack-only draft with AAC and rejects metadata that denies its audio", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-soundtrack-"));
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    const previousPointer = json({ schemaVersion: 1, buildId: "previous" });
+    await writeFile(join(previewDirectory, "current.json"), previousPointer);
+    // Music without narration: the renderer writes one AAC stream and the
+    // compiler labels the draft as carrying audio.
+    const soundtrackDraft: CompiledDraft = {
+      ...draft,
+      label: "DRAFT • WITH AUDIO",
+      soundtrack: {
+        music: {
+          assetId: "music-bed",
+          volume: 0.6,
+          loop: false,
+          trimStartFrames: 0,
+          fadeInFrames: 6,
+          fadeOutFrames: 9,
+        },
+        sfx: [],
+      },
+    };
+    expect(soundtrackDraft.narration).toBeUndefined();
+    const withAac = async () => {
+      const result = await probe();
+      return {
+        ...result,
+        streams: [
+          ...(result.streams as unknown[]),
+          { codec_type: "audio", codec_name: "aac" },
+        ],
+      };
+    };
+    const promote = async (
+      buildId: string,
+      render: { audio: "none" | "aac"; muted: boolean },
+      mediaProbe = withAac,
+    ) =>
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(root, buildId, "valid", {
+          draft: soundtrackDraft,
+          render,
+        }),
+        previewDirectory,
+        buildId,
+        draft: soundtrackDraft,
+        probe: mediaProbe,
+        decode,
+        contactSheetProbe,
+        contactSheetDecode,
+      });
+
+    for (const [buildId, render] of [
+      ["claims-silence", { audio: "none", muted: true }],
+      ["claims-muted", { audio: "aac", muted: true }],
+    ] as const) {
+      await expect(promote(buildId, render)).rejects.toThrow(
+        "Build metadata is incomplete",
+      );
+      expect(
+        await readFile(join(previewDirectory, "current.json"), "utf8"),
+      ).toBe(previousPointer);
+      await expect(
+        stat(join(previewDirectory, "builds", buildId)),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+    }
+    await expect(
+      promote("missing-audio-stream", { audio: "aac", muted: false }, probe),
+    ).rejects.toThrow("exactly one AAC audio stream");
+
+    const published = await promote("soundtrack-only", {
+      audio: "aac",
+      muted: false,
+    });
+    expect(
+      JSON.parse(await readFile(published.currentPointer, "utf8")),
+    ).toMatchObject({
+      buildId: "soundtrack-only",
+      manifestSha256: published.manifestSha256,
+    });
+    expect(
+      JSON.parse(
+        await readFile(join(published.buildDirectory, "manifest.json"), "utf8"),
+      ).render,
+    ).toMatchObject({ audio: "aac", muted: false });
   });
 
   it("rejects incomplete contact-sheet evidence and missing representative coverage", async () => {

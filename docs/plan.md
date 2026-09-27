@@ -279,7 +279,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18 (2026-09-27) after supervisor sign-off and Fatih's approval; next task not started.** Separate follow-up: `draft-project.test.ts` copies the shared `samples/krakatau-draft`, including transient `.naraframe/attempts/reuse-*` directories that `computeReuse` creates and removes; one ENOENT failure is consistent with a race between parallel test files, but the triggering test and root cause are unproven and the flake is not fixed. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
+Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. M2.4.5 frozen trial remains BLOCKED_CONFIRMED on its original freeze. B1 correction M2.4.5a is TECHNICALLY_READY after supervisor review; PR opened to `main`, not merged; the retrial waits for integration and a new freeze.** Separate follow-up: `draft-project.test.ts` copies the shared `samples/krakatau-draft`, including transient `.naraframe/attempts/reuse-*` directories that `computeReuse` creates and removes; one ENOENT failure is consistent with a race between parallel test files, but the triggering test and root cause are unproven and the flake is not fixed. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -458,7 +458,8 @@ No source `examples/` directory is needed.
 | M2.4.3 | River-history framing, shipping route, moving ships and population/data explanation | INTEGRATED — squash-merged via PR #15 (2026-09-27) after supervisor technical sign-off (serial E2E 9/9 on `94fe4b0`; later commits documentation only) and Fatih's visual approval and merge authorisation. Earlier 8/9 runs and the open repeatability/timeout questions are kept in the handoff record; follow-up issue #16. Project `work/visual-parity/medan-story`; "ke-4" claim blocked for publication |
 | M2.4.4 | Approximately 67.5s Medan, full reference comparison and approved export | TECHNICAL PART INTEGRATED via PR #17 (`cf9411f`, 2026-09-27): ten scenes, production-ready preview `18a2906ac565-9566e37d-8e1`, count-label limit. **Not complete:** the NF-AC-16 visual gate, further comparison/polish and the approved export stay DEFERRED by owner decision; the spoken "ke-4" claim still blocks publication |
 | M2.4.4b | Spatial authoring guide and timing diagnostics (inserted 2026-09-27 by the priority change; before M2.4.5) | INTEGRATED — squash-merged via PR #18 (2026-09-27) after supervisor TECHNICALLY_READY FOR MERGE on head `30d5e4b` and Fatih's approval; the merge adds only this handoff documentation. Separate follow-up: shared-fixture test isolation (unproven race, not fixed) |
-| M2.4.5 | Distinct 30s LBC first full draft, four ordinary revisions and close-out | Held until full Medan gate passes |
+| M2.4.5a | B1 correction outside the frozen trial (approved by Fatih 2026-09-27, option a): soundtrack-only full draft preview publishes with its AAC audio | TECHNICALLY_READY — supervisor review 2026-09-27: 14 integration tests and the targeted soundtrack-only E2E passed independently; implementer full verify and serial E2E logs accepted. Branch `m2-4-5a-soundtrack-preview-metadata` from `f065e4d`; committed and PR opened to `main`, not merged. Retrial waits for integration and a new freeze |
+| M2.4.5 | Frozen end-to-end authoring/revision trial on a copy of the LBC project (rescoped by Fatih 2026-09-27): short example, headline/camera/object/profile revisions, undo, asset/audio reuse | BLOCKED_CONFIRMED — supervisor reproduced B1 at the metadata assertion boundary; full soundtrack-only draft preview cannot publish. Trial stopped before the revisions; branch `m2-4-5-frozen-trial` from `f065e4d`, uncommitted. Awaiting owner decision; NF-AC-17 visual/publication judgement and export stay DEFERRED |
 
 Task IDs are unchanged. Former M2.4.2 camera/world work moves into M2.4.1 where indispensable for the opening and M2.4.3 for river-history expansion. Former route/data work remains in M2.4.3. Early LBC is now M2.4.2; full LBC remains M2.4.5. No full acceptance obligation is dropped.
 
@@ -1149,6 +1150,10 @@ pnpm naraframe preview work/visual-parity/medan --draft --scene opening --json
 - **Non-blocking follow-up: shared-fixture isolation.** `draft-project.test.ts` recursively copies the complete shared sample, while `computeReuse` creates and removes transient `.naraframe/attempts/reuse-*` directories. That supports the reported race hypothesis and the classification as unrelated to this diagnostic-only diff. It does not independently prove which concurrent test triggered the failure or reproduce it on main. Track a bounded test-isolation task: reproduce the copy/cleanup race, isolate writable fixtures or exclude transient generated state as appropriate, add a regression, and retain failure logs. Do not call the flake fixed or conclusively diagnosed; no automatic retries or weaker assertions. No separate GitHub issue was opened in this review.
 - **Integration note:** no full verify or E2E rerun by supervisor. E2E omission is acceptable for this diagnostic/documentation-only diff; rendering semantics and engine identity remain unchanged. No engine, skill, project artifact or Git mutation by supervisor; only this plan/tracker was updated. Any further runtime change requires a new gate decision.
 
+**Supervisor closure — 2026-09-27: M2.4.4b CLOSED / INTEGRATED.** Independently verified GitHub PR #18 is MERGED with head `20a0e5e4eac18a9cf239a16bf0336cfd24671e29` and squash `f065e4d65b37d35b2414e91d8943f52b450632fe`. Local `main` and `origin/main` resolve to that squash. `git diff 30d5e4b..f065e4d` changes only `docs/plan.md`; the trees of `20a0e5e` and `f065e4d` are identical (`f83568a672d223a85e1013c6cca7ebf4c0f7c20a`). Commit metadata contains no agent identity/trailer. Integration notes accurately retain the unresolved shared-fixture hypothesis; no flake fix or visual acceptance is claimed. No tests rerun because implementation is identical to the reviewed candidate. Working tree was clean before this documentation entry; this closure entry itself is local and uncommitted. No Git mutation or next-task execution performed.
+
+**Recommendation for owner decision (not a scope change or task start).** Next, align M2.4.5 with the owner's engine/skill priority: propose a bounded end-to-end authoring/revision trial on a frozen engine, using one short project and the public CLI/skill to exercise headline/camera/object/profile revisions, undo and reuse. Keep visual competition and publication/export decisions explicitly deferred rather than marking them passed. The existing M2.4.5 still depends on the deferred Medan gate; obtain Fatih's decision and update the existing acceptance/dependency text before execution. Shared-fixture isolation remains a separate bounded follow-up, not an extra blocker inferred for this closed task.
+
 **Integration record — 2026-09-27 (implementer).** Fatih approved integration. The supervisor's PR integration review below was committed to the branch as documentation only (`docs/plan.md`); no implementation, skill or test change after the reviewed head `30d5e4b`. PR #18 squash-merged into `main`, task branch deleted, `main` synced. The Miss Ayu worktree and the old stash untouched; next task not started.
 
 **PR integration review — 2026-09-27 (supervisor): TECHNICALLY_READY FOR MERGE, awaiting explicit Fatih approval.** Inspected [PR #18](https://github.com/fatlhr/NaraFrame/pull/18) live: OPEN, non-draft, base `main`, head `30d5e4b8a310475b75fb840c7779446ccd0f8918`, MERGEABLE, no registered checks. Local commit matches that head and has parent `cf9411f8dc12e827c1dceeb445e7ec3862c194e6`. Exactly the six scoped files are committed; no generated artifacts or agent identity/trailers. Working tree was clean before this review entry.
@@ -1184,20 +1189,158 @@ pnpm naraframe preview work/visual-parity/medan --draft --scene opening --json
 - *Regressions.* `packages/core/test/integration/compile-draft-timing-messages.test.ts` (6: exact overlap and out-of-scene messages, anchored offset suggestion, suggested values clear the errors, a value one past the limit does not, runtime frames and severity unchanged; against the previous compiler the three message cases fail and the three semantic cases pass). `path-count-motion.test.ts` +3: the skill's plane rule and framing recipe against `planeTransformFor` (main plane, depth 0.5, depth 0 and overlay). `compile-draft-m2-4-3.test.ts`: three message matchers updated to the new wording, same property/target checks. `pnpm verify` passed: 241 unit, 269 integration, build. Serial E2E not run: no renderer or runtime change.
 - *Limits.* The example was authored by the implementer, who already knows the renderer, so it shows the guide is sufficient and correct, not that a fresh agent needs nothing else; a clean-agent trial would be the stronger test. Camera-move messages (`CAMERA_MOVE_OVERLAP`, `CAMERA_MOVE_OUTSIDE_SCENE`) are unchanged, as scoped. In the example the label pill uses `palette.surface`, the same as the ground, so it reads faintly; cosmetic. Contrast and occlusion diagnostics are untouched.
 
-#### M2.4.5 — Full LBC, revisions and close-out
+#### M2.4.5a — Soundtrack-only preview publication (B1 correction)
 
-**Primary areas:** skill/public CLI, LBC source/profile and existing revision/media-binding system. Freeze the then-current engine/compiler/schema/CLI/recipes/skill again; record this separately from M2.4.2.
+**Inserted 2026-09-27 by Fatih's option (a).** Separate from the frozen M2.4.5 trial, whose source, revisions, logs and failed-freeze identity stay as recorded. The trial does not resume until this task is integrated and a new freeze is recorded.
 
-- [ ] Extend the retained LBC direction to a distinct 30s introduction through WhatsApp CTA using existing assets. Preserve early trial source/build and the new first full draft before owner feedback. If the runtime changed, retain early-opening regression evidence on this freeze.
-- [ ] Record authoring time, internal corrections, user interventions, render/verification work and available actual usage. No hidden renderer changes or reuse of old direct-Remotion code; that output may be a review reference after the independent draft exists.
-- [ ] Obtain Fatih's assessment of the retained full first draft as a plausible publication candidate.
-- [ ] Exercise ordinary requests: change headline, slow camera, replace object, change visual identity. Show affected scope, preview and undo through normal source transactions without user code.
-- [ ] Verify shared/vector/camera/font/transition dependencies, known media reuse, profile overrides and reversible binding decisions. Unknown media style must require explicit retention/rebinding review or replacement before final, never silent compatibility.
-- [ ] Complete focused cross-topic/revision/undo/legacy regressions, `pnpm verify` and serial `pnpm test:e2e` for close-out. Record failures and known pixel-repeatability limits honestly.
+**Primary areas:** `packages/cli/src/preview-build.ts` publication/integrity checks, the preview command result in `runner.ts`, their tests. No renderer, compiler, schema or skill change.
 
-**Command acceptance:** `pnpm naraframe preview work/visual-parity/lbc --draft --json`
+- [x] Align the audio-presence expectation in preview metadata with `narration || soundtrack`, without weakening codec, stream, hash, duration or muted checks.
+- [x] Prove it through the public CLI on a short soundtrack-only fixture; no repeated full LBC render.
+- [x] Add publication/integrity regressions; confirm silent, narrated and scoped previews are unchanged and a repeated preview reuses the build.
+- [x] Decide engine/cache identity from the change's real effect on renders, acceptance and reuse.
+- [x] `pnpm verify` and serial `pnpm test:e2e` before integration; failures are diagnosed, not rerun blindly.
+- The generic `SYSTEM_ERROR` redaction is a separate follow-up, not part of this task.
 
-**Expected:** distinct 30s silent preview and ordinary revisions on a frozen foundation. Silent final export remains excluded. A runtime/skill patch invalidates this trial: report the gap, obtain a scoped correction decision and retain a separately recorded retrial. No retrospective “first draft” after hidden fixes.
+**Command acceptance:** `pnpm naraframe preview work/m2-4-5a/soundtrack-only --draft --json` exits 0 with label `DRAFT • WITH AUDIO`, `data.muted: false` and a manifest recording `audio: "aac"`, `muted: false`; a second run reports `reusedFromBuildId`; `--scene two` stays `DRAFT • NO AUDIO`.
+
+#### Active handoff — M2.4.5a
+
+**Integration record — 2026-09-27 (implementer).** Fatih approved integration. The supervisor's integration review below was committed to the branch as documentation only (`docs/plan.md`). No implementation, test or render change after the reviewed head `7416384`; the four fingerprints were rechecked before the merge. PR #19 was squash-merged into `main` using the head-commit guard; the task branch was deleted and `main` synced. The M2.4.5 trial has not resumed. It needs a new freeze recorded from the merged `main` first. The Miss Ayu worktree and the old stash were not touched.
+
+**Supervisor integration review — 2026-09-27: TECHNICALLY_READY FOR MERGE, awaiting explicit Fatih approval.** Live [PR #19](https://github.com/fatlhr/NaraFrame/pull/19) is OPEN, non-draft, base `main`, head `m2-4-5a-soundtrack-preview-metadata` at `7416384b0d6d61993ebef154e1b34e691ce22ab1`, MERGEABLE/CLEAN, with no registered checks. Local HEAD and remote-tracking branch match that live SHA; parent is `f065e4d65b37d35b2414e91d8943f52b450632fe`. The live PR and local commit both contain exactly the five scoped files. Author is Fatih, with no agent identity/trailer or generated artifact in the commit.
+
+- Recomputed all four implementation/test SHA-256 values: exact matches to the reviewed candidate recorded below. No implementation or test drift; the remaining changes since review are plan integration/status notes. Descriptions of the fix, runner scope, unchanged render identity and required new retrial freeze are accurate.
+- Live PR description correctly distinguishes the implementer's verify, full E2E and bite checks from the supervisor's focused integration/E2E runs and artifact/log inspection. The aborted first run and caffeinate warning remain disclosed; no new pass or root-cause claim is inferred. No blocking finding. No suite or render rerun was warranted for the identical candidate.
+- Working tree was clean before this entry; only this local plan entry was added by the supervisor and it is not yet in the PR. No staging, commit, push, merge, engine/skill/test change or trial continuation. Sign-off is bound to head `7416384b0d6d61993ebef154e1b34e691ce22ab1`; any later code/test change needs renewed review. M2.4.5 remains stopped until authorised integration and a new freeze.
+
+**Integration note — 2026-09-27 (implementer).** Scope unchanged after the supervisor's TECHNICALLY_READY. No new implementation, test or render. The four implementation and test files still match the supervisor's reviewed SHA-256 fingerprints below. The five task files were committed and a PR opened to `main` on Fatih's instruction. Not merged. Nothing under `work/` or any generated artefact is included. The M2.4.5 trial stays stopped until this is integrated and a new freeze is recorded. The Miss Ayu worktree and the old stash were not touched.
+
+**Supervisor status — 2026-09-27: TECHNICALLY_READY (after IN_REVIEW).** No blocking findings. Recommend preparing the scoped commit/PR for integration review; no merge or frozen-trial continuation has occurred. Only this plan/handoff was edited by the supervisor; engine, skill, tests and Git state were not modified.
+
+- **Fix and scope:** inspected both implementation diffs. `carriesAudio` makes codec and muted expectations consistent with the existing probe. Codec/stream-count/hash/duration checks remain intact. The `runner.ts` change is within B1's user-visible scope: otherwise a successfully published AAC preview would falsely report `data.muted: true` and "no audio" to agents/users. It adds no new rendering feature.
+- **Fresh independent checks:** `preview-publication.test.ts` 14/14 passed, including accepted AAC soundtrack-only publication, rejected metadata and missing audio. Ran only the new soundtrack-only E2E by test-name filter: full preview, actual non-silent audio, repeated-preview reuse, and silent scoped preview passed in 18.43 s outside the sandbox. The other narrated case was skipped by that filter, not claimed as freshly rerun. The first supervisor attempt inside the sandbox failed after 2.2 s at render startup with generic SYSTEM_ERROR; the same test passed outside it without code changes. This supports an environment restriction, without identifying the precise suppressed low-level cause. Built CLI predicates were inspected and match source. No full E2E rerun.
+- **Saved artifacts checked:** first and reused full-preview MP4s both hash to `2aebc29a61055f5a8783a14c541876fedcca4cbd5b75e0a7aaef3b4a6335ab27`, matching their manifests (AAC, unmuted); reuse points to `73e34c5e873f-a611cabd-1bb`. Scoped build `366c78774643-b54f43e8-0fb` hash also matches its manifest (no audio, muted). Public-path E2E above independently exercises the corresponding behavior on a new temporary fixture.
+- **Coverage and evidence limits:** regression assertions would detect restoration of the old codec predicate and old `data.muted`; implementer mutation/bite runs were not repeated by the supervisor. Existing publication tests protect rejected/corrupt builds; original narrated soundtrack E2E remains in the suite. Full verify and serial E2E are log evidence, not independent full-suite executions: inspected verify log (244 unit, 273 integration, lint/typecheck/build) and run-2 log (6 files, 10 tests, 655.04 s, exit 0), with SHA-256 `54a1eb3242895b4be0ef4195bb13e26c3d98cc1d2f0f25b3a7c125e27aaef5ae` confirmed.
+- **Interrupted gate:** stored pmset evidence confirms idle sleep at 16:05:02 and full wake at 20:12:33; run 1 is aborted/incomplete (143), not a passing gate or an established product defect. Run 2 is valid completed gate evidence. Independently querying pmset found no matching sleep/wake entries in 20:26–20:37. The caffeinate warning remains recorded and is not proof sleep prevention worked; neither its warning nor the invalid first run negates the completed second run. The claim of unchanged code between those implementer runs is reported, not reconstructed from per-run source hashes.
+- **Identity decision accepted:** no renderer/compiler/key change; existing silent and narrated acceptance is unchanged. Newly accepted soundtrack-only drafts were rejected before promotion under the prior predicate, so there is no valid old-format published build requiring invalidation for this fix. Retain `naraframe-draft/10`. M2.4.5 must nevertheless use a new source commit/package freeze after integration: unchanged render identity does not mean unchanged engine code.
+- **Reviewed candidate SHA-256 (excluding evolving plan):** `packages/cli/src/preview-build.ts` = `98588cc5524017b48cd649eacbce972b4aa4416ac33107ddfcc85d594f9c2d80`; `packages/cli/src/runner.ts` = `b59687d268cfda80947e41facaf26e7ecccf5747c081c14bd7d0f03e25e6774f`; `packages/cli/test/integration/preview-publication.test.ts` = `b961ed56ff9deaf4797a4df994012bfd8c06cfac365e7c5f2a9496335bb377b8`; `packages/cli/test/e2e/soundtrack-mix.test.ts` = `76642114de5f8ffbde7bb3bc5ab4a2d02bd5e6d2d1b93033c99764e32971e6ac`. Further implementation changes require renewed verification. Generic error diagnostics and shared-fixture isolation remain separate follow-ups.
+
+**Handoff — 2026-09-27 (implementer): READY_FOR_REVIEW.** Uncommitted; the Miss Ayu worktree, the old stash and the M2.4.5 trial artefacts are untouched.
+
+- *Real path, before the fix.* Fixture `work/m2-4-5a/soundtrack-only` has two 1 s text scenes and a copy of the music bed `93f1b4b5…`, with no narration. Running `preview --draft --json` on it exits 2 with `SYSTEM_ERROR` after 8 s (`work/m2-4-5a/before-fix-preview.*`).
+- *Fix in `preview-build.ts`.* One `carriesAudio(draft)` helper (`narration || soundtrack`) now feeds `validateProbe` and both the `audio` and the `muted` expectations in `assertCompleteMetadata`. The codec, stream, hash, duration and muted checks themselves are unchanged. The preview result's `data.muted` and its human summary in `runner.ts` used `!narration`; they now use the same predicate. Before this, the CLI reported `muted: true` for a build whose own manifest said `muted: false` and which contained an AAC stream.
+- *Real path, after the fix.*
+  - Full preview: build `73e34c5e873f-a611cabd-1bb`, `DRAFT • WITH AUDIO`, `data.muted` false; the manifest records `audio: "aac"`, `muted: false`; ffprobe finds h264 2.000 s plus aac 2.048 s.
+  - Repeat preview: build `73e34c5e873f-74f521ec-a7b`, `reusedFromBuildId` pointing at the first build, identical MP4 hash.
+  - `--scene two`: build `366c78774643-b54f43e8-0fb`, `DRAFT • NO AUDIO`, `audio: "none"`, no audio stream.
+- *Regressions.*
+  - `preview-publication.test.ts` gains one case. A soundtrack-only draft with AAC metadata and an AAC stream publishes. Metadata claiming `none`, or `aac` with `muted: true`, is rejected without changing `current.json` or leaving a build. A missing audio stream is rejected. The staged-build helper now takes an optional draft and render audio.
+  - `soundtrack-mix.test.ts` gains an E2E case that needs no owner samples. A 2 s project with a generated tone runs through the CLI: the full preview has audio, the result says unmuted, the second preview reuses the first, and the scoped preview is silent (13.9 s alone).
+  - Bite checks: with the old audio predicate the integration case fails, and with the old `data.muted` the E2E case fails. Both fixes were restored and rebuilt afterwards.
+- *Engine/cache identity: no change.*
+  - No renderer, compiler or pixel change, and no assembly or scene key changes.
+  - For silent and narrated drafts the old and new expectations are identical.
+  - The only draft whose expectation changes is music without narration. Under the old code it could never publish, so no stored build carries the old expectation and none can be picked up or rejected differently by reuse.
+  - `RENDER_ENGINE` stays `naraframe-draft/10`.
+- *`pnpm verify`: passed.* Biome checked 156 files; typecheck and build passed; 244 unit and 273 integration tests passed (`work/gate-logs/m2-4-5a/verify-1.log`).
+- *Serial `pnpm test:e2e` run 1: invalid, stopped.*
+  - Started 15:59 WIB. At 16:04 the `reference-projects` case began its `project-current-issues` preview.
+  - At 16:05 the host entered idle sleep on battery (22%) and stayed asleep apart from dark wakes until 20:12 (`e2e-1-sleep.txt`).
+  - After wake, the process tree used no CPU and wrote no output, so the implementer stopped its own processes and deleted the temporary project. The log is kept (`e2e-1.log`, exit 143).
+  - This is a host sleep, not a test result, and gives no pass/fail evidence. A rerun needs the machine on power with sleep prevented.
+- *Serial `pnpm test:e2e` run 2: passed.*
+  - Rerun on the same diagnosis (host sleep): Fatih connected AC power and the run was wrapped in `caffeinate -dims`. Nothing in the code or tests changed between the two runs.
+  - Started 20:26:23 WIB; 6 files and 10 tests passed in 655.04 s, exit 0 (`work/gate-logs/m2-4-5a/e2e-2.log`, SHA-256 `54a1eb32…aef5ae`). The 10 are the previous 9 plus the new soundtrack-only case; the narrated soundtrack mix case ran as well, with none skipped.
+  - caffeinate printed "Failed to create PreventUserIdleSystemSleep assertion". The pmset log shows no sleep or wake event between 20:26 and 20:37, so the run was not interrupted.
+  - The default reporter printed no per-test durations.
+- *Separate follow-up, not in this task:* the generic `SYSTEM_ERROR` redaction that hid B1's cause.
+
+#### M2.4.5 — Frozen end-to-end authoring and revision trial (LBC copy)
+
+**Rescope — 2026-09-27 (Fatih).** Replaces the earlier "distinct 30s LBC first full draft" acceptance, which waited on the deferred Medan gate. This task now tests the engine and skill end to end on a frozen foundation; it does not judge visual competitiveness. The 30-second target, the publication-candidate assessment (NF-AC-17 visual part) and export stay DEFERRED and are not passed by this task. M2 as a whole is not complete: the technical parts are separated from the deferred visual gates (NF-AC-16 for Medan, NF-AC-17 for LBC).
+
+**Primary areas:** skill, `schema --json` and the public CLI only; a copy of the LBC project; existing assets and audio. No engine, compiler, renderer or skill change inside the trial.
+
+- [x] Freeze the engine and skill: record the main commit, package and skill tree hashes, the skill file hash and `RENDER_ENGINE`; rebuild `dist` from that tree. Any needed engine/skill change is recorded as a blocker and the trial stops there; no silent fix during a trial claimed as frozen.
+- [x] Copy the existing LBC project (source and assets, no previews or revision history) to `work/visual-parity/lbc-trial`. The original `work/visual-parity/lbc` and its baseline build `118a48d27119-74598617-246` stay untouched. The Miss Ayu worktree and the old stash are out of scope.
+- [ ] Author a short example on the copy using only the skill, `schema --json` and the CLI, validating before any preview. Long enough to exercise the flow; no 30-second target or publication polish.
+- [ ] Through public commands only (`edit` from a staging directory with `--expect`, `profile apply` with `--dry-run` first, `undo`, `status`, scoped `preview`): revise a headline, slow a camera move, replace an object, change the profile, undo. Record each revision ID, the files changed, `data.reuse` and the scope that needed a new render. Do not re-render scenes the change does not affect.
+- [ ] Reuse existing assets and suitable existing audio; no paid provider call and no change to any audio master. Show which assets and audio survived each revision unchanged. What the reuse report or the output cannot prove is reported as a gap, not as a pass.
+- [ ] Focused checks where the trial exposes something, then `pnpm verify` before review. Serial `pnpm test:e2e` only if the runtime changes, which would invalidate the frozen trial anyway.
+
+**Command acceptance:** the sequence recorded in the handoff below: `validate --stage plan`, `edit`, `profile apply --dry-run` / `profile apply`, `undo`, `status` and `preview work/visual-parity/lbc-trial --draft [--scene <id>] --json`, with the revision IDs, reuse data, build IDs and changed source they produce.
+
+**Expected:** every requested revision and the undo go through normal source transactions without user code or an engine/skill patch; unaffected scenes are not re-rendered; asset reuse is shown and audio reuse is either shown or reported as a gap. Any blocker is recorded with its reproduction and the trial stops at that point.
+
+#### Active handoff — M2.4.5
+
+**Supervisor review — 2026-09-27: BLOCKED_CONFIRMED.** Stopping the frozen trial is correct: the defect is in CLI publication/integrity validation, part of the frozen engine boundary, not in the authored LBC source. No fix, test edit, render, Git mutation or continuation of the trial was performed in this review; only this handoff/tracker was updated.
+
+- **B1 reproduced independently at the assertion boundary, not by rerendering the full video.** Loaded and compiled the current trial from the frozen built core: 375 frames, no narration, soundtrack present, label `DRAFT • WITH AUDIO`. Imported the existing built preview module in memory, exposing the unchanged private `assertCompleteMetadata` only for the diagnostic; no package file was written. Existing scoped manifest with its actual scoped draft passes. A metadata object derived from that manifest, aligned with the full compiled draft and the publisher's AAC/unmuted fields, throws the exact reported metadata-mismatch error. Keeping that metadata unchanged and adding only a truthy narration marker to the in-memory draft passes the assertion. This counterfactual is a diagnostic control, not a valid narrated project or a suggested workaround.
+- **Cause confirmed for B1.** `validateProbe` treats narration OR soundtrack as AAC-bearing, publication records that codec, and `assertCompleteMetadata` checks muted using narration OR soundtrack but checks the codec using narration alone. The contradictory predicate rejects the correctly described soundtrack-only output. Fixing source data, running doctor, or rerendering does not resolve that contradiction. The stored CLI failure and internal stack support the full-publication failure; they were read as implementer evidence, not independently rerun. Generic SYSTEM_ERROR redaction is confirmed in the CLI result and `command-result.ts`; improving safe diagnostics is a separate usability follow-up, not permission to expose raw paths/stacks indiscriminately.
+- **Freeze and original independently checked.** HEAD and recorded origin/main are `f065e4d65b37d35b2414e91d8943f52b450632fe`; package/skill trees and skill SHA-256 match the table below; no diff under packages/skills; source engine identity is draft/10. Recomputed all 11 source/media hashes listed by original LBC revision `174d41ea4ca2057e247545cef9a4aeb6631110ccd5cf2dcd5803a6da63808a4e`: zero mismatches. Original preview pointer still names `118a48d27119-74598617-246`. Fixture and copied music both hash to `93f1b4b5d13982408715a85b565ee39f5b794acea83c5cc5beb21a07b215bdb2`. This proves current agreement with the recorded baseline, not an audit of every historical operation. The dist rebuild, restricted authoring access and prior render runs remain implementer-reported.
+- **Evidence qualification.** The saved `08-preview-full.json` has `durationMs: 25021`; the narrative's approximately 49-second figure is not independently tied to that run and must not be used as a benchmark. No systematic cost/time claim is accepted. The stored diagnostic script uses a `<repo>` placeholder; resolve it before using it. Prefer a small standalone correction fixture instead of repeatedly rendering the whole trial.
+- **Recommendation (a), pending Fatih approval:** isolate B1 correction outside this frozen trial; preserve its source, revisions, logs and failed-freeze identity. Align the audio-presence predicate without weakening media integrity checks. Demonstrate a minimal soundtrack-only project through the real public preview path, then add regression coverage for publication/integrity and unchanged silent/narrated/scoped behavior; check a repeated preview/reuse. Run the required verify and serial E2E gates before integration because this changes a runtime publication boundary. Decide engine/cache identity from actual render/acceptance/reuse effects, not solely from whether pixels changed. After integration, record a new freeze and a separately identified retrial; retain the failed attempt rather than relabelling it successful. Option (b) is an owner-approved reduced-coverage workaround only: it leaves B1 and audio-reuse acceptance open, so it must not be described as a complete end-to-end pass.
+
+**Freeze — 2026-09-27.** Branch `m2-4-5-frozen-trial` from `origin/main` `f065e4d65b37d35b2414e91d8943f52b450632fe` (the M2.4.4b squash). `dist` rebuilt from this tree before the trial.
+
+| Item | Value |
+|---|---|
+| main commit | `f065e4d65b37d35b2414e91d8943f52b450632fe` |
+| `packages/` tree | `aad5662d48590391cf6c2e75159bb01ae613a3f3` |
+| `skills/` tree | `661ae569b339a20897a3e253aadaabb79d3bdf30` |
+| `skills/naraframe/SKILL.md` SHA-256 | `314d45739851aeb56b1710a3d469e5f1e7c22473134cc4e4cc66debe3c9dfeca` |
+| `RENDER_ENGINE` | `naraframe-draft/10` |
+| Working-tree changes under `packages/` or `skills/` | none |
+
+**Status — 2026-09-27 (implementer): BLOCKED, trial stopped.** A needed engine change was found; per the approved scope it is recorded here and not fixed inside the frozen trial. No engine, skill, test or Git change was made. `packages/` and `skills/` are still clean against `f065e4d`.
+
+*Done before the blocker.*
+
+- Copy: `work/visual-parity/lbc-trial` holds the source files and `assets/` of `work/visual-parity/lbc`, with no `preview/` and no `revisions/`. The original was re-hashed afterwards: no source or asset file changed, and its `preview/current.json` still points to `118a48d27119-74598617-246`. The copy's starting `sourceRevision` is `174d41ea…`, the same as the original's current revision. Its `status` shows revision `untracked` and plan `valid`.
+- Authoring used only the skill, `schema --json` and the CLI. One new 4.5 s scene, `visit-route`:
+  - an overlay headline with an accent span, "Satu tutor, jadwal kamu.";
+  - a dashed `path` route that a `draw` beat draws while a `follow` beat carries a tutor dot along it;
+  - a home marker with an `emphasize` beat, a label, and the reused WhatsApp CTA group.
+- Revisions, each applied with `edit --from <staging> --expect <sourceRevision>`, with `validate --stage plan` run after every one:
+
+| Revision | Change | `data.reuse` | Validate |
+|---|---|---|---|
+| `0d4a5c81…` | add scene | images 2/2 unchanged; scenes 1 unchanged + 1 added | one warning, `TEXT_OUTSIDE_SAFE_ZONE` on `home-label` (x 600 + width 400 > 1080 − 84) |
+| `e795866f…` | internal correction 1: label width 396 | scenes 1 unchanged / 1 changed | clean |
+| `c85131c1…` | add the existing synthetic music bed as `soundtrack.music` | images 2/2 unchanged; scenes 0/2 unchanged | clean |
+
+  - The music bed is a copy of `test-fixtures/project-current-issues/audio/music/bed.mp3` (SHA-256 `93f1b4b5…15bdb2`, the same as the fixture). Its settings are volume 0.6, no loop, fade in 800 ms, fade out 1500 ms. The master file was not changed and no provider was called.
+  - Adding the soundtrack marks both scenes as changed in the reuse report, although scoped previews carry no music. This is recorded as an observation, not investigated further.
+- Scoped preview: `preview work/visual-parity/lbc-trial --draft --scene visit-route --json` exits 0 in 11.8 s.
+  - Build `2dcce997f37b-25714ca3-a0d`: frames 240–375 of the project, label `DRAFT • NO AUDIO`, no issues.
+  - The implementer checked the contact sheet (`…/builds/2dcce997f37b-25714ca3-a0d/contact-sheet.png`). The dot waits at the route start and then travels as the route draws, the label and the home emphasis land, the CTA enters, and the headline stays fixed.
+
+*Blocker B1 — full draft preview with music and no narration always fails.*
+
+- Reproduction:
+  - Command: `preview work/visual-parity/lbc-trial --draft --json` at revision `c85131c1…`.
+  - Result: rendering reaches 100%, then the command exits 2 with `SYSTEM_ERROR` "A local system dependency or renderer operation failed." (`work/m2-4-5/08-preview-full.{json,err}`).
+  - `doctor --json` reports everything ready.
+- The redacted cause was read with a diagnostic script that calls the same `loadPlanProject` → `compileDraft` → `publishPreviewBuild` path (`work/m2-4-5/diag-full-preview.mjs`; output `work/m2-4-5/10-diag-full-preview.txt`; reproduced twice). It throws "Build metadata is incomplete or does not match the compiled draft." from `assertCompleteMetadata` (`packages/cli/src/preview-build.ts:667`) inside `validatePreviewBuildIntegrity`.
+- Cause, read from the source and not yet proven by a fix:
+  - The published metadata records `render.audio` from `verifiedMedia.audio` (`preview-build.ts:1390`). `validateProbe` (line 844) returns `"aac"` whenever `draft.narration || draft.soundtrack`.
+  - `assertCompleteMetadata` instead expects `render.audio === (draft.narration ? "aac" : "none")`, so a soundtrack-only draft is always rejected after a successful render.
+  - The `muted` check in the same function already uses `narration || soundtrack`.
+  - Existing coverage uses a fixture with narration and music, so this path has no test.
+  - Scoped previews are unaffected because they carry no music.
+- Effect on the trial: the full-project preview needed for the reuse and undo evidence cannot be produced while the project has music. Removing the music would let the trial continue, but the audio-reuse part would then only be a reported gap.
+- Also noted: the CLI redacts the underlying error to a generic `SYSTEM_ERROR` with `errorName: "Error"` and points to `doctor`, which reports everything ready. Diagnosing it needed internal access that the public workflow does not give.
+
+*Not done, because the trial stopped at B1:* the headline revision, slower camera, object replacement, profile change, undo, the reuse evidence for those steps, and `pnpm verify`. Nothing in the code changed, so no gate was run. Timing was not measured systematically. The CLI steps themselves were short: `edit` took about 0.1 s, scoped preview 11.8 s, and the failing full preview 49 s. Internal corrections so far: 1 (the safe zone). User interventions: none.
+
+*Decision needed (owner/supervisor).*
+
+- **(a)** A scoped correction task outside the frozen trial: make the metadata audio expectation match `narration || soundtrack`, add a regression for a full soundtrack-only draft preview, bump nothing unless pixels change, then restart the trial on a new recorded freeze.
+- **(b)** Continue this trial without music and report audio reuse as a gap, with B1 kept open.
+
+The recommendation is (a). Music without narration is an advertised route in the skill (`soundtrack`), and a trial that works around it would not test the engine as frozen.
 
 #### Visual acceptance, tests, and exit gate
 

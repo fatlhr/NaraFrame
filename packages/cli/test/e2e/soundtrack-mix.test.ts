@@ -200,3 +200,105 @@ describe.skipIf(!existsSync(join(sampleRoot, "audio")))(
     }, 900_000);
   },
 );
+
+describe("soundtrack without narration", () => {
+  it("publishes a full draft with its music, reuses it on the next preview, and keeps a scoped preview silent", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-music-only-"));
+    temporaryRoots.push(root);
+    const project = join(root, "music-only");
+    const cli = async (...args: string[]) => {
+      const { stdout } = await run(
+        process.execPath,
+        [cliEntry, ...args, "--json"],
+        { timeout: 300_000, maxBuffer: 16 * 1024 * 1024 },
+      );
+      return JSON.parse(stdout.trim().split("\n").at(-1) ?? "{}") as {
+        success: boolean;
+        buildId: string | null;
+        artifacts: Record<string, string>;
+        data: Record<string, unknown>;
+      };
+    };
+    expect(
+      (await cli("create", project, "--profile", "current-issues")).success,
+    ).toBe(true);
+    await writeFile(
+      join(project, "scenes.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        scenes: ["one", "two"].map((id) => ({
+          id,
+          narrativeRole: id === "one" ? "hook" : "cta",
+          durationMs: 1000,
+          visual: { type: "text", text: `Music only, scene ${id}.` },
+          beats: [],
+          transition: { type: "cut" },
+        })),
+      }),
+    );
+    await mkdir(join(project, "audio", "music"), { recursive: true });
+    await tone(join(project, "audio", "music", "bed.wav"), 220, 3);
+    const manifestPath = join(project, "assets", "manifest.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    manifest.assets.push({
+      id: "bed",
+      status: "ready",
+      kind: "wav",
+      path: "audio/music/bed.wav",
+      sha256: createHash("sha256")
+        .update(await readFile(join(project, "audio", "music", "bed.wav")))
+        .digest("hex"),
+      origin: { type: "generated", source: "ffmpeg sine test tone" },
+    });
+    await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+    const configPath = join(project, "naraframe.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    await writeFile(
+      configPath,
+      JSON.stringify(
+        { ...config, soundtrack: { music: { assetId: "bed", volume: 0.5 } } },
+        null,
+        2,
+      ),
+    );
+    const manifestRender = async (manifestJson: string | undefined) =>
+      JSON.parse(await readFile(manifestJson ?? "", "utf8")).render;
+
+    const first = await cli("preview", project, "--draft");
+    expect(first.success).toBe(true);
+    expect(first.data).toMatchObject({
+      label: "DRAFT • WITH AUDIO",
+      muted: false,
+      reusedFromBuildId: null,
+    });
+    expect(await manifestRender(first.artifacts.manifestJson)).toMatchObject({
+      audio: "aac",
+      muted: false,
+    });
+    const music = await samples(first.artifacts.previewMp4 ?? "");
+    expect(rms(music, 0.5, 1.5)).toBeGreaterThan(0.01);
+
+    const again = await cli("preview", project, "--draft");
+    expect(again.success).toBe(true);
+    expect(again.data).toMatchObject({
+      muted: false,
+      reusedFromBuildId: first.buildId,
+    });
+    expect(await manifestRender(again.artifacts.manifestJson)).toMatchObject({
+      audio: "aac",
+      muted: false,
+    });
+
+    // A scoped preview carries no music.
+    const scoped = await cli("preview", project, "--draft", "--scene", "two");
+    expect(scoped.success).toBe(true);
+    expect(scoped.data).toMatchObject({
+      label: "DRAFT • NO AUDIO",
+      muted: true,
+    });
+    expect(await manifestRender(scoped.artifacts.manifestJson)).toMatchObject({
+      audio: "none",
+      muted: true,
+    });
+  }, 900_000);
+});
