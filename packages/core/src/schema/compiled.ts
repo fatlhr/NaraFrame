@@ -250,8 +250,8 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
           to: z.number(),
           decimals: z.number().int().min(0).max(3).optional(),
           grouping: z.enum(["none", ".", ",", " "]).optional(),
-          prefix: z.string().max(24).optional(),
-          suffix: z.string().max(24).optional(),
+          prefix: z.string().max(48).optional(),
+          suffix: z.string().max(48).optional(),
           easingPreset: EasingPresetSchema.optional(),
         })
         .strict(),
