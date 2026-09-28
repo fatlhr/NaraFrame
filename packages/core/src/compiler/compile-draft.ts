@@ -1511,6 +1511,31 @@ export const compileDraft = (
           )
         : { layers: [], issues: [] };
     issues.push(...layout.issues);
+    // An image mask radius past half the shortest edge is pure geometry on
+    // the resolved (profile-defaulted) radius, so it is reported here as well
+    // as in the renderer's preflight: `validate` catches it right after a
+    // profile change instead of the next preview. Measured in the compiled
+    // units, exactly as preflight measures it.
+    layout.layers.forEach((layer, layerIndex) => {
+      if (layer.type !== "image") return;
+      const scaled = scaleLayer(layer, scaleX, scaleY);
+      if (scaled.type !== "image") return;
+      const radius = scaled.cornerRadius ?? 0;
+      if (radius <= Math.min(scaled.frame.width, scaled.frame.height) / 2) {
+        return;
+      }
+      issues.push({
+        code: "IMAGE_MASK_INVALID",
+        severity: "error",
+        responsible: "agent",
+        artifact: "scenes.json",
+        path: `/scenes/${sceneIndex}/visual/layers/${layerIndex}`,
+        entityId: layer.id,
+        message: `Image ${layer.id} corner radius exceeds half of its shortest edge.`,
+        suggestion:
+          "Reduce cornerRadius so the rendered mask matches the declared geometry.",
+      });
+    });
     varietyEntries.push({
       scene,
       sceneIndex,
