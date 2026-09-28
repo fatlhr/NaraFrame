@@ -25,6 +25,8 @@ export interface VarietyScene {
   sceneIndex: number;
   /** Layers after appearance resolution, so type sizes are the rendered ones. */
   resolvedLayers: Layer[];
+  /** Each beat's start in scene milliseconds after phrase anchors resolve. */
+  beatStartsMs?: readonly number[];
 }
 
 const varietyIssue = (
