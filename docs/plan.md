@@ -8,13 +8,29 @@
 
 **Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, the local H.264 draft renderer, atomic publication, operator CLI/skill route, offline sandbox, and cross-feature E2E are verified.
 
-Status: M0, M1, M2.1–M2.3 and M2.4.1 delivered with recorded evidence. M2.4.1 (reference-fidelity Medan opening) was integrated on 2026-09-26 via PR #12 (`3133af8`) after owner approval, supervisor sign-off and green verify/E2E; its first attempt `9747193` stays recorded as rejected. M2.4.2 (frozen-engine LBC transfer) is in progress. M3 is held until visual and generalisation gates pass.
+Status (synced 2026-09-27): M0, M1 and M2.1–M2.3 are delivered with recorded evidence.
+
+- **M2.4 integrated so far:**
+  - M2.4.1 (reference-fidelity Medan opening) via PR #12, `3133af8`; its first attempt `9747193` stays recorded as rejected.
+  - M2.4.2 (frozen-engine LBC transfer) via PR #13.
+  - M2.4.3 (river, route and data storytelling) via PR #15.
+  - M2.4.4 technical part (full Medan) via PR #17.
+  - M2.4.4b (spatial authoring guide, timing diagnostics) via PR #18.
+  - M2.4.5a (soundtrack-only preview publication) via PR #19.
+  - M2.4.5 frozen authoring and revision trial, technical scope only, via PR #20 (`44d172e`).
+- **Not passed; deferred by owner decision:** the NF-AC-16 Medan visual gate, the NF-AC-17 LBC visual/publication judgement and export. M2 is not complete.
+- **Active:** M2.4.5-F1 (contrast against the actual backdrop).
+- **Held:** M3, until the visual and generalisation gates pass.
+
+The paragraphs below keep the 2026-09-21 revision header and the per-task handoffs keep the history.
 Revision: 1.6
 Date: 2026-09-21
 Inputs: `docs/spec.md` revision 0.6 and `docs/refine-spec.md` section 12.
 Implementation baseline: main recorded at `7b232c9`; current task branch `m2-4-1-first-illustrated-shot` at `9747193` contains the rejected first attempt. Existing uncommitted spec/refinement changes are preserved; M2.2 landed in `d12eeab`/`f938304` and M2.3 in `7b232c9`. M0.10 has recorded owner acceptance on 2026-09-15. M1 has recorded acceptance of Kore final export `115247388b67-98323b06-dd5` on 2026-09-20 with untracked-cost exception. Existing evidence is retained, not re-run by this document update; pixel repeatability and paid-cost comparison remain open.
 
-**Current authorised scope: M2.4.2 frozen-engine LBC transfer.** Engine, schemas, CLI, recipes and skill are frozen at `3133af8`; only new LBC project/profile/source data may change. A needed runtime or skill patch fails the trial and must be recorded, not applied silently. No paid generation, new dependency, or later milestone work. Integration, when authorised, follows PR plus squash per AGENTS.md. M2.4.1 scope is complete and recorded in its handoff record.
+**Current authorised scope (2026-09-27): M2.4.5-F1, contrast diagnostic against the actual backdrop** (scope and acceptance in the M2.4.5-F1 section). No F2, visual gate, export or M3 work.
+
+**Earlier authorised scope, historical: M2.4.2 frozen-engine LBC transfer.** Engine, schemas, CLI, recipes and skill are frozen at `3133af8`; only new LBC project/profile/source data may change. A needed runtime or skill patch fails the trial and must be recorded, not applied silently. No paid generation, new dependency, or later milestone work. Integration, when authorised, follows PR plus squash per AGENTS.md. M2.4.1 scope is complete and recorded in its handoff record.
 
 ## 1. Global constraints
 
@@ -279,7 +295,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; its documentation was integrated via PR #20 on Fatih's approval. F1–F5 and the next milestone await separate decisions.** Separate follow-up: `draft-project.test.ts` copies the shared `samples/krakatau-draft`, including transient `.naraframe/attempts/reuse-*` directories that `computeReuse` creates and removes; one ENOENT failure is consistent with a race between parallel test files, but the triggering test and root cause are unproven and the flake is not fixed. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
+Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; it is CLOSED / INTEGRATED for its technical scope via PR #20 (`44d172e`). Fatih chose F1 next: M2.4.5-F1 (contrast against the actual backdrop) is TECHNICALLY_READY after supervisor review of correction pass 3 (group-emphasize sweep) on 2026-09-28, on branch `f1-contrast-diagnostic`, uncommitted; details in its handoff. F2–F5, the deferred visual gates, export and M3 are not started.** Separate follow-up: `draft-project.test.ts` copies the shared `samples/krakatau-draft`, including transient `.naraframe/attempts/reuse-*` directories that `computeReuse` creates and removes; one ENOENT failure is consistent with a race between parallel test files, but the triggering test and root cause are unproven and the flake is not fixed. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -442,7 +458,7 @@ No source `examples/` directory is needed.
 
 ### M2.4 — Visual storytelling and Bang Motion benchmark
 
-**Status:** M2.4.1 integrated 2026-09-26 (PR #12, `3133af8`); M2.4.2 in progress. M2.3 remains delivered; M3 is held. The first M2.4.1 attempt's owner rejection stays on record.
+**Status (synced 2026-09-27):** M2.4.1–M2.4.5 technical work is integrated, and so are M2.4.4b and M2.4.5a; see the live tracker. The NF-AC-16/17 visual and publication gates and export stay DEFERRED, so M2.4 and M2 are not complete. M2.4.5-F1 is in progress. M2.3 remains delivered, and M3 is held. The first M2.4.1 attempt's owner rejection stays on record.
 
 **Goal:** Recover reference-fidelity on one opening, prove immediate transfer to a distinct topic, then earn the full Medan benchmark and LBC revision gates. Reuse working visual foundations rather than inventing a weaker replacement while expanding infrastructure.
 
@@ -459,7 +475,8 @@ No source `examples/` directory is needed.
 | M2.4.4 | Approximately 67.5s Medan, full reference comparison and approved export | TECHNICAL PART INTEGRATED via PR #17 (`cf9411f`, 2026-09-27): ten scenes, production-ready preview `18a2906ac565-9566e37d-8e1`, count-label limit. **Not complete:** the NF-AC-16 visual gate, further comparison/polish and the approved export stay DEFERRED by owner decision; the spoken "ke-4" claim still blocks publication |
 | M2.4.4b | Spatial authoring guide and timing diagnostics (inserted 2026-09-27 by the priority change; before M2.4.5) | INTEGRATED — squash-merged via PR #18 (2026-09-27) after supervisor TECHNICALLY_READY FOR MERGE on head `30d5e4b` and Fatih's approval; the merge adds only this handoff documentation. Separate follow-up: shared-fixture test isolation (unproven race, not fixed) |
 | M2.4.5a | B1 correction outside the frozen trial (approved by Fatih 2026-09-27, option a): soundtrack-only full draft preview publishes with its AAC audio | CLOSED / INTEGRATED — PR #19 squash `159ed08`, verified 2026-09-27. Reviewed implementation unchanged; task branch deleted locally/remotely, main synced. M2.4.5 retrial requires a separately recorded new freeze |
-| M2.4.5 | Frozen end-to-end authoring/revision trial on a copy of the LBC project (rescoped by Fatih 2026-09-27): short example, headline/camera/object/profile revisions, undo, asset/audio reuse | Retrial TECHNICALLY_READY on freeze 2 (`159ed08`), supervisor review 2026-09-27; branch `m2-4-5-retrial`; documentation-only PR #20 squash-merged into `main` on Fatih's approval. Public revisions/undo and independent artifact/hash audit accepted with recorded gaps. Attempt 1 BLOCKED_CONFIRMED on `f065e4d`, kept unchanged. Technical trial only; NF-AC-17 visual/publication judgement and export stay DEFERRED |
+| M2.4.5 | Frozen end-to-end authoring/revision trial on a copy of the LBC project (rescoped by Fatih 2026-09-27): short example, headline/camera/object/profile revisions, undo, asset/audio reuse | CLOSED / INTEGRATED for the bounded technical scope — retrial on freeze 2 (`159ed08`), documentation squash-merged via PR #20 (`44d172e`), closure verified by the supervisor 2026-09-27. Public revisions/undo and independent artifact/hash audit accepted with recorded gaps. Attempt 1 BLOCKED_CONFIRMED on `f065e4d`, kept unchanged. Technical trial only; NF-AC-17 visual/publication judgement and export stay DEFERRED; findings F1–F5 recorded |
+| M2.4.5-F1 | Contrast diagnostic against the actual backdrop (Fatih's choice 2026-09-27; retrial finding F1) | INTEGRATED — PR #21 squash-merged into `main` on Fatih's approval (2026-09-28) after supervisor TECHNICALLY_READY FOR MERGE on head `9b705eb`. The recorded serial E2E 10/10 tested the pass-2 candidate; pass 3 was accepted on focused tests, verify and unchanged reference diagnostics. F2–F5 not started |
 
 Task IDs are unchanged. Former M2.4.2 camera/world work moves into M2.4.1 where indispensable for the opening and M2.4.3 for river-history expansion. Former route/data work remains in M2.4.3. Early LBC is now M2.4.2; full LBC remains M2.4.5. No full acceptance obligation is dropped.
 
@@ -1447,6 +1464,365 @@ After undo:
 - **(b)** Continue this trial without music and report audio reuse as a gap, with B1 kept open.
 
 The recommendation is (a). Music without narration is an advertised route in the skill (`soundtrack`), and a trial that works around it would not test the engine as frozen.
+
+#### M2.4.5-F1 — Contrast diagnostic against the actual backdrop
+
+**Chosen by Fatih 2026-09-27** from the M2.4.5 retrial findings (F1), and recommended first by the supervisor. It picks up M2.4.4's recorded gap 3, first fix: when an image or world plate lies under the text, report the backdrop as unknown instead of warning against the profile background.
+
+**Problem, reproduced in the retrial.** `CONTRAST_INSUFFICIENT` compared text with `palette.background`, or with an opaque rectangle only when the rectangle fully covered the text. Images were skipped as if absent.
+- Light profile text on the white report-card SVG was nearly unreadable and raised nothing.
+- Readable dark ink on the same card warned "1.09:1 against the background".
+- In Medan, all 18 warnings compared text over SVG plates with the page.
+
+**Scope.**
+- Judge text against what can actually be painted under it, when source data determines it reliably: the page background, opaque flat-fill rectangles and circles, and their strokes. Accent and quiet runs and the text's own opacity are included.
+- Report `CONTRAST_UNVERIFIED` (info) when this cannot be determined. That covers an image or SVG, a path, a translucent shape, a shadow, a group movement not tracked here, or a layer at another camera depth that the camera brings under the text. This replaces a ratio against a backdrop the text is not on.
+- Keep every valid check and the warning severity; nothing is switched off.
+- Not included: image or SVG pixel analysis, general occlusion, render-time sampling, F2–F5, visual gates, export and M3.
+- If the solution needs a large expansion, stop and ask for a decision.
+
+**Implementation boundary.**
+- Core `packages/core/src/compiler/contrast.ts`, with the design canvas and the resolved beat start times passed from `compile-draft.ts`; the latter through an optional `beatStartsMs` on `VarietyScene` in `variety.ts`.
+- Focused unit and integration tests.
+- One skill line documenting both codes.
+- No renderer, schema, CLI or render-identity change.
+
+**Acceptance.**
+- A small fixture reproduces both retrial conditions through `validate --stage plan` before the change.
+- After the change, both report `CONTRAST_UNVERIFIED`, while computable cases (text on a panel, a palette-token colour) still warn with the right backdrop.
+- Other issue codes are unchanged on the repository's sample, fixture and work projects.
+- Regressions fail without the change.
+- `pnpm verify` passes.
+- Serial E2E only if a runtime boundary changes.
+- No claim that legibility over artwork is guaranteed.
+
+#### Active handoff — M2.4.5-F1
+
+**Integration record — 2026-09-28 (implementer).** Fatih approved integration. The supervisor's integration review below was committed to the branch as documentation only (`docs/plan.md`). No implementation, test or skill change after the reviewed head `9b705eb`, and the seven fingerprints were rechecked before merging. As the supervisor requested, the PR description now says the review checks ran across the series and that the final round validated both fixtures, not that every round did. PR #21 was squash-merged using the head-commit guard, the task branch deleted and `main` synced. No suite or render was rerun. F2–F5, the visual gates, export and M3 were not started.
+
+**Supervisor integration review — 2026-09-28: TECHNICALLY_READY FOR MERGE, awaiting explicit Fatih approval.** Live PR #21 is OPEN, non-draft, MERGEABLE/CLEAN, base `main`, head `f1-contrast-diagnostic` at `9b705eb9f75722ac5ee38a237003c530737d4206`, with no registered checks. Local HEAD, remote-tracking branch and live remote head all match. Parent and live remote main are `44d172efaec863a15097f02db1951371f55b128b`. Working tree was clean before this review note.
+
+- Exactly eight files in the commit and live PR: the seven reviewed code/test/skill files plus this plan; no work artefacts or generated output. Author/committer are Fatih; commit message has no agent identity or trailer. Independently recomputed all seven SHA-256 fingerprints: exact matches to the pass-3 review. No implementation/test/skill drift from the accepted candidate.
+- Committed handoff retains pass-3 sign-off, evidence limits, fingerprints and correction history. Its integration note and tracker describe an open, unmerged PR. PR body separates implementer gates from supervisor checks, correctly labels E2E 10/10 as pass-2 evidence, states no final-candidate E2E, discloses the earlier gate error and accurately qualifies the info/undo assertions. No blocking integration finding.
+- Small non-blocking wording correction for the PR: replace “In each round ... public CLI validations of both fixtures” with a description of checks performed across the review rounds; the initial review validated the original fixture, while the separate supervisor-probe fixture was introduced later. Final pass did independently validate both. This does not change technical sign-off or the final evidence.
+- No suite or render rerun: reviewed implementation is byte-identical. Only this local handoff entry was added by supervisor; no engine/skill/test/project/Git mutation, commit, push or merge. Merge awaits Fatih's explicit approval. F2–F5, deferred visual/export gates and M3 remain separate decisions.
+
+**Integration note — 2026-09-28 (implementer).** No implementation, test or skill change since the supervisor's pass-3 TECHNICALLY_READY. The seven reviewed files match the recorded SHA-256 fingerprints. Only this note and the tracker wording were added. On Fatih's approval, the eight task files (the seven reviewed files and `docs/plan.md`) were committed and a PR opened to `main`; it is not merged. Nothing under `work/`, no render and no gate artefact is included. F2–F5, the visual gates, export and M3 were not started.
+
+**Supervisor pass-3 review — 2026-09-28: TECHNICALLY_READY (after IN_REVIEW).** P2-C is closed for the supported group-emphasize sweep. No blocking findings in this bounded correction review; the previously accepted P2-A/P2-B and original four corrections remain accepted. Recommend proceeding to documentation/code integration preparation after Fatih authorises the Git actions; no commit/push/merge authorised or executed by this review.
+
+- **Fresh supervisor checks:** focused tests 39/39 passed (36 unit contrast + 3 compiler integration, 480 ms). Public CLI validation of `work/f1-contrast/probes` and the original fixture returned success. P7 crossing reports 1.00:1 against panel marker; its far control reports only the black page, as expected from that fixture's black text/background. Earlier probe codes remain correct. Read the two-case regression proving both the off-centre sweep and loss of opaque coverage; static/shared-motion/far controls also pass.
+- **Source reasoning:** for the supported positive, uniform group scale about the fixed group centre, each member edge is affine in scale; the bounding union of resting and maximum-scaled boxes contains the intermediate positions. Outside the common group, `groupScaled` makes `layerStill` false, so that swept reach cannot stop the backdrop walk as guaranteed opaque coverage. Within the same group the shared emphasize cancels, preserving the existing relative-coordinate check. This closes P2-C without a new renderer/motion capability.
+- **Recorded evidence audited, not rerun:** all 12 available `after7`/`after6` log pairs have identical contrast code/path/message tuples and identical non-contrast code sequences. Read `verify-5.log`: Biome 157 files, typecheck/build, 270 unit and 276 integration passed. Full verify and bite/restoration remain implementer evidence; the supervisor did not rerun them or render video.
+- **Gate decision:** accept no new serial E2E for this final diagnostic-bound correction: publication, renderer, keys and E2E assertions are unchanged in this pass, fresh targeted coverage passes, and reference diagnostic outputs are unchanged. The recorded 10/10 E2E belongs to pass 2 and must remain labelled as such, not as a pass-3 run. If subsequent implementation/runtime/assertion changes occur, reassess the gate instead of carrying this exemption forward.
+- **Documentation:** pass-2 assertion wording is now accurate: error/warning checks remain, all info codes are allowed, and undo compares baseline codes rather than asserting a predetermined info set. This tradeoff is accepted for this scope, not claimed to retain the old zero-issue strictness. Existing limits and UNVERIFIED meaning remain; no proof of universal artwork legibility or visual benchmark acceptance. F2–F5, export, visual gates and M3 are not started.
+- **Review boundary:** only this handoff/tracker updated by supervisor. No engine/skill/test/project/Git edits, no commit/push/merge. Reviewed implementation/test/skill SHA-256 fingerprints for the integration check:
+
+```text
+packages/core/src/compiler/contrast.ts 1e312285c217131dbf04c251ea20c1fff6aee52d5224e664bef47133a4fbffad
+packages/core/src/compiler/compile-draft.ts 5f4c08b428a58aaa8fe454ad5e724e0c478319ac50d6c891b4c9039d21483517
+packages/core/src/compiler/variety.ts 22c6c08f74842d5b033d7856de62b0b0426b9fa9fec0a4fd1ffe79d7224a8e52
+packages/core/test/unit/contrast.test.ts 84ef3b9247d00cc9ea1cd97bebb407fca6958be79fef1f9020d1e482dba94849
+packages/core/test/integration/compile-draft-contrast.test.ts 4f757d9a359a32f40cf160c2c0b991872b0411271ebab982fc8654829c5318ea
+packages/cli/test/e2e/reference-projects.test.ts 4ca6f866d89cba05fd262e1525c3416b90a54eb015724780fc7ea25378e32ae9
+skills/naraframe/SKILL.md 8e6bebfc3509080362dd6ee15ef1ca272bf1096152caeb360d29e8def669cec5
+```
+
+**Correction pass 3 — 2026-09-28 (implementer): READY_FOR_REVIEW.** Same branch, still uncommitted; answers P2-C from the supervisor's pass-2 review below. P2-A, P2-B and the four original reproductions were not reopened. No other motion model or capability was added. The Miss Ayu worktree and the old stash were not touched.
+
+*P2-C — group-emphasize sweep.*
+- A group's emphasize scale passes through every value from 1 to its largest, and each edge of a member scaled about the group centre moves linearly with that scale. So the backdrop reach is now the union of the resting and largest boxes. The previous two separate boxes skipped the span between them.
+- Reach is kept apart from coverage. A new placement flag, `groupScaled`, marks a member moved by its group's emphasize, and such a member is never "still", so its swept box is never taken as an opaque cover. Within the same group the emphasize is shared and cancels, as before.
+- Regressions (`contrast.test.ts`, 36 cases):
+  - the supervisor's off-centre two-member probe: marker 600–640 sliding to 715–775 across the text at 675–695 now warns against panel marker;
+  - a white marker covering black text at rest but sliding away as the group scales warns against the page: the sweep is not treated as cover.
+  - The existing controls still pass: the far-away pulsing marker measured against the page, the shared-group move, and the static panel.
+- Bite checks:
+  - restoring the two separate endpoint boxes fails the off-centre case;
+  - letting the swept box count as still fails both group-emphasize cases.
+  - Code was restored and compared with `cmp`.
+- Public CLI: `work/f1-contrast/probes` gains p7. The crossing case warns against panel marker. Its far-text control warns against the background only because that fixture's page and text are both black; the marker is not implicated. p1–p6 are unchanged. The original fixture is unchanged.
+
+*Affected reference diagnostics reassessed* (`work/f1-contrast/cmp*/after7-*`): every project's contrast codes and messages are identical to `after6`, and other issue codes are identical everywhere. No reference project has a group emphasize whose sweep reaches text.
+
+*E2E wording, corrected.*
+- Pass 2 said the `reference-projects` assertions changed "without weakening them". That was not accurate, and the wording in that entry is corrected.
+- `blocking()` drops every info code. Scenario 2 still guards errors and warnings, but it now allows info notes both before the profile change and under the contrast profile.
+- After `undo`, it checks that the issue codes equal the pre-change baseline. That checks restoration, not an exact expected info set, and it is not the old assertion's zero-issue strictness.
+
+*Checks.*
+- Focused: `contrast.test.ts` 36/36 and `compile-draft-contrast.test.ts` 3/3.
+- `pnpm verify` passed: Biome 157 files, typecheck/build, 270 unit and 276 integration (`work/gate-logs/f1/verify-5.log`).
+- No serial E2E was run for this pass. The recorded E2E (`e2e-1.log`, 10/10, 659.11 s) tested the pass-2 candidate before this correction and is not a run of this candidate. This pass changes only the group-emphasize bound in the core diagnostic and its unit tests, and the reference diagnostics are unchanged.
+
+*Limits.* As in pass 2. Emphasize bounds cover the scale sweep only. Focus and group transform/follow/focus stay unverified. Boxes, not glyphs. F2–F5 were not started.
+
+**Supervisor pass-2 review — 2026-09-28: CHANGES_REQUESTED (after IN_REVIEW).** P2-A/P2-B and the original four reproductions are closed for their tested cases. One remaining finding is in the newly added group-emphasize bound; do not reopen accepted fixes or add motion capabilities.
+
+**Independent checks.** Focused contrast unit/integration tests passed 38/38 (581 ms). Fresh CLI validations of `work/f1-contrast/probes` and the original fixture succeeded with the reported contrast codes; P5 X-only/Y-only and P6 focus now produce UNVERIFIED, and clear controls remain clear. Saved `after6-*` counts and unchanged non-contrast code sequences match the report: Krakatau samples 1 each, current-issues 6, Medan 47, LBC 6, retrial 8, explainer 9, fresh/spatial 2 each. Inspected verify-4 (269 unit / 276 integration) and E2E log (6 files / 10 tests, 659.11 s, exit 0); full gates are implementer evidence, not fresh supervisor runs. E2E log SHA-256 independently matches `458a1782190ecb61d1dfeb37551956b28dbd45744d713ef3d277b41563ae7b6e`; SKILL SHA-256 matches `8e6bebfc3509080362dd6ee15ef1ca272bf1096152caeb360d29e8def669cec5`. Bite checks and the pmset no-sleep observation remain implementer-reported. No video render or full-suite rerun by supervisor.
+
+**P2-C — A group-emphasize sweep has a gap between endpoint boxes (`contrast.ts`, group emphasize `grown.flatMap`, around line 443).** The bound stores the resting member box and maximum-scaled box separately. For a member away from the group centre those boxes can be disjoint, while the renderer passes continuously between them. Reproduction, schema-valid and `compileDraft` succeeds with no CONTRAST issue: white page; two black square group members, `marker` frame `(600,200,40,40)` and `other` `(100,200,40,40)`, cornerRadius 0; identity group transform, group zIndex 0; top-level black text `M`, 24 px, frame `(675,205,20,20)`, zIndex 2; group emphasize scale 1.5 over 0–1000 ms, scene 3000 ms. The group centre is `(370,220)`. Marker X coverage moves from `[600,640]` to `[715,775]`; text `[675,695]` is in the skipped sweep. Independently called the unchanged renderer's `groupScreenTransformFor`: at frame 2 on the 540px draft, scale is `1.2770833138400457`, marker X is `[331.8646,357.4062]`, fully covering text X `[337.5,347.5]` (Y overlaps too). The diagnostic still reports no issue. This is a source/runtime-motion probe, not a fresh video render.
+
+**Bounded correction for P2-C.** Include the full swept box between resting and maximum group-scaled member poses, rather than treating only the endpoints as the reach; an explicitly unknown fallback is also acceptable if a sound bound is not supported. Preserve the distinction between reach and guaranteed opaque coverage (a swept union is not a solid backdrop at every instant). Add the off-centre two-member regression above, retain the far-away and shared-group/static controls, and keep changes limited to this bound. Do not add another motion model. Run focused tests, the small CLI probe and verify; reassess only the affected reference diagnostics. The already recorded E2E result describes this pre-correction candidate and must not be labelled a fresh run of the next candidate.
+
+**E2E assertion review and corrected history.** Allowing the newly introduced advisory CONTRAST_UNVERIFIED info while preserving error/warning checks is a reasonable contract adjustment; undo now checks restoration of baseline issue codes. It is not literally unchanged strictness: `blocking()` drops all info codes, and baseline-derived equality checks restoration rather than the exact expected info set. Qualify the handoff's “without weakening” wording accordingly; optionally limit permitted baseline/apply info to the expected contrast code. The implementer's admission that prior assertions would fail is valid and supersedes the earlier no-impact justification (including the supervisor's conditional acceptance of that justification). Running serial E2E after updating the assertions was appropriate.
+
+**Recommendation.** Remain CHANGES_REQUESTED for P2-C, not for P2-A/P2-B. The region-axis fix and conservative focus fallback are accepted. Correct the narrow sweep and evidence wording, return READY_FOR_REVIEW, no commit/push/merge. Only this plan/handoff/tracker changed in supervisor review; no engine/skill/test/project/Git changes. F2–F5, visual/export and M3 remain out of scope.
+
+**Correction pass 2 — 2026-09-28 (implementer): READY_FOR_REVIEW.** Same branch, still uncommitted; answers the supervisor's correction review below. The four earlier reproductions were not reworked; their regressions and CLI probes still pass. The Miss Ayu worktree and the old stash were not touched.
+
+*P2-A — partial transform after a follow.*
+- The centre is now tracked as a region: a point while the pose is known, the path's frame after a follow, and a band after a transform that sets one axis. The named axis moves to its new place; the other keeps the band it had.
+- Any step from a region, or one that turns, is bounded by the frame's swept disk over both regions.
+- Regressions:
+  - the supervisor's x-only case (image reaching the text at (600, 90)) is now `CONTRAST_UNVERIFIED`;
+  - a mirrored y-only case is `CONTRAST_UNVERIFIED`;
+  - control: x-only to 600 with the text at y 700, which the image provably never reaches, has no issue.
+- The public CLI fixture `work/f1-contrast/probes` gains the same three scenes (p5).
+
+*P2-B — focus.*
+- A `focus` beat on a layer, or on its group, makes that layer unbounded here: `CONTRAST_UNVERIFIED` ("a focus beat moves …", or "moves with its group …, and group movement is not tracked here").
+- It is not simulated. The renderer's `motionStateFor` does have simple bounds (pan −spacingUnit·12·intensity; push and zoom up to `focusScale` about the anchor, persisting), which a later task could use.
+- Regressions:
+  - the supervisor's panel-focus case is unverified;
+  - the same with focus on the panel's group is unverified;
+  - control: the same panel without focus covers the text, no issue.
+- CLI fixture scenes p6: the focused panel is unverified and the static control is clear.
+
+*Emphasize, found while closing P2-B.* Backdrop motion that was treated as stationary.
+- As a backdrop, a layer's own `emphasize` grows its boxes by the largest scale, about each box's centre. A convex fill scaled up about its centre still contains the text it covered, so the cover holds, but the outline is no longer treated as exact.
+- A group's `emphasize` scales its members about the centre of their frames, as `GroupView` does. Across groups, both the resting and the scaled boxes count and cover is not assumed. Within the group it cancels.
+- As text, the layer's own emphasize stays a transition and is not judged, as before.
+- Regressions:
+  - a dark shape next to the text reaches it only while emphasized: warning, and the resting control is clear;
+  - an emphasized panel under the text still covers it;
+  - a pulsing marker group far from the text is measured against the page, with no unverified entry;
+  - next to the text, the group's pulse makes the marker count.
+
+*Bite checks* (targeted mutations on this pass's code; restored and compared with `cmp`):
+- keeping the old one-axis rule fails both axis cases;
+- dropping the focus check fails the focus case;
+- dropping emphasize scaling fails the emphasize case;
+- dropping group emphasize scaling fails the group case.
+
+*Effect on existing projects* (`work/f1-contrast/cmp*/after6-*`; other issue codes identical everywhere):
+- Medan (47), LBC (6), LBC retrial (8), explainer (9), fresh trial and spatial example (2 each) are unchanged from the previous pass.
+- New: `samples/krakatau-draft` and `samples/krakatau-narrated` each gain 1 unverified (text over `map-image`, which a `focus` beat moves).
+- `project-current-issues` goes from 3 to 6 unverified (3 fades plus 3 focus).
+
+*Gate correction.*
+- The previous pass skipped E2E on the claim that no E2E assertion changed. That was wrong from correction pass 1 on.
+- `reference-projects` scenario 2 asserts that production validation of `project-current-issues` returns no issue codes at all, and under the contrast profile nothing besides `VOICE_STYLE_MISMATCH`. The fixture's genuine `CONTRAST_UNVERIFIED` info notes (3 from pass 1, 6 now) would have failed both assertions. This was confirmed by running the same CLI sequence directly.
+- The assertions were changed to keep guarding errors and warnings while allowing the new advisory info notes (wording corrected in pass 3):
+  - the baseline before the profile change may have no errors or warnings, and info is allowed;
+  - under the contrast profile, no errors or warnings besides voice, and info is allowed;
+  - after `undo`, the production issue codes must equal the baseline's. This checks restoration; it is not an exact expected info set, and it is not the old zero-issue strictness.
+- File: `packages/cli/test/e2e/reference-projects.test.ts`. No other E2E or contrast test was loosened.
+
+*Checks.*
+- Focused: `contrast.test.ts` 35/35 and `compile-draft-contrast.test.ts` 3/3.
+- `pnpm verify` passed: Biome 157 files, typecheck/build, 269 unit and 276 integration (`work/gate-logs/f1/verify-4.log`).
+- Serial `pnpm test:e2e` passed:
+  - started 04:36:35 WIB, on battery under `caffeinate -dims`;
+  - 6 files, 10 tests, 659.11 s, exit 0 (`work/gate-logs/f1/e2e-1.log`, SHA-256 `458a1782…63ae7b6e`);
+  - `caffeinate` printed its usual `PreventUserIdleSystemSleep` warning, and pmset records no sleep or wake that day.
+- `SKILL.md` was edited after verify; it is markdown only (SHA-256 `8e6bebfc3509080362dd6ee15ef1ca272bf1096152caeb360d29e8def669cec5`).
+
+*Supported coverage, as the skill now states.*
+- Bounded motion: `transform`, `follow`, emphasize (own or group), reveal/exit windows, and camera moves.
+- Unverified: `focus`, and group transform, follow or focus against layers outside the group.
+- Boxes, not glyphs; the text's own fades, drift and emphasize are not judged.
+- F2–F5 were not started.
+
+**Supervisor correction review — 2026-09-28: CHANGES_REQUESTED (after IN_REVIEW).** The four original reproductions and their controls now pass; two reachable-motion cases still fall through as known/clear. Do not reopen the four fixed reproductions or expand into general scene simulation. Prefer explicit UNVERIFIED for unsupported motion combinations.
+
+- **Independent verification:** focused unit/integration tests 32/32 passed (408 ms). Fresh public CLI `validate work/f1-contrast/probes --stage plan --json` returns the three expected background warnings, opacity-half UNVERIFIED and rotating-image UNVERIFIED, with both interior/shared-motion controls clear. Fresh validation of the original fixture still returns two image UNVERIFIED entries plus panel/token warnings. Parsed saved `after4-*` against corresponding `before-*`: reported counts match (Medan 47, LBC 6, retrial 8, current-issues 3, general-explainer 9, fresh-trial/spatial-example 2 each); other issue-code sequences match. Those project-wide comparisons are saved-log audits, not fresh reruns. Verify 263 unit / 276 integration and bite/restoration are implementer evidence, not rerun by supervisor.
+- **Model review:** rounded containment and rectangle Minkowski/ellipse intersection math are appropriate for the stated axis-aligned, static fill cases. Group-opacity and independently moving members address the original reproductions. Resolved `starts.beats` wiring and the new anchored-reveal regression agree with the intended source-time window check. More UNVERIFIED entries are an acceptable consequence of conservative coverage, not evidence of improved visual quality. Disk bounds cover the original rotation case, but not every follow/transform combination as currently claimed. No new pixel or renderer change was made; the existing diagnostic-only E2E exemption remains conditional on that boundary.
+
+**Remaining P2-A — Partial transform after follow drops the changed axis (`contrast.ts`, lines 355–358).** Reproduced with a schema-valid 3000 ms scene on the original fixture source cloned in memory: black background, white text `M`, fontSize 24, frame `(600,90,30,30)`, zIndex 2. Path `route`: `M 0 0 L 100 0`, viewBox `(0,0,100,10)`, frame `(100,100,100,10)`, zIndex 0. Image `photo`, asset `report-card`, frame `(0,0,20,20)`, zIndex 1, follows route over 0–1000 ms, then transforms only `to.x=600` over 1000–2000 ms. Both compileDraft and direct current-source checkContrast produce no CONTRAST issue. The unchanged renderer's `motionStateFor` at frame 60 returns `(translateX,translateY)=(300,45)` on the 540px draft, placing the 10px image at `(300,45)` inside the text's `(300,45,15,15)` draft box. The diagnostic keeps `toCentre=onPath` whenever either axis is missing, so it never includes the changed X coordinate. Preserve the retained-axis range and changed-axis position, or return unknown for partial transforms after follow. Include X-only and Y-only regressions plus a known non-intersecting control; do not accept no issue while the image reaches the text.
+
+**Remaining P2-B — Focus motion is treated as stationary (`contrast.ts`, moves filter around lines 308–314).** Black background and black text `M`, fontSize 24, frame `(450,200,30,30)` above an opaque white square panel `(100,100,400,400)`, radius 0. Give the panel a valid `focus` beat, `camera: pan`, `intensity:1`, over 0–1000 ms. Schema and compile succeed with no CONTRAST issue. At frame 60 the unchanged renderer returns `translateX=-48` in draft coordinates: the panel's right edge is 202 while the text begins at 225, exposing black on black. The effect persists after the beat; it is not merely the text's own transient fade excluded by the handoff. `reachFor` only considers transform/follow, so the panel is still trusted as an opaque cover. Conservatively mark unsupported focus motion (including affected groups) unknown, or correctly bound it. Add this focused regression and retain a static-panel control. Do not build a separate focus simulator just to close this task.
+
+**Next bounded correction:** close P2-A/P2-B with conservative fallbacks or small sound bounds; keep all existing positive controls. Recheck the small CLI fixture, focused tests and `pnpm verify`, then return READY_FOR_REVIEW without commit/push/merge. Qualify the skill/handoff coverage where necessary: recorded text fade/drift/emphasize exclusions do not justify treating unhandled backdrop motion as stationary. Only this plan/handoff and tracker were updated by the supervisor; no engine/skill/test/project/Git changes or video render. F2–F5, visual gates/export and M3 remain out of scope.
+
+**Correction pass — 2026-09-28 (implementer): READY_FOR_REVIEW.** Same branch, still uncommitted; responds to the supervisor's CHANGES_REQUESTED below. Nothing outside core diagnostics, its tests, one skill bullet and this plan changed. No renderer, publication, key or runtime change. The Miss Ayu worktree and the old stash were not touched.
+
+*The four probes, first as failing regressions, then fixed.*
+
+1. **Rounded corner.**
+   - Coverage now uses the rounded rectangle's actual outline: its four corners are tested against the radius, which is clamped to half the shorter side as CSS does.
+   - A still shape whose fill never touches the text box is not a backdrop, so the probe's text reads against the page and warns 1.00:1.
+   - A text box inside the shape's frame that reaches past a curved edge is `CONTRAST_UNVERIFIED` ("its box reaches past the curved edge of …"). It is not measured against the page.
+   - Controls:
+     - a label well inside the same radius-200 panel stays measured with no issue;
+     - the radius-44 `project-current-issues` map label is contained by the exact test;
+     - a CTA label whose box equals its rounded button is unverified, not a false warning against the page;
+     - text in the corner of a circle's frame reads against what is behind the circle.
+2. **Group member moving on its own.**
+   - Members of one group are compared in the group's frame. The group's own motion is shared and cancels; each member's own beats still move it.
+   - The probe (panel moves to x 600 inside the group) now warns 1.00:1 against the page.
+   - Control: the whole group moving keeps the text on its panel, no issue.
+3. **Group opacity.**
+   - Effective opacity is the layer's opacity times the group transform's opacity; text blending uses it too.
+   - Opacity 0: the panel is skipped and the text warns against the page.
+   - 0.5: `CONTRAST_UNVERIFIED` (translucent shape).
+   - 1: control, no issue.
+   - Reveals and exits of a backdrop or its group are handled by showing windows:
+     - the text is judged only while it is fully shown;
+     - a backdrop that never shows then is ignored;
+     - one fully shown for that whole time is used;
+     - anything else is `CONTRAST_UNVERIFIED` ("fades in or out while the text is visible").
+   - Phrase-anchored beats use the compiler's resolved start times (`starts.beats`, passed as `beatStartsMs`). Without them, timing is "not known here".
+4. **Rotation.**
+   - The renderer adds the pose rotation to the layer's own rotation, and the model now does the same.
+   - A transform step that turns the layer, or follows a pose known only to lie on a path (after a follow, including `orient`), is bounded by the disk the frame sweeps: half the diagonal at the larger scale, around both centres.
+   - Steps that keep the rotation keep the exact union of posed boxes: cubic easing never overshoots.
+   - The probe (image turning 0→180°) is `CONTRAST_UNVERIFIED`. Control: the same image sliding without turning stays clear of the text, no issue.
+
+*Public CLI.*
+- New fixture `work/f1-contrast/probes`, created with `create --profile current-issues`, has palette overrides (black page and text, white surface) and the supervisor's four probes plus two controls. `validate --stage plan` (`final-probes-validate.json`) gives:
+  - p1 rounded corner: warning;
+  - p1 control: none;
+  - p2 member moves: warning;
+  - p2 control: none;
+  - p3 opacity 0: warning;
+  - p3 opacity 0.5: unverified;
+  - p4 rotation: unverified.
+- The original fixture (`final-fixture-validate.json`) is unchanged: both retrial conditions are unverified, and the panel and token cases warn.
+
+*Regressions.*
+- `contrast.test.ts`: 29 unit cases (+7). They cover the four probes with their controls, the CTA-style rounded label, the circle's frame corner, and panels revealed together, before or after the text.
+- `compile-draft-contrast.test.ts`: 3 integration cases (+1). The new one shows that phrase-anchored reveals are judged at their resolved times.
+- Bite checks:
+  - with the previous candidate's `contrast.ts`, the 5 new probe and reveal cases fail;
+  - without `beatStartsMs` from `compile-draft.ts`, the narration case fails.
+  - Code was restored and compared with `cmp`.
+
+*Effect on existing projects* (`validate --stage plan`, `work/f1-contrast/cmp*/after4-*`; other issue codes identical everywhere):
+- `samples/*`: none.
+- `project-current-issues`: 3 unverified. `layer-1-text` and similar text is visible from the start while their shapes appear with `layer-stack` at 500 ms.
+- `project-general-explainer`: 9 unverified (5 translucent scrim, 4 shapes fading while text shows).
+- Medan: 0 warnings, 47 unverified:
+  - 16 labels whose box reaches past a rounded pill's curved edge;
+  - 9 images;
+  - 9 fades;
+  - 11 camera depth;
+  - 1 path;
+  - 1 group movement.
+- LBC: 6 unverified (3 image, 2 camera, 1 CTA pill). LBC retrial: 8 unverified (4 image, 2 camera, 2 CTA pill).
+- The M2.4.4b fresh trial has 2 unverified (pills); the spatial example has 2 (1 pill, 1 camera).
+- More text is unverified than in the first candidate. The difference is the conservative corner and fade rules, not lost checks: no former warning disappeared silently, and the static computable cases still warn.
+
+*Skill.* The `SKILL.md` bullet now states when a shape counts as a backdrop: its fill, rounded corners included, contains the text box, and it is shown for as long as the text. It lists the unverified cases, says the check works on boxes rather than glyphs, and repeats that neither code proves legibility. The unverified suggestion now names the fix (text box inside a panel's straight edges, panel shown as long as the text). SKILL.md SHA-256 `c01921c1f77637ffb2455cc98ea3f9ba3523173f6a7d2b38d6dbf3d24b02a0df`.
+
+*Checks.*
+- `pnpm verify` passed: Biome 157 files, typecheck/build, 263 unit and 276 integration (`work/gate-logs/f1/verify-3.log`).
+- Serial E2E not run, as the supervisor accepted for this diagnostic-only scope. No renderer, publication, render-key or runtime-acceptance change; `compile-draft.ts` only passes data to the diagnostic.
+
+*Limits.*
+- Boxes, not glyphs: labels that fill a rounded pill stay unverified.
+- The text's own fades, reveal and exit drift and emphasize scale are not judged.
+- Group motion against layers outside the group is not bounded.
+- A follower is bounded by its path's frame.
+- Unverified text is neither passed nor failed.
+- F2–F5 were not started.
+
+**Supervisor review — 2026-09-28: CHANGES_REQUESTED (after IN_REVIEW).** The original image-backdrop cases are corrected, but four schema-valid probes still produce no contrast issue when the backdrop is not the one the diagnostic assumes. Technical integration is not approved. Only this plan/handoff was changed by the supervisor; no engine/skill/test/project/Git mutation or render.
+
+**Independent checks.** Ran the focused unit/integration pair (24/24 passed, 430 ms), and the public CLI `validate work/f1-contrast/fixture --stage plan --json` (exit 0, two UNVERIFIED image cases and the two expected panel/token warnings). Read renderer `LayerView`, `GroupView`, `SceneView`, `motionStateFor` and `planeTransformFor`. Paint stacking order and the plane formula agree for the supported static cases. Parsed all saved before/after pairs in `work/f1-contrast/cmp` and `cmp2`: reported contrast counts agree, including Medan 18 warnings to 31 info entries, and other issue-code sequences are equal. This audits saved evidence, not a new before/after run of each project. Verify 256 unit / 275 integration is from the implementer's log, not rerun; bite checks/restoration remain implementer-reported. The fresh fixture message differs slightly from the earlier saved `after-validate.json` wording, with the same codes/severities. Documentation diff preserves historical handoffs and identifies superseded scope.
+
+**Reproduction setup.** Read `work/f1-contrast/fixture` with `loadPlanProject`; clone its source in memory only, set palette background/text to `#000000`, surface to `#FFFFFF`, and replace scenes with one 3000 ms composition. In every case, `SceneSchema.parse` accepts the scene and `compileDraft` returns `ok: true`, with no error or CONTRAST issue. The same direct call to the current source `checkContrast` returns `[]`. Frames below are design pixels `(x,y,width,height)`. Unless specified: opacity 1, rotation 0; panel zIndex 0, text zIndex 2; text `M`, fontSize 24. These are source/geometry probes, not fresh rendered-frame evidence.
+
+1. **P2 — Rounded cover is not a solid rectangle (`contrast.ts`, `covers`, around lines 562–573).** White rectangle `(100,100,400,400)`, cornerRadius 200; black text `(110,110,45,45)`. The whole text box is outside the rounded fill, so black page remains underneath, but `contains` ends the walk at the white panel and returns no issue. The renderer applies the radius. Do not treat rounded cutouts as covered on an assumption that glyphs are absent. Prove rounded containment, or leave corner-intersecting coverage unverified/continue to the actual backdrop. Keep an interior-label positive control; the existing radius-44 map-label test does not justify accepting every corner.
+2. **P2 — Same-group shortcut ignores member motion (`contrast.ts`, around lines 486–490).** White square panel `(100,100,400,400)`, black text `(150,150,80,50)`, both in an identity-transform group. Give the panel alone a transform to `x:600` over 0–1000 ms. After the move, text is black on the black page, yet the shortcut uses resting boxes and sets `layerStill=true`. `GroupView` renders each member through its own `LayerView`, including its independent beats. Only cancel truly shared motion; bound independent member changes or return UNVERIFIED. Regression should demonstrate the panel leaving the text.
+3. **P2 — Effective group opacity is ignored (`contrast.ts`, layer filtering/opaque-cover check around lines 454–460 and 556–573).** Same square panel and black text as case 2, but group only the panel and set group transform opacity to 0; the text stays top-level. The invisible panel still ends the walk as an opaque white backdrop. `GroupView` multiplies group transform opacity by group motion opacity. Ignore known-invisible backing layers; handle translucent/animated ancestor opacity conservatively rather than trusting child opacity alone. Include an opacity-zero regression and a fractional-opacity control.
+4. **P2 — Endpoint boxes do not bound rotation (`contrast.ts`, `reachFor`, around lines 255–273).** White text `(290,150,30,30)` over black page; image `report-card` `(100,300,400,40)` beneath it, transforming rotation 0 to 180 degrees over 0–1000 ms. Endpoint boxes miss the text, but at 90 degrees the image occupies `(280,120,40,400)` and covers it. Current result is no issue, not UNVERIFIED. Use a sound swept bound or explicitly return unknown for unsupported rotations; do not claim endpoint union bounds rotation. Also keep the renderer's additive base rotation and sequential pose semantics when deciding what is supported.
+
+**Bounded correction.** No pixel analysis, glyph engine, renderer changes or new benchmark requested. Prefer explicit unknown for unsupported motion/opacity geometry over expanding this into a complete scene simulator. Preserve computable static-panel/background warnings. Add focused failing regressions for the four cases, rerun the small public fixture, then `pnpm verify`. Update the skill/handoff limits so they do not advertise reliable coverage where the model returns false negatives.
+
+**Gate assessment.** Not repeating the long renderer E2E is reasonable for this diagnostic-only scope if renderer, publication, keys and runtime acceptance boundaries remain unchanged; focused compiler/CLI checks are the relevant evidence. This is not a blanket waiver if the correction changes those boundaries. Existing full verify and bite evidence do not cover the four probes. F2–F5, visual/export and M3 remain out of scope. Return READY_FOR_REVIEW after correction, without commit/push/merge.
+
+**Handoff — 2026-09-27 (implementer): READY_FOR_REVIEW.** Branch `f1-contrast-diagnostic` from `origin/main` `44d172efaec863a15097f02db1951371f55b128b`, uncommitted. The Miss Ayu worktree and the old stash were not touched. Evidence is under `work/f1-contrast/` and `work/gate-logs/f1/` (both gitignored).
+
+*Reproduction first.*
+- Fixture `work/f1-contrast/fixture` was created with `create --profile current-issues` (dark background `#11130F`, light text `#F5F1E8`). It holds the existing LBC `report-card.svg` and four scenes:
+  - light profile text on the card;
+  - ink `#101A37` on the card;
+  - light text on an opaque white rectangle;
+  - text coloured `palette.background`.
+- Before the change, `validate --stage plan` (`before-validate.json`) gave:
+  - condition 1: no contrast issue;
+  - condition 2: "1.09:1 against the background";
+  - the panel: 1.13:1 against the panel;
+  - the token text: 1.00:1.
+
+*Change: `contrast.ts`, rewritten around a backdrop walk.*
+- **Paint order** follows the renderer. Each top-level layer and group is a stacking context by `zIndex`, with ties broken by DOM order (top-level before groups); members sort by their own `zIndex`, then `memberIds` order.
+- **The walk** goes down from the nearest painted layer under the text:
+  - an opaque flat shape that covers the text ends it;
+  - a partial one adds its fill (and stroke) and lets the layers below and the page show;
+  - an image, path, translucent shape or uncovered shadow makes the result unverified.
+  - Rounded corners are not cut out of a rectangle's cover: a legible label whose box reaches a corner of a radius-44 panel warned otherwise, which is the `project-current-issues` map label.
+- **Reach of moving layers:**
+  - `transform` poses give the union of consecutive posed boxes;
+  - `follow` gives the path frame grown by the follower's half diagonal, and a layer whose first move is a follow is not placed at its authored frame;
+  - members of a moving or displaced group are not bounded.
+- **Camera:** layers on the same plane keep their relation. For different depths with a moving camera, the screen boxes across each camera move are computed exactly from the SKILL plane rule. The text is unverified only when they meet. `compileDraft` now passes `format.design`; without a canvas, such text stays unverified.
+- **Ink:** text colour, accent runs (`palette.accent`) and quiet runs (0.62 opacity), blended with the text's opacity over each backdrop colour. The worst ratio is reported, naming its source: panel X, circle X, the stroke of X or the background.
+- **Suggestion:** "size the text at or above 24px" now appears only for text below 24 px.
+
+*After the change, same fixture* (`after-validate.json`):
+- Both retrial conditions report `CONTRAST_UNVERIFIED` (info): "image card lies under it, and image pixels are not analysed".
+- The panel case and the token case still warn, and the panel message names panel `panel`.
+
+*Effect on existing projects* (`validate --stage plan` only, no render; before = HEAD `contrast.ts` rebuilt, after = this change; files in `work/f1-contrast/cmp*/`):
+
+| Project | Before | After | Other issue codes |
+|---|---|---|---|
+| `samples/krakatau-draft`, `samples/krakatau-narrated`, `test-fixtures/project-current-issues` | none | none | identical |
+| `test-fixtures/project-general-explainer` | none | 5 unverified (text on a translucent scrim over a photo) | identical |
+| `work/visual-parity/medan-story` | 18 `CONTRAST_INSUFFICIENT` | 0 warnings, 31 unverified (15 image, 12 camera depth, 3 group movement, 1 path); all 18 former warnings are now unverified | identical |
+| `work/visual-parity/lbc` / `lbc-retrial` | none | 5 / 6 unverified | identical |
+| `work/m2-4-4b/fresh-trial` | none | none (the heading's own panel is now measured) | identical |
+| `work/m2-4-4b/spatial-example` | none | 1 unverified (hill under the title at another depth) | identical |
+
+In the LBC retrial:
+- The report rows and `statement-1`/`2b` (over the depth-0.35 `blob` circle) are unverified.
+- `headline`, `brand-line`, `statement-2a` and the CTA label are measured.
+- `home-label` stays unverified because the badge's path box is conservative: it reaches the label's box although the badge itself stops short.
+
+*Regressions.*
+- `packages/core/test/unit/contrast.test.ts`: +12, 22 in total. They cover:
+  - both retrial conditions;
+  - an image away from the text;
+  - panel measurement with the exact message;
+  - a rounded panel reaching the label;
+  - a partial panel;
+  - group paint order;
+  - a follower far from and near the text;
+  - the camera with and without a canvas;
+  - an accent run;
+  - a shadow;
+  - the size suggestion.
+- New `packages/core/test/integration/compile-draft-contrast.test.ts` (2) checks that `compileDraft` passes the design canvas.
+- Bite checks:
+  - with HEAD's `contrast.ts`, 7 of the new unit cases fail, including both retrial conditions;
+  - without the canvas argument, the integration case for a plate the camera never brings under the text fails.
+  - Code was restored afterwards and compared with `cmp`.
+
+*Skill.* `SKILL.md` gains one bullet: what each code measures, and what to do when a text is unverified (check the preview frames, or give the text an opaque flat panel). Neither code proves legibility over artwork. The new SKILL.md SHA-256 is `a0b30338e6f0b5f3d695ec881bd56841eb5e35a9630cfd9629e588874bc5d24c`.
+
+*Checks.*
+- `pnpm verify` passed: Biome 157 files, typecheck/build, 256 unit and 275 integration (`work/gate-logs/f1/verify-2.log`).
+- Verify run 1 failed only in Biome, on six stray JSON files the implementer's own earlier shell loop had written to the repository root. They were deleted after checking timestamps and contents; the rerun had no code change.
+- Serial E2E was not run. No renderer, render key or CLI code changed. The E2E projects' plan issues are identical before and after, except the explainer's new info entries, and its scenario asserts only `success`. The `contrast` profile scenario still yields only `VOICE_STYLE_MISMATCH`, which was checked directly.
+
+*Limits.*
+- Bounding boxes, not glyph shapes; rounded corners, reveal/exit drift and emphasize scale are not modelled.
+- Group movement is not bounded.
+- Path followers use the path's frame.
+- Unverified text is not judged either way; the author or the owner still has to check it on screen.
+- F2–F5 were not started.
 
 #### Visual acceptance, tests, and exit gate
 

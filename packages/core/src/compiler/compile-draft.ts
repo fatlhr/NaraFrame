@@ -1511,7 +1511,12 @@ export const compileDraft = (
           )
         : { layers: [], issues: [] };
     issues.push(...layout.issues);
-    varietyEntries.push({ scene, sceneIndex, resolvedLayers: layout.layers });
+    varietyEntries.push({
+      scene,
+      sceneIndex,
+      resolvedLayers: layout.layers,
+      beatStartsMs: starts.beats,
+    });
 
     const beats = scene.beats.map((beat, beatIndex) => {
       const beatStartFrame = msToFrameOffset(
@@ -1606,7 +1611,13 @@ export const compileDraft = (
   if (requestedScope.type === "project") {
     issues.push(...checkVariety(varietyEntries, source.profile.render));
   }
-  issues.push(...checkContrast(varietyEntries, source.profile.render));
+  issues.push(
+    ...checkContrast(
+      varietyEntries,
+      source.profile.render,
+      source.project.format.design,
+    ),
+  );
 
   if (issues.some((issue) => issue.severity === "error")) {
     return { ok: false, issues: sortIssues(issues) };

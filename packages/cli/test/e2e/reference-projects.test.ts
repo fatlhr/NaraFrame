@@ -32,6 +32,9 @@ const cli = async (...args: string[]): Promise<Event> => {
 };
 
 const codes = (event: Event) => event.issues.map((issue) => issue.code);
+/** Errors and warnings; `info` notes (such as CONTRAST_UNVERIFIED) do not block. */
+const blocking = (event: Event) =>
+  event.issues.filter((issue) => issue.severity !== "info");
 
 /** A writable copy, so a render never leaves builds in the committed fixture. */
 const copyFixture = async (name: string): Promise<string> => {
@@ -88,6 +91,8 @@ describe("NF-AC-03 reference scenarios", () => {
     expect(before.success).toBe(true);
     const beforeRevision = (await cli("status", project)).data
       .currentSourceFingerprint;
+    const baseline = await cli("validate", project, "--stage", "production");
+    expect(blocking(baseline)).toEqual([]);
 
     const dryRun = await cli(
       "profile",
@@ -148,7 +153,7 @@ describe("NF-AC-03 reference scenarios", () => {
     expect(production.success).toBe(false);
     // Everything else about the repainted project still checks out.
     expect(
-      production.issues.filter(
+      blocking(production).filter(
         (issue) => issue.code !== "VOICE_STYLE_MISMATCH",
       ),
     ).toEqual([]);
@@ -164,8 +169,9 @@ describe("NF-AC-03 reference scenarios", () => {
     const restored = await cli("status", project);
     expect(restored.data.currentSourceFingerprint).toBe(beforeRevision);
     expect(restored.data.needsProduction).toEqual([]);
+    // Undo restores exactly the diagnostics the project had before.
     expect(
       codes(await cli("validate", project, "--stage", "production")),
-    ).toEqual([]);
+    ).toEqual(codes(baseline));
   }, 1_200_000);
 });
