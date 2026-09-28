@@ -8,7 +8,9 @@
 
 **Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, the local H.264 draft renderer, atomic publication, operator CLI/skill route, offline sandbox, and cross-feature E2E are verified.
 
-Status (synced 2026-09-27): M0, M1 and M2.1–M2.3 are delivered with recorded evidence.
+Status (synced 2026-09-28): **M2 is closed for its technical scope by Fatih's decision on 2026-09-28**; see "M2 technical closure" in section 7. The visual and publication gates (NF-AC-16/17) and export are **not passed** and are tracked as deferred item D-VIS. M3 is not started.
+
+Earlier status (2026-09-27), kept for history: M0, M1 and M2.1–M2.3 are delivered with recorded evidence.
 
 - **M2.4 integrated so far:**
   - M2.4.1 (reference-fidelity Medan opening) via PR #12, `3133af8`; its first attempt `9747193` stays recorded as rejected.
@@ -19,8 +21,9 @@ Status (synced 2026-09-27): M0, M1 and M2.1–M2.3 are delivered with recorded e
   - M2.4.5a (soundtrack-only preview publication) via PR #19.
   - M2.4.5 frozen authoring and revision trial, technical scope only, via PR #20 (`44d172e`).
 - **Not passed; deferred by owner decision:** the NF-AC-16 Medan visual gate, the NF-AC-17 LBC visual/publication judgement and export. M2 is not complete.
-- **Active:** M2.4.5-F1 (contrast against the actual backdrop).
-- **Held:** M3, until the visual and generalisation gates pass.
+- **Integrated since:** M2.4.5-F1 (contrast against the actual backdrop) via PR #21 (`4298f3a`).
+- **Then:** M2.4.5-F2 (layout feedback after a profile change) was diagnosed and implemented in the M2 closure branch together with the shared-fixture flake fix. See the M2.4.5-F2 section.
+- **Held:** M3, until Fatih starts it; its entry gate was revised on 2026-09-28.
 
 The paragraphs below keep the 2026-09-21 revision header and the per-task handoffs keep the history.
 Revision: 1.6
@@ -28,7 +31,11 @@ Date: 2026-09-21
 Inputs: `docs/spec.md` revision 0.6 and `docs/refine-spec.md` section 12.
 Implementation baseline: main recorded at `7b232c9`; current task branch `m2-4-1-first-illustrated-shot` at `9747193` contains the rejected first attempt. Existing uncommitted spec/refinement changes are preserved; M2.2 landed in `d12eeab`/`f938304` and M2.3 in `7b232c9`. M0.10 has recorded owner acceptance on 2026-09-15. M1 has recorded acceptance of Kore final export `115247388b67-98323b06-dd5` on 2026-09-20 with untracked-cost exception. Existing evidence is retained, not re-run by this document update; pixel repeatability and paid-cost comparison remain open.
 
-**Current authorised scope (2026-09-27): M2.4.5-F1, contrast diagnostic against the actual backdrop** (scope and acceptance in the M2.4.5-F1 section). No F2, visual gate, export or M3 work.
+**Current authorised scope (2026-09-28): M2 technical closure batch.** It covers the F2 skill guidance, compile-time `IMAGE_MASK_INVALID`, overflow-message hints, the shared-fixture test isolation and the closure documentation. There is one PR, with merge after supervisor sign-off and Fatih's approval. No auto-layout, no visual gate or export, and no M3.
+
+**Earlier authorised scope, historical (2026-09-28): M2.4.5-F2 diagnosis only.**
+
+**Earlier authorised scope, historical (2026-09-27): M2.4.5-F1, contrast diagnostic against the actual backdrop**, integrated via PR #21.
 
 **Earlier authorised scope, historical: M2.4.2 frozen-engine LBC transfer.** Engine, schemas, CLI, recipes and skill are frozen at `3133af8`; only new LBC project/profile/source data may change. A needed runtime or skill patch fails the trial and must be recorded, not applied silently. No paid generation, new dependency, or later milestone work. Integration, when authorised, follows PR plus squash per AGENTS.md. M2.4.1 scope is complete and recorded in its handoff record.
 
@@ -295,7 +302,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; it is CLOSED / INTEGRATED for its technical scope via PR #20 (`44d172e`). Fatih chose F1 next: M2.4.5-F1 (contrast against the actual backdrop) is TECHNICALLY_READY after supervisor review of correction pass 3 (group-emphasize sweep) on 2026-09-28, on branch `f1-contrast-diagnostic`, uncommitted; details in its handoff. F2–F5, the deferred visual gates, export and M3 are not started.** Separate follow-up: `draft-project.test.ts` copies the shared `samples/krakatau-draft`, including transient `.naraframe/attempts/reuse-*` directories that `computeReuse` creates and removes; one ENOENT failure is consistent with a race between parallel test files, but the triggering test and root cause are unproven and the flake is not fixed. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
+Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; it is CLOSED / INTEGRATED for its technical scope via PR #20 (`44d172e`). Fatih chose F1 next: M2.4.5-F1 (contrast against the actual backdrop) is INTEGRATED via [PR #21](https://github.com/fatlhr/NaraFrame/pull/21), squash `4298f3a`, closure verified by the supervisor 2026-09-28. Fatih then chose F2 and asked to close M2: the batch on branch `m2-technical-close` implements F2, fixes the shared-fixture flake and records M2's technical closure. The NF-AC-16/17 visual gates and export are not passed and are tracked as D-VIS. M3 is not started.** Shared-fixture flake: fixed in the M2 closure batch. `status` on the shared `samples/krakatau-draft` (run by `command-contract.test.ts`) makes `computeReuse` create and remove `.naraframe/attempts/reuse-*`, while `draft-project.test.ts` copied the whole sample. A 20 s reproduction gave 321 ENOENT failures in 613 copies; copying only source and assets gave 0 in 1184. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -458,7 +465,7 @@ No source `examples/` directory is needed.
 
 ### M2.4 — Visual storytelling and Bang Motion benchmark
 
-**Status (synced 2026-09-27):** M2.4.1–M2.4.5 technical work is integrated, and so are M2.4.4b and M2.4.5a; see the live tracker. The NF-AC-16/17 visual and publication gates and export stay DEFERRED, so M2.4 and M2 are not complete. M2.4.5-F1 is in progress. M2.3 remains delivered, and M3 is held. The first M2.4.1 attempt's owner rejection stays on record.
+**Status (2026-09-28):** closed for its technical scope with M2 (see "M2 technical closure"). The NF-AC-16/17 visual and publication gates and export are not passed; they are tracked as D-VIS. Earlier status (2026-09-27): M2.4.1–M2.4.5 technical work integrated, visual gates and export deferred, M2.4.5-F1 in progress. M2.3 remains delivered, and M3 is held. The first M2.4.1 attempt's owner rejection stays on record.
 
 **Goal:** Recover reference-fidelity on one opening, prove immediate transfer to a distinct topic, then earn the full Medan benchmark and LBC revision gates. Reuse working visual foundations rather than inventing a weaker replacement while expanding infrastructure.
 
@@ -476,7 +483,8 @@ No source `examples/` directory is needed.
 | M2.4.4b | Spatial authoring guide and timing diagnostics (inserted 2026-09-27 by the priority change; before M2.4.5) | INTEGRATED — squash-merged via PR #18 (2026-09-27) after supervisor TECHNICALLY_READY FOR MERGE on head `30d5e4b` and Fatih's approval; the merge adds only this handoff documentation. Separate follow-up: shared-fixture test isolation (unproven race, not fixed) |
 | M2.4.5a | B1 correction outside the frozen trial (approved by Fatih 2026-09-27, option a): soundtrack-only full draft preview publishes with its AAC audio | CLOSED / INTEGRATED — PR #19 squash `159ed08`, verified 2026-09-27. Reviewed implementation unchanged; task branch deleted locally/remotely, main synced. M2.4.5 retrial requires a separately recorded new freeze |
 | M2.4.5 | Frozen end-to-end authoring/revision trial on a copy of the LBC project (rescoped by Fatih 2026-09-27): short example, headline/camera/object/profile revisions, undo, asset/audio reuse | CLOSED / INTEGRATED for the bounded technical scope — retrial on freeze 2 (`159ed08`), documentation squash-merged via PR #20 (`44d172e`), closure verified by the supervisor 2026-09-27. Public revisions/undo and independent artifact/hash audit accepted with recorded gaps. Attempt 1 BLOCKED_CONFIRMED on `f065e4d`, kept unchanged. Technical trial only; NF-AC-17 visual/publication judgement and export stay DEFERRED; findings F1–F5 recorded |
-| M2.4.5-F1 | Contrast diagnostic against the actual backdrop (Fatih's choice 2026-09-27; retrial finding F1) | INTEGRATED — PR #21 squash-merged into `main` on Fatih's approval (2026-09-28) after supervisor TECHNICALLY_READY FOR MERGE on head `9b705eb`. The recorded serial E2E 10/10 tested the pass-2 candidate; pass 3 was accepted on focused tests, verify and unchanged reference diagnostics. F2–F5 not started |
+| M2.4.5-F1 | Contrast diagnostic against the actual backdrop (Fatih's choice 2026-09-27; retrial finding F1) | CLOSED / INTEGRATED — closure verified by the supervisor 2026-09-28; PR #21 (`4298f3a`) squash-merged into `main` on Fatih's approval (2026-09-28) after supervisor TECHNICALLY_READY FOR MERGE on head `9b705eb`. The recorded serial E2E 10/10 tested the pass-2 candidate; pass 3 was accepted on focused tests, verify and unchanged reference diagnostics. F2–F5 not started |
+| M2.4.5-F2 | Layout feedback after a profile change (Fatih's choice 2026-09-28; retrial finding F2) | IMPLEMENTED in the M2 closure batch, READY_FOR_REVIEW: skill guidance, compile-time `IMAGE_MASK_INVALID`, overflow-message hints; shared-fixture flake fixed alongside. Branch `m2-technical-close` from `4298f3a` |
 
 Task IDs are unchanged. Former M2.4.2 camera/world work moves into M2.4.1 where indispensable for the opening and M2.4.3 for river-history expansion. Former route/data work remains in M2.4.3. Early LBC is now M2.4.2; full LBC remains M2.4.5. No full acceptance obligation is dropped.
 
@@ -512,7 +520,7 @@ Update the owning checklist only with command/artifact evidence and the required
 - [x] Preserve the rejected source/build, existing branch changes and historical handoff. Record recovery starting revision; inspect relevant code instead of reimplementing working parts. No stash/drop/reset of unrelated work. Done: rejected build `5d3b28594596-96b47423-ac5` and all checkpoints preserved; no stash/reset of task work.
 - [x] Repair confirmed SVG root-paint/text-loss/external-paint-URL defects and actual-frame font readiness. Validate permitted local gradients/clips and separate asset IDs. Add bounded regressions for these known failures after the real fix works; do not wait for a full benchmark to protect safety. Done: shared root/child validation, XML text fidelity, render-context font readiness with `FONT_NOT_LOADED`, regressions in `svg-sanitize.test.ts` and `font-readiness.test.ts`.
 - [ ] Complete accessible reference playback for the opening (0–6.4s), record matched moments, ten-part baseline and source/audio hashes; listen before claiming phrase alignment. Preserve original inputs. Identify the concrete visual mechanisms and provenance to adapt. **Open at integration, carried forward:** hashes, ten-part baseline and measured silence boundaries are recorded, but the only playback is an 8.9 s recording that starts after title entry, so 0–6.4 s was not fully watched and no phrase alignment was claimed by listening.
-- [ ] Revise skill art direction around working shot patterns: statement → explanatory object/action → framing/type → movement/continuity. Preserve the reference look for this controlled trial; normal profiles give defaults, not unwanted generic-card constraints. Keep ordinary context/discovery compact. **Open at integration, carried forward:** the skill's art-direction step from the first attempt stayed unchanged through recovery and does not describe camera moves, world planes, `transform` or `exit`; those are discoverable only through `naraframe schema`. The skill is frozen as-is for M2.4.2, so the trial also tests authoring without that guidance.
+- [x] Revise skill art direction around working shot patterns: statement → explanatory object/action → framing/type → movement/continuity. Preserve the reference look for this controlled trial; normal profiles give defaults, not unwanted generic-card constraints. Keep ordinary context/discovery compact. **Open at integration, carried forward:** the skill's art-direction step from the first attempt stayed unchanged through recovery and does not describe camera moves, world planes, `transform` or `exit`; those are discoverable only through `naraframe schema`. The skill is frozen as-is for M2.4.2, so the trial also tests authoring without that guidance. **Closed 2026-09-28 by reference:** M2.4.4b (PR #18) added the skill's "Space, camera and timing" section, which covers camera moves, world and overlay planes, `transform`, `follow` and `exit`. It was used by the fresh-context trial and the M2.4.5 retrial.
 - [x] Adapt the needed trusted Remotion primitives/recipe and minimum editable source inputs, including actual object travel/exit and coherent camera/world/overlay if required. Bundle licensed local fonts/assets; do not substitute weaker handmade art without explicit reason or ask the user to author schema details. Done: camera moves, world/overlay planes with parallax, `transform` and `exit` beats; local OFL Fraunces/Space Grotesk.
 - [x] Show one matched keyframe and a 2–3s motion study, with the reference beside it where accessible. Produce the study via the existing preview route on a short source scope/project; it is a diagnostic checkpoint, not a new CLI command or a substitute for public-CLI acceptance. After at most two internal corrections, present it for Fatih's visual direction review; do not extend the full shot while this direction is rejected. Done: static frame and study build `67cb9fb19695-51ffa299-f9b` accepted by Fatih (2026-09-21).
 - [x] Produce the 6–10s `opening` through the exact command below (reference length 6.4s). Inspect actual video and matched frames at equivalent size, including real fonts, depth/framing, opaque object movement and within-shot continuity. Obtain Fatih's no-worse assessment of relevant dimensions before closing the opening gate. Done: build `536f182ba54b-d7c57043-698`, 6.4 s, approved by Fatih 2026-09-21 as an overall approval ("approve dari aku"), not a per-dimension table. Rendered by the same CLI via the pinned Node because ambient `pnpm` was unavailable.
@@ -1824,6 +1832,105 @@ In the LBC retrial:
 - Unverified text is not judged either way; the author or the owner still has to check it on screen.
 - F2–F5 were not started.
 
+#### M2.4.5-F2 — Layout feedback after a profile change (diagnosis)
+
+**Chosen by Fatih 2026-09-28** from the M2.4.5 retrial findings (F2). This entry is a bounded diagnosis only: no engine, skill, test, schema or CLI change and no auto-layout. It works from the retrial's saved events (`work/m2-4-5r/`), the source, and one probe (`work/f2-diagnosis/`).
+
+**What happened in the retrial.** `profile apply current-issues` to the LBC retrial project, then:
+
+| Run | `validate --stage plan` | `preview --draft` (full) | CLI time |
+|---|---|---|---|
+| after apply (`c28bb650`) | valid (warnings: safe zone, duration) | rejected: 6 `TEXT_OVERFLOW`, 3 `IMAGE_MASK_INVALID` | 3.7 s |
+| repair 4b (shrink, radius 0) | valid | rejected: 1 `TEXT_COLLISION` (`statement-2a`/`2b`) | 3.9 s |
+| repair 4c (2a height 122) | valid | published R2 | 28.0 s |
+| repair 4d (row ink colour) | valid, plus one false contrast warning (pre-F1) | scoped `opening`, published | 21.5 s |
+
+**Diagnosis.**
+
+1. **Why `validate` passed while `preview` refused.** This is intended, not a defect. `validate --stage plan` runs only compile-time checks in core. Overflow, minimum size, collision, off-canvas text under motion, captions and font loading need the laid-out text, which the renderer measures in the browser (`visual-preflight.ts`, `measureText`, `document.fonts.check`) during `preview`. The skill already says so: "a valid plan can still fail there". The `profile apply --dry-run` effect `revalidate-layout` names this need, but no command runs a layout-only check.
+
+2. **Which checks need the browser and fonts, and which do not.**
+   - Need them: `TEXT_OVERFLOW`, `MIN_FONT_SIZE_VIOLATION`, `TEXT_COLLISION` (measured text rectangle, per frame with motion), `TEXT_OUTSIDE_CANVAS`, `CAPTION_OVERFLOW`, `CAPTION_COLLISION`, `FONT_NOT_LOADED`. `PATH_INVALID` uses the renderer's path geometry.
+   - Do not need them: `IMAGE_MASK_INVALID` is pure geometry. It checks whether the image radius exceeds half the shortest edge, and that radius is already resolved at compile time (`resolveLayerAppearance`, `appearance.media.cornerRadius` 44 under `current-issues`). `PANEL_DEAD_SPACE` is also frame geometry only. Both still run only in preview.
+   - Already compile-time: schema and references, timing, `LAYER_OUTSIDE_CANVAS`, `TEXT_OUTSIDE_SAFE_ZONE`, duration and contrast.
+
+3. **Why the problems appeared in stages.** The run did not stop early. The first rejection already listed every measurable error together (9), and the probe shows a collision is reported in the same run as other overflow and mask errors. One check is skipped for layers that overflow: the collision, caption-collision and off-canvas loops `return` for any text whose metrics overflow (`if (!leftMetrics || leftMetrics.overflow) return;`). So the `statement-2a`/`2b` collision was present but hidden until their overflow was fixed:
+   - **Latent source overlap.** The LBC source boxes overlap by 2 px (2a at 262 + 124 = 386 > 2b at 384). With Fraunces 112/1.04 the measured text height (116.5) stays inside the box, so there was no collision.
+   - **Hidden, not new.** With Arial 800 at 128/1.02 the text overflows; its measured rectangle is clamped to the full box (`min(available, content)`), which reaches 2b, but the collision loop skipped it. Shrink then produced text that fits but still fills the box, so the collision became visible.
+   - **Probe** (`work/f2-diagnosis/c28-probe`): the `c28bb650` source restored from the revision store, with only 2a/2b set to `overflowPolicy: "shrink"`. `preview --draft` was rejected in 3.6 s with `TEXT_COLLISION` (2a) alongside 4 `TEXT_OVERFLOW` and 3 `IMAGE_MASK_INVALID` in one report (`probe1-preview.json`), while `validate` was valid. The only thing that delays a problem is the per-layer skip.
+   - **The contrast repair (4d) was not a preflight error.** The light rows on the white card were found by looking at frames. After F1, `validate` lists them as `CONTRAST_UNVERIFIED` (info) with the image named (`probe1-validate.json`), which points review at them but does not reject.
+
+4. **Faster feedback without a full video.** It already exists:
+   - A preview whose preflight fails is rejected before any frame is rendered: the two rejections took 3.7 and 3.9 s, against 28 s for a full render.
+   - `preview --draft --scene <id>` limits the check to one scene.
+   - So the retrial's layout loop cost about 7.6 s of rejected previews out of 163 s of preview time. The cost of the extra rounds was author turns (edit, validate, preview), not rendering.
+
+**Classification.**
+- *Intended boundary:*
+  - measured-text checks need the browser;
+  - overflowing text has no reliable settled geometry, so collision for it is deferred.
+- *Defect:* none found in the checks themselves.
+- *UX opportunities, small and optional:*
+  - (a) run the pure-geometry `IMAGE_MASK_INVALID` (and possibly `PANEL_DEAD_SPACE`) at compile time as well, so `validate` reports them right after `profile apply`;
+  - (b) say in `TEXT_OVERFLOW`/`MIN_FONT_SIZE_VIOLATION` messages that collision and off-canvas checks for that layer resume once it fits, so a second round is expected rather than surprising;
+  - (c) report overflow boxes in design pixels as authored. The message says "456x130 box" (draft pixels) for a 912x260 source frame.
+  - Checking collision for overflowing text against its clamped box would surface cases like 2a/2b one round earlier, but it can also report collisions that disappear once the overflow is fixed differently. It is left as an option, not recommended now.
+
+**Recommendation: workflow and skill first, engine change optional.**
+- *Skill/workflow (enough on its own).* After `profile apply` (or any change with `revalidate-layout`), run `preview --draft`, or `--scene` per affected scene, straight away as the layout check, and repair all reported errors in one pass. A rejected preview costs seconds, not a render. Expect one more round when overflow errors are present, because collisions of those layers are checked only after they fit. Review every `CONTRAST_UNVERIFIED` text in the frames. Before a profile change, keep adjacent text boxes from touching, so a bigger face does not turn a latent overlap into a collision.
+- *Smallest engine change, if wanted:* (a) plus the message hint (b). This is core and preflight messages only, with focused tests; no layout behaviour changes.
+- *Not recommended:* a new layout pass or auto-layout, or promising that all problems appear in one run.
+
+**Acceptance (for a follow-up task, if approved).**
+- Skill only: the `profile apply` and revision bullets state the preview-as-layout-check loop, the overflow-then-collision order, and the unverified-contrast review; checked by reading `SKILL.md`.
+- With (a): on the restored `c28bb650` source, `validate --stage plan` reports the three `IMAGE_MASK_INVALID` errors (today it reports none), while `preview` still reports them; pure-geometry regressions pass.
+- With (b): the overflow message on 2a/2b names the deferred collision check.
+- `pnpm verify`; serial E2E only if a publication, runtime or E2E-asserted output changes.
+
+**Expected effect.**
+- On this retrial the preview count stays about the same. The first rejection is still needed for font-measured overflow, and the collision still needs a second measured round unless the latent overlap is avoided beforehand; with the skill guidance the author would likely avoid it.
+- (a) moves 3 of the 9 first-round errors to `validate`. It saves an edit round only when the mask errors are the only ones.
+- Wall-clock gains are small, since rejections already skip rendering. The gain is fewer surprise rounds and clearer expectations.
+- Limits that remain:
+  - measured text still needs `preview`;
+  - collisions of overflowing text stay deferred;
+  - contrast over images or SVG stays a visual review;
+  - no guarantee that every problem appears in one run.
+
+**Implementation — 2026-09-28 (implementer): READY_FOR_REVIEW, in the M2 closure batch.** Fatih asked to close M2 and to do the remaining work at once. He chose the skill guidance plus (a), (b) and (c), and let the implementer choose among the follow-ups: the shared-fixture flake was taken, and `SYSTEM_ERROR` diagnostics stay backlog. Branch `m2-technical-close` from `4298f3a` (renamed from `f2-profile-layout-diagnosis`). The Miss Ayu worktree and the old stash were not touched.
+
+- **(a) `IMAGE_MASK_INVALID` at compile time.**
+  - `compile-draft.ts` checks each resolved image layer in the compiled units that preflight uses (`scaleLayer`), with the same code, path, message and suggestion. So `validate --stage plan` reports it, including radii that come from the profile's `appearance.media.cornerRadius`.
+  - The preflight check stays as the renderer's own safety net. A compile error stops `preview` before preflight, so it is not reported twice.
+  - Real path: on the restored `c28bb650` source, `validate` was valid before; it now fails with the three `IMAGE_MASK_INVALID` errors on `check-1`–`check-3` (`work/f2-diagnosis/after-orig-validate.json`).
+- **(b) Overflow hint** and **(c) units.**
+  - `TEXT_OVERFLOW` and `MIN_FONT_SIZE_VIOLATION` now read, for example: "Text layer statement-2a does not fit its 456x62 box (draft pixels; the draft is 540x960) within 20 lines. Its collision and off-canvas checks run once it fits, so the next preview may report more." (`work/f2-diagnosis/after-orig-preview.json`, rejected in 3.4 s.)
+  - (c) is done as unit labelling, not conversion. The compiled draft does not carry the design size, and adding it would change the draft shape and render keys. The lines clause appears only when `maxLines` is set; the profile sets 20 here.
+- **Skill.** A new bullet after the profile-change bullet covers the preview-as-layout-check loop: rejections cost seconds and list every measurable problem, then repair in one pass. It also covers the overflow-then-collision order, keeping neighbouring text boxes apart, reviewing `CONTRAST_UNVERIFIED`, draft-pixel sizes, and the fact that mask radii are now caught by `validate`.
+- **Shared-fixture flake.**
+  - Mechanism proven. `status` on a project with a parent revision runs `computeReuse`, which creates and removes `.naraframe/attempts/reuse-*` in the project; running `status` once on `samples/krakatau-draft` updated that directory. `command-contract.test.ts` runs `status` on the shared sample, while `draft-project.test.ts` copied the whole sample recursively.
+  - Scratch reproduction (`race.mjs`, 20 s, `computeReuse` churning while copying): 321 `ENOENT` in 613 copies, with the same `opendir …/.naraframe/attempts/reuse-…/current` error as the flake.
+  - The fix is test-only: `draft-project.test.ts` copies only source and assets (`copySampleSource`, no `.naraframe`, `preview` or `revisions`). The same reproduction with that filter gave 0 in 1184 copies.
+  - This removes this copy's dependence on shared runtime state. Other tests still run commands on the shared sample, which is safe for copies made this way.
+- **Regressions.**
+  - `compile-draft-image-mask.test.ts` (new, 3): profile-default radius 44 on a 56 px icon errors with the exact issue; an explicit 40 errors; exactly half, explicit 0 over the default, and no radius all pass.
+  - `visual-preflight.test.ts` (+1): the overflow message names draft pixels and the deferred checks, no collision is reported while the layer overflows, and the same layout reports `TEXT_COLLISION` once the text fits.
+  - `draft-project.test.ts` (+1): the sample copy has source and assets, and no `.naraframe`, `preview` or `revisions`.
+  - Bite checks:
+    - without the compile check, 2 of 3 image-mask cases fail;
+    - with the old message, the preflight case fails;
+    - without the copy filter, the copy case fails.
+    - Code was restored and compared with `cmp`.
+- **Effect on existing projects.** `validate --stage plan` results on every sample, fixture and work project (`work/f1-contrast/cmp*/after8-*`) are identical to before, with no new errors.
+- **Checks.**
+  - `pnpm verify` passed: Biome 158 files, typecheck/build, 271 unit and 280 integration (`work/gate-logs/m2-close/verify-1.log`).
+  - Serial `pnpm test:e2e` passed on this candidate: started 22:55:58 WIB on battery under `caffeinate -dims`; 6 files, 10 tests, 664.38 s, exit 0 (`work/gate-logs/m2-close/e2e-1.log`, SHA-256 `f7be52d5…d566aa06e`). It was run because preview's preflight messages changed; its assertions were unchanged. No sleep or wake appears in pmset.
+- **Limits.**
+  - Measured text still needs `preview`.
+  - Collisions of overflowing text stay deferred to the next preview; the message now says so.
+  - Contrast over images stays a visual review.
+  - No promise that every problem appears in one run, and no auto-layout.
+
 #### Visual acceptance, tests, and exit gate
 
 | Dimension | Owner assessment |
@@ -1842,12 +1949,49 @@ Follow model → real path → visible output/manual acceptance → focused test
 
 Use a lightweight handoff record, not new infrastructure, for NF-CO-02. Compare like-for-like content trials, not NaraFrame engine development against one competitor content run. Preserve unknown usage/cost, fresh render versus cache reuse, owner versus agent actions, and internal versus feedback-driven corrections. No cheaper/faster claim without measurement.
 
-**Exit gate:** all five outputs accepted with source/build/revision evidence; NF-AC-16/17 passed; new capabilities advertised only after real-path proof and focused protection; required integration/runtime checks recorded and unresolved constraints explicit. M3 remains pending until this gate passes. Historical M2.3 completion is not revoked.
+**Exit gate (original, kept as history; see the technical closure below for the 2026-09-28 decision):** all five outputs accepted with source/build/revision evidence; NF-AC-16/17 passed; new capabilities advertised only after real-path proof and focused protection; required integration/runtime checks recorded and unresolved constraints explicit. M3 remains pending until this gate passes. Historical M2.3 completion is not revoked.
+
+
+#### M2 technical closure — 2026-09-28 (Fatih's decision)
+
+**Decision.** Fatih chose to close M2 for its technical scope now rather than wait for the visual gates. The NF-AC-16 and NF-AC-17 visual and publication judgements and the approved export are **not passed**. They move to one tracked deferred item, **D-VIS**, below. They are not dropped and are not claimed. This replaces the requirement "NF-AC-16/17 passed" in the M2.4 exit gate for the purpose of closing M2 technically. The original gate text stays below as history.
+
+**What closes.**
+- M2.1–M2.3 as delivered.
+- M2.4.1–M2.4.5 technical work, M2.4.4b, M2.4.5a, M2.4.5-F1 and M2.4.5-F2, integrated through PRs #12, #13, #15, #17, #18, #19, #20 and #21, plus the M2 closure PR.
+- The frozen-engine authoring and revision trial passed its bounded technical acceptance: ordinary revisions, profile change and undo through the public CLI, with no engine or skill patch during the trial.
+- New capabilities were advertised only after real-path proof and focused tests. Integration and runtime checks are recorded per task.
+
+**Deferred item D-VIS (open, owner-judged).**
+- NF-AC-16: the full Medan preview no worse than the reference in all five dimensions and at least two better, with scene/time evidence. This is M2.4.4's deferred checkboxes. It includes the accessible reference playback for the 0–6.4 s opening, which is still incomplete, since the only recording starts after the title entry.
+- NF-AC-17: an LBC full draft judged as a publication candidate.
+- The approved export of the Medan preview through `--approve-preview`.
+- The spoken "ke-4" population claim still blocks any publication.
+- No visual competitiveness, publication readiness or export may be claimed until D-VIS is decided.
+
+**Open technical items carried forward (not blocking the technical closure).**
+- F3: undo to a named revision.
+- F4: reuse report coverage. Adding a soundtrack marks every scene changed, and music, SVG and fonts are not counted.
+- Voice reuse is untested on a narrated revision trial. Unknown media-style bindings have no recorded review, which is M2.4.2's partly-shown checkbox.
+- Generic `SYSTEM_ERROR` diagnostics hide causes (seen in B1).
+- Issue #16, E2E harness diagnostics.
+- Pixel repeatability: the owner-flow hash caveat.
+- Measured comparative cost.
+- Contrast: `focus` motion is left unverified, although its renderer bounds are simple.
+- Layout: collisions of overflowing text stay deferred to the next preview.
+- M2.4.4's focused transition-boundary, scoped-neighbour, audio-duration, publication and cache test checkbox, for which no evidence is recorded.
+- F5 needs no task.
+
+**M3.** Its entry gate is revised below. M3 is not started by this closure and starts only on Fatih's explicit instruction.
 
 
 ## 8. M3 — Owner dogfooding and release evidence
 
-**Entry gate:** M2.4 and NF-AC-16/17 must pass first. M3 is not started by the documentation-only insertion.
+**Entry gate (revised 2026-09-28 by Fatih's technical-closure decision):**
+- M2 is closed for its technical scope.
+- M3 starts only on Fatih's explicit instruction.
+- Deferred item D-VIS (NF-AC-16/17 visual and publication judgements and export) stays open and must be decided before any release, publication or visual-competitiveness claim in M3.
+- Original gate, kept as history: "M2.4 and NF-AC-16/17 must pass first." M3 is not started by the documentation-only insertion.
 
 **Goal:** Establish repeatability and recovery for Fatih on the reference setup; no three-person nondeveloper study is required.
 
