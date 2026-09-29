@@ -409,6 +409,46 @@ describe("resolveVisualPreflight — layer issue codes", () => {
     expect(report.issues.map((issue) => issue.code)).toContain("TEXT_OVERFLOW");
   });
 
+  it("says an overflowing layer's collision check waits until it fits, and in which pixels its box is", () => {
+    // F2: the collision below exists either way; it is reported only once
+    // the overflow is fixed, and the overflow message now says so.
+    const overlapping = (copy: string): Layer[] => [
+      text({
+        id: "upper",
+        text: copy,
+        frame: { x: 100, y: 400, width: 300, height: 80 },
+        overflowPolicy: "error",
+      }),
+      text({
+        id: "lower",
+        text: "Lower",
+        frame: { x: 100, y: 420, width: 300, height: 80 },
+      }),
+    ];
+
+    const overflowing = resolveVisualPreflight(
+      draftWithScene(
+        overlapping(
+          "This copy is far too long for its declared box and keeps going on.",
+        ),
+      ),
+    ).report.issues;
+    const fitting = resolveVisualPreflight(draftWithScene(overlapping("Upper")))
+      .report.issues;
+
+    const overflow = overflowing.find(
+      (issue) => issue.code === "TEXT_OVERFLOW",
+    );
+    expect(overflow?.message).toContain("box (draft pixels; the draft is ");
+    expect(overflow?.message).toContain(
+      "Its collision and off-canvas checks run once it fits",
+    );
+    expect(overflowing.map((issue) => issue.code)).not.toContain(
+      "TEXT_COLLISION",
+    );
+    expect(fitting.map((issue) => issue.code)).toContain("TEXT_COLLISION");
+  });
+
   it("flags shrink-to-fit text that bottoms out at the profile minimum as MIN_FONT_SIZE_VIOLATION", () => {
     const layers: Layer[] = [
       text({

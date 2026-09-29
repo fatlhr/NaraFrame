@@ -1,4 +1,11 @@
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  cp,
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,6 +21,22 @@ const sampleRoot = fileURLToPath(
 );
 const temporaryRoots: string[] = [];
 
+/**
+ * A writable copy of the sample's source and assets. Generated state is left
+ * out: other test files run CLI commands on the shared sample (for example
+ * `status`, whose reuse report creates and removes
+ * `.naraframe/attempts/reuse-*`), and copying that directory while it churns
+ * failed with ENOENT.
+ */
+const copySampleSource = (to: string) =>
+  cp(sampleRoot, to, {
+    recursive: true,
+    filter: (source) =>
+      !/[\\/](\.naraframe|preview|revisions)([\\/]|$)/.test(
+        source.slice(sampleRoot.length),
+      ),
+  });
+
 afterEach(async () => {
   await Promise.all(
     temporaryRoots
@@ -23,6 +46,26 @@ afterEach(async () => {
 });
 
 describe("Krakatau draft project", () => {
+  it("copies the shared sample's source without its generated state", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-copy-"));
+    temporaryRoots.push(root);
+
+    await copySampleSource(root);
+
+    const entries = await readdir(root);
+    expect(entries).toEqual(
+      expect.arrayContaining([
+        "assets",
+        "naraframe.json",
+        "profile.lock.json",
+        "scenes.json",
+      ]),
+    );
+    expect(entries).not.toContain(".naraframe");
+    expect(entries).not.toContain("preview");
+    expect(entries).not.toContain("revisions");
+  });
+
   it("loads strict source JSON and compiles an 18-second vertical draft", async () => {
     const loaded = await loadPlanProject(sampleRoot);
 
@@ -300,7 +343,7 @@ describe("Krakatau draft project", () => {
   it("rejects a ready PNG whose contents do not match its locked hash", async () => {
     const root = await mkdtemp(join(tmpdir(), "naraframe-load-"));
     temporaryRoots.push(root);
-    await cp(sampleRoot, root, { recursive: true });
+    await copySampleSource(root);
     await writeFile(join(root, "assets/map.png"), "changed-image");
     const manifestPath = join(root, "assets/manifest.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));

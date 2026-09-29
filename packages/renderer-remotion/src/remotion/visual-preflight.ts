@@ -743,7 +743,10 @@ export const resolveVisualPreflight = (
           sceneIndex,
           layerIndex,
           layer.id,
-          `Text layer ${layer.id} does not fit its ${layer.frame.width}x${layer.frame.height} box within ${layer.maxLines ?? 20} lines.`,
+          // Frames here are in the draft's pixels, not the design pixels the
+          // source is written in; say so. Overflowing text has no settled
+          // geometry, so its collision and off-canvas checks wait (below).
+          `Text layer ${layer.id} does not fit its ${layer.frame.width}x${layer.frame.height} box (draft pixels; the draft is ${draft.width}x${draft.height})${layer.maxLines !== undefined ? ` within ${layer.maxLines} lines` : ""}. Its collision and off-canvas checks run once it fits, so the next preview may report more.`,
           code === "TEXT_OVERFLOW"
             ? "Shorten the copy, enlarge its box, increase maxLines, or explicitly use bounded shrink."
             : `Shorten the copy or enlarge its box; the profile minimum is ${minimum}px.`,
