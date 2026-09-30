@@ -302,7 +302,7 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; it is CLOSED / INTEGRATED for its technical scope via PR #20 (`44d172e`). Fatih chose F1 next: M2.4.5-F1 (contrast against the actual backdrop) is INTEGRATED via [PR #21](https://github.com/fatlhr/NaraFrame/pull/21), squash `4298f3a`, closure verified by the supervisor 2026-09-28. Fatih then chose F2 and asked to close M2: the batch on branch `m2-technical-close` implements F2, fixes the shared-fixture flake and records M2's technical closure. The NF-AC-16/17 visual gates and export are not passed and are tracked as D-VIS. M3 is not started.** Shared-fixture flake: fixed in the M2 closure batch. `status` on the shared `samples/krakatau-draft` (run by `command-contract.test.ts`) makes `computeReuse` create and remove `.naraframe/attempts/reuse-*`, while `draft-project.test.ts` copied the whole sample. A 20 s reproduction gave 321 ENOENT failures in 613 copies; copying only source and assets gave 0 in 1184. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
+Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; it is CLOSED / INTEGRATED for its technical scope via PR #20 (`44d172e`). Fatih chose F1 next: M2.4.5-F1 (contrast against the actual backdrop) is INTEGRATED via [PR #21](https://github.com/fatlhr/NaraFrame/pull/21), squash `4298f3a`, closure verified by the supervisor 2026-09-28. Fatih then chose F2 and asked to close M2: the batch on branch `m2-technical-close` implements F2, fixes the shared-fixture flake and records M2's technical closure. The NF-AC-16/17 visual gates and export are not passed and are tracked as D-VIS. M2 is closed for its technical scope via PR #22 (`93c0a67`); D-VIS stays OPEN. M3.1 has started with a limited scope: the evidence map and first-batch proposal (M3.1-A, real-process interruption during `renderMedia` and recovery) was approved, and M3.1-A has been executed: its test-harness correction is TECHNICALLY_READY (2026-10-01) on branch `m3-1a-interruption-recovery`, uncommitted, with finding F-A2 (Chrome descendants observed alive for 10 seconds after SIGKILL) recorded, not fixed. Corrected A1 plus synthetic tests passed 4/4; after a final lint control-flow correction, synthetic probes passed 3/3 and verify passed 271 unit / 280 integration. M3.1-B/C are not started.** Shared-fixture flake: fixed in the M2 closure batch. `status` on the shared `samples/krakatau-draft` (run by `command-contract.test.ts`) makes `computeReuse` create and remove `.naraframe/attempts/reuse-*`, while `draft-project.test.ts` copied the whole sample. A 20 s reproduction gave 321 ENOENT failures in 613 copies; copying only source and assets gave 0 in 1184. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -484,7 +484,7 @@ No source `examples/` directory is needed.
 | M2.4.5a | B1 correction outside the frozen trial (approved by Fatih 2026-09-27, option a): soundtrack-only full draft preview publishes with its AAC audio | CLOSED / INTEGRATED — PR #19 squash `159ed08`, verified 2026-09-27. Reviewed implementation unchanged; task branch deleted locally/remotely, main synced. M2.4.5 retrial requires a separately recorded new freeze |
 | M2.4.5 | Frozen end-to-end authoring/revision trial on a copy of the LBC project (rescoped by Fatih 2026-09-27): short example, headline/camera/object/profile revisions, undo, asset/audio reuse | CLOSED / INTEGRATED for the bounded technical scope — retrial on freeze 2 (`159ed08`), documentation squash-merged via PR #20 (`44d172e`), closure verified by the supervisor 2026-09-27. Public revisions/undo and independent artifact/hash audit accepted with recorded gaps. Attempt 1 BLOCKED_CONFIRMED on `f065e4d`, kept unchanged. Technical trial only; NF-AC-17 visual/publication judgement and export stay DEFERRED; findings F1–F5 recorded |
 | M2.4.5-F1 | Contrast diagnostic against the actual backdrop (Fatih's choice 2026-09-27; retrial finding F1) | CLOSED / INTEGRATED — closure verified by the supervisor 2026-09-28; PR #21 (`4298f3a`) squash-merged into `main` on Fatih's approval (2026-09-28) after supervisor TECHNICALLY_READY FOR MERGE on head `9b705eb`. The recorded serial E2E 10/10 tested the pass-2 candidate; pass 3 was accepted on focused tests, verify and unchanged reference diagnostics. F2–F5 not started |
-| M2.4.5-F2 | Layout feedback after a profile change (Fatih's choice 2026-09-28; retrial finding F2) | TECHNICALLY_READY FOR MERGE — supervisor batch review 2026-09-29, PR #22 head `15798f5`, not merged. Skill guidance, compile-time `IMAGE_MASK_INVALID`, overflow-message hints; shared-fixture flake fixed alongside. Branch `m2-technical-close` from `4298f3a`; D-VIS remains open and M3 not started |
+| M2.4.5-F2 | Layout feedback after a profile change (Fatih's choice 2026-09-28; retrial finding F2) | CLOSED / INTEGRATED — PR #22 squash-merged as `93c0a67` on 2026-09-29 after supervisor sign-off and Fatih's standing merge authorization. Skill guidance, compile-time `IMAGE_MASK_INVALID`, overflow-message hints; shared-fixture flake fixed alongside. D-VIS remains open and M3 not started |
 
 Task IDs are unchanged. Former M2.4.2 camera/world work moves into M2.4.1 where indispensable for the opening and M2.4.3 for river-history expansion. Former route/data work remains in M2.4.3. Early LBC is now M2.4.2; full LBC remains M2.4.5. No full acceptance obligation is dropped.
 
@@ -1974,6 +1974,8 @@ Use a lightweight handoff record, not new infrastructure, for NF-CO-02. Compare 
 
 #### M2 technical closure — 2026-09-28 (Fatih's decision)
 
+**Integration closure — 2026-09-29 (supervisor): CLOSED / INTEGRATED.** Under Fatih's standing authorization to merge reviewed work, PR #22 was squash-merged with exact-head guard `6b06a0bb5dd975624ba60f35ec6e03f09fb8b08b`. GitHub reports MERGED at `2026-09-29T14:50:38Z`, squash `93c0a6769cd31f6b6da96c2a06f6e6432fe1cd23`. Independently verified: the final head differs from reviewed `15798f5` only in `docs/plan.md`; all six implementation/test/skill fingerprints match; the squash tree is identical to the final head; its message contains no agent identity/trailers. Focused tests rerun before merge: 38/38. No full verify, E2E or render rerun for the documentation-only follow-up. Local main was fast-forwarded to origin/main; task branches were deleted locally/remotely. The unrelated local `AGENTS.md` memory-context edit was preserved, and the Miss Ayu worktree and old stash were not touched. This closure record and tracker update are local documentation changes, not part of squash `93c0a67`. Current step is now awaiting Fatih's next decision: D-VIS remains OPEN and M3 has not started.
+
 **Decision.** Fatih chose to close M2 for its technical scope now rather than wait for the visual gates. The NF-AC-16 and NF-AC-17 visual and publication judgements and the approved export are **not passed**. They move to one tracked deferred item, **D-VIS**, below. They are not dropped and are not claimed. This replaces the requirement "NF-AC-16/17 passed" in the M2.4 exit gate for the purpose of closing M2 technically. The original gate text stays below as history.
 
 **What closes.**
@@ -2024,6 +2026,164 @@ Use a lightweight handoff record, not new infrastructure, for NF-CO-02. Compare 
 - [ ] Check exact issue/exit codes, missing browser, unsafe assets, invalid timing/word requirements, stale sources, cache preservation, source/build atomicity, and cancellation.
 - [ ] Compare canonical compiled hashes and selected decoded pixel hashes twice on the same runtime; do not claim cross-machine or encoded-MP4 byte identity.
 - [ ] Probe final dimensions/fps/codec/audio/duration; check pause/sample-boundary fixtures within one video frame of synthetic scheduling expectations.
+
+#### M3.1 evidence map and first-batch proposal — 2026-09-29 (implementer, proposal only; revised after the supervisor's APPROVE WITH CHANGES)
+
+Started on Fatih's instruction (via the supervisor) with a limited first scope. This entry maps M3.1's acceptance to evidence that already exists and proposes one small batch. Nothing here was executed: no gate run, render or code change. D-VIS stays OPEN, and nothing below claims publication readiness, export approval or visual quality.
+
+**Current candidate.** `main` `93c0a67` (PR #22). Its code and test tree equal the reviewed head `15798f5`; the only later change is documentation.
+
+| M3.1 acceptance | Existing evidence | Status |
+|---|---|---|
+| Workspace verify plus renderer E2E on both projects and the derived variant | `pnpm verify` (271 unit / 280 integration) and serial `pnpm test:e2e` 10/10 (664 s) on `15798f5`. `reference-projects` scenarios 1–3 cover `project-current-issues`, `project-general-explainer` and the `contrast` profile variant, plus owner flow, reuse, fonts and soundtrack | **Shown on equivalent code.** A formal rerun on the M3.1 head belongs to close-out (M3.1-C) |
+| Exact issue and exit codes | `command-contract.test.ts` (versioned events, usage/source/cancellation failures, redaction), `render-command.test.ts`, `validate-command.test.ts`, `cache-clean.test.ts` (exit 3 for usage) | Covered in integration (real CLI entry, in-process) |
+| Missing browser / FFmpeg | `command-contract` "reports missing browser and FFmpeg tools without attempting downloads"; M0.8.3 egress-denied run | Covered |
+| Unsafe assets | `svg-sanitize.test.ts`; path, hash and symlink checks in core load tests; output-symlink refusal in `preview-publication` | Covered |
+| Invalid timing | timing-message and M2.4.3 compiler tests (overlap, out-of-scene, rounding) | Covered at compile level |
+| Phrase requirements | narration-source and phrase-anchor tests (phrase ids, anchored starts, measured phrase timing) | Covered at compile level |
+| Word-level requirements | `profile.production.timing.wordLevelRequired` exists in the profile schema and is set in test fixtures, but no compiler or CLI code enforces it and no test proves an enforcement | **Open, not proven.** Not in this batch |
+| Stale sources | `command-contract` (stale after valid edit); `owner-flow` E2E | Covered |
+| Cache preservation | `cache-clean.test.ts` (keeps approved, selected and current builds; lock refusal; no symlink traversal) | Covered |
+| Source/build atomicity | preview and final publication failure injection (pointer kept, attempts cleaned); revision lock with stale-owner takeover (`revisions.test.ts`, synthetic lock file) | Covered with injected failures |
+| Cancellation | abort-signal paths in publication and command-contract; SIGINT handler unit test (`process-interruption.test.ts`) | **Gap:** no real CLI process interrupted or killed during rendering, with pointer, builds, lock, staging and browser descendants checked afterwards |
+| Canonical compiled hashes and decoded pixel hashes, twice on one runtime | key-order determinism (M0.8.2); `owner-flow` compares lossless frame hashes of a repeated build | **Partial/open:** known pixel-repeatability caveat (2026-09-20 failure, earlier 8/9 E2E runs) |
+| Final dimensions/fps/codec/audio/duration probe | `final-publication.test.ts` with a mocked probe; the only real final export is M1.3's Kore build (2026-09-20, old engine) | **Gap:** no real export probe on current code |
+| Pause and sample-boundary fixtures within one frame | narration timeline unit tests (pause and breath offsets); soundtrack E2E measures levels | **Partial:** compile-level only; not measured in rendered audio |
+
+**Proposed batch M3.1-A: real-process interruption during `renderMedia`, and recovery.**
+
+- **What it covers.** It proves only interruption while frames are being rendered (`renderMedia`). Cancellation during bundling, composition selection and preflight, and during post-processing (media validation, contact sheet, metadata, publication), stays outside this evidence. The publication stages keep their existing injected-failure tests.
+- **Setup.**
+  - `work/m3-1a/project` is a source-only copy of `samples/krakatau-draft`, with no `.naraframe`, `preview` or `revisions`.
+  - One baseline `preview --draft --json` publishes build B0. Record its pointer, `preview/builds` listing and `.naraframe` listing.
+- **Execution details (approved with the scope, 2026-09-29).**
+  - Each trial is compared with the pointer and build list recorded just before that trial, not with the first B0. A1's recovery publishes a new build, so A2's baseline is that build unless a separate project copy is used.
+  - The descendants' identities (PID, start time, command) are saved before the signal. The same PIDs are checked after the parent dies, including any that became orphans. Identity is verified again before any cleanup, and no process outside the trial is stopped.
+- **How a trial runs.**
+  - Each trial starts the CLI directly as `node packages/cli/dist/index.js preview <p> --draft --rerender --json` from a small scratch driver, so the signal goes to that Node process's PID and never to a `pnpm` or shell wrapper. `--rerender` makes sure there is a real render to interrupt.
+  - **Trigger:** the first stderr progress line from `Render 10%` to `Render 90%` inclusive. A trial that reaches `Render 100%` or exits first is recorded as *not interrupted in time* and is not counted as a pass.
+  - **Timeout:** 120 s per trial; on timeout the trial is recorded as a failure.
+  - **Descendants:** just before the signal and again afterwards, record the trial CLI's descendant process tree (Chrome/Remotion, found by parent PID) with PIDs and commands.
+- **A1 — graceful interrupt (SIGINT to the CLI PID).** Expect:
+  - exit 130 and exactly one JSON event with `status: "interrupted"` and `COMMAND_INTERRUPTED`;
+  - `preview/current.json` byte-identical to B0's, and no new directory under `preview/builds`;
+  - automatic cleanup, with no `.naraframe/attempts/*` left by this trial, no `.naraframe/lock`, and none of the trial's descendant processes alive within 10 s. A leftover attempt, lock or process is a finding, even if `cache clean` could remove it later;
+  - then `preview <p> --draft --rerender --json` publishes a new build with `reusedFromBuildId: null`.
+- **A2 — hard kill (SIGKILL to the CLI PID).** No JSON event or exit 130 is expected; only the kill status is recorded. Then, in order:
+  - record which of the trial's descendants are still alive (orphans) before any cleanup;
+  - stop only those recorded trial descendants, never other processes;
+  - confirm `preview/current.json` is still B0's and no partial build was published;
+  - record leftovers (`.naraframe/attempts/*`, `.naraframe/lock`);
+  - if an attempt remains, `cache clean --dry-run` must list it, and `cache clean` must remove it and keep B0;
+  - if a lock was left, the next command must take it over. If none was left, no takeover is claimed;
+  - `status` works, and `preview <p> --draft --rerender --json` publishes a new build with `reusedFromBuildId: null`.
+- **A3 — limited addition: a note edit during render.**
+  - Start the preview as above, and during `renderMedia` run a valid `edit` that changes only a scene `note`.
+  - Expect both commands to succeed, the published build to record the pre-edit `sourceRevision`, `status` to report the preview stale against the new revision, and pointer and revision history to stay consistent.
+  - This shows metadata consistency for a note-only edit. It says nothing about isolation of assets, audio or other source changed during a render.
+- **Automated coverage, after the manual path.**
+  - One E2E file, `packages/cli/test/e2e/interruption-recovery.test.ts`, covering A1 with the same trigger, direct PID, timeout and descendant checks.
+  - A2 is added only if it is deterministic; otherwise its manual evidence is recorded. A3 is manual evidence unless its timing proves reliable.
+  - No existing test is loosened.
+- **Gates.** The new E2E file alone and `pnpm verify`. The full serial E2E waits for M3.1-C unless a runtime or publication change is made.
+- **Boundaries.**
+  - No runtime change. A defect or new gap found here is recorded with its reproduction and a scoped fix is proposed for approval, never fixed inside this batch.
+  - No renders beyond the draft copy, no final export, no F3/F4 or other backlog.
+  - The local closure note stays local, and `AGENTS.md` is not staged.
+- **Expected size.** A few draft previews of an 18 s sample (about 20–30 s each), one new E2E file (about 1–2 min), and one verify.
+
+**Queued, not proposed now.**
+- **M3.1-B, technical final export.** A real `render --approve-preview` of a narrated fixture, with an ffprobe check of dimensions, fps, codec, audio and duration, and a rendered-audio check of pause and sample boundaries within one frame. This is a technical export only; it is not the Medan export under D-VIS and not a publication claim.
+- **M3.1-C, close-out.** Repeatability from two fresh renders on the same runtime, compared by canonical compiled hash and selected decoded pixel hashes, reported as they come without retry-until-green. Then formal verify and serial E2E on the M3.1 head.
+
+#### Active handoff — M3.1-A
+
+**Correction takeover — 2026-10-01: TECHNICALLY_READY, uncommitted.** Fatih asked the supervisor to continue after the implementer hit its usage limit. The correction was implemented on `m3-1a-interruption-recovery`; no runtime changes, Git integration or M3.1-B/C. The closure note, unrelated `AGENTS.md` change, Miss Ayu worktree and old stash remain untouched by this correction. Historical implementer evidence below is retained, not claimed as newly rerun.
+
+*Correction evidence (current candidate).*
+- The E2E harness owns baseline, interrupted and recovery processes. It records PID/start/command identities in a dedicated process group; timeout, spawn and assertion failures retain their evidence before unconditional teardown. Cleanup signals only re-verified identities, waits for termination, and retains temporary files on cleanup failure. Output drain is bounded to 2 seconds; missing files are accepted only for ENOENT. Browser-survivor assertions still run **before** emergency cleanup, so teardown cannot make a failed product cleanup pass.
+- Three short synthetic tests exercise timeout with descendants, assertion failure with descendants, and spawn error/output completion. An initial sandbox-denied `ps` run exposed a constructor leak; ownership inspection now runs before spawning. The implementer recorded and stopped the four synthetic processes by exact identities. Subsequent synthetic runs passed. This is test-harness work, not a product fix for F-A2.
+- The supervisor ran the corrected real A1 plus synthetic tests: **4/4**, 125.04 s, exit 0 (`work/gate-logs/m3-1a/e2e-correction-1.log`, SHA-256 `c3be9dd8d882996a7e6794e9fb8710ae3042c62a461d553b941f3f624f53240e`). Candidate test SHA at that run was `7c150f7086fe52cec50137a9ac029aa48036c2682ff32d367273cfcfac1cf3c7`.
+- First verify stopped at Biome `noUnsafeFinally`; no unit/integration result is claimed for that run (`verify-correction-1.log`). Throws were moved after `finally`, preserving the original failure and combining cleanup failure if present. The final test SHA-256 is `b60c222c7aeb6e185d10d4ffa0b93a5992fd9737c2fe7b47d5dc66c0dab0472f`.
+- On that final candidate the supervisor ran synthetic probes again: **3/3**, real A1 skipped, 1.80 s (`harness-correction-2.log`), then **pnpm verify passed**: Biome 159 files, typecheck/build, **271 unit / 280 integration**, exit 0 (`verify-correction-2.log`). The real A1 render was not repeated after this failure-path control-flow correction; its assertions, rendering and signal trigger were unchanged. No full serial E2E or long mutation/bite run was repeated.
+- A separate read-only reviewer found no blocker in the harness and rechecked the final `finally` correction. That review was static; it did not rerun the gates. The tests establish the recorded process-group/identity cleanup cases, not universal descendant ownership across arbitrary detached processes.
+- F-A2 remains **OPEN**: the actual SIGKILL trial observed ten Chrome descendants surviving for 10 seconds before manual cleanup. Indefinite survival, arbitrary crash/OOM behavior and actual SIGTERM behavior are not proven. Recommend a separately approved, documented cleanup procedure using recorded and re-verified NaraFrame process identities; do not kill generic Puppeteer/Chrome processes by name/profile.
+- Integration recommendation: this bounded test/documentation batch is technically ready for commit/PR when authorized, with F-A2 explicit. No commit, push or merge performed; M3.1 remains open pending B/C, and D-VIS remains OPEN.
+
+**Handoff — 2026-09-29 (implementer): READY_FOR_REVIEW, with one operational finding (F-A2) recorded, not fixed.** Branch `m3-1a-interruption-recovery` from `origin/main` `93c0a67`, uncommitted.
+- Runtime, engine and CLI are unchanged. The only new file is one E2E test, and this plan is updated.
+- The local closure note is kept, and `AGENTS.md` is not part of this work.
+- The Miss Ayu worktree and the old stash were not touched.
+- Evidence is in `work/m3-1a/` and `work/gate-logs/m3-1a/` (gitignored).
+- Scope as approved: interruption during `renderMedia` only. Bundling, composition selection/preflight and post-processing cancellation are not covered.
+
+*Setup.*
+- `work/m3-1a/project` is a source-only copy of `samples/krakatau-draft`, 18 s and 540 frames.
+- Baseline `preview --draft` published B0, `d6ad181a0f96-32704642-181`, in 44.3 s.
+- The trial driver `work/m3-1a/driver.mjs`:
+  - spawns `node packages/cli/dist/index.js preview <p> --draft --rerender --json` directly;
+  - triggers on the first stderr `Render 10–90%`, with a 120 s timeout;
+  - records the descendant tree (pid, start time, command) at the signal, then checks those identities right after the parent exits and again after 10 s.
+- Each trial compares with the pointer and build list taken just before it.
+
+*A1 — SIGINT* (`01-a1-sigint.json`). Signal at `Render 10%` (7.5 s into the run).
+- The CLI exited 66 ms later with **code 130** and **one** JSON line: `status: "interrupted"`, `COMMAND_INTERRUPTED`.
+- `preview/current.json` was byte-identical to the trial baseline (B0), and `preview/builds` was unchanged.
+- Cleanup was automatic: `.naraframe/attempts` was empty and there was no lock.
+- All **10** descendants (the headless Chrome for the render) were gone immediately after exit and still gone at 10 s.
+- Recovery with `preview --draft --rerender` published `d6ad181a0f96-cb95e786-0b1`, `reusedFromBuildId: null`, in 34.3 s (`02-a1-recovery.json`).
+
+*A2 — SIGKILL* (`03-a2-sigkill.json`). Baseline: the A1 recovery build `…-cb95e786-0b1`. Signal at `Render 10%` (7.4 s); the process exited by SIGKILL with no JSON line and no exit code, as expected.
+- The pointer still named `…-cb95e786-0b1`, `preview/builds` was unchanged, and no partial build was published.
+- There was no lock. The preview holds the project lock only while syncing source, so none was left and **no stale-lock takeover is claimed**.
+- One attempt was left, `.naraframe/attempts/b8cee814-…` (8.7 KB).
+- **Finding F-A2: the render browser is orphaned.** All 10 recorded descendants were still alive right after the kill and after 10 s. The root Chrome process was reparented to PID 1 and its 9 helpers stayed under it.
+- `work/m3-1a/stop-orphans.mjs` re-verified all 10 identities (pid, start time, command) and stopped only those with SIGTERM; all were gone, none needed SIGKILL (`04-a2-orphans-stopped.json`).
+- Then:
+  - `cache clean --dry-run` listed the leftover attempt, plus the unselected B0 build as ordinary cache (`05`);
+  - `cache clean` removed both and kept the selected build (`06`);
+  - `status` returned `previewState: current` (`07`);
+  - `preview --draft --rerender` published `…-bef2ec25-d08` with `reusedFromBuildId: null`, attempts empty and no lock (`08`).
+
+*A3 — note edit during render, limited* (`09-a3-edit-during-render.json`).
+- A scene-`note`-only `edit` ran at `Render 10%` of a forced preview and succeeded, creating revision `b5c4046e…`.
+- The preview finished (exit 0) and recorded the pre-edit revision `6b85450e…`.
+- `status` afterwards reported `previewState: stale` against the new revision, with the current revision `b5c4046e…`.
+- This is metadata consistency for a note-only edit. It is not evidence about assets, audio or other source changed during a render.
+
+*Automated coverage (original implementer candidate, before the correction above).*
+- New `packages/cli/test/e2e/interruption-recovery.test.ts` (SHA-256 `2e2f60ab…c53f891`) automates A1:
+  - source-only temp copy and baseline preview;
+  - SIGINT to the CLI's own PID at render progress 10–90%, with a 120 s timeout;
+  - exit 130 and exactly one `COMMAND_INTERRUPTED` event;
+  - pointer and builds unchanged, attempts empty, no lock;
+  - no recorded descendant alive within 10 s, checked by identity including orphans;
+  - `--rerender` recovery with `reusedFromBuildId: null`.
+- Alone it passed 1/1 in 105.6 s (`work/gate-logs/m3-1a/e2e-interruption-1.log`).
+- A2 is not automated: asserting on orphan cleanup would be a test that stops browser processes, and F-A2 is an open finding. Its evidence stays manual. A3 also stays manual evidence.
+- Bite check: with `controller.abort()` removed from the CLI's SIGINT handler, the test failed after 169.7 s because the render ran on (`e2e-interruption-bite.log`). The code was restored (`cmp`) and rebuilt; no puppeteer Chrome process remained afterwards.
+
+*Checks.*
+- `pnpm verify` passed: Biome 159 files, typecheck/build, 271 unit and 280 integration (`work/gate-logs/m3-1a/verify-1.log`).
+- The full serial E2E was not run: no runtime or publication change, as approved. It is scheduled for M3.1-C.
+
+*Finding F-A2 (recorded, not fixed; needs a decision).*
+- In the recorded SIGKILL trial, the render's 10 recorded Chrome descendants were still alive immediately after CLI exit and at the 10-second check; they were then stopped manually. Indefinite lifetime and behavior after other crashes or OOM were not tested.
+- Nothing in NaraFrame reports or removes it: `cache clean` handles files only, and `doctor` does not look for processes.
+- The real-process SIGINT trial cleaned up automatically. SIGTERM has handler-level coverage, but was not exercised by this real-process trial.
+- This is an operational risk (leaked memory/CPU after crashes), not a data-integrity problem: pointer, builds and revisions stayed consistent.
+- Options for a scoped follow-up:
+  - (1) `doctor` reports confirmed NaraFrame-owned orphan processes; a Puppeteer profile alone is not sufficient ownership evidence;
+  - (2) a documented cleanup step restricted to recorded, re-verified trial/process identities (supervisor's recommended first mitigation; not implemented as a product feature here);
+  - (3) launching the browser so that it exits with its parent, if Remotion allows it.
+- No fix is made in this batch.
+
+*Acceptance.*
+- A1 met, and automated.
+- A2 met as specified, since recording and trial-only cleanup were the acceptance, with F-A2 recorded.
+- A3 met within its limited claim.
+- M3.1's cancellation and atomicity rows now have real-process evidence for the `renderMedia` stage. The other M3.1 rows are unchanged, and the M3.1 checkboxes stay open until M3.1-B/C.
+- M3.1-B/C were not started. D-VIS stays OPEN.
 
 ### M3.2 — Human visual/audio and mixed-route workflow
 
