@@ -168,6 +168,8 @@ Historical sections below retain dated checklists/reviews. Labels such as “M3 
 
 Settled product requirements: profiles drive repeated multi-brand production; all three explicit audio modes; native final/native preview; substantive revisions and safe reuse; actual owner output acceptance. Recommendation: expressive parameterized Remotion on the existing production layer. Open experiment: whether that route matches the TutorLog reference with bounded work, then integrates economically. Do not interpret “recommended” as “visually proven”.
 
+**Status 2026-10-04:** M3.P0 is CLOSED / INTEGRATED via PR #24 (`b1875e2`). The next task is M3.P1a; it starts only after Fatih authorizes it. The original P0 instruction follows for history.
+
 First task is M3.P0, not Medan polish or new primitives. Read live status/AGENTS/spec 0.7/refinement 13/this section and the exact M3.1-B handoff. Preserve candidate hashes and prior gates, unrelated files, failed outputs and existing worktrees/stash. Present checkpoint artifact/evidence and request missing Git authorization; absent that authorization stop without implementation/Git. If authorized, integrate only the approved unchanged audio checkpoint, then stop and report SHA/paths/evidence. P1a and later require the corresponding task authorization, not a wholesale architecture rewrite. Supervisor reviews code/diff/runtime evidence; Fatih decides visual acceptance and route changes. No new parallel plan.
 
 ## 1. Global constraints
@@ -2142,7 +2144,7 @@ Use a lightweight handoff record, not new infrastructure, for NF-CO-02. Compare 
 
 ## 8. Historical M3 scope and active audio checkpoint evidence
 
-The evidence below is retained. M3.1-B/B1's uncommitted checkpoint is dispositioned first in M3.P0; later unchecked tasks follow the mapping in section 0.2 rather than automatic execution of the old sequence. Historical entry-gate wording is not authority to require Medan polish before the new pilot.
+The evidence below is retained. M3.1-B/B1's checkpoint was dispositioned in M3.P0 and integrated via PR #24 (`b1875e2`) on 2026-10-04; later unchecked tasks follow the mapping in section 0.2 rather than automatic execution of the old sequence. Historical entry-gate wording is not authority to require Medan polish before the new pilot.
 
 **Entry gate (revised 2026-09-28 by Fatih's technical-closure decision):**
 - M2 is closed for its technical scope.
