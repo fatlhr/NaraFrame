@@ -1,26 +1,28 @@
 # NaraFrame MVP Product and Technical Specification
 
-Status: Active product contract; reference-first M2.4 recovery approved; first opening rejected, recovery not implemented
+Status: Active product-direction revision; profile-first production and bounded expressive-authoring pilot planned, not implemented
 
-Revision: 0.6
+Revision: 0.7
 
-Date: 2026-09-20
-Implementation status: M0, M1, and M2.1–M2.3 retain recorded delivery evidence on main at `7b232c9`. M2.4.1 has an unmerged implementation at `9747193`; Fatih rejected its first opening, then accepted the recovered static direction. Supervisor recovery now includes a rendered 3-second camera/parallax/object-motion study awaiting owner review; this is not full opening acceptance. The supplied 8.9-second recording has been sampled; full reference playback, remaining integration gates, pixel repeatability and comparative costs remain open in `docs/plan.md`. M3 waits for visual and generalisation gates.
+Date: 2026-10-04
+Implementation status: M2 closed technically through PR #22 (`93c0a67`); M3.1-A integrated through PR #23 (`8463764`). M3.1-B/B1's audio correction was integrated through M3.P0 via PR #24 (`b1875e2`) with reused gates. D-VIS, pixel repeatability and measured comparative costs remain open. The TutorLog benchmark failed native final export without narration and was judged visually inferior to Bang Motion by Fatih. The new contracts below are requirements, not available capabilities. Execution order and historical dispositions are in `docs/plan.md`, section 0.
+
+**Contract precedence.** Revision 0.7 supersedes the former global narration requirement, semantic-only authoring restriction, universal GUI-editability promise and historical requirement to finish Medan before new product work. Delivered version-1 declarative projects remain supported. Dated M0–M3 evidence and NF-AC-16/17 retain their original scope; no failed or deferred gate is retroactively passed. New implementation requires a separately authorized task.
 
 ## 1. Summary
 
-NaraFrame is a local-first production system for faceless vertical motion explainers. A user can give a topic to Codex, let the NaraFrame skill coordinate content preparation, review a generated preview, and ask the NaraFrame core to render the final MP4.
+NaraFrame is a local-first, profile-driven production system that helps one creator repeatedly turn briefs and reusable brand assets into visually strong, revisable vertical videos ready for upload.
 
 NaraFrame consists of one production pipeline with two responsibilities:
 
 1. The NaraFrame skill guides Codex through research, script writing, scene planning, asset preparation, narration preparation, validation, preview review, and revision.
-2. The NaraFrame core validates declarative project artifacts, resolves a pinned creative profile, compiles a deterministic timeline, and renders preview/final media.
+2. The production core validates local inputs, resolves a pinned brand profile, tracks revisions/dependencies and coordinates preview/final artifacts. The existing declarative renderer remains supported; a bounded pilot will evaluate parameterized trusted Remotion compositions before selecting the next authoring contract.
 
 The skill and core work in an interleaved loop. Codex invokes core commands at checkpoints instead of preparing the entire project before receiving validation.
 
 ## 2. MVP goal
 
-Prove that one creator can repeatedly produce publishable 9:16 motion explainers through a chat-first Codex workflow while retaining manual control through project files and the CLI.
+Prove repeated multi-brand production: select a profile, supply a brief/assets and the desired audio mode, review a native-resolution video, request substantive revisions, and receive an approved final MP4 without designing engine features for each episode. Agent mediation is primary; manual files/CLI remain supported.
 
 The MVP is successful when:
 
@@ -28,16 +30,18 @@ The MVP is successful when:
 - Codex can follow the NaraFrame skill and create conforming local artifacts using available external tools;
 - the core can validate partial and complete project states;
 - a complete project can produce a reviewable preview, contact sheet, report, and final MP4;
-- the same pinned inputs can reproduce the same compiled project and frame pixels in a pinned runtime;
-- revisions do not require editing renderer implementation code.
+- the same pinned inputs reproduce canonical compiled inputs; frame evaluation is independent of playback order, with pixel repeatability measured rather than claimed from one green run;
+- routine content/framing/asset/choreography revisions do not require production-core or renderer-adapter patches;
+- three different LBC videos reuse one pinned profile, followed by a compatible profile switch without leaked logo, CTA or unrelated business claims;
+- voice + music, music-only and explicitly timed silent projects can each reach legitimate final output when their own dependencies are ready.
 
-Visual quality is a first-class product goal alongside revision control and reuse. M2.4 must demonstrate competitive visual storytelling against the owner's Medan/Bang Motion reference and transfer it to a different topic. Technical validity alone does not make a video publishable; NF-AC-16/17 define the new visual and revision gates.
+Visual quality is a first-class product goal alongside revision control and reuse. The next decisive evidence is a same-brief TutorLog pilot against the owner's chosen Bang Motion result, then repeated LBC production (NF-AC-18–20). Primitive counts, schema strictness and test totals alone are not product success. Historical NF-AC-16/17 remain deferred under D-VIS, not prerequisites to this pilot or passed visual claims.
 
 ## 3. Product principles
 
 ### NF-PR-01: Vertical-first
 
-MVP output is 9:16. Final rendering defaults to 1080 × 1920 at 30 fps. Preview defaults to 540 × 960 at 30 fps.
+MVP output is 9:16. Final rendering is native 1080 × 1920 at 30 fps. Preview defaults to fast 540 × 960, with an explicit native 1080 × 1920 review option; it is not an upscale of the draft. Resolution and draft/production readiness are independent. Current implementation only permits 540 previews; the high-resolution option is planned.
 
 ### NF-PR-02: Local-first
 
@@ -57,11 +61,11 @@ Editorial direction, branding, visual rules, caption behavior, and render defaul
 
 ### NF-PR-06: Semantic motion
 
-Authors choose semantic visual forms and actions. Raw animation keyframes are not part of the MVP project schema.
+Semantic forms/actions remain the default for supported declarative projects, not the only permissible authoring language. Parameterized compositions may use frame-indexed keyframes, interpolation, masks and local transforms internally. The user need not author keyframes. Do not expand a universal JSON animation language merely to translate every expressive composition into primitives.
 
 ### NF-PR-07: Measured extensibility
 
-MVP favors tested, composable capabilities. A named benchmark or recurring production need can justify new visual vocabulary even when no existing validator reports an error. M2.4 is the approved expansion for the Medan reference. Arbitrary per-project React/TSX scenes are excluded.
+Prefer a small reusable composition that proves a real video over a broad capability catalogue. The initial experiment uses installed Remotion and the existing output pipeline. A trusted local custom composition is an explicit escape route when the recipe is insufficient; it is executable code, not passive asset data. Unreviewed code execution and automatic adoption of arbitrary packages remain excluded. Select one production route after the pilot; no multi-renderer framework.
 
 ### NF-PR-08: Layout-safe output
 
@@ -73,11 +77,11 @@ Composition, illustration, motion, continuity, and explanatory clarity are judge
 
 ### NF-PR-10: Reference-first visual delivery
 
-When a working visual reference exists, preserve its demonstrated artwork, typography, framing, and choreography in a bounded engineering comparison before redesigning them or expanding a generic capability catalogue. Adapt the required mechanisms as trusted reusable renderer code; reference/project content remains local data. Port only the mechanisms needed by the active shot and expose the minimum editable inputs through the existing source/compiled boundary. Do not implement the whole planned vocabulary before producing a visible comparison.
+When a working visual reference exists, inspect its actual playback and authoring/export mechanisms. Preserve the brief, copy, official assets and audio as the comparison control; composition and choreography may improve rather than imitate every frame. Prefer reusable parameterized mechanisms and expose the content/framing controls needed by the pilot. Do not implement the whole planned vocabulary before producing a visible comparison.
 
-An opening that retains reference quality proves runtime fidelity, not creative superiority or cross-topic generalisation. Immediately follow its acceptance with a different-topic opening on a frozen engine, before expanding the complete reference video. All claims still require the final NF-AC-16/17 gates.
+Matching an adapted reference proves fidelity, not independent creative superiority. The TutorLog quality decision belongs to Fatih and applies to that benchmark. Freeze the selected implementation before the three-video LBC trial; no per-episode engine patches.
 
-Future GUI compatibility means stable editable identities and source data; it is not a reason to design a universal animation editor in advance. If faithful motion cannot fit the authorised data contract, record the exact missing mechanism and seek a scope decision instead of substituting an inferior effect or loading project code.
+Future GUI compatibility applies to declared content/profile/recipe parameters, not arbitrary composition internals. If the pilot remains weaker or needs repeated engine patches, stop expansion and consider the existing Bang Motion workflow as the alternative authoring/export route. Neither sunk costs nor a hypothetical GUI justify a poorer output contract.
 
 ## 4. Scope boundary
 
@@ -86,9 +90,10 @@ Future GUI compatibility means stable editable identities and source data; it is
 The intended user journey begins with a topic:
 
 ```text
-User topic
-→ Codex follows NaraFrame skill
-→ research/script/scene plan/assets/narration
+Profile + brief + supplied assets + audio choice
+→ agent follows NaraFrame skill
+→ copy/art direction/reusable composition + relevant local assets
+→ prepared voice/music only when requested
 → staged core validation
 → preview and report
 → Codex/user revision loop
@@ -105,7 +110,7 @@ The core begins with local structured artifacts. It owns:
 - project/profile schema validation;
 - profile resolution and override enforcement;
 - asset resolution and safety checks;
-- narration-driven timeline compilation;
+- narration-driven or explicitly timed timeline compilation, according to the selected audio mode;
 - scene/layout/motion rendering;
 - caption/audio composition;
 - preview, contact-sheet, report, and final output generation;
@@ -162,7 +167,7 @@ Skill and manual routes use the same project format, validation rules, revision 
 
 ### NF-UX-03: Plain-language revisions and future GUI authoring
 
-Users can request changes such as “slow down the camera”, “replace this object”, or “change the visual identity” without learning JSON or writing code. The agent maps them to stable scene/object/text/camera/motion identities, reports the affected scope, and uses the existing edit/undo path. Source remains structured data editable by a future GUI; neither opaque executable scenes nor user-authored keyframes are required. Manual JSON control remains available, not mandatory for ordinary revisions. No GUI, mandatory wizard, or new nondeveloper study is added by M2.4.
+Users can request changes such as “slow down the camera”, “replace this object”, or “change the visual identity” without learning JSON or writing code. The agent maps them to stable content/asset/recipe parameters and records affected dependencies through managed revisions. A bounded custom composition may require the agent to edit its trusted code; this is distinct from patching the shared engine. The resulting code/parameter changes must be revisioned, hashed and reversible. Only declared parameters are promised as future GUI controls. No GUI or onboarding wizard is added now.
 
 ### 5.2 Primary mode: chat-first
 
@@ -212,7 +217,7 @@ The user may call the same commands and edit the same JSON/Markdown artifacts wi
 
 ### NF-CAP-01: Production capability readiness
 
-The skill checks available/unavailable/unverified capability status before production. Research depends on the profile/brief; image generation is optional when native or existing assets suffice; TTS is required unless ready narration is supplied; phrase timing is required for narrated production. Local renderer readiness is checked by `doctor`; it cannot infer external tools/accounts that it cannot inspect.
+The skill checks available/unavailable/unverified capability status before production. Research depends on the profile/brief; image generation is optional when native or existing assets suffice. TTS is needed only when speech is requested and ready narration is not supplied; measured phrase timing is required for narrated production. Music-only/silent projects use explicit timing and require no TTS or dummy narration. Local readiness is checked by `doctor`, not inferred for external accounts.
 
 Distinguish prepared-media diagnostics, no-new-spend visual draft, and narrated production. Missing TTS allows a labelled silent draft and actionable next step, not a narrated-success claim. MVP requires one documented and runtime-tested Indonesian narration/timing recipe outside core. Record tool/provider, settings, timing support, usage limits, price source/date when available, and recipe evidence; do not invent provider availability.
 
@@ -425,7 +430,30 @@ Editing/cloning a source profile changes defaults for future use, not existing p
 
 MVP profile inputs are either an explicit local directory or an ID resolved from the repository's `profiles/` directory. Remote and global user profile registries are excluded. Once locked, a project does not need the original profile path to compile or render.
 
+### NF-PF-06: Brand, recipe and episode are distinct
+
+- **Brand profile:** pinned identity/direction, audience, editorial constraints, approved CTA destinations/copy, local asset catalogue with roles/ownership/provenance, and audio/render defaults. Logo, tutor photo, product screenshot and background are different roles. Current profiles already pin direction/config/font and PNG assets; machine-readable CTA, audience, asset-role selection and audio-mode policy are planned additions, not implemented fields.
+- **Content recipe/composition:** versioned reusable presentation/choreography with declared parameters, compatible asset roles and timing requirements. A profile recommends recipes rather than forcing one shot order.
+- **Episode:** brief, verified claims/copy, selected asset IDs, framing, audio/timing, and composition parameters or an explicitly trusted custom composition. An episode does not silently modify shared brand defaults.
+
+A profile switch dry-run must show brand-bound replacements, layout/audio effects, incompatible roles and editorial review. Unknown compatibility does not permit another brand's logo, person or CTA. Preserve neutral assets only when relevance is established; final blocks unresolved required identity bindings. Switching appearance never validates business claims: review meaning and preserve compatible facts with provenance or obtain an explicit content change. Undo restores the prior profile, recipe/code references, parameters and asset selections; receipts remain append-only.
+
 ## 11. Scene model
+
+### NF-AU-01: Bounded expressive authoring (pilot contract)
+
+Start with one trusted local Remotion composition and JSON-compatible content/profile/asset/framing/timing parameters, using the installed exact-version runtime. Stable IDs distinguish editable content from reusable presentation. The thin pilot bridge must use normal source revisions, preview approval, output metadata and atomic publication before claiming production-ready NaraFrame output. An isolated direct-Remotion study can inform the choice, but is not managed final success.
+
+Trusted custom authoring is an opt-in local execution boundary, not a schema sanitizer or sandbox guarantee. Agent-produced code is untrusted until reviewed/explicitly accepted for that project. Requirements:
+
+- resolve within designated project/bundled composition roots, with traversal/symlink checks; never execute SVG, Markdown or media as code;
+- use pinned installed dependencies and local inputs only; no render-time network, providers, package installs, arbitrary shell execution or secrets/environment-based content;
+- derive poses from frame/time and explicit seeds, not playback state, wall-clock time or unseeded randomness; seek/reverse-order checks precede deterministic-evaluation claims;
+- hash composition identity/version, entry and local transitive code, parameters, relevant profile/assets/fonts/audio and runtime/settings into render keys; keep unrelated voice generation keys separate;
+- retain code dependencies/parameters in immutable source snapshots or equivalent verified local bundles referenced by them. Code edits invalidate approval/render keys; undo restores code/inputs, not merely a path;
+- document supported parameter edits and validation coverage. Layer-based collision/contrast checks cannot be assumed to inspect custom markup; use recipe-specific technical checks plus output review and disclose gaps.
+
+No arbitrary-code auto-loader, universal plugin API, GUI code editor or portable renderer abstraction is required. Version-1 declarative projects retain existing coordinate/motion defaults. New authoring is explicit and advertised only after proof, with clear rejection by older engines. The pilot determines the smallest added source contract; it does not already exist.
 
 ### 11.1 Separation of meaning and form
 
@@ -516,7 +544,7 @@ easingPreset
 
 `focus` may use camera presets such as push, pan, or zoom. A beat MUST target a compatible layer/capability. Unknown actions, targets, or unsupported parameter combinations fail validation.
 
-Raw keyframes, arbitrary CSS/JS animation, and arbitrary executable components are excluded.
+For the version-1 declarative path, raw keyframes and executable CSS/JS are not schema inputs. NF-AU-01 permits trusted composition internals without a universal scene schema.
 
 M2.4 extends the vocabulary with object translation/rotation/scale, enter/exit, path drawing, path following, count-up/data growth, and text stagger/highlight. These are bounded semantic actions, not a free-form animation language. Each action declares its target and timing. Sequential actions preserve their preceding resolved end state; overlapping writes to the same target property are rejected with a source-targeted issue. Independent properties can animate together. Every pose is evaluated from the frame, without playback-order state. Text stagger is decorative unless verified word timing is explicitly referenced.
 
@@ -524,7 +552,7 @@ M2.4 extends the vocabulary with object translation/rotation/scale, enter/exit, 
 
 M0 uses `cut`. M0.9 may add a bounded overlap or object-wipe transition only when the LBC benchmark demonstrates the need; later recipes may add `push` and `mask`. Transitions occur within existing visual intervals and MUST NOT alter the resolved narration timeline duration.
 
-`focus` can move a whole scene or declared group as a camera/world rig around a bounded focal anchor. Authors select semantic presets and targets, not raw keyframes, arbitrary CSS/JS animation, or GSAP timelines. Scene-to-scene continuity SHOULD preserve a visual through-line when the content supports one; it must not force the same motion template onto unrelated topics.
+`focus` can move a scene or group as a camera/world rig. Declarative authors select supported presets/targets; expressive compositions can choreograph shared objects under NF-AU-01. Continuity should support the story, not force variety or one template onto unrelated content.
 
 ### 11.7 M2.4 composition, camera, and integration contract
 
@@ -537,11 +565,17 @@ M0 uses `cut`. M0.9 may add a bounded overlap or object-wipe transition only whe
 
 These are target contracts, not a claim that the complete vocabulary is implemented. M2.4.1 already has partial SVG/rich-text code with open review findings. Implement the minimum coherent camera/world/object/type slice required to retain opening quality first; the original layer-by-layer schedule is superseded by NF-PR-10. Extend remaining mechanisms only with the shots that need them.
 
-## 12. Narration-driven timeline
+## 12. Audio-mode-driven timeline
 
 ### NF-TL-01: Resolved composition clock
 
-One compiled timeline resolves ordered narration clips and explicit pauses. Rendering does not generate or align speech. Local clip durations are probed; the compiler derives global offsets. An assembled narration master, if generated, is derived output, never a mandatory authoring input. Draft-only timing is provisional and cannot authorize final rendering.
+One compiled timeline has an explicit authority. Voice mode resolves ready narration clips/pauses; rendering does not generate or align speech. Music-only/silent mode resolves approved explicit scene/composition durations. Music never silently sets video length; trim/loop/fades follow that clock. Missing required voice is not converted to music-only by inference. Provisional placeholder timing remains draft-only; approved explicit timing without speech is legitimate production input after the new route is implemented.
+
+### NF-TL-06: Production audio modes
+
+The brief selects voice (optionally with music), music-only, or silent, subject to intentionally locked profile requirements. An unspecified choice can use the profile default but must appear in the rundown/result. Voice requires ready voice, text/style binding and measured timing; music-only requires ready music and explicit video timing; silent requires explicit timing and no accidental audio stream. Planned/corrupt media blocks final in every mode. Do not fabricate empty/silent narration to pass the old gate. Without speech, editorial text is composition content, not speech-derived captions.
+
+Narrated timing and M3.1-B/B1 audio correctness remain intact. Production currently requires narration globally; implementing and proving these three export routes is scheduled work, not a result of this spec edit.
 
 ### NF-TL-05: Story-block authoring
 
@@ -630,7 +664,7 @@ The caption renderer MUST enforce profile rules for safe zone, maximum lines, mi
 
 MVP audio graph supports:
 
-- one resolved narration track assembled from local block clips and explicit pauses;
+- zero or one narration track, required only in voice mode, assembled from local blocks/pauses;
 - zero or one background-music asset;
 - zero or more SFX cues associated with scene beats or explicit timestamps.
 
@@ -699,7 +733,7 @@ The command-result field `fingerprint` identifies canonical compiled render inpu
 
 ### NF-CP-03: Determinism claim
 
-With the same fingerprint and pinned runtime, NaraFrame MUST produce the same compiled manifest and selected frame pixels.
+With the same fingerprint and pinned runtime, NaraFrame must produce the same canonical compiled inputs and frame-derived animation independent of playback order. Pixel repeatability is a separate acceptance target with a known open failure, not a current product guarantee. Report differences from two fresh renders without retry-until-green or silently changing tolerances.
 
 MVP does not promise byte-identical encoded MP4 files across operating systems or encoder builds.
 
@@ -857,7 +891,7 @@ frames.json
 manifest.json
 ```
 
-Resolve these under `preview/builds/<build-id>/` via `preview/current.json`. Default preview is 540 × 960, 30 fps, H.264/AAC MP4; an explicitly silent draft may omit audio and reports that fact. Scene preview compiles the required scope according to NF-PV-01, including exclusive-to-inclusive frame adaptation. Draft labels must be visible in preview and report; approval of a draft does not authorize final export of placeholders.
+Resolve these under `preview/builds/<build-id>/` via `preview/current.json`. Preview defaults to 540 × 960 with a planned native 1080 × 1920 option; both use 30 fps. H.264/AAC is used with audio; silent output has no audio stream and reports that fact. Scene preview follows NF-PV-01 and records isolated scope/music limitations. Resolution, frame checks, labels, artifact metadata and keys must agree. A high-resolution draft remains a draft; approval never authorizes placeholders in final.
 
 ### NF-QA-02: Contact sheet
 
@@ -865,7 +899,7 @@ The contact sheet includes scene entry, a settled composition, relevant semantic
 
 ### NF-QA-03: Final output
 
-Default final output is `final.mp4` in the selected immutable output build, with `output/final.mp4` as a convenience export: 1080 × 1920, 30 fps, H.264/AAC. Exact CRF/bitrate, pixel format, and color-space settings are selected by the renderer spike and recorded in the build manifest. Consumers use the artifact path reported by CLI, not assumptions about convenience-copy freshness.
+Final output is `final.mp4` in the selected immutable build, with `output/final.mp4` as a convenience export: native 1080 × 1920, 30 fps, H.264 and AAC when audio is requested, no audio stream in silent mode. Record encoding settings and consume the CLI artifact path. Ready music-only/silent output is not a draft fallback after NF-TL-06 is implemented. Final export approval is distinct from posting authorization.
 
 ### NF-QA-04: Build manifest
 
@@ -882,7 +916,7 @@ M2.4 uses early matched-frame and short-motion review before broad implementatio
 ## 21. Security and trust boundaries
 
 - Project JSON, Markdown, SVG, media, and agent-produced content are untrusted inputs.
-- No project artifact may execute arbitrary JavaScript/TSX in MVP.
+- Passive project data/assets never execute JavaScript/TSX. Explicit trusted local compositions follow NF-AU-01; accepting code is a separate trust decision, not a result of JSON/media validation.
 - Asset resolution prevents path traversal and symlink escape.
 - Rendering does not load remote URLs.
 - SVG handling is sanitized or isolated.
@@ -905,7 +939,7 @@ Contact sheet: renderer stills plus a proven image-composition library
 
 All `remotion` and `@remotion/*` packages MUST use the same exact version. No browser Studio/Vite application is created in MVP.
 
-M0.9 may add the exact-version-matched `@remotion/layout-utils` package for deterministic text measurement and fitting. The historical policy treating Bang Motion only as a composition/review reference is superseded for M2.4. Its working starter/camera/timeline/object/type mechanisms may be adapted into trusted, versioned Remotion runtime modules. The engine must not load arbitrary project HTML/JS/GSAP timelines, embed a reference player, or flatten the reference into video/images to claim parity. Keep project-specific artwork/choreography in data, preserve the core/renderer boundary, and keep render-time assets/fonts/dependencies local. Pin the upstream revision and retain applicable copyright/licence notices for adapted code; reference artwork/fonts have their own provenance and rights.
+The installed Remotion 4.0.521 pipeline is the first pilot candidate; no upgrade or new dependency is authorized by this document. Bang Motion is a skill plus HTML/GSAP authoring/export workflow, not a replacement engine to import wholesale. Its local stage/world rig, explicit timeline and frame-seek/export mechanisms can inform trusted Remotion compositions. Keep local fonts/media, preserve licence/provenance obligations, and do not embed or flatten a reference video as proof. If the bounded Remotion pilot fails, evaluate the existing Bang workflow as one alternative route and choose explicitly; do not build simultaneous adapters/frameworks.
 
 M2.4 may add exact-version-matched `@remotion/paths` to the renderer for path drawing/following. Core continues to store and validate renderer-independent data. This approved dependency direction is not an instruction to install packages during the documentation-only stage.
 
@@ -931,13 +965,13 @@ The renderer defaults to a 180-second safety limit to catch accidental timestamp
 - Production capability recipe, budget/receipts, block-local voice revision, and source edit/undo.
 - Technical and visual QA evidence, including the corrective LBC parity benchmark.
 
-Delivery gates are M0 first visual draft, M0.9 fidelity correction, M0.10 initial visual growth, M1 narrated revision, M2.1–M2.3 scoped preview/profile/audio/reference scenarios, M2.4 competitive visual storytelling and cross-topic revision, then M3 owner dogfooding/reliability evidence. Earlier gates retain their recorded historical scope. M2.4 is inserted after delivered M2.3; M3 must wait for NF-AC-16/17. Detailed sequencing and evidence live in `docs/plan.md`.
+Earlier M0–M3 delivery evidence retains its scope. M2 closed technically; historical NF-AC-16/17 remain D-VIS, not passed. The next production sequence is checkpoint disposition → native audio-mode output/review → TutorLog authoring pilot/route choice → reusable brand controls → frozen LBC production/revisions/profile switch. Detailed sequencing is in `docs/plan.md`, section 0; old unfinished checkboxes are not automatic instructions to resume unrelated hardening.
 
 ## 25. Explicit non-goals
 
 - custom NaraFrame GUI or browser Studio;
-- arbitrary per-project TSX/React scenes;
-- manual keyframes or curve editor;
+- unreviewed arbitrary code execution and a universal composition/plugin framework; NF-AU-01's trusted local escape route is in scope for the bounded pilot;
+- a manual keyframe/curve editor (frame-derived composition internals are allowed);
 - generic node/timeline editor;
 - built-in research/image/TTS providers;
 - provider API keys;
@@ -945,7 +979,7 @@ Delivery gates are M0 first visual draft, M0.9 fidelity correction, M0.10 initia
 - cloud render/storage, auth, collaboration, or multi-user projects;
 - publishing, scheduling, or social platform integration;
 - multiple aspect ratios;
-- 3D production, complex simulation, or character rigging;
+- general 3D production, simulation or character rigging; a small perspective transform inside a trusted composition is not a new 3D-engine project;
 - automatic fact-checking;
 - frame-level render resume;
 - schema migration tooling before a second schema version exists;
@@ -971,7 +1005,7 @@ Two independent source projects plus one derived profile-switch variant prove th
 2. a derived variant of the first project after profile re-application, with snapshot comparison, invalidation report, and layout revalidation;
 3. a different explainer using media, stat, list/comparison, and layered composition.
 
-All reference projects render without per-project executable scene code.
+These original declarative reference projects render without per-project executable scene code. This preserves their compatibility evidence; it does not prohibit the separately accepted trusted-composition pilot in NF-AU-01/NF-AC-19.
 
 ### NF-AC-04: Manual correction
 
@@ -985,7 +1019,7 @@ Missing/corrupt assets, invalid timing, unsupported actions, unsafe paths, and l
 
 ### NF-AC-06: Determinism evidence
 
-In the pinned reference environment, repeated compilation produces an identical canonical manifest hash and repeated selected-frame renders produce identical pixel hashes.
+In the pinned reference environment, repeated compilation produces an identical canonical manifest hash. Matching selected-frame pixel hashes remain an unfulfilled repeatability target, not a proven consequence of canonical input or frame-based motion; report measured differences and disposition them explicitly.
 
 The reference environment includes the same machine/OS, browser executable and rendering backend, local fonts, Remotion packages, FFmpeg, and render settings. Cross-machine pixel identity remains unproven.
 
@@ -1026,7 +1060,7 @@ Given three voice blocks, change the middle block's speech. Initially regenerate
 ### NF-AC-13: Scoped preview, reuse, and build integrity
 
 - Ready scene 2 and missing scene 7 asset: selected preview succeeds, final fails.
-- No voice: draft reports provisional timing and muted state; it cannot count as final-ready.
+- Missing required voice: draft reports provisional timing and the actual audio state; it cannot count as final-ready. An explicitly timed music-only or silent project follows NF-TL-06/NF-AC-18 instead and must not be rejected solely for lacking narration.
 - Caption-only correction: no voice/image calls, unrelated scene key unchanged.
 - Editorial note change: new sourceRevision, potentially reusable pixels, factual approval reconsidered as required.
 - Crash before current-build pointer promotion: old video/report/contact-sheet remain one current build.
@@ -1055,6 +1089,8 @@ Using the same LBC source intent and local assets as the direct-Remotion referen
 
 ### NF-AC-16: Competitive Medan visual storytelling
 
+**Historical benchmark contract, deferred as D-VIS.** The criteria below retain their original scope and remain unpassed; they do not dictate the new production pilot's authoring restrictions or sequencing. See NF-AC-18–20 and plan section 0.
+
 **Early fidelity gate (M2.4.1):** compare the same 6–10s opening interval (the current reference boundary is 0–6.4s) at equivalent display size and matched times. Keep reference artwork, typography, framing and choreography as the control; document every unavoidable conversion or omission. Review an initial representative frame and 2–3s motion study before completing the opening. Both sides may be muted for the visual comparison; retain the original narrative schedule. Fatih must judge no relevant dimension worse, including within-shot continuity. A simplified replacement illustration, a clip of the reference, or a test-only composition bypassing public project authoring does not pass. This gate permits a faithful adaptation; it does not satisfy the full superiority criterion.
 
 **Full benchmark gate (M2.4.4):** use the owner's Medan reference, the same narration audio/content, and approximately its 67.5-second duration. Preserve reference source/audio hashes and review actual playback; reading HTML is not visual acceptance. Compare at equivalent display size and matched narrative moments, recording resolution/fps/encoding differences. Do not treat the reference script's factual claims as independently verified by this visual benchmark.
@@ -1063,19 +1099,35 @@ Fatih rates five dimensions as worse/equal/better: composition/typography, illus
 
 ### NF-AC-17: Cross-topic first draft and approachable revisions
 
+**Historical benchmark contract, deferred as D-VIS.** The original trial criteria below remain recorded, not silently passed. Their silent-final exclusion and M3 entry rule were superseded; next production acceptance uses NF-AC-18–20.
+
 **Early transfer gate (M2.4.2):** immediately after the recovered Medan opening is accepted and integrated, freeze the renderer, compiler/schema, CLI, bundled runtime/recipes, and skill revision. From one LBC brief and its existing assets, create a distinct 6–10s silent opening. Only project/profile/artwork data may change; no renderer code, new executable scene, or implementation/skill patch is allowed during the trial. Retain the first delivered draft before owner feedback and demonstrate a headline change and camera-speed change with undo. Fatih must consider the opening worth developing into a publication candidate. Failure blocks longer Medan work; record the missing capability and obtain a bounded recovery decision rather than silently patching the frozen engine.
 
 **Full transfer gate (M2.4.5):** freeze the updated implementation again after the Medan build and extend the retained LBC project into a 30-second silent draft with a distinct visual language. The opening trial and the complete-video trial are separate records. If engine/skill changes after the first freeze affect it, rerun the opening regression on the second freeze before judging the full video. Do not copy the Medan shot order or patch renderer code for LBC. Retain the first delivered draft before owner feedback; log internal correction passes, elapsed time, external generation, and subsequent revisions under NF-CO-02. “One brief” allows internal agent iteration; it does not mean one model call or promise equal effort to the unmeasured Bang Motion run.
 
 Fatih accepts the first draft as a plausible publication candidate, subject to normal editorial revisions. Exercise plain-language headline, camera-speed, object, and identity changes through the normal edit/preview/undo path. Preserve unaffected assets, validate shared dependencies and profile bindings, and explain any production impact. If renderer changes are required, the frozen-engine generalisation test has failed: retain that first result, obtain a scoped correction decision, protect the generic fix, and restart the affected trial from a clean source baseline on a new freeze. LBC uses `preview --draft`; silent final export is not added. M3 cannot start until NF-AC-16 and NF-AC-17 have evidence.
 
-All acceptance criteria above are requirements, not passed tests. Current implementation/runtime evidence is tracked in `docs/refine-spec.md` and `docs/plan.md`.
+### NF-AC-18: Native audio-mode production and review
+
+Voice + music, music-only and silent fixtures each reach production validation, full preview and approved native final 1080×1920/30. A native 1080 preview reveals final-size crop/type, with resolution-sensitive keys and correctly scaled checks. Music-only needs no narration; incomplete required voice still blocks. Verify streams/full decode/duration, retained approval/source hashes and narrated boundary regressions. No upscaling or dummy narration. These are planned gates.
+
+### NF-AC-19: TutorLog pilot and authoring-route choice
+
+Reuse `work/tutorlog-promo/shared/BRIEF.md`, official assets and its exact prepared music. Retain old three outputs. Produce a new 20s/600-frame native final and 1080 preview with a reusable composition, not a rendered reference backdrop. Demonstrate non-destructive crop/subject positioning, differentiated type emphasis and background/asset separation, visible object motion and coherent transitions. Changing framing must leave original media hashes intact. Treat low-resolution invoice evidence honestly; neither upscaling nor redrawing invented UI adds source detail.
+
+Fatih compares actual playback with the chosen Bang Motion MP4 at equivalent display size: composition/type, asset framing/separation, motion/continuity and communication. Pilot passes only when he considers the result at least comparable overall with no unacceptable weakness in those dimensions. Record concrete observations; do not claim universal superiority. At most two internal corrections per checkpoint (short study, then full video); if rejected after that bound, stop expansion and seek the route decision in plan section 0. Technical native export alone does not pass quality.
+
+### NF-AC-20: Repeated production, revision and brand isolation
+
+After the route/profile controls are accepted, freeze core/renderer/CLI/skill/shared recipes. Produce three genuinely different LBC episodes from one profile, preserving first drafts, then exercise substantive copy and framing/asset changes and undo. At least one change must affect wrapping/shot communication, not just a label or file name. Deliberate recipe/choreography reuse is allowed. A compatible-content switch to another approved profile must replace brand-bound logo/CTA and identify neutral, incompatible and unknown assets/claims; it is not a false LBC-to-TutorLog endorsement. No per-video engine/skill/shared-recipe patch or user coding. Record revisions, actual media reuse and voice gaps, active/elapsed/render time and available costs separately; unknown remains unknown. Fatih reviews upload candidacy, and export/posting retain separate approvals.
+
+**Historical acceptance disposition.** NF-AC-01–15 remain applicable within their tested scopes; NF-AC-02 gains non-voice routes through NF-AC-18, NF-AC-04/10/14 extend to composition parameters/code snapshots, and NF-AC-06 remains an open repeatability target. NF-AC-16/17 retain the original deferred Medan/LBC criteria; their old bans on silent final/custom code and M3 sequencing are historical, superseded by NF-TL-06/NF-AU-01 and the new plan. NF-AC-18–20 are not passed by this documentation revision.
 
 ## 27. Post-MVP evidence gate
 
 After MVP completion, use NaraFrame for at least 10 real videos before choosing GUI/provider/MCP expansion. Continue the pilot measurements of manual corrections, unsupported visuals, profile overrides, preview/render failures, voice-sync corrections, render time, generation attempts/reuse, and estimated/observed/unknown cost per video. Cost accounting starts before paid production, not after MVP.
 
-The first GUI may edit text/narration, asset selection and crop/transform, scene order/timing, layout/transition/motion presets, and waveform/caption timing. It remains constrained by the same source schemas and compiled representation.
+Any future GUI may edit declared profile/content/recipe parameters. Editing arbitrary custom composition internals is not promised. GUI scope follows observed repeated production needs, not a constraint on today's pilot authoring language.
 
 ## 28. References
 

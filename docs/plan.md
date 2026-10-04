@@ -2,15 +2,15 @@
 
 > **For execution:** implement the active numbered task in this workspace, with a review checkpoint after each task. The plan defines intent, boundaries, contracts, and proof; implementation details belong to the work stage.
 
-**Goal:** Deliver visually competitive local motion explainers with agent-mediated creative control, optional direct JSON/CLI use, controlled generation cost, and localized reversible revisions.
+**Goal:** Repeated profile-driven production of visually strong, revisable vertical videos across brands. Owner-reviewed output, reusable identity/assets and ordinary substantive revisions are the success criteria, not feature/test counts.
 
-**Architecture:** Interleave skill → CLI/core validation/compilation → Remotion rendering. Keep external production operations outside core/renderer. M2.4 adapts proven visual foundations into trusted reusable Remotion components and minimal editable source contracts, validates opening fidelity and early cross-topic transfer, then extends storytelling; it does not introduce per-project TSX.
+**Architecture recommendation:** Keep the proven profile/assets/revisions/audio/artifact production layer and declarative-v1 compatibility. Pilot parameterized trusted local Remotion compositions using installed 4.0.521 before selecting one authoring route. Agent manages technical authoring; external provider operations stay outside core/renderer. No multi-renderer framework. Recommendation is not proof that the pilot will pass.
 
 **Tech Stack:** Verified workspace pins for M0: Node 24.20.0 LTS, pnpm 12.3.4, TypeScript 7.0.2, React/React DOM 19.2.8, Remotion/@remotion packages 4.0.521, Zod 4.5.4, Vitest 5.0.0, and Biome 2.5.12. Install, frozen-lockfile, test, typecheck, build, the local H.264 draft renderer, atomic publication, operator CLI/skill route, offline sandbox, and cross-feature E2E are verified.
 
-Status (synced 2026-09-28): **M2 is closed for its technical scope by Fatih's decision on 2026-09-28**; see "M2 technical closure" in section 7. The visual and publication gates (NF-AC-16/17) and export are **not passed** and are tracked as deferred item D-VIS. M3 is not started.
+Status (synced 2026-10-04): **M2 is closed technically; M3.1-A integrated via PR #23 (`8463764`). M3.P0 integrated the M3.1-B/B1 audio checkpoint via PR #24 (`b1875e2`).** M3.P1a is next and needs its own authorization. D-VIS/NF-AC-16/17, pixel repeatability and comparative cost remain open. Section 0 is the active production-direction sequence; P0's Git integration was separately authorized by Fatih; no other implementation or Git operation is authorized.
 
-Earlier status (2026-09-27), kept for history: M0, M1 and M2.1–M2.3 are delivered with recorded evidence.
+Earlier status (2026-09-27/28), kept for history, not current sequencing: M0, M1 and M2.1–M2.3 are delivered with recorded evidence.
 
 - **M2.4 integrated so far:**
   - M2.4.1 (reference-fidelity Medan opening) via PR #12, `3133af8`; its first attempt `9747193` stays recorded as rejected.
@@ -25,13 +25,14 @@ Earlier status (2026-09-27), kept for history: M0, M1 and M2.1–M2.3 are delive
 - **Then:** M2.4.5-F2 (layout feedback after a profile change) was diagnosed and implemented in the M2 closure branch together with the shared-fixture flake fix. See the M2.4.5-F2 section.
 - **Held:** M3, until Fatih starts it; its entry gate was revised on 2026-09-28.
 
-The paragraphs below keep the 2026-09-21 revision header and the per-task handoffs keep the history.
-Revision: 1.6
-Date: 2026-09-21
-Inputs: `docs/spec.md` revision 0.6 and `docs/refine-spec.md` section 12.
-Implementation baseline: main recorded at `7b232c9`; current task branch `m2-4-1-first-illustrated-shot` at `9747193` contains the rejected first attempt. Existing uncommitted spec/refinement changes are preserved; M2.2 landed in `d12eeab`/`f938304` and M2.3 in `7b232c9`. M0.10 has recorded owner acceptance on 2026-09-15. M1 has recorded acceptance of Kore final export `115247388b67-98323b06-dd5` on 2026-09-20 with untracked-cost exception. Existing evidence is retained, not re-run by this document update; pixel repeatability and paid-cost comparison remain open.
+Revision: 1.7
+Date: 2026-10-04
+Inputs: `docs/spec.md` revision 0.7 and `docs/refine-spec.md` section 13; owner's TutorLog benchmark and profile-first brief.
+Implementation baseline: main/origin-main at `b1875e2` (PR #24, audio checkpoint integrated through M3.P0); the documentation revision was drafted on `8463764` and carried unchanged onto `m3-p0-docs`. Existing work and per-task handoffs remain intact. Historical 2026-09-21 baseline was `7b232c9` with rejected attempt `9747193`, not current code. M0.10 and M1 retain their recorded owner acceptance within their scope. No historical runtime gate is rerun or retroactively passed by this documentation update.
 
-**Current authorised scope (2026-09-28): M2 technical closure batch.** It covers the F2 skill guidance, compile-time `IMAGE_MASK_INVALID`, overflow-message hints, the shared-fixture test isolation and the closure documentation. There is one PR, with merge after supervisor sign-off and Fatih's approval. No auto-layout, no visual gate or export, and no M3.
+**Current authorised scope (2026-10-04): M3.P0 integration complete; documentation PR open for review. M3.P1a not started.** Earlier on 2026-10-04 the scope was audit and revision of spec/refinement/plan only: No engine/skill/test implementation, dependency installation, rendering or Git mutation. Proposed execution begins only after Fatih authorizes it. Preserve uncommitted audio work, unrelated `AGENTS.md`, Miss Ayu worktree, stash and failed benchmark artifacts.
+
+**Earlier authorised scope, historical (2026-09-28): M2 technical closure batch**, integrated through PR #22 (`93c0a67`).
 
 **Earlier authorised scope, historical (2026-09-28): M2.4.5-F2 diagnosis only.**
 
@@ -39,21 +40,155 @@ Implementation baseline: main recorded at `7b232c9`; current task branch `m2-4-1
 
 **Earlier authorised scope, historical: M2.4.2 frozen-engine LBC transfer.** Engine, schemas, CLI, recipes and skill are frozen at `3133af8`; only new LBC project/profile/source data may change. A needed runtime or skill patch fails the trial and must be recorded, not applied silently. No paid generation, new dependency, or later milestone work. Integration, when authorised, follows PR plus squash per AGENTS.md. M2.4.1 scope is complete and recorded in its handoff record.
 
+## 0. Active production-direction plan — 2026-10-04
+
+This section supersedes conflicting sequencing and exclusions in historical sections 2–12. It does not rename delivered milestones or check off their unfinished tests. M3.P tasks are the next production feature track, not a parallel plan. Spec revision 0.7 / refinement section 13 define the contracts and alternatives. Settled: profile-first workflow, explicit audio modes, native output, real visual/revision acceptance and preservation of useful infrastructure. Experimental: expressive authoring route and its minimal composition interface.
+
+### 0.1 Outcome, limits and task tracker
+
+Workflow: choose profile → brief/assets/audio mode → agent authors → technical validation/native preview → ordinary revision → owner approval → final MP4. Do not ask the user to choose primitive/schema details. Account/profile selection does not silently approve unrelated business claims.
+
+| Task | User-visible outcome | Dependency / status |
+|---|---|---|
+| M3.P0 | Existing audio-correct native export checkpoint safely integrated | INTEGRATED via PR #24, squash `b1875e2` (2026-10-04) |
+| M3.P1a | Native final with voice+music, music-only or silent as requested | P0 integrated; PLANNED |
+| M3.P1b | 1080 preview for honest crop/type review | P1a integrated; PLANNED |
+| M3.P2a | Same-brief TutorLog motion study and 20s expressive pilot | P1b; PLANNED, route/visual decision |
+| M3.P2b | Accepted recipe operated through the production CLI, revision and undo | P2a accepted and one route chosen; PLANNED |
+| M3.P3 | Usable brand profile and safe asset/CTA selection | P2b; PLANNED |
+| M3.P4 | Three LBC episodes, substantive revisions and compatible profile switch on a freeze | P3; PLANNED, owner production acceptance |
+| M3.P5 | Proportionate release evidence and handoff for repeated use | P4 accepted; PLANNED |
+
+No task above is completed by this document. Do one independently reviewable task per branch from integrated main; no stacked work. For each: define output → implement real path → show manual acceptance → add focused regression → integration gate. Do not build the whole architecture before showing a video. Existing CLI commands below remain entry points; `--resolution 1080` is a **proposed, unavailable** preview option until P1b ships. Pilot experiment files belong under `work/`, not new planning documents.
+
+### M3.P0 — Preserve and integrate the audio checkpoint
+
+**Scope/dependency:** First disposition M3.1-B/B1 on `m3-1b-audio-delay`; do not overwrite it with a new renderer experiment. Runtime candidate consists of `keys.ts`, `render-draft.ts`, new `audio-encoding.ts`, its unit test and `audio-boundaries.test.ts`. Keep checkpoint evidence and failed exports; exclude unrelated `AGENTS.md`. Documentation direction changes are not permission to bundle all local work into a commit.
+
+**Acceptance artifact:** existing `work/m3-1b/narrated/output/builds/e20cd950d34b-db83869c-1e6/final.mp4` and M3.1-B handoff. Expected native 1080×1920/30, 560 frames, 18.666667 s, AAC 48 kHz stereo; input edges [0,400], [700,1237], [2237,3224] ms versus output [0,400], [700,1234], [2233,3220] ms. Engine `/11` invalidates old renders, not generated voice keys. These are recorded checkpoint results, not newly measured here.
+
+**Manual/focused/gate:** supervisor compares live fingerprints/diff with reviewed candidate and verifies preserved artifacts/logs. Reuse unchanged candidate's 6/6 focused, verify 274/280 and serial E2E 15/15 evidence; do not run another long suite without changed runtime, stale evidence or a concrete hypothesis. Follow AGENTS integration requirements, record whether evidence reuse is accepted; otherwise gate once. Only after separate explicit commit/push/merge authority integrate exact approved paths via PR and sync main, preserving unrelated work. Stop at this checkpoint if authority is absent. No new feature, audio model or provider action.
+
+**P0 verification — 2026-10-04 (implementer): READY FOR INTEGRATION, awaiting Git authority.** No runtime change, render or long suite. Pinned Node 24.20.0.
+- Candidate: the five runtime/test fingerprints equal the M3.1-B table; `git diff HEAD -- packages` touches only `keys.ts` (comment plus `/10`→`/11`) and `render-draft.ts`; the three untracked files are exactly the candidate. Base `8463764` still equals `origin/main` (`git ls-remote`); the branch is not on the remote.
+- Gate logs: `verify-2.log` SHA-256 `dcb2e89f…a376`, 274 unit / 280 integration; `e2e-1.log` `16ff68a2…089e`, 8 files / 15 tests, 916.54 s. Both hashes match the handoff. One gap found: `keys.ts` mtime (06:13:49 WIB) is after `verify-2` started (06:12:32); the diff confirms only the `/11` history comment came later, as the handoff states. Serial E2E (06:14:23) ran after it. Hypothesis "comment breaks format/lint" was checked with `biome check .`: 162 files, no fixes, exit 0. Typecheck/tests not rerun (a comment cannot change types or behavior).
+- Native final `work/m3-1b/narrated/output/builds/e20cd950d34b-db83869c-1e6/final.mp4`: SHA-256 `d90ea475…7dfb` (matches); ffprobe H.264 1080×1920, 30/1, 560 frames, 18.666667 s; AAC 48 kHz stereo 18.645 s; full FFmpeg decode exit 0. `output/current.json` selects it; manifest SHA-256 `99263495…fb85` matches the pointer. `narrated-final-fixed-verification.json`: hashes valid, manifest matches, selected, approval matches.
+- Boundaries: `boundary-measurements-fixed.json` reads [0,400]/[700,1234]/[2233,3220] ms vs authored [0,400]/[700,1237]/[2237,3224], deltas ≤4 ms, zero offset correction, `pass: true`. Failed final `86e3276ce78b-d078c2bd-68c` and `boundary-measurements.json` (+38–43 ms) remain, as do first narrated final `1da9b758834c-1dba9ed0-946`, corrected synthetic final `c80f295af3d1-dedb8247-ef6`, branch `m3-1b-final-export`, the Miss Ayu worktree (`00942b5`), `stash@{0}` and the unrelated `AGENTS.md` (`cfc4f217…32ef`).
+- Proposed evidence reuse: accept the recorded focused 6/6, verify 274/280 and serial E2E 15/15 for the unchanged candidate. Integration needs Fatih's explicit commit/push/PR/squash-merge authority and a decision on which documentation paths ship with it.
+
+**P0 integration — 2026-10-04: CLOSED / INTEGRATED.** The supervisor accepted reuse of focused 6/6, verify 274/280 and serial E2E 15/15 for the unchanged candidate and chose option A (runtime PR first, documentation PR separately). With Fatih's explicit authority, commit `fec7d22a691c469c94f5e7a7cd3d470a51a5e51a` on `m3-1b-audio-delay` (base `8463764` = origin/main, fingerprints rechecked unchanged) staged exactly the five candidate files (+399/−4). [PR #24](https://github.com/fatlhr/NaraFrame/pull/24) recorded fingerprints, reused gates, the post-verify comment gap and implementer/supervisor evidence ownership. The supervisor signed off on that head; after Fatih's merge authority it was squash-merged with `--match-head-commit fec7d22…` at `2026-10-04T11:19:44Z`, producing `b1875e2083af4600dc298ec665874e0af50521d2` (parent `8463764`). Squash tree and reviewed head tree are both `fb55562d274d868c54e264cebb545e149c2ffc80`; the squash message has no agent identity or trailer. The repository has no CI checks, so review/sign-off was the integration gate; no suite was rerun. Local main fast-forwarded to `b1875e2` without stash or discard; the documentation changes were carried onto `m3-p0-docs`. `AGENTS.md`, `work/`, the Miss Ayu worktree, `stash@{0}`, branch `m3-1b-final-export`, failed builds and gate logs are untouched. Branch `m3-1b-audio-delay` still exists locally and on the remote pending a cleanup decision. F-A2, D-VIS and word-level enforcement remain open.
+
+**Branch cleanup — 2026-10-04:** with supervisor approval, `m3-1b-audio-delay` was deleted locally and on the remote after both refs were confirmed at `fec7d22a691c469c94f5e7a7cd3d470a51a5e51a`. Branch `m3-1b-final-export`, the Miss Ayu worktree, `stash@{0}` and the `work/m3-1b` artifacts were not touched.
+
+### M3.P1a — Final readiness follows the requested audio mode
+
+**Scope/dependency:** P0 integrated. Add explicit voice(+optional music), music-only and silent intent with an authoritative timeline. A profile may default the mode; project intent resolves it explicitly. Required missing narration still fails. Music/silent must use approved explicit scene durations, not fake narration or music length as story timing. Keep old declarative-v1 projects valid; define a conservative legacy mapping (narration → voice; soundtrack with explicit durations → music-only; no audio with explicit durations → silent), and report unresolved/provisional timing rather than silently declaring it final. Do not change speech alignment merely to implement non-voice readiness.
+
+**Real path:** source-only copies under `work/production-pilot/tutorlog-music` and `work/production-pilot/tutorlog-silent`; `pnpm naraframe validate <project> --stage production --json` then `pnpm naraframe render <project> --json`. Expected 20s/600-frame native 1080×1920/30 H.264; prepared music yields AAC, silent has no audio stream. A copied narrated checkpoint remains valid. No silent-to-narrated downgrade when voice was requested.
+
+**Acceptance:** inspect ffprobe/full decode, music start/end and waveform/boundary evidence, source/approval manifest and failure with intentionally missing required voice. Do not upscale the old 540 preview. Upload approval remains Fatih's decision, not a validator inference.
+
+**Regression/gate:** mode/legacy-resolution matrix; missing required voice and unresolved clock; soundtrack/silent full publication, scoped audio policy, cache/metadata and audio-checkpoint preservation. `pnpm verify` plus one serial full E2E before integration because production/publication behavior changes. No new paid generation.
+
+### M3.P1b — Native-resolution preview
+
+**Scope/dependency:** P1a integrated. Default remains 540; expose explicit 1080 preview without changing the project's design canvas, audio intent or draft/final readiness. Preview resolution, font/layout measurement and render dependencies must agree and affect preview keys/manifests. 1080 does not remove the draft label or authorize final. Avoid a generalized resolution/backend system.
+
+**Proposed acceptance command:** `pnpm naraframe preview work/production-pilot/tutorlog-music --draft --resolution 1080 --json`. Expected native 1080×1920/30 preview, not post-upscaled MP4. Render existing 540 once for comparison; original media hashes unchanged. Show crop/line wrapping and limitations of the 414×290 invoice source at final size.
+
+**Regression/gate:** option/schema validation; separate 540/1080 cache keys/reuse; measured/full/scoped layout consistency; old default compatibility and exact manifest dimensions. Manual playback, focused tests, `pnpm verify` and serial full E2E for this runtime/resolution boundary. Do not promise better source detail from more pixels.
+
+### M3.P2a — Bounded expressive TutorLog pilot, before a framework
+
+**Scope/dependency:** P1b. Use `work/tutorlog-promo/shared/BRIEF.md`, exact copy, official logo/UI/fonts and prepared music segment/gain/fades. Preserve original files and all three earlier outputs. Review the available Bang Motion generator/capture workflow for mechanisms, not as an engine to imitate blindly. Use installed Remotion 4.0.521 first; no dependency upgrade, new provider or general 3D system.
+
+**Authoring experiment:** one trusted local, frame-evaluated Remotion composition with JSON content/brand/framing/timing parameters; seeded randomness if needed, no playback-order state. Separate composition implementation, reusable recipe parameters and episode content. Parameterize enough to prove copy/framing revision, not every visual detail. Internal keyframes/CSS/perspective are allowed. Current declarative paths remain available, but do not extend a universal primitive vocabulary to reproduce each shot. Record local composition/import/asset/font hashes, environment and explicit code approval. Use restricted local imports and no external network, dependency installation, shell/provider calls or secrets; this is trusted owner code, not a secure untrusted-code sandbox. Inspect adaptation provenance/rights first.
+
+**Artifacts:** `work/production-pilot/tutorlog-expression/` containing source, input manifest, 3–5s study MP4 and later `pilot.mp4` (native 1080×1920/30, 20s/600 frames, same music). Record exact executable command used against the installed renderer; do not advertise a new NaraFrame CLI capability until P2b proves it. The study must show distinct text emphasis/surface separation, non-destructive crop/subject placement and conspicuous meaningful object motion. Full pilot must communicate all five copy beats with coherent handoffs, not just a polished opener. A direct-render experiment is not yet NaraFrame final publication.
+
+**Manual acceptance:** show study before completing the video; maximum two internal correction passes at each checkpoint. Fatih compares actual full playback at equal display size with the chosen Bang Motion output: composition/type, framing/separation, purposeful motion/continuity and explanation; overall at least comparable, no unacceptable weakness. Preserve first output and concrete review notes. Exact imagery or choreography copying is not required. Do not redraw invented UI to hide weak source resolution.
+
+**Revision proof/focused checks:** change substantive headline wrapping and one crop/framing through parameters, not original media mutation; compare rendered results and hashes. Check deterministic frame evaluation and local dependency manifest; use small rendered probes rather than a broad framework/test suite. No core change in this experiment unless separately proposed and authorized. Report authoring/render/operator time, corrections and available tokens/cost; unknown remains unknown.
+
+**Route decision/stop:** recommendation is the Remotion composition route, not a predetermined pass. If still visually rejected after the bound, needs repeated engine patches, or managed integration demands a broad framework, stop. Fatih then chooses a separately scoped Bang Motion workflow pilot/bridge, narrows the product, or pauses. Never silently build both. Acceptance selects one route and authorizes P2b separately; do not defend the current engine on sunk cost.
+
+### M3.P2b — Operate one accepted recipe through NaraFrame
+
+**Scope/dependency:** accepted P2a route. If Remotion is selected, wrap only that trusted local recipe in existing preview/render/revision flows. Before implementation record its minimal source interface: route/version, pinned code entry and transitive local dependencies, JSON content/profile parameters, asset references and explicit timing/audio intent. Code/parameter snapshots participate in sourceRevision, render keys, invalidation, approval and undo. Passive SVG sanitization is not approval to execute a script. No arbitrary upload/code marketplace or multi-renderer abstraction. If the alternative route is selected, revise this task's bounded adapter/acceptance in this document before implementing; do not implement both interfaces.
+
+**Acceptance:** `preview` and `render` on the new TutorLog project through CLI, same native video; edit copy/framing via the public edit route and undo to the previous snapshot. Demonstrate offline/local operation and reused untouched media. Untrusted/unapproved code, external import/path and changed dependency hash must fail directionally; stale code cannot reuse approval/cache. Old v1 sample still previews unchanged.
+
+**Validation boundary:** label which checks apply to recipe parameters, assets, fonts, actual text boxes, runtime and publication. For custom layout expose measurable text/safe-zone regions or document uncovered geometry for manual review; do not pretend old declarative preflight fully inspects TSX. Future GUI edits declared parameters only; opaque internals require an agent code change and review.
+
+**Regression/gate:** code/import/parameter/asset key invalidation; revisions/undo and approval; offline enforcement and unsafe references; final audio/artifact metadata; old-v1 compatibility. Show public real path first, then focused protection, `pnpm verify` and serial E2E before integration. Capability registry/skill advertise only the proven bounded path. Stop if integration expands beyond one recipe/route.
+
+### M3.P3 — Profiles that choose brand assets and production defaults
+
+**Scope/dependency:** P2b integrated. Extend existing pinned profiles only where needed for LBC/TutorLog: audience/editorial intent, logo/font/approved-media roles, CTA/contact/destination, audio/default production preferences and recipe defaults. Content pattern is a reusable recipe; episode facts/copy/assets remain project content. Preserve existing font/PNG pinning, overrides and explicit profile apply. No GUI/catalog service, marketing claim generator or mandatory fresh media generation.
+
+**Acceptance artifact:** create one short LBC project from profile + brief using skill/schema/public CLI, without opening renderer implementation during authoring. Report selected asset roles, CTA, audio mode and snapshot. Dry-run a compatible profile switch: identify branded, neutral, incompatible and unknown bindings. Unknown is not automatically compatible; unresolved logo/CTA/claim bindings block production readiness. Source-profile edit alone leaves the project unchanged; explicit apply/undo is reproducible.
+
+**Manual/focused/gate:** review visible branding/CTA and relevant asset selection, not just JSON diffs. Cover locked overrides, profile hash/assets, brand-bound versus neutral references, role conflicts, editorial claims not silently rewritten, default precedence, apply/undo and reusable media. Focused tests + `pnpm verify`; full serial E2E if the runtime/publication boundary changes, otherwise existing E2E at P5. Claim no voice reuse proof without voice in the fixture.
+
+### M3.P4 — Frozen repeated LBC production and compatible brand switch
+
+**Scope/dependency:** P3 accepted/integrated; record exact Git/tree/code/skill/shared-recipe hashes, runtime and artifact baseline. Three new LBC episodes with different messages: tutor introduction, personalised one-to-one study, and parent progress reports, subject to current verified business facts. Use one pinned profile and relevant local assets; audio modes follow each brief, not forced voice. Shared choreography reuse is legitimate brand consistency, not a heuristic failure.
+
+**Artifacts/commands:** `work/production-trial/lbc-01` through `lbc-03`; each reaches public `validate --stage production`, native `preview` and `render`, with first draft/final MP4 and revision/receipt reports. Final posting remains separate. Record active owner/operator and agent authoring time from the start, render time, internal versus user corrections, raw reuse hashes/key reports, provider calls and actual/estimated/unknown costs. Do not equate byte/hash reuse with reported generation savings or compare mismatched benchmark timers.
+
+**Acceptance:** Fatih judges each a usable upload candidate. Request substantive copy that changes wrapping/communication, a materially different crop or asset, and undo. One neutral, compatible-content project switches to another approved profile with different logo/CTA/fonts; review content/claims explicitly rather than turning an LBC tutor endorsement into TutorLog promotion. Original profile/projects stay unchanged; no leaked logo/contact. Voice binding/reuse is demonstrated only if actual narration participates; otherwise explicitly open.
+
+**Freeze/stop:** no engine/compiler/renderer/CLI/skill/shared-recipe patch during the trial. Episode content/parameters and recipe-supported choreography edits are allowed. A needed shared patch is a failed trial checkpoint, preserved with reproduction; propose a separate task/new freeze. At most two internal corrections per episode/revision checkpoint, then ask Fatih instead of silently burning tokens. Do not add new primitives as a trial workaround.
+
+**Focused/gate:** primarily evidence from real public paths; add regression for defects only in separately approved tasks, not mid-freeze. No full suite rerun for every content edit. Audit keys/revisions/undo/brand/audio artifacts and measure output effort; any new runtime change invalidates the frozen trial rather than passing it.
+
+### M3.P5 — Release evidence and practical handoff
+
+**Scope/dependency:** P4 owner acceptance. Reconcile NF-AC-18–20 and old evidence in one register, current capabilities/skill instructions and short operator workflow. Fresh runtime gates cover changed authoring/audio/profile/publication boundaries; do not duplicate historical tests just to fill unchecked boxes. Run `pnpm verify` and one serial `pnpm test:e2e` on the final code candidate. Run two fresh comparable renders once for repeatability, recording differences without retry-until-green. Bit-identical pixels are not proven by deterministic input/keys; disposition remaining differences explicitly.
+
+**Acceptance:** operator can pick profile, produce, revise and obtain the approved native MP4 from the documented commands; manifest/ffprobe/full decode agree with intended audio and timing. Preserve cancellation/atomicity evidence and open hard-kill process/reliability findings. No claim of safe untrusted-code hosting, universally better/cheaper output or full word-timing support without proof. Review D-VIS separately for any actual Medan/LBC publication; its old outputs do not become approved by this pilot. Release/package/provider expansion requires a separate owner decision.
+
+### 0.2 Historical task and contract disposition
+
+| Existing work / constraint | Disposition under this direction |
+|---|---|
+| M0–M2 delivered technical tasks, F1/F2, M3.1-A | Retain their scoped evidence and regressions; no blanket visual success inferred. |
+| M3.1-B/B1 audio correction | Integrated through P0 via PR #24 (`b1875e2`) with reused gates. No restart/rewrite. |
+| M3.1-C broad hardening/repeatability | Re-scope into P5 after real production proof; existing open findings remain open. |
+| M3.2 mixed-route/visual dogfooding | Superseded for next execution by P1–P4; retain unchecked historical gates, not mark passed. |
+| M3.3 metrics/handoff | Production metrics start in P2/P4, consolidated in P5. Packaging/bootstrap only when needed. |
+| NF-AC-16/17 and old M2.4 publication/export checkboxes | D-VIS OPEN, deferred case-specific owner review; not an automatic blocker to the new pilot and not a retrospective pass. Population “ke-4” still blocks that Medan publication. |
+| Semantic-only/raw-keyframe/project-code exclusions | Superseded by bounded trusted NF-AU-01; existing declarative-v1 projects supported, no arbitrary-code GUI promise. |
+| Global mandatory narration and 540-only preview | Revised by NF-TL-06/NF-AC-18, to be implemented in P1; failed old export remains failed. |
+| F3/F4, voice/style binding, SYSTEM_ERROR, issue #16, F-A2, contrast/collision limits, M2.4.4 test checkbox without evidence | Keep open; take only concrete production blockers as separate tasks, not silently add backlog to pilot. |
+| Word-level timing enforcement | Not currently proven; optional/request-driven, no schema field advertised as implemented enforcement. |
+| GUI/cloud/provider marketplace/general 3D/universal primitives | Deferred or stopped as default expansion; revisit only after repeated production needs. |
+
+Historical sections below retain dated checklists/reviews. Labels such as “M3 held”, “M2 not complete”, “silent final excluded” describe their original decision, not current policy. This section and spec 0.7 take precedence.
+
+### 0.3 Claude handoff — next authorized execution
+
+Settled product requirements: profiles drive repeated multi-brand production; all three explicit audio modes; native final/native preview; substantive revisions and safe reuse; actual owner output acceptance. Recommendation: expressive parameterized Remotion on the existing production layer. Open experiment: whether that route matches the TutorLog reference with bounded work, then integrates economically. Do not interpret “recommended” as “visually proven”.
+
+**Status 2026-10-04:** M3.P0 is CLOSED / INTEGRATED via PR #24 (`b1875e2`). The next task is M3.P1a; it starts only after Fatih authorizes it. The original P0 instruction follows for history.
+
+First task is M3.P0, not Medan polish or new primitives. Read live status/AGENTS/spec 0.7/refinement 13/this section and the exact M3.1-B handoff. Preserve candidate hashes and prior gates, unrelated files, failed outputs and existing worktrees/stash. Present checkpoint artifact/evidence and request missing Git authorization; absent that authorization stop without implementation/Git. If authorized, integrate only the approved unchanged audio checkpoint, then stop and report SHA/paths/evidence. P1a and later require the corresponding task authorization, not a wholesale architecture rewrite. Supervisor reviews code/diff/runtime evidence; Fatih decides visual acceptance and route changes. No new parallel plan.
+
 ## 1. Global constraints
 
 - MVP output is 9:16. Final rendering defaults to 1080 × 1920 at 30 fps. Preview defaults to 540 × 960 at 30 fps.
 - The core package MUST NOT import Remotion. Only the renderer package imports Remotion APIs.
-- Raw keyframes, arbitrary CSS/JS animation, and arbitrary executable components are excluded.
-- Phrase/utterance timing is required. Word-level timing is optional unless required by the active profile or referenced by a beat/caption effect.
+- Declarative-v1 stays supported. Bounded trusted local compositions may use frame keyframes/CSS under NF-AU-01; unapproved arbitrary executable components remain excluded. No renderer-framework or general 3D scope.
+- Phrase/utterance timing is required when narration/phrase synchronization is used, not for explicit-duration music/silent projects. Word-level timing is request-driven; current enforcement is unproven and must not be claimed from a profile field alone.
 - Updating the source profile MUST NOT silently alter existing projects.
-- First operator: Fatih, comfortable with JSON and terminal. Ordinary agent-mediated revisions must also be usable without schema knowledge (NF-UX-03); a future GUI will edit the same data. No GUI or novice wizard is built in this insertion.
+- First operator: Fatih, comfortable with JSON and terminal. Ordinary agent-mediated revisions must be usable without schema knowledge (NF-UX-03). Future GUI may edit declared profile/content/recipe parameters, not necessarily custom code internals. No GUI or novice wizard now.
 - No GUI, MCP, cloud publishing, provider SDKs/keys in core/CLI, generic billing service, distributed cache, or frame resume.
 - External render-time network is denied in Node and browser; required local loopback is allowed. No implicit browser download.
 - Provider operations are sequential initially. Receipts/unknown charges survive undo; reused source audio/images are not disposable cache.
 - Safety is implemented with each feature, not postponed to the final milestone.
 - Keep discovery/spec/refinement/plan in the four existing documents. Update this file for milestone details and runtime decisions; do not create parallel plans, review files, or empty `examples/` directories.
 
-## 2. What changed and why
+## 2. Historical delivery sequence and rationale (through M2)
 
 The old Phase 0–9 / 41-task sequence is superseded. It placed CLI and skill late and built many visual components before testing the user flow. The accepted order is:
 
@@ -105,7 +240,7 @@ Avoid speculative generic workflow engines, broad renderer portability layers, a
 
 ## 4. How to use this plan
 
-This is the implementation plan described by the spec-driven workflow. There is no second planning layer between this document and coding. M0–M2.3 sections preserve delivered scope/evidence; M2.4 is expanded as the next work unit. M3 remains behind the new visual gate. Implementation bodies belong to later execution, not this Markdown-only update.
+This is the implementation plan described by the spec-driven workflow; there is no second planning layer between this document and coding. Section 0 is the next authorized-task sequence, subject to explicit execution permission. M0–M3 histories preserve delivered and unfinished evidence; M2.4/D-VIS are not automatically the next work unit. Implementation bodies belong to execution, not this documentation-only revision.
 
 Delivery is feature-driven, confirmed in practice during M0.9: build the real path first, show the working output, then add focused automated coverage. Tests protect behavior that has already been demonstrated; they are not the first gate. Each task is a small user-visible feature and must end in behavior Fatih can run or an artifact he can inspect. M0.8 adds cross-feature E2E, failure-injection, and runtime evidence; it is not the first testing point. TypeScript bodies, fixtures, package manifests, and renderer details belong to execution. If implementation reveals a material product or architecture change, update the relevant spec/refinement decision before continuing.
 
@@ -302,7 +437,9 @@ Trial evidence: the clean M0.7 worktree started from `0789b08`. Ambient Node `23
 
 Live execution tracker:
 
-Current step: **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; it is CLOSED / INTEGRATED for its technical scope via PR #20 (`44d172e`). Fatih chose F1 next: M2.4.5-F1 (contrast against the actual backdrop) is INTEGRATED via [PR #21](https://github.com/fatlhr/NaraFrame/pull/21), squash `4298f3a`, closure verified by the supervisor 2026-09-28. Fatih then chose F2 and asked to close M2: the batch on branch `m2-technical-close` implements F2, fixes the shared-fixture flake and records M2's technical closure. The NF-AC-16/17 visual gates and export are not passed and are tracked as D-VIS. M2 is closed for its technical scope via PR #22 (`93c0a67`); D-VIS stays OPEN. M3.1 has started with a limited scope: the evidence map and first-batch proposal (M3.1-A, real-process interruption during `renderMedia` and recovery) was approved, and M3.1-A has been executed: its test-harness correction is TECHNICALLY_READY (2026-10-01) on branch `m3-1a-interruption-recovery`, uncommitted, with finding F-A2 (Chrome descendants observed alive for 10 seconds after SIGKILL) recorded, not fixed. Corrected A1 plus synthetic tests passed 4/4; after a final lint control-flow correction, synthetic probes passed 3/3 and verify passed 271 unit / 280 integration. M3.1-B/C are not started.** Shared-fixture flake: fixed in the M2 closure batch. `status` on the shared `samples/krakatau-draft` (run by `command-contract.test.ts`) makes `computeReuse` create and remove `.naraframe/attempts/reuse-*`, while `draft-project.test.ts` copied the whole sample. A 20 s reproduction gave 321 ENOENT failures in 613 copies; copying only source and assets gave 0 in 1184. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
+Current step (2026-10-04): **M3.P0 INTEGRATED via PR #24 (`b1875e2`); documentation PR pending review; M3.P1a awaits authorization.** Earlier the same day: documentation revision only, with M3.P0 pending separate Git authority. M2 closed technically, M3.1-A integrated at `8463764`, M3.1-B/B1 uncommitted/TECHNICALLY_READY on `m3-1b-audio-delay`. Preserve its audio candidate/evidence before P1 native audio modes and preview, P2 TutorLog authoring pilot, and P3/P4 repeated profile production. No new task, suite or render executed by this audit. D-VIS and existing reliability/reuse/cost findings remain open. Section 0 is authoritative.
+
+Historical tracker snapshot (audio checkpoint; retained): **M2.4.4 technical part INTEGRATED via [PR #17](https://github.com/fatlhr/NaraFrame/pull/17), squash `cf9411f`. M2.4.4b INTEGRATED via PR #18, squash `f065e4d`. B1 correction M2.4.5a CLOSED / INTEGRATED via [PR #19](https://github.com/fatlhr/NaraFrame/pull/19), squash `159ed08`. M2.4.5's failed attempt remains BLOCKED_CONFIRMED on its original freeze; the separate freeze-2 retrial is TECHNICALLY_READY after supervisor evidence review; it is CLOSED / INTEGRATED for its technical scope via PR #20 (`44d172e`). Fatih chose F1 next: M2.4.5-F1 (contrast against the actual backdrop) is INTEGRATED via [PR #21](https://github.com/fatlhr/NaraFrame/pull/21), squash `4298f3a`, closure verified by the supervisor 2026-09-28. Fatih then chose F2 and asked to close M2: the batch on branch `m2-technical-close` implements F2, fixes the shared-fixture flake and records M2's technical closure. The NF-AC-16/17 visual gates and export are not passed and are tracked as D-VIS. M2 is closed for its technical scope via PR #22 (`93c0a67`); D-VIS stays OPEN. M3.1-A is CLOSED / INTEGRATED via PR #23 (`8463764`), with F-A2 still OPEN. M3.1-B/B1 is TECHNICALLY_READY on `m3-1b-audio-delay`: audio boundaries 0–4 ms, verify 274/280 and full serial E2E 15/15 pass. Fatih requested a checkpoint stop; review/integration is pending, with no commit/push/merge; M3.1-C is not started.** Shared-fixture flake: fixed in the M2 closure batch. `status` on the shared `samples/krakatau-draft` (run by `command-contract.test.ts`) makes `computeReuse` create and remove `.naraframe/attempts/reuse-*`, while `draft-project.test.ts` copied the whole sample. A 20 s reproduction gave 321 ENOENT failures in 613 copies; copying only source and assets gave 0 in 1184. M2.4.1–3 are integrated. The NF-AC-16 visual assessment, further video polish and export are deferred by owner decision, not passed. The population scene's "ke-4" claim still blocks publication. Pixel repeatability, E2E diagnostics (issue #16), unknown style bindings and measured comparative cost remain open.
 
 - [x] **M0.8.1 — Isolated pinned baseline:** create the short-lived worktree from current `origin/main`, complete a frozen install without lockfile drift, and pass the existing verification suite.
 - [x] **M0.8.2 — Contract gap closure:** mapped existing coverage and added the missing source/reference, key-order determinism, motion-boundary, and public-package assertions; unit coverage passes 16/16.
@@ -2007,7 +2144,9 @@ Use a lightweight handoff record, not new infrastructure, for NF-CO-02. Compare 
 **M3.** Its entry gate is revised below. M3 is not started by this closure and starts only on Fatih's explicit instruction.
 
 
-## 8. M3 — Owner dogfooding and release evidence
+## 8. Historical M3 scope and active audio checkpoint evidence
+
+The evidence below is retained. M3.1-B/B1's checkpoint was dispositioned in M3.P0 and integrated via PR #24 (`b1875e2`) on 2026-10-04; later unchecked tasks follow the mapping in section 0.2 rather than automatic execution of the old sequence. Historical entry-gate wording is not authority to require Medan polish before the new pilot.
 
 **Entry gate (revised 2026-09-28 by Fatih's technical-closure decision):**
 - M2 is closed for its technical scope.
@@ -2096,7 +2235,9 @@ Started on Fatih's instruction (via the supervisor) with a limited first scope. 
 - **M3.1-B, technical final export.** A real `render --approve-preview` of a narrated fixture, with an ffprobe check of dimensions, fps, codec, audio and duration, and a rendered-audio check of pause and sample boundaries within one frame. This is a technical export only; it is not the Medan export under D-VIS and not a publication claim.
 - **M3.1-C, close-out.** Repeatability from two fresh renders on the same runtime, compared by canonical compiled hash and selected decoded pixel hashes, reported as they come without retry-until-green. Then formal verify and serial E2E on the M3.1 head.
 
-#### Active handoff — M3.1-A
+#### Handoff record — M3.1-A (integrated)
+
+**Integration closure — 2026-10-01: CLOSED / INTEGRATED.** Fatih instructed continuation from the proposed integration and M3.1-B next step. PR #23 was squash-merged with exact-head guard `2d6b812a20e6ef09ce4e96aacb722273d7449b8c`, producing `8463764b77dce149ebb34dd0cf56b89dca21a950`. The squash and reviewed head trees both equal `4ee2fe385ee41ce4307c2ed830494ffd8252d9e7`. The PR contained only this plan and the new interruption E2E; commit metadata has no agent identity/trailer. A fresh pre-integration verify passed 271 unit / 280 integration (`work/gate-logs/m3-1a/verify-integration-1.log`), with the test fingerprint unchanged. Main was synced and task branches removed locally/remotely. Unrelated `AGENTS.md` bytes remained unchanged. F-A2 remains OPEN; no M3.1 completion or D-VIS acceptance is implied.
 
 **Correction takeover — 2026-10-01: TECHNICALLY_READY, uncommitted.** Fatih asked the supervisor to continue after the implementer hit its usage limit. The correction was implemented on `m3-1a-interruption-recovery`; no runtime changes, Git integration or M3.1-B/C. The closure note, unrelated `AGENTS.md` change, Miss Ayu worktree and old stash remain untouched by this correction. Historical implementer evidence below is retained, not claimed as newly rerun.
 
@@ -2185,6 +2326,51 @@ Started on Fatih's instruction (via the supervisor) with a limited first scope. 
 - M3.1's cancellation and atomicity rows now have real-process evidence for the `renderMedia` stage. The other M3.1 rows are unchanged, and the M3.1 checkboxes stay open until M3.1-B/C.
 - M3.1-B/C were not started. D-VIS stays OPEN.
 
+#### Active handoff — M3.1-B: technical final export
+
+**2026-10-04: CLOSED / INTEGRATED through M3.P0** via [PR #24](https://github.com/fatlhr/NaraFrame/pull/24), squash `b1875e2`; see the M3.P0 integration record in section 0.
+
+**2026-10-01: TECHNICALLY_READY — checkpoint stop requested by Fatih; not committed or integrated.** M3.1-B technical export and its B1 correction have passing evidence below. Branch `m3-1b-audio-delay` starts from `8463764` (PR #23), carrying this documentation and preserving unrelated AGENTS.md. M3.1-C and D-VIS remain open; no PR, push, merge or new task is performed at this checkpoint.
+
+**History: blocker reproduced.** The initial attempt on `m3-1b-final-export` produced both final MP4s, but synthetic audio edges were 38–43 ms late, beyond the fixed 33.334 ms acceptance. Failed builds and measurements stay intact. Fatih instructed the scoped correction separately. Existing source fixtures remain unchanged.
+
+**Audio correction (M3.1-B1), authorised continuation 2026-10-01.** `work/m3-1b/diagnostic-aac.json` isolates the cause without another video render: the same bundled libfdk_aac encoder produces input intervals [0,400]/[700,1237] ms unchanged when encoded directly into MP4, while AAC/ADTS and that ADTS copied into MP4 both produce [42,443]/[742,1280] ms. Remotion 4.0.521's compressAudio explicitly creates ADTS before its stitcher copies audio. Use PCM as the intermediate and encode AAC once during the final stitcher through its supported ffmpegOverride; preserve H.264/AAC output, default audio quality, cancellation and the one-frame criterion. Raise RENDER_ENGINE for cache invalidation. Prove the corrected public preview/export first with the retained synthetic source, then add a compact portable regression and focused option coverage. Since audio runtime changes, run verify and serial E2E before integration. No fixed timestamp subtraction or source retiming.
+
+**Correction evidence — 2026-10-01 (in progress).** Engine identity is `naraframe-draft/11`. The audio-bearing path uses a lossless PCM intermediate, then libfdk_aac at the final MP4 mux (320k, cutoff 18000, matching the pinned renderer's previous defaults). Remotion requires a `.mkv` temporary filename for PCM; the override explicitly writes MP4 with faststart there, then renames it to the requested output. The private `.audio-render-*` directory is removed in `finally`; silent rendering is unchanged. No extra encoder process outside Remotion's cancellation path, dependency, authored timing adjustment or fixed offset is introduced.
+
+- Retained failing synthetic final: `86e3276ce78b-d078c2bd-68c`, source `ee129ca10633d624061844e51d57c7e4bf34ce47bbcf2604041fcdab8a990448`. `boundary-measurements.json` records [42,443]/[742,1276]/[2275,3263] ms against independent authored [0,400]/[700,1237]/[2237,3224], with deltas +38–43 ms. It is not overwritten or reclassified as passing.
+- Corrected public preview: `bee4d3f2f9ac-ea29a1b9-d2b`, fresh, same source. Approved final: `c80f295af3d1-dedb8247-ef6`, H.264 1080×1920, 30 fps, 97 frames / 3.233333 s; AAC 48 kHz stereo / 3.233 s. `boundary-measurements-fixed.json` uses the same 1 ms non-overlapping RMS bins, threshold 0.03 and zero offset correction: [0,400]/[700,1234]/[2233,3220] ms; deltas 0/0, 0/−3, −4/−4 ms. This meets one-frame scheduling tolerance; it does not prove exact sample identity after lossy AAC encoding or speech/caption quality.
+- New portable `audio-boundaries.test.ts` generates its own two PCM clips, verifies its independent input detector, and exercises public production validation, full preview and approved final. It checks decoded edges, audible tail, full decode, streams, hashes, approval/source revision, output pointer and attempt cleanup. Initial test run reached the audio assertions but failed a mistaken manifest-map assertion; the manifest is an artifact array. That test assertion was corrected; rerun passed 1/1 in 24.80 s. Runtime was not changed for that harness correction.
+- Earlier checkpoint: audio-command unit coverage passed 3/3. Fresh `verify` passed 274 unit / 280 integration, Biome 162 files and build/typecheck (`work/gate-logs/m3-1b/verify-1.log`, exit 0, 12.634 s). Full serial E2E was pending then; its final result is recorded below. No M3.1-C or D-VIS acceptance.
+- Read-only review found one container edge: an audio-bearing draft can register no audio at zero gain; the original override then left Matroska at the temporary `.mkv` path. Corrected the override to force MP4 for every stitcher, even without an audio codec, and added the exact no-audio command control. This does not change the public requirement for AAC on audio-bearing drafts. Reviewer inspected the correction and reported no actionable findings; it did not run tests or render (`work/m3-1b/audio-review.md`). Fresh focused coverage passed 6/6 (audio command plus engine/voice identity), and final-runtime `verify-2.log` passed 274/280 in 11.956 s. The `/11` history comment was subsequently added; no behavior changed. Serial E2E remains pending.
+- Fresh narrated `/11` preview `fe558fd2fa43-b9c84553-73d` (53.552 s wall time) was approved for technical export only. Final `e20cd950d34b-db83869c-1e6` (53.809 s) retains source `bca225013164bb3bdd68b5b6ca3bae622a853dd0962e4abdb88578b885dd9029`; H.264 1080×1920, 30 fps, 560 frames / 18.666667 s; AAC 48 kHz stereo, 18.645 s. MP4 SHA-256 `d90ea475aa4c1c394cc3d617e5f7505e08d6c3af02782e5b2d88a781adbe7dfb`. `narrated-final-fixed-verification.json` confirms every manifest artifact hash, manifest hash, approval and selected output pointer. Existing narrated fixture's 39-file hash map is unchanged. Whole-speech listening and exact MP3 sample identity are not claimed; the independent PCM boundary fixture isolates scheduling.
+
+- [x] Copy source/assets of the existing general-explainer narrated fixture to `work/m3-1b/narrated`, excluding prior previews, output and revision state. Run public `validate --stage production`, full `preview --json`, inspect its technical artifacts, then `render --approve-preview <that-build-id> --json`. Approval here is restricted to this authorized technical fixture export, not owner visual/publication acceptance.
+- [x] Probe the final MP4 for H.264, AAC, 1080×1920, 30 fps, timeline duration and full decode. Check report/manifest hashes, source revision, preview approval and selected output pointer. Preserve the actual MP4.
+- [x] Build a small deterministic synthetic-audio fixture at `work/m3-1b/boundaries` using the narration path, with a 1000 ms inter-block pause, a 300 ms internal silent interval and audible terminal samples at a non-frame-aligned clip duration. Label this as synthetic scheduling evidence, not speech quality. Render through the same public preview/approved-export path. Decode audio and measure scheduled edges/last audible tail against independently specified input times, tolerance one frame at 30 fps. Do not compensate away measured offset or expand tolerance to obtain a pass.
+- [x] After the manual path works, add focused portable coverage for final export/audio boundaries only if needed to preserve this newly proven path. No existing assertion weakened. Run new focused tests and verify if tracked tests change; full serial E2E remains scheduled for M3.1-C unless runtime/publication changes.
+- [x] Record exact commands, build IDs, source hashes, measured offsets, runtime and evidence limits here. A defect is recorded and proposed separately, not silently fixed or bypassed in this evidence batch. Keep F-A2, D-VIS and word-level enforcement open.
+
+**First output — verified 2026-10-01.** Narrated preview `7af2ba753605-9ce3d4d8-512` and final `1da9b758834c-1dba9ed0-946` share source `bca225013164bb3bdd68b5b6ca3bae622a853dd0962e4abdb88578b885dd9029`. Final MP4: `work/m3-1b/narrated/output/builds/1da9b758834c-1dba9ed0-946/final.mp4`, H.264 1080×1920 / 30 fps / 560 frames / 18.666667 s; AAC 48 kHz, stream/container 18.688 s (packet padding recorded separately). The implementer verified full decode and artifact hashes; supervisor independently ran ffprobe and inspected approval/manifest/pointer. Boundary scheduling remains in progress; these stream checks alone do not close it.
+
+**Acceptance commands:** `pnpm naraframe render work/m3-1b/narrated --approve-preview <current-full-preview-id> --json` and the same command for `work/m3-1b/boundaries`. Expected: ready final output with verified streams/hashes and boundary measurements within 33.334 ms, or a precise finding with retained artifacts. No release claim.
+
+**Final checkpoint — 2026-10-01: TECHNICALLY_READY, integration pending.** The final-runtime verify is `verify-2.log` (274 unit / 280 integration, exit 0; SHA-256 `dcb2e89ff56053ca66a15a1d8e7ab16d475fd2d01e81359c2c176effcbfba376`). Full serial `pnpm test:e2e` passed 8 files / 15 tests in 916.54 s (`work/gate-logs/m3-1b/e2e-1.log`, exit 0; SHA-256 `16ff68a21c8001426fcc2d22fa4a6aebaeb0a44c451e3df7aa25e9be623d089e`). It includes the new real preview/final boundary regression, interruption/recovery, existing silent/narrated/soundtrack-only, scoped/reuse, font and reference workflow coverage. This does not close pixel-repeatability investigations or prove cancellation at all stages. No retries-until-green, existing assertion weakening, or second full E2E run. After the gate, the fresh narrated final also decoded completely with FFmpeg (exit 0). Read-only code review has no outstanding actionable findings; execution evidence is owned by this implementation, not attributed to the reviewer.
+
+Commands were run with pinned Node 24.20.0 / pnpm 12.3.4, Chrome 154.0.8037.58 / FFmpeg 7.1.1. The public manual paths were `preview work/m3-1b/boundaries --json`, `render work/m3-1b/boundaries --approve-preview bee4d3f2f9ac-ea29a1b9-d2b --json`, `preview work/m3-1b/narrated --json`, and `render work/m3-1b/narrated --approve-preview fe558fd2fa43-b9c84553-73d --json` via the pinned CLI Node entry. The full E2E gate ran with `caffeinate -dims` on AC, without concurrent renders. One resource snapshot during it showed swap used 1632 MB; this is not continuous monitoring or proof of zero sleep/resource stalls. Active owner time and token/cash cost are unavailable; no generation provider was called.
+
+Resume from review/integration, not a new implementation or render. Final code/test fingerprints:
+
+| File | SHA-256 |
+|---|---|
+| `packages/core/src/compiler/keys.ts` | `40aa380b732afc23e30d0ca897d9de38994661cbbe531ccf45b4d1aa922f14ba` |
+| `packages/renderer-remotion/src/render-draft.ts` | `b69c3d6f8d43ac061c2eb422b32e4455f7bccfee43ce98ff6ea6bb462529cfe3` |
+| `packages/renderer-remotion/src/audio-encoding.ts` | `96129b1aa0c528aa6aa4f73e4986478d0be30266daec07d3859777a5d3b37905` |
+| `packages/renderer-remotion/test/unit/audio-encoding.test.ts` | `ccfaeb2b98644e0b1abd0ca5f57d77fc7cfd0f8deb8cf87c4f98295a5455ceb1` |
+| `packages/cli/test/e2e/audio-boundaries.test.ts` | `9b8e21475fb2bffadecf045b32f506924f1e41a003a1eeafcb6c1577f0030871` |
+
+`AGENTS.md` remains unrelated and byte-identical to the takeover baseline (`cfc4f217…532ef`); it must not be staged. Miss Ayu worktree and the old stash remain untouched. Preserve both failed and corrected artifacts and the evidence-only `m3-1b-final-export` branch. If code/runtime fingerprints remain unchanged on resume, use these recorded gates rather than rerunning the lengthy suite merely for documentation. M3.1-C needs its own execution decision; D-VIS, F-A2 and word-level enforcement remain open.
+
 ### M3.2 — Human visual/audio and mixed-route workflow
 
 - [ ] Fatih previews through the skill, changes caption size in JSON, validates/previews via CLI, returns to the skill for export, and exercises undo/error recovery without renderer-code edits (NF-AC-10).
@@ -2205,6 +2391,8 @@ Started on Fatih's instruction (via the supervisor) with a limited first scope. 
 **Exit gate:** All applicable acceptance criteria have passing evidence and Fatih has reviewed the outputs. Known limits/deferred items are explicit. MVP completion cannot be declared from static checks alone.
 
 ## 9. Requirement and finding traceability
+
+**Current additions:** NF-TL-06/NF-AC-18 → M3.P1a/P1b; NF-AU-01/NF-AC-19 → M3.P2a/P2b; NF-PF-06/NF-AC-20 → M3.P3/P4; release/repeatability/metrics → M3.P5. The older traceability rows below retain delivery history; any “required before M3” reference describes the original deferred gate, not section 0 sequencing.
 
 | Requirement area | Delivery / proof |
 |---|---|
