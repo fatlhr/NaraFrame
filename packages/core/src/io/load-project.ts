@@ -4,6 +4,7 @@ import { type SanitizedSvg, sanitizeSvg } from "../asset/svg-sanitize.js";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
 import { sha256File, sha256Text } from "../project/hash.js";
 import { resolveSafeExistingFile } from "../project/safe-path.js";
+import { loadRecipes } from "../recipe/load-recipes.js";
 import {
   type PlanSource,
   validatePlanSource,
@@ -278,14 +279,24 @@ export const loadPlanProject = async (
     };
   }
 
+  const recipes = await loadRecipes(root, validated.value);
+  if (!recipes.ok) {
+    return {
+      ok: false,
+      issues: sortIssues([...validated.issues, ...recipes.issues]),
+    };
+  }
+
   return {
     ok: true,
     value: {
       root,
-      source:
-        Object.keys(vectors.value).length > 0
+      source: {
+        ...(Object.keys(vectors.value).length > 0
           ? { ...validated.value, vectors: vectors.value }
-          : validated.value,
+          : validated.value),
+        ...recipes.value,
+      },
     },
     issues: validated.issues,
   };

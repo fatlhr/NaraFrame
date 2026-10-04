@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "frame-card",
+  "version": "1.0.0",
+  "entry": "index.tsx",
+  "files": ["index.tsx", "crop.ts"],
+  "description": "Test recipe: a titled card that pushes into a crop of one PNG."
+}

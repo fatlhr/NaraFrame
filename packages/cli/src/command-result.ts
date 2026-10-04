@@ -12,6 +12,7 @@ export type CommandName =
   | "render"
   | "cache"
   | "profile"
+  | "recipe"
   | "unknown";
 
 export type CommandReadiness =

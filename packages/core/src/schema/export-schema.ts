@@ -13,6 +13,7 @@ import { CompiledDraftSchema } from "./compiled.js";
 import { type Narration, NarrationSchema } from "./narration.js";
 import { type ProfileLock, ProfileLockSchema } from "./profile.js";
 import { type ProjectConfig, ProjectConfigSchema } from "./project.js";
+import type { LoadedRecipe } from "./recipe.js";
 import { type Scenes, ScenesSchema } from "./scene.js";
 
 export interface PlanSource {
@@ -23,6 +24,14 @@ export interface PlanSource {
    * rather than inlining markup nobody validated.
    */
   vectors?: Record<string, SanitizedSvg>;
+  /**
+   * Declared recipes with the hash of every code file, filled in by the
+   * loader only when the project declares recipes, so a project without them
+   * keeps its source revision.
+   */
+  recipes?: LoadedRecipe[];
+  /** Pixel sizes of ready PNG assets, read only for recipe projects. */
+  imageSizes?: Record<string, { width: number; height: number }>;
   profile: ProfileLock;
   scenes: Scenes;
   assets: AssetManifest;
@@ -90,6 +99,23 @@ const referencedAssets = (
         assetId: scene.visual.assetId,
         path: `/scenes/${sceneIndex}/visual/assetId`,
       });
+    }
+
+    if (scene.visual.type === "recipe") {
+      const walk = (value: unknown, path: string): void => {
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            walk(item, `${path}/${index}`);
+          });
+        } else if (value !== null && typeof value === "object") {
+          for (const [key, nested] of Object.entries(value)) {
+            if (key === "assetId" && typeof nested === "string") {
+              references.push({ assetId: nested, path: `${path}/assetId` });
+            } else walk(nested, `${path}/${key}`);
+          }
+        }
+      };
+      walk(scene.visual.params, `/scenes/${sceneIndex}/visual/params`);
     }
 
     if (scene.visual.type === "composition") {

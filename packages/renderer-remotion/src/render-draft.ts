@@ -1,10 +1,21 @@
-import { access, mkdir, mkdtemp, rename, rm } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import {
+  access,
+  mkdir,
+  mkdtemp,
+  rename,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type CompiledDraft,
   CompiledDraftSchema,
+  checkRecipeTrust,
   type Issue,
+  loadPlanProject,
+  readRecipeTrust,
 } from "@naraframe/core";
 import { bundle } from "@remotion/bundler";
 import {
@@ -48,6 +59,67 @@ const resolveEntryPoint = async (): Promise<string> => {
   } catch {
     return fileURLToPath(new URL("./remotion/entry.tsx", import.meta.url));
   }
+};
+
+/**
+ * For a draft with recipe scenes, re-reads the project's recipes, confirms
+ * the code on disk is the code that was compiled and that the owner trusts
+ * it, then writes a wrapper entry that registers those modules before the
+ * normal entry. The CLI checks trust first; this is the renderer's own guard.
+ */
+const prepareRecipeEntry = async (
+  draft: CompiledDraft,
+  projectRoot: string,
+  baseEntry: string,
+): Promise<{ entry: string; directory: string } | null> => {
+  const used = new Map<string, string>();
+  for (const scene of draft.scenes) {
+    if (scene.visual.type === "recipe") {
+      used.set(scene.visual.recipe, scene.visual.codeSha256);
+    }
+  }
+  if (used.size === 0) return null;
+  const loaded = await loadPlanProject(projectRoot);
+  if (!loaded.ok) {
+    throw new Error(
+      `Recipe project could not be re-read before rendering: ${loaded.issues.map((issue) => issue.code).join(", ")}.`,
+    );
+  }
+  const untrusted = checkRecipeTrust(draft, await readRecipeTrust(projectRoot));
+  if (untrusted.length > 0) {
+    throw new Error(untrusted.map((issue) => issue.message).join(" "));
+  }
+  const imports: string[] = [];
+  const entries: string[] = [];
+  for (const [index, [id, codeSha256]] of [...used].entries()) {
+    const recipe = loaded.value.source.recipes?.find((item) => item.id === id);
+    if (!recipe || recipe.codeSha256 !== codeSha256) {
+      throw new Error(
+        `Recipe ${id} changed on disk after it was compiled; compile and preview again.`,
+      );
+    }
+    const file = resolve(projectRoot, recipe.path, recipe.entry);
+    imports.push(`import * as recipe${index} from ${JSON.stringify(file)};`);
+    entries.push(`${JSON.stringify(id)}: recipe${index}`);
+  }
+  const extension = extname(baseEntry);
+  const registry = join(
+    dirname(baseEntry),
+    `recipe-registry${extension === ".tsx" ? ".ts" : extension}`,
+  );
+  const directory = await mkdtemp(join(tmpdir(), "naraframe-recipes-"));
+  const entry = join(directory, "entry.tsx");
+  await writeFile(
+    entry,
+    [
+      `import { registerRecipes } from ${JSON.stringify(registry)};`,
+      ...imports,
+      `registerRecipes({ ${entries.join(", ")} });`,
+      `import ${JSON.stringify(baseEntry)};`,
+      "",
+    ].join("\n"),
+  );
+  return { entry, directory };
 };
 
 export interface RenderDraftRequest {
@@ -141,23 +213,48 @@ export const renderDraft = async ({
   const browserExecutable = await resolveBrowserExecutable(requestedBrowser);
   await mkdir(dirname(outputPath), { recursive: true });
 
-  const entryPoint = await resolveEntryPoint();
+  const baseEntry = await resolveEntryPoint();
   const packageRoot = fileURLToPath(new URL("../", import.meta.url));
-  const serveUrl = await bundle({
-    entryPoint,
-    publicDir: resolve(projectRoot),
-    rootDir: packageRoot,
-    webpackOverride: (configuration) => ({
-      ...configuration,
-      resolve: {
-        ...configuration.resolve,
-        extensionAlias: {
-          ...configuration.resolve?.extensionAlias,
-          ".js": [".tsx", ".ts", ".js"],
+  const recipeEntry = await prepareRecipeEntry(draft, projectRoot, baseEntry);
+  const modules = join(packageRoot, "node_modules");
+  let serveUrl: string;
+  try {
+    serveUrl = await bundle({
+      entryPoint: recipeEntry?.entry ?? baseEntry,
+      // The wrapper registers recipes, then imports the entry that calls
+      // registerRoot; Remotion only scans the wrapper's own text for it.
+      ...(recipeEntry ? { ignoreRegisterRootWarning: true } : {}),
+      publicDir: resolve(projectRoot),
+      rootDir: packageRoot,
+      webpackOverride: (configuration) => ({
+        ...configuration,
+        resolve: {
+          ...configuration.resolve,
+          extensionAlias: {
+            ...configuration.resolve?.extensionAlias,
+            ".js": [".tsx", ".ts", ".js"],
+          },
+          // Recipe code lives in the project, outside this package: give it
+          // the renderer's single copies of react and remotion.
+          ...(recipeEntry
+            ? {
+                modules: [modules, "node_modules"],
+                alias: {
+                  ...(configuration.resolve?.alias as Record<string, string>),
+                  react: join(modules, "react"),
+                  "react-dom": join(modules, "react-dom"),
+                  remotion: join(modules, "remotion"),
+                },
+              }
+            : {}),
         },
-      },
-    }),
-  });
+      }),
+    });
+  } finally {
+    if (recipeEntry) {
+      await rm(recipeEntry.directory, { recursive: true, force: true });
+    }
+  }
   const composition = await selectComposition({
     serveUrl,
     id: "NaraFrameDraft",

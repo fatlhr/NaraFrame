@@ -29,6 +29,10 @@ const mediaPaths = (source: PlanSource): string[] => [
     asset.status === "ready" ? [asset.path] : [],
   ),
   ...source.profile.assets.map((asset) => asset.path),
+  // Recipe code is part of the source: undo must restore the exact files.
+  ...(source.recipes ?? []).flatMap((recipe) =>
+    recipe.files.map((file) => file.path),
+  ),
 ];
 
 /**

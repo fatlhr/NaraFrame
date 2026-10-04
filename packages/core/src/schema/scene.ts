@@ -271,6 +271,19 @@ const MediaVisualSchema = z
   })
   .strict();
 
+/**
+ * A scene drawn by a trusted local recipe (NF-AU-01). `params` is the
+ * episode's JSON content for that recipe; any `assetId` inside refers to a
+ * ready PNG and a sibling `crop` is a view onto it, never an edit of the file.
+ */
+const RecipeVisualSchema = z
+  .object({
+    type: z.literal("recipe"),
+    recipe: IdSchema,
+    params: z.record(z.string(), z.unknown()),
+  })
+  .strict();
+
 const CompositionVisualSchema = z
   .object({
     type: z.literal("composition"),
@@ -282,6 +295,7 @@ export const SceneVisualSchema = z.discriminatedUnion("type", [
   TextVisualSchema,
   MediaVisualSchema,
   CompositionVisualSchema,
+  RecipeVisualSchema,
 ]);
 
 /**

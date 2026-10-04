@@ -9,6 +9,7 @@ import {
   capabilityRegistry,
   checkAudioModeConflicts,
   checkProductionReadiness,
+  checkRecipeTrust,
   compileDraft,
   computeCostReport,
   computeReuse,
@@ -24,8 +25,10 @@ import {
   planProfileApply,
   readApprovals,
   readProductionLedger,
+  readRecipeTrust,
   readRevisionState,
   recordApproval,
+  recordRecipeTrust,
   resolveAudioMode,
   syncWorkingCopy,
   undoProject,
@@ -86,6 +89,7 @@ Usage:
   naraframe validate [project] --stage plan|production [--scene <scene-id>] [--json]
   naraframe status [project] [--json]
   naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
+  naraframe recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>] [--json]
   naraframe profile inspect <id-or-path> [--json]
   naraframe profile apply <id-or-path> [project] [--dry-run] [--reset-overrides] [--json]
   naraframe cache clean [project] [--dry-run] [--json]`;
@@ -671,6 +675,25 @@ const previewCommand = async (
       }),
     };
   }
+  // Recipe code runs only when the owner trusts this exact code: checked for
+  // every preview, draft included, before anything is synced or bundled.
+  const untrustedRecipes = checkRecipeTrust(
+    compiled.value,
+    await readRecipeTrust(loaded.value.root),
+  );
+  if (untrustedRecipes.length > 0) {
+    return {
+      exitCode: 1,
+      event: commonEvent("preview", {
+        status: "failed",
+        success: false,
+        readiness: "not-ready",
+        mode: "draft",
+        scope: compiled.value.scope,
+        issues: [...issues, ...untrustedRecipes],
+      }),
+    };
+  }
   if (signal?.aborted) {
     const error = new Error("Interrupted");
     error.name = "AbortError";
@@ -893,6 +916,7 @@ const runProductionChecks = async (
   if (!draft.ok || !final.ok) return { ok: false, issues };
   issues.push(
     ...checkProductionReadiness(loaded.source, final.value, final.issues),
+    ...checkRecipeTrust(final.value, await readRecipeTrust(loaded.root)),
   );
   issues.push(...(await preflightNarrationAudio(loaded.root, final.value)));
   issues.push(...(await preflightSoundtrackAudio(loaded.root, final.value)));
@@ -923,6 +947,7 @@ const runPreviewProductionChecks = async (
       finalExport: false,
       ...(sceneId ? { sceneId } : {}),
     }),
+    ...checkRecipeTrust(draft.value, await readRecipeTrust(loaded.root)),
   );
   issues.push(...(await preflightNarrationAudio(loaded.root, draft.value)));
   issues.push(...(await preflightSoundtrackAudio(loaded.root, draft.value)));
@@ -1332,6 +1357,84 @@ const cacheCommand = async (args: readonly string[]): Promise<Execution> => {
   };
 };
 
+/**
+ * Records the owner's acceptance of a recipe's current code. Run it only after
+ * the owner reviewed that code and said so; it never edits source files.
+ */
+const recipeCommand = async (args: readonly string[]): Promise<Execution> => {
+  const [subcommand, ...rest] = args;
+  const parsed = parseArguments(
+    rest,
+    [],
+    ["--recipe", "--authorized-by", "--note"],
+  );
+  const recipeId = parsed.values.get("--recipe");
+  const authorizedBy = parsed.values.get("--authorized-by");
+  if (
+    parsed.error ||
+    subcommand !== "trust" ||
+    parsed.positionals.length > 1 ||
+    !recipeId ||
+    !authorizedBy
+  ) {
+    return usageFailure(
+      "recipe",
+      parsed.error ??
+        "recipe supports: recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>].",
+    );
+  }
+  const loaded = await loadPlanProject(parsed.positionals[0] ?? ".");
+  const failed = (issues: Issue[]): Execution => ({
+    exitCode: 1,
+    event: commonEvent("recipe", {
+      status: "failed",
+      success: false,
+      readiness: "invalid",
+      issues,
+    }),
+  });
+  if (!loaded.ok) return failed(loaded.issues);
+  const recipe = loaded.value.source.recipes?.find(
+    (item) => item.id === recipeId,
+  );
+  if (!recipe) {
+    return failed([
+      {
+        code: "RECIPE_UNKNOWN",
+        severity: "error",
+        responsible: "user",
+        artifact: "naraframe.json",
+        path: "/recipes",
+        message: `This project declares no recipe ${recipeId}.`,
+        suggestion:
+          "Use the id of a recipe listed under recipes in naraframe.json.",
+      },
+    ]);
+  }
+  const note = parsed.values.get("--note");
+  const trust = await recordRecipeTrust(loaded.value.root, {
+    recipeId: recipe.id,
+    codeSha256: recipe.codeSha256,
+    authorizedBy,
+    ...(note ? { note } : {}),
+    trustedAt: new Date().toISOString(),
+  });
+  return {
+    exitCode: 0,
+    event: commonEvent("recipe", {
+      readiness: "not-applicable",
+      data: {
+        trust,
+        version: recipe.version,
+        files: recipe.files,
+      },
+    }),
+    human: [
+      `Trusted recipe ${recipe.id} ${recipe.version} code ${recipe.codeSha256.slice(0, 12)} for this project (authorized by ${authorizedBy}).`,
+    ],
+  };
+};
+
 const knownCommand = (value: string | undefined): CommandName =>
   value === "doctor" ||
   value === "schema" ||
@@ -1343,7 +1446,8 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "undo" ||
   value === "render" ||
   value === "cache" ||
-  value === "profile"
+  value === "profile" ||
+  value === "recipe"
     ? value
     : "unknown";
 
@@ -1363,6 +1467,7 @@ const executeCommand = async (
   if (command === "render") return renderCommand(args, options);
   if (command === "cache") return cacheCommand(args);
   if (command === "profile") return profileCommand(args);
+  if (command === "recipe") return recipeCommand(args);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 

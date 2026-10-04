@@ -131,6 +131,27 @@ const CompiledVisualSchema = z.discriminatedUnion("type", [
     })
     .strict(),
   z.object({ type: z.literal("composition") }).strict(),
+  z
+    .object({
+      type: z.literal("recipe"),
+      recipe: IdSchema,
+      version: z.string().min(1),
+      /** Hash of the trusted code; any code change changes every key. */
+      codeSha256: Sha256Schema,
+      params: z.record(z.string(), z.unknown()),
+      /** The PNGs the params reference, with their real pixel size. */
+      assets: z.record(
+        IdSchema,
+        z
+          .object({
+            publicPath: z.string().min(1),
+            width: z.number().int().positive(),
+            height: z.number().int().positive(),
+          })
+          .strict(),
+      ),
+    })
+    .strict(),
 ]);
 
 const CompiledBeatBaseShape = {

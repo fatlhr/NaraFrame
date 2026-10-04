@@ -58,6 +58,122 @@ const compileIssue = (
   suggestion,
 });
 
+type CompiledRecipeVisual = Extract<
+  CompiledDraft["scenes"][number]["visual"],
+  { type: "recipe" }
+>;
+
+/**
+ * A recipe scene's compiled form: the trusted code's identity and the PNGs
+ * its params reference, each checked to exist, be ready, and contain any
+ * crop drawn from it. Recipe scenes draw their own motion, so declarative
+ * beats and camera moves are refused there.
+ */
+const compileRecipeVisual = (
+  source: PlanSource,
+  scene: PlanSource["scenes"]["scenes"][number],
+  sceneIndex: number,
+  issues: Issue[],
+): CompiledRecipeVisual | null => {
+  if (scene.visual.type !== "recipe") return null;
+  const at = `/scenes/${sceneIndex}/visual`;
+  const fail = (path: string, message: string, suggestion: string) =>
+    issues.push(
+      compileIssue("RECIPE_PARAM_INVALID", path, message, "error", suggestion),
+    );
+  const recipeId = scene.visual.recipe;
+  const recipe = source.recipes?.find((candidate) => candidate.id === recipeId);
+  if (!recipe) {
+    issues.push(
+      compileIssue(
+        "RECIPE_UNKNOWN",
+        `${at}/recipe`,
+        `Scene ${scene.id} uses recipe ${scene.visual.recipe}, which naraframe.json does not declare.`,
+        "error",
+        "Declare the recipe under recipes in naraframe.json, or use a declared one.",
+      ),
+    );
+    return null;
+  }
+  if (scene.beats.length > 0 || scene.camera) {
+    fail(
+      `/scenes/${sceneIndex}/beats`,
+      `Scene ${scene.id} is drawn by recipe ${recipe.id}, which owns its motion; declarative beats and camera moves do not apply.`,
+      "Remove beats and camera from this scene and express motion through the recipe's parameters.",
+    );
+  }
+  const assets: CompiledRecipeVisual["assets"] = {};
+  const walk = (value: unknown, path: string): void => {
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        walk(item, `${path}/${index}`);
+      });
+      return;
+    }
+    if (value === null || typeof value !== "object") return;
+    const record = value as Record<string, unknown>;
+    const assetId = record.assetId;
+    if (typeof assetId === "string") {
+      const asset = source.assets.assets.find((item) => item.id === assetId);
+      const size = source.imageSizes?.[assetId];
+      if (asset?.status !== "ready" || asset.kind !== "png" || !size) {
+        fail(
+          `${path}/assetId`,
+          `Recipe parameter asset ${assetId} must be a ready PNG in the asset manifest.`,
+          "Reference a ready PNG asset, or add and mark it ready first.",
+        );
+      } else {
+        assets[assetId] = {
+          publicPath: asset.path,
+          width: size.width,
+          height: size.height,
+        };
+        const crop = record.crop as
+          | { x?: unknown; y?: unknown; width?: unknown; height?: unknown }
+          | undefined;
+        if (crop !== undefined) {
+          const [x, y, width, height] = [
+            crop.x,
+            crop.y,
+            crop.width,
+            crop.height,
+          ];
+          const numbers = [x, y, width, height].every(
+            (item) => typeof item === "number" && Number.isFinite(item),
+          );
+          if (
+            !numbers ||
+            (width as number) <= 0 ||
+            (height as number) <= 0 ||
+            (x as number) < 0 ||
+            (y as number) < 0 ||
+            (x as number) + (width as number) > size.width ||
+            (y as number) + (height as number) > size.height
+          ) {
+            fail(
+              `${path}/crop`,
+              `Crop on asset ${assetId} must be a rectangle inside its ${size.width}×${size.height} pixels.`,
+              "Use x, y, width and height in source pixels that stay within the image; the file itself is never edited.",
+            );
+          }
+        }
+      }
+    }
+    for (const [key, nested] of Object.entries(record)) {
+      if (key !== "assetId") walk(nested, `${path}/${key}`);
+    }
+  };
+  walk(scene.visual.params, `${at}/params`);
+  return {
+    type: "recipe",
+    recipe: recipe.id,
+    version: recipe.version,
+    codeSha256: recipe.codeSha256,
+    params: scene.visual.params,
+    assets,
+  };
+};
+
 const compiledAssets = (source: PlanSource): Record<string, CompiledAsset> =>
   Object.fromEntries(
     source.assets.assets.flatMap((asset): Array<[string, CompiledAsset]> => {
@@ -1187,6 +1303,11 @@ export const compileDraft = (
   }
 
   issues.push(...checkSourceProvenance(source));
+  const recipeVisuals = new Map<string, CompiledRecipeVisual>();
+  source.scenes.scenes.forEach((scene, sceneIndex) => {
+    const visual = compileRecipeVisual(source, scene, sceneIndex, issues);
+    if (visual) recipeVisuals.set(scene.id, visual);
+  });
 
   // Narration wiring: when narration.json exists, derive timeline, check
   // provenance, and partition scenes against the narration clock. Otherwise
@@ -1600,7 +1721,9 @@ export const compileDraft = (
       visual:
         scene.visual.type === "composition"
           ? { type: "composition" as const }
-          : scene.visual,
+          : scene.visual.type === "recipe"
+            ? (recipeVisuals.get(scene.id) ?? scene.visual)
+            : scene.visual,
       layers:
         scene.visual.type === "composition"
           ? layout.layers.map((layer) => scaleLayer(layer, scaleX, scaleY))
