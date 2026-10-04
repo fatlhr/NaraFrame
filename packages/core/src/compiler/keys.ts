@@ -15,7 +15,8 @@ import { narrationTextHash } from "./voice-binding.js";
 //    last frame of a shot that used to keep everything on screen.
 // 9: headline spans flow inline in one text box instead of one line per run.
 // 10: path layers, and draw, follow and count beats paint new motion.
-export const RENDER_ENGINE = "naraframe-draft/10";
+// 11: AAC is encoded directly into MP4 to preserve audio priming timestamps.
+export const RENDER_ENGINE = "naraframe-draft/11";
 
 /**
  * Finds a retained voice clip for a block: the spoken text (whitespace
