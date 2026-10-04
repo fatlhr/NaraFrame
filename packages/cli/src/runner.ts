@@ -12,6 +12,7 @@ import {
   computeCostReport,
   computeReuse,
   createProject,
+  type DraftResolution,
   dedupeIssues,
   editProject,
   exportSchemas,
@@ -83,7 +84,7 @@ Usage:
   naraframe create <name> --profile <id-or-path> [--json]
   naraframe validate [project] --stage plan|production [--scene <scene-id>] [--json]
   naraframe status [project] [--json]
-  naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--json]
+  naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
   naraframe profile inspect <id-or-path> [--json]
   naraframe profile apply <id-or-path> [project] [--dry-run] [--reset-overrides] [--json]
   naraframe cache clean [project] [--dry-run] [--json]`;
@@ -568,13 +569,27 @@ const previewCommand = async (
   options: RunCliOptions,
 ): Promise<Execution> => {
   const { signal, onPreviewRenameDispatched } = options;
-  const parsed = parseArguments(args, ["--draft", "--rerender"], ["--scene"]);
-  if (parsed.error || parsed.positionals.length > 1) {
+  const parsed = parseArguments(
+    args,
+    ["--draft", "--rerender"],
+    ["--scene", "--resolution"],
+  );
+  const requestedResolution = parsed.values.get("--resolution") ?? "540";
+  if (
+    parsed.error ||
+    parsed.positionals.length > 1 ||
+    (requestedResolution !== "540" && requestedResolution !== "1080")
+  ) {
     return usageFailure(
       "preview",
-      parsed.error ?? "preview accepts at most one project.",
+      parsed.error ??
+        (parsed.positionals.length > 1
+          ? "preview accepts at most one project."
+          : "--resolution accepts 540 (default) or 1080."),
     );
   }
+  const resolution: DraftResolution =
+    requestedResolution === "1080" ? 1080 : 540;
   const productionStage = !parsed.flags.has("--draft");
   const projectPath = parsed.positionals[0] ?? ".";
   const loaded = await loadPlanProject(projectPath);
@@ -592,7 +607,7 @@ const previewCommand = async (
   }
   const sceneId = parsed.values.get("--scene");
   const productionChecks = productionStage
-    ? await runPreviewProductionChecks(loaded.value, sceneId)
+    ? await runPreviewProductionChecks(loaded.value, sceneId, resolution)
     : null;
   if (productionChecks && !productionChecks.ok) {
     return {
@@ -611,6 +626,7 @@ const previewCommand = async (
   const compiled = compileDraft(
     loaded.value.source,
     sceneId ? { type: "scene", sceneId } : { type: "project" },
+    { resolution },
   );
   const issues = [
     ...loaded.issues,
@@ -718,6 +734,7 @@ const previewCommand = async (
       data: {
         label: compiled.value.label,
         muted: !(compiled.value.narration || compiled.value.soundtrack),
+        resolution,
         audioMode: resolveAudioMode(loaded.value.source),
         timelineScope: compiled.value.timelineScope,
         manifestSha256: published.manifestSha256,
@@ -869,10 +886,12 @@ const runProductionChecks = async (
 const runPreviewProductionChecks = async (
   loaded: LoadedPlanProject,
   sceneId: string | undefined,
+  resolution: DraftResolution = 540,
 ): Promise<ProductionChecks> => {
   const draft = compileDraft(
     loaded.source,
     sceneId ? { type: "scene", sceneId } : { type: "project" },
+    { resolution },
   );
   const issues: Issue[] = [...draft.issues];
   if (!draft.ok) return { ok: false, issues };
@@ -990,6 +1009,20 @@ const renderCommand = async (
     }
     const render = (manifest?.render ?? {}) as Record<string, unknown>;
     const scope = (manifest?.scope ?? {}) as Record<string, unknown>;
+    // A native 1080 preview reviews the same source at final size.
+    const reviewedDraft =
+      render.width === 1080
+        ? compileDraft(
+            loaded.value.source,
+            { type: "project" },
+            { resolution: 1080 },
+          )
+        : null;
+    const reviewedAssemblyKey = reviewedDraft
+      ? reviewedDraft.ok
+        ? reviewedDraft.value.assemblyKey
+        : null
+      : checks.draft.assemblyKey;
     if (!manifest) {
       fail(
         "APPROVAL_PREVIEW_UNKNOWN",
@@ -998,7 +1031,7 @@ const renderCommand = async (
       );
     } else if (
       manifest.sourceRevision !== checks.draft.sourceRevision ||
-      manifest.assemblyKey !== checks.draft.assemblyKey ||
+      manifest.assemblyKey !== reviewedAssemblyKey ||
       scope.type !== "project"
     ) {
       fail(

@@ -402,6 +402,44 @@ describe.skipIf(!existsSync(ffmpeg))("render command gates", () => {
     expect(codes(event)).toEqual(["APPROVAL_PREVIEW_SILENT"]);
   });
 
+  it("binds a native 1080 preview review to the 1080 compile of the same source", async () => {
+    const { root } = await makeProject();
+    const source = (await loadPlanProject(root)).value?.source as PlanSource;
+    const half = compileDraft(source);
+    if (!half.ok) throw new Error("fixture");
+    const directory = join(root, "preview", "builds", "native-build");
+    await mkdir(directory, { recursive: true });
+    // A 1080 manifest carrying the 540 key is not a review of this source.
+    await writeFile(
+      join(directory, "manifest.json"),
+      JSON.stringify({
+        sourceRevision: half.value.sourceRevision,
+        assemblyKey: half.value.assemblyKey,
+        scope: { type: "project" },
+        render: { audio: "aac", width: 1080 },
+      }),
+    );
+    const { event } = await run(
+      "render",
+      root,
+      "--approve-preview",
+      "native-build",
+    );
+    expect(codes(event)).toEqual(["APPROVAL_PREVIEW_STALE"]);
+  });
+
+  it("rejects an unsupported preview resolution", async () => {
+    const { root } = await makeProject();
+    const { exitCode, event } = await run(
+      "preview",
+      root,
+      "--resolution",
+      "720",
+    );
+    expect(exitCode).toBe(3);
+    expect(codes(event)).toEqual(["CLI_USAGE"]);
+  });
+
   it("does not accept a preview with audio as the review of a silent export", async () => {
     const { root } = await makeProject({
       omitNarration: true,

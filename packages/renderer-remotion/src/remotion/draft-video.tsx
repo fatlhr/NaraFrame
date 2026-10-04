@@ -717,6 +717,7 @@ const useBundledFonts = (fonts: CompiledDraft["fonts"]): void => {
 
 export const DraftVideo = (draft: CompiledDraft) => {
   useBundledFonts(draft.fonts);
+  const labelScale = draft.width / 540;
   return (
     <AbsoluteFill
       style={{
@@ -760,14 +761,15 @@ export const DraftVideo = (draft: CompiledDraft) => {
       {draft.mode === "draft" && (
         <div
           style={{
+            // Sized for the 540-wide draft; a native-resolution draft scales it.
             position: "absolute",
-            left: 44,
-            right: 44,
-            bottom: 34,
+            left: 44 * labelScale,
+            right: 44 * labelScale,
+            bottom: 34 * labelScale,
             color: draft.profile.render.palette.accent,
-            fontSize: 18,
+            fontSize: 18 * labelScale,
             fontWeight: 800,
-            letterSpacing: 2,
+            letterSpacing: 2 * labelScale,
             textAlign: "center",
           }}
         >

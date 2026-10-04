@@ -19,6 +19,7 @@ export { type CaptionCue, deriveCaptionCues } from "./compiler/captions.js";
 export {
   type CompileOptions,
   compileDraft,
+  type DraftResolution,
   type DraftScope,
 } from "./compiler/compile-draft.js";
 export { contrastRatio, contrastThresholdFor } from "./compiler/contrast.js";
