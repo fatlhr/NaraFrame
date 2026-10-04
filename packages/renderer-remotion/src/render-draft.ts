@@ -1,5 +1,5 @@
-import { access, mkdir } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { access, mkdir, mkdtemp, rename, rm } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type CompiledDraft,
@@ -13,6 +13,7 @@ import {
   selectComposition,
 } from "@remotion/renderer";
 import { VERSION as remotionVersion } from "remotion";
+import { encodeAudioWhenMuxing } from "./audio-encoding.js";
 import { FONT_RENDER_FAILURE } from "./remotion/typography.js";
 import {
   type VisualPreflightReport,
@@ -181,20 +182,41 @@ export const renderDraft = async ({
   const hasNarration = Boolean(
     preflight.draft.narration || preflight.draft.soundtrack,
   );
+  // Remotion requires a .mkv/.mov filename when mixing PCM. Our stitcher
+  // encodes that PCM directly into MP4, then publishes it at the requested path.
+  let audioRenderDirectory: string | null = null;
   try {
+    if (hasNarration) {
+      audioRenderDirectory = await mkdtemp(
+        join(dirname(outputPath), ".audio-render-"),
+      );
+    }
     await renderMedia({
       serveUrl,
       composition,
       inputProps: preflight.draft,
-      outputLocation: outputPath,
+      outputLocation: audioRenderDirectory
+        ? join(audioRenderDirectory, "render.mkv")
+        : outputPath,
       browserExecutable,
       codec: "h264",
       muted: !hasNarration,
+      // Remotion's AAC/ADTS intermediate loses priming timestamps on copy.
+      // Keep the mix lossless and encode once into the final MP4 instead.
+      ...(hasNarration
+        ? {
+            audioCodec: "pcm-16" as const,
+            ffmpegOverride: encodeAudioWhenMuxing,
+          }
+        : {}),
       overwrite: true,
       logLevel: "warn",
       cancelSignal: cancellation.cancelSignal,
       onProgress: ({ progress }) => onProgress?.(progress),
     });
+    if (audioRenderDirectory) {
+      await rename(join(audioRenderDirectory, "render.mkv"), outputPath);
+    }
   } catch (error) {
     if (signal?.aborted) {
       throw interrupted();
@@ -220,6 +242,9 @@ export const renderDraft = async ({
     throw error;
   } finally {
     signal?.removeEventListener("abort", onAbort);
+    if (audioRenderDirectory) {
+      await rm(audioRenderDirectory, { recursive: true, force: true });
+    }
   }
 
   return {
