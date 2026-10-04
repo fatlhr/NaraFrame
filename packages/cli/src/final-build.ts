@@ -16,9 +16,11 @@ import type {
   CompiledDraft,
   CostReport,
   Issue,
+  ResolvedAudioMode,
 } from "@naraframe/core";
 import { type RenderedDraft, renderDraft } from "@naraframe/renderer-remotion";
 import {
+  carriesAudio,
   commandVersion,
   execute,
   ffmpegExecutable,
@@ -126,6 +128,8 @@ const verifyFinalMedia = async (
     ...(checks.probe ? { probe: checks.probe } : {}),
     ...(checks.decode ? { decode: checks.decode } : {}),
   });
+  // A silent export has no audio stream; the probe has already proven that.
+  if (!carriesAudio(draft)) return;
   if (checks.audioDecode) await checks.audioDecode(path);
   else await decodeAudio(path, checks.ffmpegExecutable ?? ffmpegExecutable());
 };
@@ -260,6 +264,8 @@ export interface PublishFinalOptions extends MediaChecks {
   approval: Approval;
   issues: readonly Issue[];
   cost: CostReport | null;
+  /** The resolved audio mode, recorded in the report. */
+  audioMode?: ResolvedAudioMode;
   onProgress?: (progress: number) => void;
   signal?: AbortSignal;
   failureInjection?: "before-pointer";
@@ -338,8 +344,9 @@ export const publishFinalBuild = async (
           fps: rendered.fps,
           durationInFrames: rendered.durationInFrames,
           codec: "h264",
-          audio: "aac",
+          audio: carriesAudio(draft) ? "aac" : "none",
         },
+        ...(options.audioMode ? { audioMode: options.audioMode } : {}),
         approval: options.approval,
         cost: options.cost,
         visualPreflight: {

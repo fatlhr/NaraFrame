@@ -153,6 +153,8 @@ export const ProductionProfileSchema = z
     timing: z.object({ wordLevelRequired: z.boolean() }).strict(),
     assetPolicy: z.object({ allowPlannedInDraft: z.boolean() }).strict(),
     requireSourcing: z.boolean().optional(),
+    /** Default audio mode for this profile's projects; lock it to require it. */
+    audioMode: z.enum(["voice", "music", "silent"]).optional(),
   })
   .strict();
 

@@ -1,6 +1,11 @@
 import type { Issue } from "../model/issue.js";
 import type { CompiledDraft } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
+import {
+  checkAudioModeConflicts,
+  checkFinalAudioMode,
+  resolveAudioMode,
+} from "./audio-mode.js";
 import { referencedAssetIds } from "./keys.js";
 
 const problem = (
@@ -25,8 +30,11 @@ const problem = (
 export interface ProductionScope {
   /** Only this scene and what it depends on must be ready. */
   sceneId?: string;
-  /** A final export needs narration; a production preview does not. */
-  requireNarration?: boolean;
+  /**
+   * A final export needs everything its audio mode requires; a production
+   * preview only needs a conflict-free source.
+   */
+  finalExport?: boolean;
 }
 
 /** Everything one scene needs from outside itself. */
@@ -125,19 +133,19 @@ export const checkProductionReadiness = (
   scope: ProductionScope = {},
 ): Issue[] => {
   const issues: Issue[] = [];
-  const requireNarration = scope.requireNarration ?? true;
+  const finalExport = scope.finalExport ?? true;
   const closure = scope.sceneId
     ? computeSceneClosure(source, scope.sceneId)
     : null;
 
-  if (requireNarration && (!source.narration || !compiled.narration)) {
+  const audioMode = resolveAudioMode(source);
+  issues.push(...checkAudioModeConflicts(source, audioMode));
+  if (finalExport) {
     issues.push(
-      problem(
-        "NARRATION_REQUIRED",
-        "narration.json",
-        "/",
-        "A final export needs narration; this project has none.",
-        "Add narration.json with ready audio blocks, or keep working with draft previews.",
+      ...checkFinalAudioMode(
+        source,
+        audioMode,
+        compiled.narration !== undefined,
       ),
     );
   }

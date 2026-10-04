@@ -44,6 +44,8 @@ const EVIDENCE: Record<string, string[]> = {
   // phrase-anchors: compile-draft-m2-4-3.
   audio: ["narration", "captions", "music", "phrase-anchors", "sfx", "ducking"],
   textEmphasis: ["accent", "strong", "quiet"],
+  // audio-modes (e2e) exports music and silent finals; audio-boundaries voice.
+  audioModes: ["voice", "music", "silent"],
 };
 
 describe("capability registry", () => {

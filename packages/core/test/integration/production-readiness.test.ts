@@ -112,13 +112,18 @@ describe("checkProductionReadiness", () => {
     expect(readiness(bound(narratedSource()))).toEqual([]);
   });
 
-  it("requires narration for a final export", () => {
+  it("blocks a final export without narration unless a non-voice mode is declared", () => {
     const { narration: _omit, ...silent } = narratedSource({
       scenes: [narratedScene("s1")],
     });
     expect(codes(readiness(silent as PlanSource))).toContain(
-      "NARRATION_REQUIRED",
+      "AUDIO_MODE_UNDECLARED",
     );
+    const voice = {
+      ...silent,
+      project: { ...silent.project, audioMode: "voice" },
+    } as PlanSource;
+    expect(codes(readiness(voice))).toContain("NARRATION_REQUIRED");
   });
 
   it("turns a missing voice binding from a warning into an error", () => {
