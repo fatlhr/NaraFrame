@@ -165,6 +165,20 @@ describe("final export by audio mode", () => {
       expect(undeclared.success).toBe(false);
       expect(codes(undeclared)).toEqual(["AUDIO_MODE_UNDECLARED"]);
 
+      // Undeclared timing stays previewable as a provisional draft.
+      const provisional = await cli(
+        "preview",
+        project,
+        "--draft",
+        "--scene",
+        "two",
+      );
+      expect(provisional.success).toBe(true);
+      expect(provisional.data.audioMode).toEqual({
+        mode: withMusic ? "music" : "silent",
+        source: "legacy",
+      });
+
       await declare(project, mode);
       const validated = await cli("validate", project, "--stage", "production");
       expect(validated.success).toBe(true);
@@ -214,4 +228,18 @@ describe("final export by audio mode", () => {
     },
     900_000,
   );
+
+  it("previews a voice draft whose narration is not ready yet but blocks its export", async () => {
+    const project = await makeProject("voice-pending", false);
+    await declare(project, "voice");
+    const draft = await cli("preview", project, "--draft");
+    expect(draft.success).toBe(true);
+    expect(draft.data).toMatchObject({
+      muted: true,
+      audioMode: { mode: "voice", source: "project" },
+    });
+    const validated = await cli("validate", project, "--stage", "production");
+    expect(validated.success).toBe(false);
+    expect(codes(validated)).toEqual(["NARRATION_REQUIRED"]);
+  }, 900_000);
 });

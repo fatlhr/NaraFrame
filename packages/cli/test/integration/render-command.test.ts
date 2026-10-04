@@ -62,6 +62,10 @@ interface Options {
   contextDeclaredMs?: number;
   omitNarration?: boolean;
   audioMode?: "voice" | "music" | "silent";
+  /** Soundtrack written to naraframe.json (uses the context clip as music). */
+  soundtrack?: boolean;
+  /** Profile default audio mode, locked. */
+  lockedProfileAudioMode?: "voice" | "music" | "silent";
   plannedImage?: boolean;
   /** Scene that still uses the planned image; defaults to s1. */
   plannedImageOn?: string;
@@ -164,8 +168,23 @@ const makeProject = async (
   await write("naraframe.json", {
     ...source.project,
     ...(options.audioMode ? { audioMode: options.audioMode } : {}),
+    ...(options.soundtrack
+      ? { soundtrack: { music: { assetId: "voice-context" }, sfx: [] } }
+      : {}),
   });
-  await write("profile.lock.json", source.profile);
+  await write(
+    "profile.lock.json",
+    options.lockedProfileAudioMode
+      ? {
+          ...source.profile,
+          production: {
+            ...source.profile.production,
+            audioMode: options.lockedProfileAudioMode,
+          },
+          lockedPaths: [...source.profile.lockedPaths, "production.audioMode"],
+        }
+      : source.profile,
+  );
   await write("scenes.json", source.scenes);
   await write("assets/manifest.json", source.assets);
   if (options.plannedContext) {
@@ -439,6 +458,56 @@ describe.skipIf(!existsSync(ffmpeg))("render command gates", () => {
     expect(exitCode).toBe(3);
     expect(codes(event)).toEqual(["CLI_USAGE"]);
   });
+
+  it.each([
+    {
+      name: "a silent project with a soundtrack",
+      options: {
+        omitNarration: true,
+        audioMode: "silent",
+        soundtrack: true,
+      } as Options,
+      code: "AUDIO_MODE_CONFLICT",
+    },
+    {
+      name: "a music-only project with narration",
+      options: { audioMode: "music" } as Options,
+      code: "AUDIO_MODE_CONFLICT",
+    },
+    {
+      name: "a mode the profile locks differently",
+      options: {
+        omitNarration: true,
+        audioMode: "silent",
+        lockedProfileAudioMode: "music",
+      } as Options,
+      code: "AUDIO_MODE_LOCKED",
+    },
+  ])(
+    "refuses every preview of $name before rendering and keeps the pointer",
+    async ({ options, code }) => {
+      const { root } = await makeProject(options);
+      const pointer = join(root, "preview", "current.json");
+      await mkdir(join(root, "preview"), { recursive: true });
+      const existing = JSON.stringify({ buildId: "earlier-build" });
+      await writeFile(pointer, existing);
+      for (const args of [
+        ["--draft"],
+        [],
+        ["--draft", "--resolution", "1080"],
+        ["--draft", "--scene", "s1"],
+        ["--scene", "s1", "--resolution", "1080"],
+      ]) {
+        const { exitCode, event } = await run("preview", root, ...args);
+        expect(exitCode, args.join(" ")).toBe(1);
+        expect(event.readiness).toBe("invalid");
+        expect(event.buildId).toBeNull();
+        expect(codes(event)).toEqual([code]);
+      }
+      expect(await readFile(pointer, "utf8")).toBe(existing);
+      expect(existsSync(join(root, "preview", "builds"))).toBe(false);
+    },
+  );
 
   it("does not accept a preview with audio as the review of a silent export", async () => {
     const { root } = await makeProject({

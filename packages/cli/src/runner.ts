@@ -7,6 +7,7 @@ import {
   buildProfileLock,
   type CompiledDraft,
   capabilityRegistry,
+  checkAudioModeConflicts,
   checkProductionReadiness,
   compileDraft,
   computeCostReport,
@@ -606,6 +607,28 @@ const previewCommand = async (
     };
   }
   const sceneId = parsed.values.get("--scene");
+  // Audio that contradicts the mode, or a mode the profile locks, is a source
+  // error for every preview, draft included: a draft may be provisional, but
+  // it never renders sound the project says it must not have.
+  const audioMode = resolveAudioMode(loaded.value.source);
+  const audioConflicts = checkAudioModeConflicts(
+    loaded.value.source,
+    audioMode,
+  );
+  if (audioConflicts.length > 0) {
+    return {
+      exitCode: 1,
+      event: commonEvent("preview", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        mode: "draft",
+        scope: sceneId ? { type: "scene", sceneId } : { type: "project" },
+        issues: [...loaded.issues, ...audioConflicts],
+        data: { stage: productionStage ? "production" : "draft", audioMode },
+      }),
+    };
+  }
   const productionChecks = productionStage
     ? await runPreviewProductionChecks(loaded.value, sceneId, resolution)
     : null;
@@ -735,7 +758,7 @@ const previewCommand = async (
         label: compiled.value.label,
         muted: !(compiled.value.narration || compiled.value.soundtrack),
         resolution,
-        audioMode: resolveAudioMode(loaded.value.source),
+        audioMode,
         timelineScope: compiled.value.timelineScope,
         manifestSha256: published.manifestSha256,
         reusedFromBuildId: reusable?.buildId ?? null,
