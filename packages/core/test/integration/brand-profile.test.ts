@@ -249,6 +249,7 @@ describe("brand-managed profiles", () => {
     expect(plan.ok).toBe(true);
     if (!plan.ok) return;
     expect(plan.value.bindings).toEqual({
+      compatible: [],
       branded: [{ assetId: "logo", role: "logo", replacement: "brand-b-logo" }],
       incompatible: [{ assetId: "tutor", role: "person" }],
       neutral: ["chart"],
@@ -270,6 +271,28 @@ describe("brand-managed profiles", () => {
     expect(await readFile(join(root, "profile.lock.json"), "utf8")).toBe(
       before,
     );
+  });
+
+  it("reports assets bound to the target brand as compatible, not neutral", async () => {
+    const a = await writeBrandProfile("brand-a", brandA);
+    const root = await makeProject(a, {
+      logo: { brand: "brand-a", role: "logo" },
+      tutor: { brand: "brand-a", role: "person" },
+      chart: "neutral",
+    });
+    const plan = await planProfileApply({
+      root,
+      profileDirectory: a,
+      profileSource,
+    });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.value.bindings?.compatible).toEqual([
+      { assetId: "logo", role: "logo" },
+      { assetId: "tutor", role: "person" },
+    ]);
+    expect(plan.value.bindings?.neutral).toEqual(["chart"]);
+    expect(plan.value.bindings?.branded).toEqual([]);
   });
 
   it("applies a switch reproducibly, blocks the export, and undoes it", async () => {

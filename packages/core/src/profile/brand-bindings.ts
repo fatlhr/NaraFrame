@@ -140,6 +140,8 @@ export const checkBrandBindings = (source: PlanSource): Issue[] => {
 };
 
 export interface BrandBindingPlan {
+  /** Bound to the target brand itself: brand identity that stays valid. */
+  compatible: Array<{ assetId: string; role: string | null }>;
   /** Bound to the current brand; the target profile has an asset for its role. */
   branded: Array<{ assetId: string; role: string | null; replacement: string }>;
   /** Bound to the current brand with no target asset for its role. */
@@ -164,6 +166,7 @@ export const planBrandBindings = (
   target: ProfileLock,
 ): BrandBindingPlan => {
   const plan: BrandBindingPlan = {
+    compatible: [],
     branded: [],
     incompatible: [],
     neutral: [],
@@ -178,7 +181,9 @@ export const planBrandBindings = (
     } else if (!binding) {
       plan.unknown.push(asset.id);
     } else if (binding.brand === target.id) {
-      plan.neutral.push(asset.id);
+      // Brand identity that matches the target is compatible, not neutral:
+      // only an explicit "neutral" binding means any brand may use it.
+      plan.compatible.push({ assetId: asset.id, role: binding.role ?? null });
     } else {
       const replacement = target.assets.find(
         (candidate) => binding.role && candidate.role === binding.role,
