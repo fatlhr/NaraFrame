@@ -178,6 +178,21 @@ export const checkProductionReadiness = (
     issues.push({ ...issue, severity: inScope ? "error" : "info" });
   }
 
+  // Brand identity that does not hold under the pinned profile is fine in a
+  // draft, but a final export must not ship another brand's logo or CTA.
+  if (finalExport) {
+    for (const issue of compileIssues) {
+      if (
+        issue.code === "BRAND_TEXT_MISMATCH" ||
+        issue.code === "BRAND_FIELD_MISSING" ||
+        issue.code === "BRAND_ASSET_MISMATCH" ||
+        issue.code === "ASSET_BINDING_UNKNOWN"
+      ) {
+        issues.push({ ...issue, severity: "error" });
+      }
+    }
+  }
+
   for (const issue of compileIssues) {
     if (issue.code === "SOUNDTRACK_ASSET_PLANNED") {
       issues.push({ ...issue, severity: "error" });

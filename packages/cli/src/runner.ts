@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import {
   type Approval,
   applyProfile,
+  brandSummary,
   buildProfileLock,
   type CompiledDraft,
   capabilityRegistry,
@@ -412,6 +413,7 @@ const validateCommand = async (args: readonly string[]): Promise<Execution> => {
         data: {
           stage: "production",
           audioMode: resolveAudioMode(loaded.value.source),
+          brand: brandSummary(loaded.value.source),
         },
       }),
       ...(checks.ok
@@ -1230,11 +1232,14 @@ const profileCommand = async (args: readonly string[]): Promise<Execution> => {
       voiceStyleSignature: lock.production.voiceStyleSignature,
       illustrationStyleSignature: lock.production.illustrationStyleSignature,
       duration: lock.duration,
+      audioMode: lock.production.audioMode ?? null,
+      brand: lock.brand ?? null,
       lockedPaths: lock.lockedPaths,
       overridablePaths: lock.overridablePaths,
       assets: lock.assets.map((asset) => ({
         id: asset.id,
         kind: asset.kind,
+        ...(asset.role ? { role: asset.role } : {}),
         sha256: asset.sha256,
       })),
     };

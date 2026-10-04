@@ -97,6 +97,14 @@ const TextLayerSchema = z
     maxLines: z.number().int().min(1).max(20).optional(),
     overflowPolicy: z.enum(["error", "shrink"]).optional(),
     avoidLayerIds: z.array(IdSchema).max(20).optional(),
+    /**
+     * The profile value this text must show, such as the call to action. The
+     * compiler checks it against the pinned profile; a switch never rewrites
+     * it silently.
+     */
+    binding: z
+      .enum(["brand.name", "brand.cta.label", "brand.cta.url"])
+      .optional(),
     ...LayerPresentationShape,
   })
   .strict()

@@ -169,10 +169,41 @@ export const DurationProfileSchema = z
     path: ["preferredMinMs"],
   });
 
+/** What a brand asset is for; a profile switch replaces it by role. */
+export const BrandRoleSchema = z.enum([
+  "logo",
+  "person",
+  "product",
+  "illustration",
+  "background",
+]);
+
+/**
+ * Identity a profile carries beyond its look: who it speaks to, editorial
+ * rules, and the call to action. Scenes bind to these values explicitly; a
+ * profile switch reports them for review and never rewrites copy by itself.
+ */
+export const BrandSchema = z
+  .object({
+    name: z.string().trim().min(1),
+    audience: z.string().trim().min(1).optional(),
+    editorial: z.array(z.string().trim().min(1)).max(12).optional(),
+    cta: z
+      .object({
+        label: z.string().trim().min(1),
+        url: z.string().trim().min(1),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
 const ProfileAssetBaseSchema = z
   .object({
     id: IdSchema,
     kind: z.enum(["font", "png"]),
+    /** PNG-only: the brand role this image fills. */
+    role: BrandRoleSchema.optional(),
     path: SafeRelativePathSchema,
     sha256: Sha256Schema.optional(),
     /** Font-only: the CSS family name the renderer registers this face
@@ -208,6 +239,13 @@ const ProfileAssetBaseSchema = z
         path: ["family"],
       });
     }
+    if (asset.kind === "font" && asset.role) {
+      context.addIssue({
+        code: "custom",
+        message: "Font profile assets cannot declare a brand role",
+        path: ["role"],
+      });
+    }
     if (asset.kind === "png" && (asset.family || asset.weight !== undefined)) {
       context.addIssue({
         code: "custom",
@@ -225,6 +263,7 @@ export const ProfileSourceSchema = z
     render: RenderTokensSchema,
     production: ProductionProfileSchema,
     duration: DurationProfileSchema,
+    brand: BrandSchema.optional(),
     lockedPaths: z.array(ConfigPathSchema),
     overridablePaths: z.array(ConfigPathSchema),
     assets: z.array(ProfileAssetBaseSchema).default([]),
@@ -261,6 +300,7 @@ export const ProfileLockSchema = z
     render: RenderTokensSchema,
     production: ProductionProfileSchema,
     duration: DurationProfileSchema,
+    brand: BrandSchema.optional(),
     lockedPaths: z.array(ConfigPathSchema),
     overridablePaths: z.array(ConfigPathSchema),
     assets: z.array(LockedProfileAssetSchema).default([]),

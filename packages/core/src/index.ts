@@ -138,6 +138,12 @@ export {
   planProfileApply,
 } from "./profile/apply.js";
 export {
+  type BrandBindingPlan,
+  brandSummary,
+  checkBrandBindings,
+  planBrandBindings,
+} from "./profile/brand-bindings.js";
+export {
   type BuiltProfileLock,
   buildProfileLock,
   type CreatedProject,

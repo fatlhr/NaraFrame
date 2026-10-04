@@ -1,5 +1,6 @@
 import { formatCount } from "../count-format.js";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
+import { checkBrandBindings } from "../profile/brand-bindings.js";
 import { hashValue } from "../project/hash.js";
 import type { CompiledAsset, CompiledDraft } from "../schema/compiled.js";
 import { CompiledDraftSchema } from "../schema/compiled.js";
@@ -1303,6 +1304,7 @@ export const compileDraft = (
   }
 
   issues.push(...checkSourceProvenance(source));
+  issues.push(...checkBrandBindings(source));
   const recipeVisuals = new Map<string, CompiledRecipeVisual>();
   source.scenes.scenes.forEach((scene, sceneIndex) => {
     const visual = compileRecipeVisual(source, scene, sceneIndex, issues);
