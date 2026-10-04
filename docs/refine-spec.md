@@ -1,9 +1,9 @@
 # NaraFrame MVP — Adversarial Spec Refinement
 
-Status: M0, M1, and M2.1–M2.3 have recorded delivery evidence on main at `7b232c9`. M2.4.1 has an unmerged implementation at `9747193`, but its opening was rejected by Fatih. Reference-first recovery is approved for planning; recovery execution and both visual gates remain open. M3 is held.
+Status: Active product-direction audit; production-layer recommendation and bounded authoring pilot planned, not implemented. Main is at `b1875e2`; M2 is technically closed, M3.1-A integrated, and the M3.1-B/B1 audio checkpoint integrated through M3.P0 (PR #24). D-VIS remains open. Section 13 is the current refinement verdict.
 
-Date: 2026-09-20
-Reviewed artifacts: historical spec/LBC reviews; M2.3 recorded delivery evidence; the owner's Medan/Bang Motion source reference; the rejected M2.4.1 source, retained output frames, and sanitizer probes. Active specification is revision 0.6. The original review was Markdown-only; the 2026-09-21 evidence update in section 12 records subsequent authorised technical recovery, recording inspection and a diagnostic static render. Current execution evidence lives in `docs/plan.md`.
+Date: 2026-10-04
+Reviewed artifacts: active Git diff/handoffs, specification revision 0.7, NaraFrame skill and source contracts, and the local TutorLog brief/report, three generators, result JSON and MP4 playback. Sections 1–12 retain dated historical reviews; their sequencing/exclusions are not current execution instructions. Section 13 and plan section 0 supersede conflicting historical policies. No implementation, suite or render was executed for this audit.
 
 The user approved the AR follow-up changes after clarifying the initial technical-user target. AR-01 is withdrawn; AR-02–14 are accepted-for-spec. No runtime, usability, voice-quality, or cost test is marked passed by this document update. The temporary dated review/revision-plan files were absorbed into spec/refinement/plan/discovery and removed; this file retains their finding IDs and rationale.
 
@@ -378,7 +378,7 @@ The historical RF review contained 6 High, 9 Medium, and 2 Low findings. The tab
 
 At the revision-0.3 documentation checkpoint, implementation had not started and verification had not run. That sentence is historical, not the current project status. Superseded wording is not an active defect obligation when the replacement contract addresses its original risk.
 
-## 6. Blocking evidence by current milestone
+## 6. Historical blocking evidence by milestone (2026-09-20)
 
 Demonstrate these with the feature that needs them, not as one broad prerequisite before the first draft:
 
@@ -393,7 +393,7 @@ Demonstrate these with the feature that needs them, not as one broad prerequisit
 
 If a required gate fails, stop the affected milestone and resolve it or explicitly narrow the approved scope. Do not mark it passed because the requirement was written down.
 
-## 7. Current refinement verdict
+## 7. Historical refinement verdict (2026-09-20)
 
 The accepted design preserves one interleaved skill/core pipeline and optional direct CLI/JSON control. AR-01 remains withdrawn as a historical reviewer scope error. The owner's new M2.4 direction explicitly adds ordinary revisions without schema knowledge and data suitable for a future GUI (NF-UX-03), without adding a GUI or mandatory novice-onboarding study.
 
@@ -655,3 +655,60 @@ Each feature follows real path → visible output/manual acceptance → focused 
 The active handoff and all checklists live in `docs/plan.md`. There is one writer at a time; READY_FOR_REVIEW means the implementer stops, not that review automatically happens. Supervisor technical readiness is not owner visual approval or merge authorization. The planning-only pass below has since been followed by owner-authorised supervisor recovery on 2026-09-21: technical follow-ups and one static reference-fidelity frame, awaiting owner review. The rejected output remains rejected; no integration or motion acceptance is implied.
 
 **2026-09-21 evidence update.** The owner supplied an 8.9-second recording; 18 sampled frames and an opening still now establish the reference's visual composition and city-to-newspaper sequence, not full-speed or full-story motion acceptance. Fatih accepted static build `756b6958b781-13491d1f-243`, which retains separate passive SVG layers, native editable text, and local Fraunces/Space Grotesk. Subsequent build `67cb9fb19695-51ffa299-f9b` is a 3-second motion study through the public CLI: explicit camera, world-plane parallax, fixed overlays and sequential opaque object transforms, with shared preflight geometry and 60 passing focused tests. Motion direction awaits owner review. Nested compositions, full opening, phrase synchronization, skill generalisation and integration are still open. Contrast analysis still does not understand the SVG road-sign backdrop; warnings and the right-hand label's safe-zone warning remain visible. This is supervised reference adaptation, not proof of cheap one-prompt design or benchmark superiority. Exact evidence lives in `docs/plan.md`; earlier playback-unavailable and planning-only statements are historical.
+
+## 13. Profile-first production audit and direction — 2026-10-04
+
+### 13.1 Positioning and evidence boundary
+
+NaraFrame is a local, profile-driven production system for repeatedly making strong, revisable vertical videos across brands. Its advantage must be demonstrated through usable output, brand isolation and less repeated work, not inferred from schema or test totals. User flow: choose profile → brief/assets/audio mode → agent authors and validates → preview/revise → approve final. Posting is separate.
+
+This audit inspected the local generators and renderer/compiler/profile contracts, result JSON and report, and played the three TutorLog MP4s in QuickTime with seek/replay observations. This establishes selected motion/transition observations, not continuous frame-by-frame certification or owner approval. The owner's Bang Motion preference is an accepted judgement for this benchmark only. Reported decode/audio/timing measurements were read, not rerun. No current upstream repository, provider pricing or license eligibility was revalidated; inspect the pinned code/rights before adaptation or redistribution.
+
+Local baseline: `8463764`, branch `m3-1b-audio-delay`. The uncommitted M3.1-B/B1 PCM-to-final-MP4 correction, engine `/11`, tests and evidence remain intact. The handoff records 0–4 ms boundary error, verify 274/280 and serial E2E 15/15; these are earlier checkpoint results, not fresh audit runs. Integrate or explicitly disposition that checkpoint before changing rendering. Preserve unrelated `AGENTS.md`, Miss Ayu worktree, old stash and failed attempts. This revision authorizes documents only, not Git integration. Update 2026-10-04: integrated separately through M3.P0 via PR #24 (`b1875e2`) with Fatih's Git authority; no runtime changed in this documentation.
+
+### 13.2 TutorLog complaint audit
+
+The shared brief is 20 s / 600 frames, native 1080×1920 / 30, official logo/UI/fonts and the same prepared music, without voice. The reported Bang Motion and Hyperframe outputs are native finals; NaraFrame build `7ee7990e9d70-3e8893e1-14e` is a 540×960 draft. Final JSON rejects the same source with `NARRATION_REQUIRED`. A 540 draft cannot establish native-final parity even when it decodes correctly.
+
+| Finding | Evidence/classification | Disposition |
+|---|---|---|
+| Asset/background separation is weak | Generator uses pale assets/backgrounds with little separating treatment; playback confirms flat separation. Bang uses deliberate white panels, outlines/shadows and overlapping handoffs. Mainly art direction, not absence of layers. | Require visible separation in pilot; do not add a primitive just to fix palette/staging. |
+| Framing is unnecessarily static | All Nara benchmark images use `contain`; existing raster `cover`/`focalPoint` are unused. Renderer SVG uses centered `preserveAspectRatio` and does not apply the focal point. Source has no complete crop/inner-framing contract. | Demonstrate non-destructive framing. Distinguish raster authoring from the SVG discrepancy; reproduce any SVG correction separately if the pilot needs it. |
+| Type hierarchy/color is shallow | Benchmark uses uniform text color, no rich-text spans. Renderer already supports per-layer colors and accent spans. | Improve composition/typography using existing facilities or selected recipe; not a new color engine. |
+| Assets feel static | Focus is subtle and shots largely reset. Existing groups/camera/transforms can move objects; a screenshot does not expose its internal UI as independent parts. Bang generator stages rotation/perspective and overlapping object exits/entries. | Stage purposeful object motion. Layer/prepare assets only where explanation needs it; do not claim bitmap travel animates internal content. |
+| Narration blocks music final | `production.ts` defaults `requireNarration` true. Profile voice-style text cannot override that rule. Soundtrack-only preview now works after PR #19. | Explicit audio mode/clock and readiness, with native music-only/silent finals. Required missing voice must still fail. |
+| Preview cannot judge final-size detail | Project schema fixes draft to 540×960. Invoice source is itself only 414×290. | Add native preview; document source-detail limits, never imply larger canvas invents sharper UI. |
+| Fonts impose avoidable authoring work | Report aliases the same Source Serif 4 font; preflight font checks use unquoted names while render checks quote them. | Candidate bounded defect, not proven by a new runtime repro here. Fix only if reproduced/needed, not by renaming every future brand font. |
+
+Source locations: `packages/core/src/schema/{project,scene,profile}.ts`, `compiler/production.ts`, `packages/renderer-remotion/src/{visual-preflight.ts,remotion/draft-video.tsx}`; benchmark generators/results under `work/tutorlog-promo/`. Current profiles already pin local fonts/PNG assets and direction. Semantic audience, CTA, asset roles and audio defaults are the missing usable brand contract, not an absence of all profile infrastructure.
+
+Observed source/playback lessons from Bang Motion: accent headline words, contrasting surfaces, intentional framing, perspective/object travel and overlapping shot handoffs. Its local workflow is HTML/GSAP plus frame capture/FFmpeg, not an independent rendering engine or a proof that arbitrary one-prompt work always wins. Hyperframe provides another native-quality output, not a reason to add a third backend. Do not use either reference video as a flattened backdrop and call that authoring.
+
+### 13.3 Alternatives and decision
+
+| Route | Benefit | Risk / decision |
+|---|---|---|
+| Extend the declarative engine alone | Existing validation, editable objects and compatibility | High schema/primitive churn; more capabilities may still yield poor art direction. Retain for suitable content, but stop universal expansion as the default route. |
+| Production layer + parameterized expressive compositions | Keep profile/assets/revisions/audio/artifacts while exposing mature Remotion composition; technical details handled by agent | Trusted-code safety, recipe interfaces, hashing and honest validation scope need work. **Recommended first pilot**, using installed Remotion 4.0.521, not a rewrite or finished solution. |
+| Adopt the available Bang Motion authoring/export route | Proven local quality reference and simpler expressive authoring | Must still bridge brand/revision/audio/export metadata and inspect code/asset rights. Different runtime/security assumptions; current capture flags are not a reusable safety policy. Fallback if the bounded Remotion pilot underperforms or needs excessive engine work. |
+
+Choose one production route after the pilot. Do not build renderer-neutral plugin architecture, upgrade dependencies for the experiment, or port the reference workflow wholesale before testing. Remotion use alone does not guarantee good design. Composition code may contain frame keyframes, CSS transforms and perspective; that is a bounded authoring escape hatch, not a general 3D engine.
+
+### 13.4 Contract disposition
+
+| Retain | Revise | Defer / stop as default |
+|---|---|---|
+| Pinned profiles, local assets/provenance, immutable revisions, atomic publication, voice/media correctness, cache dependencies, declarative v1 support | Explicit audio mode and timing; native preview; brand/recipe/episode split; parameter/code revisions with dependency hashes; validation coverage per authoring route | GUI/cloud/provider marketplace; universal motion expansion; arbitrary-code GUI promises; simultaneous alternate backends |
+| Historical evidence, failed output, owner approvals within their scope | Final readiness must not require voice for explicitly timed music/silent projects; capability registry advertises only proven paths | Further Medan polish as an automatic next step; old checklist/gate text does not override plan section 0 |
+
+Trusted local composition is executable code, unlike passive SVG. NF-AU-01 requires explicit approval, pinned local imports, offline rendering, frame/seed evaluation, dependency/code hashes and revision preservation. No package install, shell/provider operation or secret access in compositions. Review/import restrictions and blocked network do not constitute a secure sandbox; no public untrusted-code service is promised. Declared parameters remain data-editable; opaque internals need agent code revision and review. Validation must say which schema, text/layout and runtime checks were actually applied; no inherited claim that every declarative preflight works on TSX.
+
+### 13.5 Production proof and stop conditions
+
+The next gates are NF-AC-18 (native audio routes/preview), NF-AC-19 (same-brief TutorLog route pilot) and NF-AC-20 (three LBC episodes + compatible profile switch). Historical D-VIS/NF-AC-16/17 remain unpassed; new output is not a retrospective acceptance of Medan. Existing word-level enforcement, repeatability, hard-kill orphans and reuse-report gaps retain their open status.
+
+Pilot checkpoints: one 3–5 s motion/framing study, then the 20 s final. Maximum two internal correction passes per checkpoint; preserve first drafts and failed attempts. Stop and ask for route selection if Fatih still rejects the result, composition authoring requires repeated engine patches, or managed integration becomes a framework project. Do not keep adding primitives hoping for visual quality. A fallback is a separate approved task, not an automatic simultaneous implementation.
+
+During the three-episode trial freeze engine, CLI, skill and shared recipes; episode content/parameters and intentional choreography reuse are allowed. A needed shared-code patch fails that trial and starts a separately reviewed task/freeze, rather than silently changing the denominator. Measure active operator time, elapsed authoring, render/review effort, corrections, actual asset/audio reuse and available provider/token charges separately. Unknown time/cost remains unknown. Existing reported render times (Bang 61.28 s, Hyperframe 32.078 s, Nara 42.274 s) have different boundaries/resolutions and cannot support a faster/cheaper claim.
+
+**Execution/handoff:** plan section 0 is authoritative. First preserve/integrate the audio checkpoint only after explicit Git permission; then prove native outputs before authoring-route and repeated-brand trials. This document recommends an approach and defines future acceptance; it does not claim those paths are implemented or accepted.
