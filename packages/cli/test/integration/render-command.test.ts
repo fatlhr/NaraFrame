@@ -61,6 +61,11 @@ const tone = (path: string, seconds: number) =>
 interface Options {
   contextDeclaredMs?: number;
   omitNarration?: boolean;
+  audioMode?: "voice" | "music" | "silent";
+  /** Soundtrack written to naraframe.json (uses the context clip as music). */
+  soundtrack?: boolean;
+  /** Profile default audio mode, locked. */
+  lockedProfileAudioMode?: "voice" | "music" | "silent";
   plannedImage?: boolean;
   /** Scene that still uses the planned image; defaults to s1. */
   plannedImageOn?: string;
@@ -160,8 +165,26 @@ const makeProject = async (
   };
   const write = (name: string, value: unknown) =>
     writeFile(join(root, name), JSON.stringify(value, null, 2));
-  await write("naraframe.json", source.project);
-  await write("profile.lock.json", source.profile);
+  await write("naraframe.json", {
+    ...source.project,
+    ...(options.audioMode ? { audioMode: options.audioMode } : {}),
+    ...(options.soundtrack
+      ? { soundtrack: { music: { assetId: "voice-context" }, sfx: [] } }
+      : {}),
+  });
+  await write(
+    "profile.lock.json",
+    options.lockedProfileAudioMode
+      ? {
+          ...source.profile,
+          production: {
+            ...source.profile.production,
+            audioMode: options.lockedProfileAudioMode,
+          },
+          lockedPaths: [...source.profile.lockedPaths, "production.audioMode"],
+        }
+      : source.profile,
+  );
   await write("scenes.json", source.scenes);
   await write("assets/manifest.json", source.assets);
   if (options.plannedContext) {
@@ -233,12 +256,36 @@ describe.skipIf(!existsSync(ffmpeg))("validate --stage production", () => {
         (await run("validate", planned.root, "--stage", "production")).event,
       ),
     ).toContain("ASSET_NOT_READY");
-    const silent = await makeProject({ omitNarration: true });
+    const undeclared = await makeProject({ omitNarration: true });
     expect(
       codes(
-        (await run("validate", silent.root, "--stage", "production")).event,
+        (await run("validate", undeclared.root, "--stage", "production")).event,
       ),
+    ).toContain("AUDIO_MODE_UNDECLARED");
+    const voice = await makeProject({
+      omitNarration: true,
+      audioMode: "voice",
+    });
+    expect(
+      codes((await run("validate", voice.root, "--stage", "production")).event),
     ).toContain("NARRATION_REQUIRED");
+  });
+
+  it("accepts a declared silent project and reports its audio mode", async () => {
+    const { root } = await makeProject({
+      omitNarration: true,
+      audioMode: "silent",
+    });
+    const { exitCode, event } = await run(
+      "validate",
+      root,
+      "--stage",
+      "production",
+    );
+    expect(exitCode).toBe(0);
+    expect(event.data).toMatchObject({
+      audioMode: { mode: "silent", source: "project" },
+    });
   });
 
   it("still accepts the plan stage and rejects an unknown stage", async () => {
@@ -372,6 +419,123 @@ describe.skipIf(!existsSync(ffmpeg))("render command gates", () => {
       "silent-build",
     );
     expect(codes(event)).toEqual(["APPROVAL_PREVIEW_SILENT"]);
+  });
+
+  it("binds a native 1080 preview review to the 1080 compile of the same source", async () => {
+    const { root } = await makeProject();
+    const source = (await loadPlanProject(root)).value?.source as PlanSource;
+    const half = compileDraft(source);
+    if (!half.ok) throw new Error("fixture");
+    const directory = join(root, "preview", "builds", "native-build");
+    await mkdir(directory, { recursive: true });
+    // A 1080 manifest carrying the 540 key is not a review of this source.
+    await writeFile(
+      join(directory, "manifest.json"),
+      JSON.stringify({
+        sourceRevision: half.value.sourceRevision,
+        assemblyKey: half.value.assemblyKey,
+        scope: { type: "project" },
+        render: { audio: "aac", width: 1080 },
+      }),
+    );
+    const { event } = await run(
+      "render",
+      root,
+      "--approve-preview",
+      "native-build",
+    );
+    expect(codes(event)).toEqual(["APPROVAL_PREVIEW_STALE"]);
+  });
+
+  it("rejects an unsupported preview resolution", async () => {
+    const { root } = await makeProject();
+    const { exitCode, event } = await run(
+      "preview",
+      root,
+      "--resolution",
+      "720",
+    );
+    expect(exitCode).toBe(3);
+    expect(codes(event)).toEqual(["CLI_USAGE"]);
+  });
+
+  it.each([
+    {
+      name: "a silent project with a soundtrack",
+      options: {
+        omitNarration: true,
+        audioMode: "silent",
+        soundtrack: true,
+      } as Options,
+      code: "AUDIO_MODE_CONFLICT",
+    },
+    {
+      name: "a music-only project with narration",
+      options: { audioMode: "music" } as Options,
+      code: "AUDIO_MODE_CONFLICT",
+    },
+    {
+      name: "a mode the profile locks differently",
+      options: {
+        omitNarration: true,
+        audioMode: "silent",
+        lockedProfileAudioMode: "music",
+      } as Options,
+      code: "AUDIO_MODE_LOCKED",
+    },
+  ])(
+    "refuses every preview of $name before rendering and keeps the pointer",
+    async ({ options, code }) => {
+      const { root } = await makeProject(options);
+      const pointer = join(root, "preview", "current.json");
+      await mkdir(join(root, "preview"), { recursive: true });
+      const existing = JSON.stringify({ buildId: "earlier-build" });
+      await writeFile(pointer, existing);
+      for (const args of [
+        ["--draft"],
+        [],
+        ["--draft", "--resolution", "1080"],
+        ["--draft", "--scene", "s1"],
+        ["--scene", "s1", "--resolution", "1080"],
+      ]) {
+        const { exitCode, event } = await run("preview", root, ...args);
+        expect(exitCode, args.join(" ")).toBe(1);
+        expect(event.readiness).toBe("invalid");
+        expect(event.buildId).toBeNull();
+        expect(codes(event)).toEqual([code]);
+      }
+      expect(await readFile(pointer, "utf8")).toBe(existing);
+      expect(existsSync(join(root, "preview", "builds"))).toBe(false);
+    },
+  );
+
+  it("does not accept a preview with audio as the review of a silent export", async () => {
+    const { root } = await makeProject({
+      omitNarration: true,
+      audioMode: "silent",
+    });
+    const current = compileDraft(
+      (await loadPlanProject(root)).value?.source as PlanSource,
+    );
+    if (!current.ok) throw new Error("fixture");
+    const directory = join(root, "preview", "builds", "loud-build");
+    await mkdir(directory, { recursive: true });
+    await writeFile(
+      join(directory, "manifest.json"),
+      JSON.stringify({
+        sourceRevision: current.value.sourceRevision,
+        assemblyKey: current.value.assemblyKey,
+        scope: { type: "project" },
+        render: { audio: "aac" },
+      }),
+    );
+    const { event } = await run(
+      "render",
+      root,
+      "--approve-preview",
+      "loud-build",
+    );
+    expect(codes(event)).toEqual(["APPROVAL_PREVIEW_AUDIO_MISMATCH"]);
   });
 });
 

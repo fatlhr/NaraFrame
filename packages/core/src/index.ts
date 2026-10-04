@@ -8,10 +8,18 @@ export {
   type CapabilityRegistry,
   capabilityRegistry,
 } from "./capabilities.js";
+export {
+  type AudioModeSource,
+  checkAudioModeConflicts,
+  checkFinalAudioMode,
+  type ResolvedAudioMode,
+  resolveAudioMode,
+} from "./compiler/audio-mode.js";
 export { type CaptionCue, deriveCaptionCues } from "./compiler/captions.js";
 export {
   type CompileOptions,
   compileDraft,
+  type DraftResolution,
   type DraftScope,
 } from "./compiler/compile-draft.js";
 export { contrastRatio, contrastThresholdFor } from "./compiler/contrast.js";

@@ -666,7 +666,7 @@ const assertMetadataShape = (
 
 // Narration and a soundtrack both put one AAC stream in the preview, so the
 // probe and the metadata checks must agree on this single predicate.
-const carriesAudio = (draft: CompiledDraft): boolean =>
+export const carriesAudio = (draft: CompiledDraft): boolean =>
   Boolean(draft.narration || draft.soundtrack);
 
 const assertCompleteMetadata = (

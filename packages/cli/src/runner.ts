@@ -7,11 +7,13 @@ import {
   buildProfileLock,
   type CompiledDraft,
   capabilityRegistry,
+  checkAudioModeConflicts,
   checkProductionReadiness,
   compileDraft,
   computeCostReport,
   computeReuse,
   createProject,
+  type DraftResolution,
   dedupeIssues,
   editProject,
   exportSchemas,
@@ -24,6 +26,7 @@ import {
   readProductionLedger,
   readRevisionState,
   recordApproval,
+  resolveAudioMode,
   syncWorkingCopy,
   undoProject,
   withProjectLock,
@@ -47,6 +50,7 @@ import {
   readCurrentOutput,
 } from "./final-build.js";
 import {
+  carriesAudio,
   findReusablePreview,
   publishPreviewBuild,
   publishReusedPreviewBuild,
@@ -81,7 +85,7 @@ Usage:
   naraframe create <name> --profile <id-or-path> [--json]
   naraframe validate [project] --stage plan|production [--scene <scene-id>] [--json]
   naraframe status [project] [--json]
-  naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--json]
+  naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
   naraframe profile inspect <id-or-path> [--json]
   naraframe profile apply <id-or-path> [project] [--dry-run] [--reset-overrides] [--json]
   naraframe cache clean [project] [--dry-run] [--json]`;
@@ -401,7 +405,10 @@ const validateCommand = async (args: readonly string[]): Promise<Execution> => {
         fingerprint:
           (sceneId ? checks.draft : checks.final)?.assemblyKey ?? null,
         issues: [...loaded.issues, ...checks.issues],
-        data: { stage: "production" },
+        data: {
+          stage: "production",
+          audioMode: resolveAudioMode(loaded.value.source),
+        },
       }),
       ...(checks.ok
         ? { human: ["Production checks passed: ready for a reviewed export."] }
@@ -563,13 +570,27 @@ const previewCommand = async (
   options: RunCliOptions,
 ): Promise<Execution> => {
   const { signal, onPreviewRenameDispatched } = options;
-  const parsed = parseArguments(args, ["--draft", "--rerender"], ["--scene"]);
-  if (parsed.error || parsed.positionals.length > 1) {
+  const parsed = parseArguments(
+    args,
+    ["--draft", "--rerender"],
+    ["--scene", "--resolution"],
+  );
+  const requestedResolution = parsed.values.get("--resolution") ?? "540";
+  if (
+    parsed.error ||
+    parsed.positionals.length > 1 ||
+    (requestedResolution !== "540" && requestedResolution !== "1080")
+  ) {
     return usageFailure(
       "preview",
-      parsed.error ?? "preview accepts at most one project.",
+      parsed.error ??
+        (parsed.positionals.length > 1
+          ? "preview accepts at most one project."
+          : "--resolution accepts 540 (default) or 1080."),
     );
   }
+  const resolution: DraftResolution =
+    requestedResolution === "1080" ? 1080 : 540;
   const productionStage = !parsed.flags.has("--draft");
   const projectPath = parsed.positionals[0] ?? ".";
   const loaded = await loadPlanProject(projectPath);
@@ -586,8 +607,30 @@ const previewCommand = async (
     };
   }
   const sceneId = parsed.values.get("--scene");
+  // Audio that contradicts the mode, or a mode the profile locks, is a source
+  // error for every preview, draft included: a draft may be provisional, but
+  // it never renders sound the project says it must not have.
+  const audioMode = resolveAudioMode(loaded.value.source);
+  const audioConflicts = checkAudioModeConflicts(
+    loaded.value.source,
+    audioMode,
+  );
+  if (audioConflicts.length > 0) {
+    return {
+      exitCode: 1,
+      event: commonEvent("preview", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        mode: "draft",
+        scope: sceneId ? { type: "scene", sceneId } : { type: "project" },
+        issues: [...loaded.issues, ...audioConflicts],
+        data: { stage: productionStage ? "production" : "draft", audioMode },
+      }),
+    };
+  }
   const productionChecks = productionStage
-    ? await runPreviewProductionChecks(loaded.value, sceneId)
+    ? await runPreviewProductionChecks(loaded.value, sceneId, resolution)
     : null;
   if (productionChecks && !productionChecks.ok) {
     return {
@@ -606,6 +649,7 @@ const previewCommand = async (
   const compiled = compileDraft(
     loaded.value.source,
     sceneId ? { type: "scene", sceneId } : { type: "project" },
+    { resolution },
   );
   const issues = [
     ...loaded.issues,
@@ -713,6 +757,8 @@ const previewCommand = async (
       data: {
         label: compiled.value.label,
         muted: !(compiled.value.narration || compiled.value.soundtrack),
+        resolution,
+        audioMode,
         timelineScope: compiled.value.timelineScope,
         manifestSha256: published.manifestSha256,
         reusedFromBuildId: reusable?.buildId ?? null,
@@ -863,16 +909,18 @@ const runProductionChecks = async (
 const runPreviewProductionChecks = async (
   loaded: LoadedPlanProject,
   sceneId: string | undefined,
+  resolution: DraftResolution = 540,
 ): Promise<ProductionChecks> => {
   const draft = compileDraft(
     loaded.source,
     sceneId ? { type: "scene", sceneId } : { type: "project" },
+    { resolution },
   );
   const issues: Issue[] = [...draft.issues];
   if (!draft.ok) return { ok: false, issues };
   issues.push(
     ...checkProductionReadiness(loaded.source, draft.value, draft.issues, {
-      requireNarration: false,
+      finalExport: false,
       ...(sceneId ? { sceneId } : {}),
     }),
   );
@@ -984,6 +1032,20 @@ const renderCommand = async (
     }
     const render = (manifest?.render ?? {}) as Record<string, unknown>;
     const scope = (manifest?.scope ?? {}) as Record<string, unknown>;
+    // A native 1080 preview reviews the same source at final size.
+    const reviewedDraft =
+      render.width === 1080
+        ? compileDraft(
+            loaded.value.source,
+            { type: "project" },
+            { resolution: 1080 },
+          )
+        : null;
+    const reviewedAssemblyKey = reviewedDraft
+      ? reviewedDraft.ok
+        ? reviewedDraft.value.assemblyKey
+        : null
+      : checks.draft.assemblyKey;
     if (!manifest) {
       fail(
         "APPROVAL_PREVIEW_UNKNOWN",
@@ -992,7 +1054,7 @@ const renderCommand = async (
       );
     } else if (
       manifest.sourceRevision !== checks.draft.sourceRevision ||
-      manifest.assemblyKey !== checks.draft.assemblyKey ||
+      manifest.assemblyKey !== reviewedAssemblyKey ||
       scope.type !== "project"
     ) {
       fail(
@@ -1000,11 +1062,17 @@ const renderCommand = async (
         `Preview build ${reviewed} is not a full preview of the current source, so its review does not carry over.`,
         "Run preview --draft on the current source, review it, and approve that build.",
       );
-    } else if (render.audio !== "aac") {
+    } else if (carriesAudio(checks.final) && render.audio !== "aac") {
       fail(
         "APPROVAL_PREVIEW_SILENT",
-        `Preview build ${reviewed} has no narration audio.`,
-        "Review a narrated preview before exporting.",
+        `Preview build ${reviewed} has no audio, but this export carries audio.`,
+        "Review a full preview with the project's audio before exporting.",
+      );
+    } else if (!carriesAudio(checks.final) && render.audio !== "none") {
+      fail(
+        "APPROVAL_PREVIEW_AUDIO_MISMATCH",
+        `Preview build ${reviewed} has audio, but this silent export has none.`,
+        "Review a full preview of the current silent source before exporting.",
       );
     }
   }
@@ -1044,10 +1112,12 @@ const renderCommand = async (
     `Exporting ${loaded.value.source.project.title} (${checks.final.width}x${checks.final.height}, ${checks.final.totalFrames} frames)...`,
   );
   let lastReported = -1;
+  const audioMode = resolveAudioMode(loaded.value.source);
   const published = await publishFinalBuild({
     projectRoot: loaded.value.root,
     draft: checks.final,
     approval,
+    audioMode,
     issues: checks.issues,
     cost: ledger.ok && ledger.value ? computeCostReport(ledger.value) : null,
     ...(signal ? { signal } : {}),
@@ -1084,13 +1154,14 @@ const renderCommand = async (
         fps: published.rendered.fps,
         durationInFrames: published.rendered.durationInFrames,
         codec: "h264",
-        audio: "aac",
+        audio: carriesAudio(checks.final) ? "aac" : "none",
+        audioMode,
         manifestSha256: published.manifestSha256,
       },
     }),
     human: [
       `Final export ready: ${published.buildDirectory}`,
-      `${published.rendered.width}x${published.rendered.height} @ ${published.rendered.fps}fps, ${(published.rendered.durationInFrames / published.rendered.fps).toFixed(1)}s, H.264 + AAC`,
+      `${published.rendered.width}x${published.rendered.height} @ ${published.rendered.fps}fps, ${(published.rendered.durationInFrames / published.rendered.fps).toFixed(1)}s, H.264${carriesAudio(checks.final) ? " + AAC" : ", no audio stream"} (${audioMode.mode} mode)`,
       approval.autonomy
         ? `Approved by autonomy authorisation from ${approval.autonomy.authorizedBy}`
         : `Approved from reviewed preview ${approval.previewBuildId}`,

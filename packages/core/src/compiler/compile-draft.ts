@@ -1130,7 +1130,14 @@ const scopedTransitionHandles = (
 export interface CompileOptions {
   /** "final" compiles at the design format with no draft label. */
   mode?: "draft" | "final";
+  /**
+   * Draft only: 1080 renders the draft natively at the design format, so crop
+   * and type can be reviewed at final size. The default stays 540.
+   */
+  resolution?: DraftResolution;
 }
+
+export type DraftResolution = 540 | 1080;
 
 export const compileDraft = (
   source: PlanSource,
@@ -1139,7 +1146,7 @@ export const compileDraft = (
 ): Result<CompiledDraft> => {
   const mode = options.mode ?? "draft";
   const format =
-    mode === "final"
+    mode === "final" || options.resolution === 1080
       ? source.project.format.design
       : source.project.format.draft;
   const fps = format.fps;

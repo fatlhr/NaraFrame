@@ -7,6 +7,14 @@ import {
 } from "./primitives.js";
 import { SoundtrackSchema } from "./soundtrack.js";
 
+/**
+ * Which audio a production carries. `voice` is narrated (optionally with
+ * music); `music` is a music bed with no speech; `silent` has no audio stream.
+ * Without speech, the scenes' own durations are the final clock.
+ */
+export const AudioModeSchema = z.enum(["voice", "music", "silent"]);
+export type AudioMode = z.infer<typeof AudioModeSchema>;
+
 const DesignFormatSchema = z
   .object({
     width: z.literal(1080),
@@ -38,6 +46,8 @@ export const ProjectConfigSchema = z
      * Only paths the profile declares overridable are accepted.
      */
     overrides: z.record(ConfigPathSchema, z.unknown()).optional(),
+    /** The production's audio intent; overrides the profile default. */
+    audioMode: AudioModeSchema.optional(),
     /** One optional music bed plus scene-anchored effects; never changes the timeline. */
     soundtrack: SoundtrackSchema.optional(),
   })

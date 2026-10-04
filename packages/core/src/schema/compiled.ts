@@ -421,14 +421,16 @@ export const CompiledDraftSchema = z
   .strict()
   .superRefine((draft, context) => {
     const isFinal = draft.mode === "final";
+    const native = draft.width === 1080 && draft.height === 1920;
+    const half = draft.width === 540 && draft.height === 960;
     if (
-      isFinal !== (draft.width === 1080 && draft.height === 1920) ||
+      (isFinal ? !native : !(native || half)) ||
       isFinal !== (draft.label === "FINAL")
     ) {
       context.addIssue({
         code: "custom",
         message:
-          "A final draft uses the 1080x1920 design format and the FINAL label; a draft uses 540x960 and a DRAFT label",
+          "A final draft uses the 1080x1920 design format and the FINAL label; a draft uses 540x960 or native 1080x1920 and a DRAFT label",
         path: ["mode"],
       });
     }

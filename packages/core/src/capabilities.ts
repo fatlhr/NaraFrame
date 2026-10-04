@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { AssetManifestSchema } from "./schema/asset.js";
 import { ProfileLockSchema } from "./schema/profile.js";
+import { AudioModeSchema } from "./schema/project.js";
 import {
   BeatSchema,
   LayerSchema,
@@ -42,6 +43,8 @@ export interface CapabilityRegistry {
   };
   /** Audio features the compiler and renderer wire up. */
   audio: string[];
+  /** Production audio modes a project may declare as `audioMode`. */
+  audioModes: string[];
   /** Forms deliberately not implemented, with the reason. */
   unsupported: Array<{ name: string; reason: string }>;
 }
@@ -153,6 +156,7 @@ export const capabilityRegistry = (): CapabilityRegistry => {
       "sfx",
       "ducking",
     ].sort(),
+    audioModes: enumOf(AudioModeSchema),
     unsupported: [
       { name: "video-asset", reason: "No decode or timing test has been run." },
       {
