@@ -14,9 +14,26 @@ const isProcessAlive = (pid: number): boolean => {
 
 /**
  * One writer per project. A lock whose owner process is gone is taken over,
- * so a crash cannot wedge the project.
+ * so a crash cannot wedge the project. With `waitMs`, a short append waits
+ * for a live holder instead of failing, up to that bound.
  */
 export const withProjectLock = async <T>(
+  root: string,
+  work: () => Promise<Result<T>>,
+  options: { waitMs?: number } = {},
+): Promise<Result<T>> => {
+  const deadline = Date.now() + (options.waitMs ?? 0);
+  for (;;) {
+    const result = await withProjectLockOnce(root, work);
+    const locked =
+      !result.ok &&
+      result.issues.some((issue) => issue.code === "PROJECT_LOCKED");
+    if (!locked || Date.now() >= deadline) return result;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 20));
+  }
+};
+
+const withProjectLockOnce = async <T>(
   root: string,
   work: () => Promise<Result<T>>,
 ): Promise<Result<T>> => {

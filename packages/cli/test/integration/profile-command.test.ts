@@ -83,6 +83,26 @@ describe("profile command", () => {
     ).toContain("render.palette");
   });
 
+  it("reports a profile's brand, audio default and asset roles", async () => {
+    const dir = await candidate((profile) => {
+      const patched = profile as ProfileJson & {
+        brand?: unknown;
+        production: { audioMode?: string };
+      };
+      patched.brand = {
+        name: "Example",
+        cta: { label: "Join", url: "example.org" },
+      };
+      patched.production.audioMode = "music";
+    });
+    const { exitCode, event } = await run("profile", "inspect", dir);
+    expect(exitCode).toBe(0);
+    expect(event.data.profile).toMatchObject({
+      audioMode: "music",
+      brand: { name: "Example", cta: { label: "Join", url: "example.org" } },
+    });
+  });
+
   it("dry-runs and applies a new profile version, then undo restores it", async () => {
     const parent = await tmp();
     const root = join(parent, "demo");

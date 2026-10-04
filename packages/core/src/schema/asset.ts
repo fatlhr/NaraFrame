@@ -8,6 +8,24 @@ import {
   Sha256Schema,
 } from "./primitives.js";
 
+/**
+ * Whose identity a ready image or vector carries. `brand` ties it to one
+ * profile id (and optionally a role); `neutral` means any brand may use it.
+ * No binding is unknown, which a brand-managed profile does not accept as
+ * compatible.
+ */
+const AssetBindingSchema = z.union([
+  z.literal("neutral"),
+  z
+    .object({
+      brand: IdSchema,
+      role: z
+        .enum(["logo", "person", "product", "illustration", "background"])
+        .optional(),
+    })
+    .strict(),
+]);
+
 const AssetOriginTypeSchema = z.enum([
   "web",
   "licensed",
@@ -59,6 +77,7 @@ const ReadyPngAssetSchema = z
     kind: z.literal("png"),
     path: RelativePngPathSchema,
     sha256: Sha256Schema,
+    binding: AssetBindingSchema.optional(),
     origin: z
       .object({
         type: AssetOriginTypeSchema,
@@ -102,6 +121,7 @@ const ReadyVectorAssetSchema = z
     kind: z.literal("svg"),
     path: RelativeSvgPathSchema,
     sha256: Sha256Schema,
+    binding: AssetBindingSchema.optional(),
     origin: z
       .object({
         type: AssetOriginTypeSchema,

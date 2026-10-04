@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { loadPlanProject } from "../io/load-project.js";
 import type { Issue, Result } from "../model/issue.js";
 import { buildProfileLock } from "../project/create-project.js";
 import { syncWorkingCopy } from "../revision/capture.js";
@@ -9,6 +10,7 @@ import { withProjectLock } from "../revision/lock.js";
 import { readCurrentRevisionId } from "../revision/store.js";
 import { type ProfileLock, ProfileLockSchema } from "../schema/profile.js";
 import { type ProjectConfig, ProjectConfigSchema } from "../schema/project.js";
+import { type BrandBindingPlan, planBrandBindings } from "./brand-bindings.js";
 import { applyProjectOverrides, classifyOverridePath } from "./overrides.js";
 
 export type ProfileEffect =
@@ -43,6 +45,12 @@ export interface ProfileApplyPlan {
   conflicts: OverrideConflict[];
   /** Conflicting overrides that this apply explicitly removes. */
   resetOverrides: string[];
+  /**
+   * Brand-bound images and text under the new profile: what it can replace
+   * by role, what it cannot, what is neutral and what is unknown. Present
+   * when either profile manages a brand or the project binds assets/text.
+   */
+  bindings?: BrandBindingPlan;
   blocked: boolean;
 }
 
@@ -191,6 +199,31 @@ const prepare = async (
   }
   if (directionChanged) effects.add("editorial-review");
 
+  // Identity is reviewed, never rewritten: report what the switch touches.
+  const loaded = await loadPlanProject(root);
+  const bindings = loaded.ok
+    ? planBrandBindings(loaded.value.source, candidate)
+    : undefined;
+  const bindingsRelevant =
+    bindings !== undefined &&
+    (currentLock.brand !== undefined ||
+      candidate.brand !== undefined ||
+      bindings.branded.length +
+        bindings.incompatible.length +
+        bindings.text.length >
+        0);
+  if (bindings && bindingsRelevant) {
+    if (
+      bindings.text.some((entry) => entry.target !== entry.current) ||
+      (candidate.id !== currentLock.id && bindings.claims.length > 0)
+    ) {
+      effects.add("editorial-review");
+    }
+    if (bindings.branded.length + bindings.incompatible.length > 0) {
+      effects.add("replace-assets");
+    }
+  }
+
   const conflicts: OverrideConflict[] = [];
   const preserved: string[] = [];
   for (const [path, value] of Object.entries(currentProject.overrides ?? {})) {
@@ -232,6 +265,7 @@ const prepare = async (
         preservedOverrides: preserved.sort(),
         conflicts,
         resetOverrides,
+        ...(bindings && bindingsRelevant ? { bindings } : {}),
         blocked: conflicts.length > resetOverrides.length,
       },
       project,

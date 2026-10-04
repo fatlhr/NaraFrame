@@ -22,6 +22,7 @@ import {
   planeTransformFor,
   sceneTransitionStateFor,
 } from "./motion.js";
+import { getRecipe } from "./recipe-registry.js";
 import { musicGainAt } from "./soundtrack-gain.js";
 import {
   FONT_RENDER_FAILURE,
@@ -405,6 +406,59 @@ const GroupView = ({
   );
 };
 
+/**
+ * A scene drawn by a trusted recipe. The recipe always works in 1080×1920
+ * design pixels; a 540 draft scales the whole drawing, never the params.
+ */
+const RecipeScene = ({
+  draft,
+  scene,
+}: {
+  draft: CompiledDraft;
+  scene: CompiledDraft["scenes"][number];
+}) => {
+  if (scene.visual.type !== "recipe") return null;
+  const Recipe = getRecipe(scene.visual.recipe);
+  if (!Recipe) {
+    throw new Error(
+      `Recipe ${scene.visual.recipe} was not registered for this render.`,
+    );
+  }
+  const assets = Object.fromEntries(
+    Object.entries(scene.visual.assets).map(([id, asset]) => [
+      id,
+      {
+        src: staticFile(asset.publicPath),
+        width: asset.width,
+        height: asset.height,
+      },
+    ]),
+  );
+  return (
+    <AbsoluteFill style={{ overflow: "hidden" }}>
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: 1080,
+          height: 1920,
+          transform: `scale(${draft.width / 1080})`,
+          transformOrigin: "0 0",
+        }}
+      >
+        <Recipe
+          params={scene.visual.params}
+          assets={assets}
+          profile={draft.profile.render}
+          fps={draft.fps}
+          durationInFrames={scene.endFrame - scene.startFrame}
+        />
+      </div>
+    </AbsoluteFill>
+  );
+};
+
 const SceneView = ({
   draft,
   scene,
@@ -413,6 +467,9 @@ const SceneView = ({
   scene: CompiledDraft["scenes"][number];
 }) => {
   const localFrame = useCurrentFrame();
+  if (scene.visual.type === "recipe") {
+    return <RecipeScene draft={draft} scene={scene} />;
+  }
   const safeZone = draft.profile.render.safeZone;
   const sceneMotion = motionStyleFor(draft, scene, scene.id, localFrame);
 

@@ -9,7 +9,8 @@ const registry = capabilityRegistry();
  * instead of quietly appearing in the published capability list.
  */
 const EVIDENCE: Record<string, string[]> = {
-  visuals: ["text", "media", "composition"],
+  // recipe: recipe-project (integration) and recipe-production (e2e).
+  visuals: ["text", "media", "composition", "recipe"],
   // path: compile-draft-m2-4-3 and path-count-motion.
   layers: ["text", "image", "shape", "path", "group"],
   groupLayouts: ["absolute", "stack", "grid"],

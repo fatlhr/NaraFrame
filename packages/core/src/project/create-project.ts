@@ -171,6 +171,7 @@ const prepareProfileAssets = async (
       kind: asset.kind,
       path: `assets/profile/${sha256}${extension}`,
       sha256,
+      ...(asset.role ? { role: asset.role } : {}),
       ...(asset.family ? { family: asset.family } : {}),
       ...(asset.weight !== undefined ? { weight: asset.weight } : {}),
       sourcePath: resolved.value,

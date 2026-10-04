@@ -138,12 +138,24 @@ export {
   planProfileApply,
 } from "./profile/apply.js";
 export {
+  type BrandBindingPlan,
+  brandSummary,
+  checkBrandBindings,
+  planBrandBindings,
+} from "./profile/brand-bindings.js";
+export {
   type BuiltProfileLock,
   buildProfileLock,
   type CreatedProject,
   type CreateProjectOptions,
   createProject,
 } from "./project/create-project.js";
+export {
+  pngSize,
+  RECIPE_ALLOWED_MODULES,
+  recipeCodeHash,
+  scanRecipeCode,
+} from "./recipe/load-recipes.js";
 export {
   type Approval,
   ApprovalSchema,
@@ -161,6 +173,13 @@ export {
   editProject,
 } from "./revision/edit.js";
 export { withProjectLock } from "./revision/lock.js";
+export {
+  checkRecipeTrust,
+  type RecipeTrust,
+  RecipeTrustSchema,
+  readRecipeTrust,
+  recordRecipeTrust,
+} from "./revision/recipe-trust.js";
 export {
   type CostSide,
   computeReuse,
@@ -230,6 +249,11 @@ export {
 } from "./schema/profile.js";
 export type { ProjectConfig } from "./schema/project.js";
 export { ProjectConfigSchema } from "./schema/project.js";
+export {
+  type LoadedRecipe,
+  type RecipeManifest,
+  RecipeManifestSchema,
+} from "./schema/recipe.js";
 export type {
   Beat,
   FocalPoint,
