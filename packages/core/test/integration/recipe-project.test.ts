@@ -190,6 +190,74 @@ describe("recipe projects", () => {
     expect(compileCodes(beats)).toContain("RECIPE_PARAM_INVALID");
   });
 
+  it("reports malformed crops as parameter errors instead of crashing", async () => {
+    const withCrop = (crop: unknown) =>
+      cardParams({
+        image: {
+          assetId: "photo",
+          crop,
+          focusCrop: { x: 0, y: 0, width: 10, height: 10 },
+        },
+      });
+    for (const [crop, expected] of [
+      [null, ["RECIPE_PARAM_INVALID"]],
+      [[0, 0, 10, 10], ["RECIPE_PARAM_INVALID"]],
+      ["0,0,10,10", ["RECIPE_PARAM_INVALID"]],
+      [42, ["RECIPE_PARAM_INVALID"]],
+      [{ x: 0, y: 0, width: 10 }, ["RECIPE_PARAM_INVALID"]],
+      [{ x: 0, y: 0, width: "10", height: 10 }, ["RECIPE_PARAM_INVALID"]],
+      [{ x: 150, y: 0, width: 100, height: 100 }, ["RECIPE_PARAM_INVALID"]],
+      [{ x: 0, y: 0, width: 100, height: 100 }, []],
+    ] as const) {
+      const source = await load(await makeRecipeProject(withCrop(crop)));
+      const result = compileDraft(source);
+      const errors = result.issues.filter(
+        (issue) => issue.severity === "error",
+      );
+      expect(
+        errors.map((issue) => issue.code),
+        JSON.stringify(crop),
+      ).toEqual(expected);
+      if (expected.length > 0) {
+        expect(errors[0]?.path).toBe("/scenes/0/visual/params/image/crop");
+      }
+    }
+  });
+
+  it("keeps every concurrent trust append and refuses to overwrite an unreadable log", async () => {
+    const root = await makeRecipeProject();
+    const entry = (recipeId: string) => ({
+      recipeId,
+      codeSha256: "a".repeat(64),
+      authorizedBy: "Owner",
+      trustedAt: new Date().toISOString(),
+    });
+    expect((await recordRecipeTrust(root, entry("earlier"))).ok).toBe(true);
+    const results = await Promise.all(
+      ["probe-a", "probe-b", "probe-c"].map((id) =>
+        recordRecipeTrust(root, entry(id)),
+      ),
+    );
+    expect(results.map((result) => result.ok)).toEqual([true, true, true]);
+    const ids = (await readRecipeTrust(root)).map((trust) => trust.recipeId);
+    expect(ids[0]).toBe("earlier");
+    expect([...ids].sort()).toEqual([
+      "earlier",
+      "probe-a",
+      "probe-b",
+      "probe-c",
+    ]);
+
+    const log = join(root, "revisions", "recipe-trust.json");
+    await writeFile(log, "{ not json");
+    const refused = await recordRecipeTrust(root, entry("later"));
+    expect(refused.ok).toBe(false);
+    expect(refused.issues.map((issue) => issue.code)).toEqual([
+      "RECIPE_TRUST_LOG_INVALID",
+    ]);
+    expect(await readFile(log, "utf8")).toBe("{ not json");
+  });
+
   it("runs only code the owner trusted, by exact hash", async () => {
     const root = await makeRecipeProject();
     const draft = compiled(await load(root));

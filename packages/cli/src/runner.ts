@@ -1417,13 +1417,15 @@ const recipeCommand = async (args: readonly string[]): Promise<Execution> => {
     ]);
   }
   const note = parsed.values.get("--note");
-  const trust = await recordRecipeTrust(loaded.value.root, {
+  const recorded = await recordRecipeTrust(loaded.value.root, {
     recipeId: recipe.id,
     codeSha256: recipe.codeSha256,
     authorizedBy,
     ...(note ? { note } : {}),
     trustedAt: new Date().toISOString(),
   });
+  if (!recorded.ok) return failed(recorded.issues);
+  const trust = recorded.value;
   return {
     exitCode: 0,
     event: commonEvent("recipe", {

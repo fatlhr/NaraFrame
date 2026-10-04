@@ -153,6 +153,7 @@ export {
 export {
   pngSize,
   RECIPE_ALLOWED_MODULES,
+  recipeCodeHash,
   scanRecipeCode,
 } from "./recipe/load-recipes.js";
 export {

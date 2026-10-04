@@ -144,4 +144,45 @@ describe("trusted recipe through the production CLI", () => {
     expect(restored.success).toBe(true);
     expect(restored.data.reusedFromBuildId).toBe(preview.buildId);
   }, 900_000);
+
+  it("runs only listed, trusted bytes even when an unlisted sibling would resolve first", async () => {
+    const project = await makeRecipeProject(undefined, {
+      track: (root) => roots.push(root),
+    });
+    const recipeDir = join(project, "recipes", "frame-card");
+    const index = join(recipeDir, "index.tsx");
+    await writeFile(
+      index,
+      `import { label } from "./label";\n${(await readFile(index, "utf8")).replace("{title}", "{label}")}`,
+    );
+    await writeFile(
+      join(recipeDir, "label.tsx"),
+      'export const label = "listed label";\n',
+    );
+    // A resolver prefers .ts over .tsx; this file is not listed or trusted.
+    await writeFile(
+      join(recipeDir, "label.ts"),
+      'throw new Error("unlisted module executed");\nexport const label = "";\n',
+    );
+    const manifest = JSON.parse(
+      await readFile(join(recipeDir, "recipe.json"), "utf8"),
+    );
+    manifest.files = [...manifest.files, "label.tsx"];
+    await writeFile(join(recipeDir, "recipe.json"), JSON.stringify(manifest));
+    expect(
+      (
+        await cli(
+          "recipe",
+          "trust",
+          project,
+          "--recipe",
+          "frame-card",
+          "--authorized-by",
+          "Owner",
+        )
+      ).success,
+    ).toBe(true);
+    const preview = await cli("preview", project, "--draft");
+    expect(preview.success, JSON.stringify(preview.issues)).toBe(true);
+  }, 900_000);
 });

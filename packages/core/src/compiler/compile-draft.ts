@@ -129,31 +129,33 @@ const compileRecipeVisual = (
           width: size.width,
           height: size.height,
         };
-        const crop = record.crop as
-          | { x?: unknown; y?: unknown; width?: unknown; height?: unknown }
-          | undefined;
-        if (crop !== undefined) {
-          const [x, y, width, height] = [
-            crop.x,
-            crop.y,
-            crop.width,
-            crop.height,
-          ];
-          const numbers = [x, y, width, height].every(
-            (item) => typeof item === "number" && Number.isFinite(item),
-          );
+        if ("crop" in record) {
+          const crop = record.crop;
+          const shaped =
+            crop !== null &&
+            typeof crop === "object" &&
+            !Array.isArray(crop) &&
+            ["x", "y", "width", "height"].every((key) => {
+              const value = (crop as Record<string, unknown>)[key];
+              return typeof value === "number" && Number.isFinite(value);
+            });
+          const rect = shaped
+            ? (crop as { x: number; y: number; width: number; height: number })
+            : null;
           if (
-            !numbers ||
-            (width as number) <= 0 ||
-            (height as number) <= 0 ||
-            (x as number) < 0 ||
-            (y as number) < 0 ||
-            (x as number) + (width as number) > size.width ||
-            (y as number) + (height as number) > size.height
+            !rect ||
+            rect.width <= 0 ||
+            rect.height <= 0 ||
+            rect.x < 0 ||
+            rect.y < 0 ||
+            rect.x + rect.width > size.width ||
+            rect.y + rect.height > size.height
           ) {
             fail(
               `${path}/crop`,
-              `Crop on asset ${assetId} must be a rectangle inside its ${size.width}×${size.height} pixels.`,
+              rect
+                ? `Crop on asset ${assetId} must be a rectangle inside its ${size.width}×${size.height} pixels.`
+                : `Crop on asset ${assetId} must be an object with numeric x, y, width and height.`,
               "Use x, y, width and height in source pixels that stay within the image; the file itself is never edited.",
             );
           }
@@ -168,6 +170,7 @@ const compileRecipeVisual = (
   return {
     type: "recipe",
     recipe: recipe.id,
+    executor: "naraframe-recipe/2",
     version: recipe.version,
     codeSha256: recipe.codeSha256,
     params: scene.visual.params,

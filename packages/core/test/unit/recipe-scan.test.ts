@@ -36,6 +36,27 @@ describe("recipe code scan", () => {
     ).toEqual(["RECIPE_IMPORT_FORBIDDEN"]);
   });
 
+  it("refuses imports that more than one listed file could satisfy", () => {
+    const both = new Set(["index.tsx", "helper.ts", "helper.tsx"]);
+    expect(
+      scanRecipeCode('import { v } from "./helper";', "index.tsx", both).map(
+        (finding) => finding.code,
+      ),
+    ).toEqual(["RECIPE_IMPORT_FORBIDDEN"]);
+    expect(
+      scanRecipeCode('import { v } from "./helper.tsx";', "index.tsx", both),
+    ).toEqual([]);
+  });
+
+  it("refuses dynamic imports with a computed specifier", () => {
+    expect(codes('const name = "./lib";\nimport(name);')).toEqual([
+      "RECIPE_IMPORT_FORBIDDEN",
+    ]);
+    const templated = ["import(`./", "$", "{which}`);"].join("");
+    expect(codes(templated)).toEqual(["RECIPE_IMPORT_FORBIDDEN"]);
+    expect(codes('const m = import("./lib");')).toEqual([]);
+  });
+
   it("refuses network, clock, randomness, eval and host access", () => {
     for (const snippet of [
       'fetch("https://example.com");',

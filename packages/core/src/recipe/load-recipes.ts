@@ -77,11 +77,19 @@ export const scanRecipeCode = (
       const target = posix.normalize(
         posix.join(posix.dirname(file), specifier),
       );
-      const candidates = [target, `${target}.ts`, `${target}.tsx`];
-      if (
-        !target.startsWith("../") &&
-        candidates.some((candidate) => listed.has(candidate))
-      ) {
+      const matches = [target, `${target}.ts`, `${target}.tsx`].filter(
+        (candidate) => listed.has(candidate),
+      );
+      // The bundle sees only listed files, so exactly one listed match is the
+      // file that runs. Two matches would leave the choice to the resolver.
+      if (!target.startsWith("../") && matches.length === 1) continue;
+      if (!target.startsWith("../") && matches.length > 1) {
+        findings.push({
+          code: "RECIPE_IMPORT_FORBIDDEN",
+          message: `${file} imports "${specifier}", which matches several listed files (${matches.join(", ")}).`,
+          suggestion:
+            "Import the file with its extension, or list only one file for that name.",
+        });
         continue;
       }
     }
@@ -90,6 +98,14 @@ export const scanRecipeCode = (
       message: `${file} imports "${specifier}", which is neither a listed recipe file nor ${RECIPE_ALLOWED_MODULES.join(" or ")}.`,
       suggestion:
         "Import only react, remotion or a file listed in recipe.json, by a relative path inside the recipe directory.",
+    });
+  }
+  // A computed specifier cannot be checked against the listed files.
+  if (/\bimport\s*\(\s*(?!["'][^"'`]*["']\s*\))/.test(withoutComments)) {
+    findings.push({
+      code: "RECIPE_IMPORT_FORBIDDEN",
+      message: `${file} uses import() with a computed specifier, which cannot be checked against the listed files.`,
+      suggestion: "Import listed files statically by a quoted relative path.",
     });
   }
   for (const [pattern, name] of FORBIDDEN_CODE) {
@@ -212,11 +228,18 @@ const loadRecipe = async (
       path: declaration.path,
       entry: manifest.entry,
       files,
-      codeSha256: hashValue(files),
+      codeSha256: recipeCodeHash(files),
     },
     issues: [],
   };
 };
+
+/**
+ * The one hash over a recipe's manifest and listed files. Trust, render keys
+ * and the renderer's staging check all use this, so they agree byte for byte.
+ */
+export const recipeCodeHash = (files: LoadedRecipe["files"]): string =>
+  hashValue(files);
 
 /** Width and height from a PNG header, or null when it is not a PNG. */
 export const pngSize = (

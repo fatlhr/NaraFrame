@@ -1,7 +1,9 @@
+import { createHash } from "node:crypto";
 import {
   access,
   mkdir,
   mkdtemp,
+  readFile,
   rename,
   rm,
   writeFile,
@@ -16,6 +18,7 @@ import {
   type Issue,
   loadPlanProject,
   readRecipeTrust,
+  recipeCodeHash,
 } from "@naraframe/core";
 import { bundle } from "@remotion/bundler";
 import {
@@ -67,7 +70,7 @@ const resolveEntryPoint = async (): Promise<string> => {
  * it, then writes a wrapper entry that registers those modules before the
  * normal entry. The CLI checks trust first; this is the renderer's own guard.
  */
-const prepareRecipeEntry = async (
+export const prepareRecipeEntry = async (
   draft: CompiledDraft,
   projectRoot: string,
   baseEntry: string,
@@ -91,23 +94,53 @@ const prepareRecipeEntry = async (
   }
   const imports: string[] = [];
   const entries: string[] = [];
-  for (const [index, [id, codeSha256]] of [...used].entries()) {
-    const recipe = loaded.value.source.recipes?.find((item) => item.id === id);
-    if (!recipe || recipe.codeSha256 !== codeSha256) {
-      throw new Error(
-        `Recipe ${id} changed on disk after it was compiled; compile and preview again.`,
+  // Bundle a private copy holding only the listed files, written from the
+  // very bytes hashed here. The resolver can then reach nothing unlisted, and
+  // a file edited after the check cannot be what runs.
+  const directory = await mkdtemp(join(tmpdir(), "naraframe-recipes-"));
+  try {
+    for (const [index, [id, codeSha256]] of [...used].entries()) {
+      const recipe = loaded.value.source.recipes?.find(
+        (item) => item.id === id,
       );
+      if (!recipe) {
+        throw new Error(`Recipe ${id} is no longer declared; compile again.`);
+      }
+      const staged: Array<{ path: string; sha256: string; bytes: Buffer }> = [];
+      for (const file of recipe.files) {
+        const bytes = await readFile(resolve(projectRoot, file.path));
+        staged.push({
+          path: file.path,
+          sha256: createHash("sha256").update(bytes).digest("hex"),
+          bytes,
+        });
+      }
+      const stagedHash = recipeCodeHash(
+        staged.map(({ path, sha256 }) => ({ path, sha256 })),
+      );
+      if (stagedHash !== codeSha256) {
+        throw new Error(
+          `Recipe ${id} changed on disk after it was compiled; compile and preview again.`,
+        );
+      }
+      for (const file of staged) {
+        const target = join(directory, file.path);
+        await mkdir(dirname(target), { recursive: true });
+        await writeFile(target, file.bytes, { flag: "wx" });
+      }
+      const file = join(directory, recipe.path, recipe.entry);
+      imports.push(`import * as recipe${index} from ${JSON.stringify(file)};`);
+      entries.push(`${JSON.stringify(id)}: recipe${index}`);
     }
-    const file = resolve(projectRoot, recipe.path, recipe.entry);
-    imports.push(`import * as recipe${index} from ${JSON.stringify(file)};`);
-    entries.push(`${JSON.stringify(id)}: recipe${index}`);
+  } catch (error) {
+    await rm(directory, { recursive: true, force: true });
+    throw error;
   }
   const extension = extname(baseEntry);
   const registry = join(
     dirname(baseEntry),
     `recipe-registry${extension === ".tsx" ? ".ts" : extension}`,
   );
-  const directory = await mkdtemp(join(tmpdir(), "naraframe-recipes-"));
   const entry = join(directory, "entry.tsx");
   await writeFile(
     entry,

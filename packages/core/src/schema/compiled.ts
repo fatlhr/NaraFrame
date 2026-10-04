@@ -135,6 +135,11 @@ const CompiledVisualSchema = z.discriminatedUnion("type", [
     .object({
       type: z.literal("recipe"),
       recipe: IdSchema,
+      /**
+       * How recipe code is executed. 2: bundled from a staged copy of exactly
+       * the listed, hashed files; builds made before that are not reused.
+       */
+      executor: z.literal("naraframe-recipe/2"),
       version: z.string().min(1),
       /** Hash of the trusted code; any code change changes every key. */
       codeSha256: Sha256Schema,
