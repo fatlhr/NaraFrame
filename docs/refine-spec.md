@@ -705,7 +705,7 @@ Trusted local composition is executable code, unlike passive SVG. NF-AU-01 requi
 
 ### 13.5 Production proof and stop conditions
 
-The next gates are NF-AC-18 (native audio routes/preview), NF-AC-19 (same-brief TutorLog route pilot) and NF-AC-20 (three LBC episodes + compatible profile switch). Historical D-VIS/NF-AC-16/17 remain unpassed; new output is not a retrospective acceptance of Medan. Existing word-level enforcement, repeatability, hard-kill orphans and reuse-report gaps retain their open status.
+The next gates are NF-AC-18 (native audio routes/preview), NF-AC-19 (same-brief TutorLog route pilot) and NF-AC-20 (three LBC episodes + compatible profile switch). Historical D-VIS/NF-AC-16/17 remain unpassed; new output is not a retrospective acceptance of Medan. Existing word-level enforcement, repeatability, hard-kill orphans and reuse-report gaps retain their open status. Status at M3.P5 (2026-10-05): NF-AC-18 met on fixtures; NF-AC-19 route chosen, Bang Motion comparability open; NF-AC-20 accepted for internal production; register in `docs/plan.md`.
 
 Pilot checkpoints: one 3–5 s motion/framing study, then the 20 s final. Maximum two internal correction passes per checkpoint; preserve first drafts and failed attempts. Stop and ask for route selection if Fatih still rejects the result, composition authoring requires repeated engine patches, or managed integration becomes a framework project. Do not keep adding primitives hoping for visual quality. A fallback is a separate approved task, not an automatic simultaneous implementation.
 
