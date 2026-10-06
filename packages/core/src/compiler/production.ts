@@ -186,7 +186,10 @@ export const checkProductionReadiness = (
         issue.code === "BRAND_TEXT_MISMATCH" ||
         issue.code === "BRAND_FIELD_MISSING" ||
         issue.code === "BRAND_ASSET_MISMATCH" ||
-        issue.code === "ASSET_BINDING_UNKNOWN"
+        issue.code === "ASSET_BINDING_UNKNOWN" ||
+        issue.code === "RECIPE_BINDING_MISMATCH" ||
+        issue.code === "RECIPE_BINDING_PATH_MISSING" ||
+        issue.code === "RECIPE_BINDING_TYPE_INVALID"
       ) {
         issues.push({ ...issue, severity: "error" });
       }

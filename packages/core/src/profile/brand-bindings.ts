@@ -2,6 +2,7 @@ import { referencedAssetIds } from "../compiler/keys.js";
 import type { Issue } from "../model/issue.js";
 import type { PlanSource } from "../schema/export-schema.js";
 import type { ProfileLock } from "../schema/profile.js";
+import type { RecipeBindingField } from "../schema/recipe.js";
 
 type TextBinding = "brand.name" | "brand.cta.label" | "brand.cta.url";
 
@@ -14,6 +15,146 @@ const brandValue = (
     : binding === "brand.cta.label"
       ? profile.brand?.cta?.label
       : profile.brand?.cta?.url;
+
+/** The profile value a recipe binding field names, if the profile has one. */
+const profileFieldValue = (
+  profile: Pick<ProfileLock, "brand" | "render">,
+  field: RecipeBindingField,
+): string | undefined => {
+  if (field.startsWith("brand.")) {
+    return brandValue(profile, field as TextBinding);
+  }
+  const slot = field.slice(
+    "render.palette.".length,
+  ) as keyof ProfileLock["render"]["palette"];
+  return profile.render.palette[slot];
+};
+
+/** Colours compare without regard to hex case; text compares exactly. */
+const sameValue = (field: RecipeBindingField, a: string, b: string): boolean =>
+  field.startsWith("render.palette.")
+    ? a.toLowerCase() === b.toLowerCase()
+    : a === b;
+
+/** Follows an explicit JSON pointer; no wildcards, no evaluation. */
+const lookupParam = (
+  params: unknown,
+  pointer: string,
+): { found: true; value: unknown } | { found: false } => {
+  let current = params;
+  for (const segment of pointer.slice(1).split("/")) {
+    if (Array.isArray(current)) {
+      if (!/^(?:0|[1-9][0-9]*)$/.test(segment)) return { found: false };
+      const index = Number(segment);
+      if (index >= current.length) return { found: false };
+      current = current[index];
+    } else if (
+      current !== null &&
+      typeof current === "object" &&
+      Object.hasOwn(current, segment)
+    ) {
+      current = (current as Record<string, unknown>)[segment];
+    } else {
+      return { found: false };
+    }
+  }
+  return { found: true, value: current };
+};
+
+interface RecipeParamBinding {
+  sceneId: string;
+  recipe: string;
+  param: string;
+  field: RecipeBindingField;
+  /** scenes.json location of the bound value. */
+  path: string;
+  state: "ok" | "missing" | "invalid-type";
+  value: string | null;
+}
+
+/** Every declared identity param of every recipe scene, resolved. */
+const recipeParamBindings = (source: PlanSource): RecipeParamBinding[] =>
+  source.scenes.scenes.flatMap((scene, sceneIndex) => {
+    if (scene.visual.type !== "recipe") return [];
+    const visual = scene.visual;
+    const recipe = source.recipes?.find((item) => item.id === visual.recipe);
+    return (recipe?.bindings ?? []).map((binding) => {
+      const found = lookupParam(visual.params, binding.param);
+      const base = {
+        sceneId: scene.id,
+        recipe: visual.recipe,
+        param: binding.param,
+        field: binding.field,
+        path: `/scenes/${sceneIndex}/visual/params${binding.param}`,
+      };
+      if (!found.found)
+        return { ...base, state: "missing" as const, value: null };
+      if (typeof found.value !== "string") {
+        return { ...base, state: "invalid-type" as const, value: null };
+      }
+      return { ...base, state: "ok" as const, value: found.value };
+    });
+  });
+
+/** One object key as a JSON pointer segment (RFC 6901): "~" then "/". */
+const pointerSegment = (key: string): string =>
+  key.replaceAll("~", "~0").replaceAll("/", "~1");
+
+/**
+ * Text params a recipe scene carries that no binding covers. They are not
+ * brand-checked; reporting them keeps the coverage honest. Keys are escaped,
+ * so a literal key such as "brand/name" never matches the bound path
+ * /brand/name.
+ */
+const uncheckedParams = (params: unknown, bound: Set<string>): string[] => {
+  const out: string[] = [];
+  const walk = (value: unknown, pointer: string): void => {
+    if (bound.has(pointer)) return;
+    if (typeof value === "string") {
+      out.push(pointer);
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        walk(item, `${pointer}/${index}`);
+      });
+    } else if (value !== null && typeof value === "object") {
+      for (const [key, nested] of Object.entries(value)) {
+        if (key !== "assetId")
+          walk(nested, `${pointer}/${pointerSegment(key)}`);
+      }
+    }
+  };
+  walk(params, "");
+  return out;
+};
+
+export interface RecipeCoverage {
+  sceneId: string;
+  recipe: string;
+  /** Identity params the recipe declares and NaraFrame compares. */
+  declared: number;
+  /** Text params no binding covers: not brand-checked. */
+  unchecked: string[];
+}
+
+const recipeCoverage = (source: PlanSource): RecipeCoverage[] =>
+  source.scenes.scenes.flatMap((scene) => {
+    if (scene.visual.type !== "recipe") return [];
+    const visual = scene.visual;
+    const recipe = source.recipes?.find((item) => item.id === visual.recipe);
+    if (!recipe) return [];
+    const bindings = recipe.bindings ?? [];
+    return [
+      {
+        sceneId: scene.id,
+        recipe: recipe.id,
+        declared: bindings.length,
+        unchecked: uncheckedParams(
+          visual.params,
+          new Set(bindings.map((binding) => binding.param)),
+        ),
+      },
+    ];
+  });
 
 interface BoundText {
   sceneId: string;
@@ -136,8 +277,95 @@ export const checkBrandBindings = (source: PlanSource): Issue[] => {
       );
     }
   });
+  for (const bound of recipeParamBindings(source)) {
+    const where = `Recipe ${bound.recipe} in scene ${bound.sceneId} binds params ${bound.param} to ${bound.field}`;
+    if (bound.state === "missing") {
+      issues.push(
+        bindingIssue(
+          "RECIPE_BINDING_PATH_MISSING",
+          "scenes.json",
+          bound.path,
+          `${where}, but the params have no value there.`,
+          `Add the value at ${bound.param} in this scene's params, or correct the binding in recipe.json (which needs trust again).`,
+          bound.sceneId,
+        ),
+      );
+      continue;
+    }
+    if (bound.state === "invalid-type") {
+      issues.push(
+        bindingIssue(
+          "RECIPE_BINDING_TYPE_INVALID",
+          "scenes.json",
+          bound.path,
+          `${where}, but the value there is not text.`,
+          `Put the ${bound.field} value at ${bound.param} as a string.`,
+          bound.sceneId,
+        ),
+      );
+      continue;
+    }
+    const expected = profileFieldValue(profile, bound.field);
+    if (expected === undefined) {
+      issues.push(
+        bindingIssue(
+          "BRAND_FIELD_MISSING",
+          "scenes.json",
+          bound.path,
+          `${where}, which profile ${profile.id} does not define.`,
+          `Add ${bound.field} to the profile, or remove the binding from recipe.json (which needs trust again).`,
+          bound.sceneId,
+        ),
+      );
+    } else if (
+      bound.value !== null &&
+      !sameValue(bound.field, bound.value, expected)
+    ) {
+      issues.push(
+        bindingIssue(
+          "RECIPE_BINDING_MISMATCH",
+          "scenes.json",
+          bound.path,
+          `${where} and reads "${bound.value}"; profile ${profile.id} says "${expected}".`,
+          "Change the param to the profile value through an edit, after checking the copy still fits and is true for this brand.",
+          bound.sceneId,
+        ),
+      );
+    }
+  }
+  // Coverage, not a defect: says what the recipe checks and what it does not.
+  if (profile.brand || source.recipes?.some((recipe) => recipe.bindings)) {
+    for (const coverage of recipeCoverage(source)) {
+      const sample = coverage.unchecked.slice(0, 5).join(", ");
+      issues.push({
+        ...bindingIssue(
+          "RECIPE_BINDING_COVERAGE",
+          "scenes.json",
+          `/scenes/${source.scenes.scenes.findIndex((scene) => scene.id === coverage.sceneId)}/visual/params`,
+          `Recipe ${coverage.recipe} in scene ${coverage.sceneId}: ${coverage.declared} identity param(s) are compared with profile ${profile.id}; ${coverage.unchecked.length} other text param(s) are not covered by a binding and are not brand-checked${sample ? ` (${sample}${coverage.unchecked.length > 5 ? ", …" : ""})` : ""}.`,
+          "Review uncovered params by eye before a brand switch. Params that carry brand identity belong in recipe.json bindings, which needs the owner's trust again.",
+          coverage.sceneId,
+        ),
+        severity: "info",
+      });
+    }
+  }
   return issues;
 };
+
+export interface RecipeParamPlan {
+  sceneId: string;
+  recipe: string;
+  param: string;
+  field: RecipeBindingField;
+  current: string | null;
+  target: string | null;
+  /**
+   * unchanged/changes compare current with the target profile; missing,
+   * invalid-type and field-missing name a binding that cannot be checked.
+   */
+  state: "unchanged" | "changes" | "missing" | "invalid-type" | "field-missing";
+}
 
 export interface BrandBindingPlan {
   /** Bound to the target brand itself: brand identity that stays valid. */
@@ -158,12 +386,18 @@ export interface BrandBindingPlan {
   }>;
   /** Scenes that carry a factual claim; a brand switch never validates them. */
   claims: string[];
+  /** Declared identity params in recipe scenes, current and target values. */
+  recipeParams: RecipeParamPlan[];
+  /** Per recipe scene: declared bindings and uncovered text params. */
+  recipeCoverage: RecipeCoverage[];
 }
 
 /** How the project's brand-bound content fares under another profile. */
 export const planBrandBindings = (
   source: PlanSource,
   target: ProfileLock,
+  /** The target with the project's surviving overrides applied (palette). */
+  targetProfile: Pick<ProfileLock, "brand" | "render"> = target,
 ): BrandBindingPlan => {
   const plan: BrandBindingPlan = {
     compatible: [],
@@ -173,6 +407,8 @@ export const planBrandBindings = (
     unknown: [],
     text: [],
     claims: [],
+    recipeParams: [],
+    recipeCoverage: recipeCoverage(source),
   };
   for (const asset of usedAssets(source)) {
     const binding = asset.binding;
@@ -211,6 +447,26 @@ export const planBrandBindings = (
       target: brandValue(target, bound.binding) ?? null,
     });
   }
+  for (const bound of recipeParamBindings(source)) {
+    const target = profileFieldValue(targetProfile, bound.field) ?? null;
+    const state: RecipeParamPlan["state"] =
+      bound.state !== "ok"
+        ? bound.state
+        : target === null
+          ? "field-missing"
+          : bound.value !== null && sameValue(bound.field, bound.value, target)
+            ? "unchanged"
+            : "changes";
+    plan.recipeParams.push({
+      sceneId: bound.sceneId,
+      recipe: bound.recipe,
+      param: bound.param,
+      field: bound.field,
+      current: bound.value,
+      target,
+      state,
+    });
+  }
   plan.claims = source.scenes.scenes
     .filter((scene) => scene.carriesFactualClaim)
     .map((scene) => scene.id);
@@ -234,5 +490,22 @@ export const brandSummary = (source: PlanSource) => ({
     layerId: bound.layerId,
     binding: bound.binding,
     text: bound.text,
+  })),
+  recipes: recipeCoverage(source).map((coverage) => ({
+    ...coverage,
+    bindings: recipeParamBindings(source)
+      .filter((bound) => bound.sceneId === coverage.sceneId)
+      .map((bound) => {
+        const expected = profileFieldValue(source.profile, bound.field) ?? null;
+        return {
+          param: bound.param,
+          field: bound.field,
+          value: bound.value,
+          matches:
+            bound.value !== null &&
+            expected !== null &&
+            sameValue(bound.field, bound.value, expected),
+        };
+      }),
   })),
 });

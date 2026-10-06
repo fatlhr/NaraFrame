@@ -229,6 +229,9 @@ const loadRecipe = async (
       entry: manifest.entry,
       files,
       codeSha256: recipeCodeHash(files),
+      // Only present when declared, so recipes without bindings keep their
+      // existing source identity.
+      ...(manifest.bindings ? { bindings: manifest.bindings } : {}),
     },
     issues: [],
   };
