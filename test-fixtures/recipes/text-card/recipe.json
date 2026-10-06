@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "text-card",
+  "version": "1.0.0",
+  "entry": "index.tsx",
+  "files": ["index.tsx"],
+  "description": "Test recipe: one measured title slot drawn from props.textSlots.",
+  "textSlots": [
+    {
+      "id": "title",
+      "param": "/title",
+      "role": "display",
+      "fontSize": 104,
+      "lineHeight": 112,
+      "letterSpacing": -2,
+      "box": { "width": 760, "height": 118 },
+      "maxLines": 1,
+      "wrap": "words"
+    }
+  ]
+}

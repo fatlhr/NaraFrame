@@ -10,6 +10,7 @@ import {
   planeTransformFor,
   sceneTransitionStateFor,
 } from "./motion.js";
+import { recipeTextFit } from "./recipe-text-fit.js";
 import { fontFamilyForRole } from "./typography.js";
 
 export const visualPreflightProperty = "__naraframeVisualPreflight";
@@ -652,6 +653,7 @@ export const resolveVisualPreflight = (
 
   draft.scenes.forEach((scene, sceneIndex) => {
     issues.push(...panelDeadSpace(scene, sceneIndex));
+    issues.push(...recipeTextFit(draft, scene, sceneIndex, loadedFontFamilies));
     const textMetrics = new Map<string, TextMetrics>();
     scene.layers.forEach((layer, layerIndex) => {
       if (layer.type === "path") {

@@ -232,6 +232,7 @@ const loadRecipe = async (
       // Only present when declared, so recipes without bindings keep their
       // existing source identity.
       ...(manifest.bindings ? { bindings: manifest.bindings } : {}),
+      ...(manifest.textSlots ? { textSlots: manifest.textSlots } : {}),
     },
     issues: [],
   };
