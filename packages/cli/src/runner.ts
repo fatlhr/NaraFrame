@@ -657,13 +657,15 @@ const previewCommand = async (
     sceneId ? { type: "scene", sceneId } : { type: "project" },
     { resolution },
   );
-  const issues = [
+  // The production checks compile the same source again, so their info
+  // issues can repeat the draft compile's; report each finding once.
+  const issues = dedupeIssues([
     ...loaded.issues,
     ...compiled.issues,
     ...(productionChecks
       ? productionChecks.issues.filter((issue) => issue.severity === "info")
       : []),
-  ];
+  ]);
   if (!compiled.ok) {
     return {
       exitCode: 1,
@@ -784,6 +786,7 @@ const previewCommand = async (
         muted: !(compiled.value.narration || compiled.value.soundtrack),
         resolution,
         audioMode,
+        brand: brandSummary(loaded.value.source),
         timelineScope: compiled.value.timelineScope,
         manifestSha256: published.manifestSha256,
         reusedFromBuildId: reusable?.buildId ?? null,
@@ -1183,6 +1186,7 @@ const renderCommand = async (
         codec: "h264",
         audio: carriesAudio(checks.final) ? "aac" : "none",
         audioMode,
+        brand: brandSummary(loaded.value.source),
         manifestSha256: published.manifestSha256,
       },
     }),

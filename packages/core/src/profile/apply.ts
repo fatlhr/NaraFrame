@@ -199,31 +199,6 @@ const prepare = async (
   }
   if (directionChanged) effects.add("editorial-review");
 
-  // Identity is reviewed, never rewritten: report what the switch touches.
-  const loaded = await loadPlanProject(root);
-  const bindings = loaded.ok
-    ? planBrandBindings(loaded.value.source, candidate)
-    : undefined;
-  const bindingsRelevant =
-    bindings !== undefined &&
-    (currentLock.brand !== undefined ||
-      candidate.brand !== undefined ||
-      bindings.branded.length +
-        bindings.incompatible.length +
-        bindings.text.length >
-        0);
-  if (bindings && bindingsRelevant) {
-    if (
-      bindings.text.some((entry) => entry.target !== entry.current) ||
-      (candidate.id !== currentLock.id && bindings.claims.length > 0)
-    ) {
-      effects.add("editorial-review");
-    }
-    if (bindings.branded.length + bindings.incompatible.length > 0) {
-      effects.add("replace-assets");
-    }
-  }
-
   const conflicts: OverrideConflict[] = [];
   const preserved: string[] = [];
   for (const [path, value] of Object.entries(currentProject.overrides ?? {})) {
@@ -239,6 +214,47 @@ const prepare = async (
   const resetOverrides = options.resetConflicts
     ? conflicts.map((conflict) => conflict.path)
     : [];
+
+  // Identity is reviewed, never rewritten: report what the switch touches.
+  // Recipe palette bindings compare with the target as the project would
+  // see it, with the overrides that survive the switch.
+  const surviving = applyProjectOverrides(
+    candidate,
+    Object.fromEntries(
+      Object.entries(currentProject.overrides ?? {}).filter(([path]) =>
+        preserved.includes(path),
+      ),
+    ),
+  );
+  const loaded = await loadPlanProject(root);
+  const bindings = loaded.ok
+    ? planBrandBindings(
+        loaded.value.source,
+        candidate,
+        surviving.ok ? surviving.value : candidate,
+      )
+    : undefined;
+  const bindingsRelevant =
+    bindings !== undefined &&
+    (currentLock.brand !== undefined ||
+      candidate.brand !== undefined ||
+      bindings.branded.length +
+        bindings.incompatible.length +
+        bindings.text.length +
+        bindings.recipeParams.length >
+        0);
+  if (bindings && bindingsRelevant) {
+    if (
+      bindings.text.some((entry) => entry.target !== entry.current) ||
+      bindings.recipeParams.some((entry) => entry.state !== "unchanged") ||
+      (candidate.id !== currentLock.id && bindings.claims.length > 0)
+    ) {
+      effects.add("editorial-review");
+    }
+    if (bindings.branded.length + bindings.incompatible.length > 0) {
+      effects.add("replace-assets");
+    }
+  }
 
   const remaining = Object.fromEntries(
     Object.entries(currentProject.overrides ?? {}).filter(

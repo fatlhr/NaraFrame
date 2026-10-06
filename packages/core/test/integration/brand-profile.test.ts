@@ -264,6 +264,9 @@ describe("brand-managed profiles", () => {
         },
       ],
       claims: [],
+      // A declarative project has no recipe scenes to report.
+      recipeParams: [],
+      recipeCoverage: [],
     });
     expect(plan.value.effects).toEqual(
       expect.arrayContaining(["editorial-review", "replace-assets"]),
