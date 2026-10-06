@@ -189,7 +189,9 @@ export const checkProductionReadiness = (
         issue.code === "ASSET_BINDING_UNKNOWN" ||
         issue.code === "RECIPE_BINDING_MISMATCH" ||
         issue.code === "RECIPE_BINDING_PATH_MISSING" ||
-        issue.code === "RECIPE_BINDING_TYPE_INVALID"
+        issue.code === "RECIPE_BINDING_TYPE_INVALID" ||
+        issue.code === "RECIPE_TEXT_SLOT_PATH_MISSING" ||
+        issue.code === "RECIPE_TEXT_SLOT_TYPE_INVALID"
       ) {
         issues.push({ ...issue, severity: "error" });
       }

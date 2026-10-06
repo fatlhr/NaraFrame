@@ -1,5 +1,6 @@
 import { referencedAssetIds } from "../compiler/keys.js";
 import type { Issue } from "../model/issue.js";
+import { lookupParam, pointerSegment } from "../recipe/param-pointer.js";
 import type { PlanSource } from "../schema/export-schema.js";
 import type { ProfileLock } from "../schema/profile.js";
 import type { RecipeBindingField } from "../schema/recipe.js";
@@ -36,31 +37,6 @@ const sameValue = (field: RecipeBindingField, a: string, b: string): boolean =>
     ? a.toLowerCase() === b.toLowerCase()
     : a === b;
 
-/** Follows an explicit JSON pointer; no wildcards, no evaluation. */
-const lookupParam = (
-  params: unknown,
-  pointer: string,
-): { found: true; value: unknown } | { found: false } => {
-  let current = params;
-  for (const segment of pointer.slice(1).split("/")) {
-    if (Array.isArray(current)) {
-      if (!/^(?:0|[1-9][0-9]*)$/.test(segment)) return { found: false };
-      const index = Number(segment);
-      if (index >= current.length) return { found: false };
-      current = current[index];
-    } else if (
-      current !== null &&
-      typeof current === "object" &&
-      Object.hasOwn(current, segment)
-    ) {
-      current = (current as Record<string, unknown>)[segment];
-    } else {
-      return { found: false };
-    }
-  }
-  return { found: true, value: current };
-};
-
 interface RecipeParamBinding {
   sceneId: string;
   recipe: string;
@@ -95,10 +71,6 @@ const recipeParamBindings = (source: PlanSource): RecipeParamBinding[] =>
       return { ...base, state: "ok" as const, value: found.value };
     });
   });
-
-/** One object key as a JSON pointer segment (RFC 6901): "~" then "/". */
-const pointerSegment = (key: string): string =>
-  key.replaceAll("~", "~0").replaceAll("/", "~1");
 
 /**
  * Text params a recipe scene carries that no binding covers. They are not

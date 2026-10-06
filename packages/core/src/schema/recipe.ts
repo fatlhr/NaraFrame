@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { IdSchema, SchemaVersionSchema, VersionSchema } from "./primitives.js";
+import { TypographyRoleSchema } from "./scene.js";
 
 const CodeFileSchema = z
   .string()
@@ -52,6 +53,43 @@ export const RecipeBindingSchema = z
 
 export type RecipeBinding = z.infer<typeof RecipeBindingSchema>;
 
+const ParamPointerSchema = z
+  .string()
+  .regex(
+    /^(?:\/[A-Za-z0-9_-]+){1,16}$/,
+    'A text slot names one params location as a JSON pointer such as "/headline"',
+  );
+
+/**
+ * One text slot the recipe draws and NaraFrame measures. Every length is a
+ * CSS pixel in the 1080×1920 design frame: lineHeight is the pixel distance
+ * between lines (CSS line-height in px), letterSpacing a pixel value that may
+ * be zero or negative. `param` points at a string, or at an array whose
+ * elements are each one instance of the slot.
+ */
+export const RecipeTextSlotSchema = z
+  .object({
+    id: IdSchema,
+    param: ParamPointerSchema,
+    role: TypographyRoleSchema,
+    fontSize: z.number().positive().max(1000),
+    lineHeight: z.number().positive().max(2000),
+    letterSpacing: z.number().min(-200).max(200).optional(),
+    fontWeight: z.number().int().min(100).max(900).optional(),
+    box: z
+      .object({
+        width: z.number().positive().max(1080),
+        height: z.number().positive().max(1920),
+      })
+      .strict(),
+    maxLines: z.number().int().min(1).max(50),
+    /** words: CSS white-space pre-line; none: CSS white-space pre. */
+    wrap: z.enum(["words", "none"]),
+  })
+  .strict();
+
+export type RecipeTextSlot = z.infer<typeof RecipeTextSlotSchema>;
+
 /**
  * `recipe.json` inside a recipe directory: the entry and every code file the
  * recipe may load. Only these files are hashed, snapshotted and bundled.
@@ -67,9 +105,36 @@ export const RecipeManifestSchema = z
     files: z.array(CodeFileSchema).min(1).max(64),
     description: z.string().trim().min(1).optional(),
     bindings: z.array(RecipeBindingSchema).max(64).optional(),
+    textSlots: z.array(RecipeTextSlotSchema).max(32).optional(),
   })
   .strict()
   .superRefine((manifest, context) => {
+    const slots = manifest.textSlots ?? [];
+    slots.forEach((slot, index) => {
+      if (slots.findIndex((other) => other.id === slot.id) !== index) {
+        context.addIssue({
+          code: "custom",
+          message: `Text slot id ${slot.id} is declared more than once`,
+          path: ["textSlots", index, "id"],
+        });
+      }
+      const clash = slots.find(
+        (other, otherIndex) =>
+          otherIndex !== index &&
+          (other.param === slot.param ||
+            slot.param.startsWith(`${other.param}/`)),
+      );
+      if (clash) {
+        context.addIssue({
+          code: "custom",
+          message:
+            clash.param === slot.param
+              ? `Params location ${slot.param} is a text slot more than once`
+              : `Text slot ${slot.id} at ${slot.param} lies inside slot ${clash.id} at ${clash.param}`,
+          path: ["textSlots", index, "param"],
+        });
+      }
+    });
     const params = (manifest.bindings ?? []).map((binding) => binding.param);
     params.forEach((param, index) => {
       const clash = params.find(
@@ -119,4 +184,6 @@ export interface LoadedRecipe {
   codeSha256: string;
   /** Declared identity params; absent for a recipe that declares none. */
   bindings?: RecipeBinding[];
+  /** Declared measured text slots; absent for a recipe that declares none. */
+  textSlots?: RecipeTextSlot[];
 }

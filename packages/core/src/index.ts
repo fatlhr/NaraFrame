@@ -156,6 +156,7 @@ export {
   recipeCodeHash,
   scanRecipeCode,
 } from "./recipe/load-recipes.js";
+export { resolveTextSlotStyle } from "./recipe/text-slots.js";
 export {
   type Approval,
   ApprovalSchema,
@@ -205,6 +206,7 @@ export type {
   CompiledCaptions,
   CompiledDraft,
   CompiledFont,
+  CompiledTextSlot,
   CompiledTransition,
 } from "./schema/compiled.js";
 export {

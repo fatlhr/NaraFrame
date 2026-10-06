@@ -121,6 +121,34 @@ const CompiledAssetSchema = z.discriminatedUnion("kind", [
     .strict(),
 ]);
 
+/** One recipe text slot after resolving its style against the profile. */
+export const CompiledTextSlotSchema = z
+  .object({
+    id: IdSchema,
+    param: z.string().min(2),
+    style: z
+      .object({
+        fontFamily: z.string().min(1),
+        fontWeight: z.number().int().min(100).max(900),
+        fontSize: z.number().positive(),
+        /** CSS pixels between lines, not a multiplier. */
+        lineHeight: z.number().positive(),
+        letterSpacing: z.number(),
+        width: z.number().positive(),
+        height: z.number().positive(),
+        maxLines: z.number().int().positive(),
+        wrap: z.enum(["words", "none"]),
+      })
+      .strict(),
+    /** One entry per string the slot covers (an array param gives several). */
+    instances: z.array(
+      z.object({ pointer: z.string().min(2), text: z.string() }).strict(),
+    ),
+  })
+  .strict();
+
+export type CompiledTextSlot = z.infer<typeof CompiledTextSlotSchema>;
+
 const CompiledVisualSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("text"), text: z.string().min(1) }).strict(),
   z
@@ -155,6 +183,21 @@ const CompiledVisualSchema = z.discriminatedUnion("type", [
           })
           .strict(),
       ),
+      /**
+       * Declared text slots with the style resolved from the profile and
+       * each instance's text; measured by the preview/render preflight and
+       * passed to the recipe as props.textSlots. Absent when the recipe
+       * declares none, so older recipe keys are unchanged.
+       */
+      textSlots: z.array(CompiledTextSlotSchema).optional(),
+      /**
+       * Version of the text-fit rules the preflight applies to the slots.
+       * Present only with textSlots, so it is part of the keys of slot
+       * recipes alone: a build checked under older rules is never reused
+       * (preview reuse skips the preflight). 2: CSS line boxes (terminal
+       * breaks, empty text) and only space/tab collapsing in pre-line.
+       */
+      textFitRules: z.literal("naraframe-text-fit/2").optional(),
     })
     .strict(),
 ]);

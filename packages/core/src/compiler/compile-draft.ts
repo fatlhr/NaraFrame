@@ -2,6 +2,7 @@ import { formatCount } from "../count-format.js";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
 import { checkBrandBindings } from "../profile/brand-bindings.js";
 import { hashValue } from "../project/hash.js";
+import { compileTextSlots, textFitCoverage } from "../recipe/text-slots.js";
 import type { CompiledAsset, CompiledDraft } from "../schema/compiled.js";
 import { CompiledDraftSchema } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
@@ -167,6 +168,15 @@ const compileRecipeVisual = (
     }
   };
   walk(scene.visual.params, `${at}/params`);
+  const textSlots = compileTextSlots(
+    recipe,
+    scene.id,
+    sceneIndex,
+    scene.visual.params,
+    source.profile.render,
+    issues,
+  );
+  issues.push(textFitCoverage(recipe, scene.id, sceneIndex, textSlots));
   return {
     type: "recipe",
     recipe: recipe.id,
@@ -175,6 +185,10 @@ const compileRecipeVisual = (
     codeSha256: recipe.codeSha256,
     params: scene.visual.params,
     assets,
+    // Only when declared: recipes without slots keep their compiled form.
+    ...(textSlots
+      ? { textSlots, textFitRules: "naraframe-text-fit/2" as const }
+      : {}),
   };
 };
 

@@ -451,6 +451,9 @@ const RecipeScene = ({
           params={scene.visual.params}
           assets={assets}
           profile={draft.profile.render}
+          textSlots={Object.fromEntries(
+            (scene.visual.textSlots ?? []).map((slot) => [slot.id, slot.style]),
+          )}
           fps={draft.fps}
           durationInFrames={scene.endFrame - scene.startFrame}
         />
