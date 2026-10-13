@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "phase": "cleanup verification before Git integration authorization",
+  "date": "2026-10-13",
+  "baseline": "e008490e983d52e89da4ba6f25426e6467a5b831",
+  "taskBranch": "cleanup-mvp2-docs",
+  "archive": {
+    "index": "/Users/fatih/Code/Playground/NaraFrame-archive/2026-10-13/index.json",
+    "indexSha256": "f4132a8551df00ae26e14a860c4043f2a91e8570404631250dc2c6faf3093e71",
+    "verifiedAt": "2026-10-13T13:48:23.098Z",
+    "files": 36228,
+    "bytes": 3412492972,
+    "verification": "All archive file hashes and symlink targets matched the initial and unchanged source inventories before movement.",
+    "originalRecovery": "/Users/fatih/.Trash/naraframe-work-2026-10-13",
+    "cacheRecovery": "/Users/fatih/.Trash/naraframe-webpack-2026-10-13",
+    "permanentDeletion": false
+  },
+  "preservation": {
+    "trackedNonDocumentFilesChecked": 231,
+    "trackedNonDocumentFilesUnchanged": true,
+    "dirtyAgentsMdUnchanged": true,
+    "bothSampleInventoriesUnchanged": true,
+    "headUnchanged": true,
+    "worktreeRegistrationUnchanged": true,
+    "branchAndStashRefsUnchangedSinceTaskBranchCreation": true,
+    "historicalSnapshotHashesMatch": true
+  },
+  "runtime": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "remotion": "4.0.521"
+  },
+  "checks": {
+    "typecheck": { "command": "pnpm typecheck", "exitCode": 0 },
+    "build": { "command": "pnpm build", "exitCode": 0 },
+    "doctor": {
+      "command": "pnpm naraframe doctor --json",
+      "exitCode": 0,
+      "readiness": "ready",
+      "readyChecks": 8,
+      "issues": [],
+      "downloadsPerformed": false,
+      "renderPerformed": false
+    },
+    "diffCheck": { "command": "git diff --check", "exitCode": 0 },
+    "activeLocalLinks": "All checked targets and Markdown anchors resolve. Exact historical snapshots retain original link context."
+  },
+  "notRun": ["unit suite", "integration suite", "renderer E2E", "video render"],
+  "authorization": {
+    "m4FeatureExecution": false,
+    "commitPushMerge": false
+  }
+}
