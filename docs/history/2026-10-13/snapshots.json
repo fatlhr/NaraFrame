@@ -1,0 +1,23 @@
+{
+  "capturedAt": "2026-10-13T13:46:52.730Z",
+  "baseline": "e008490e983d52e89da4ba6f25426e6467a5b831",
+  "includesLocalPlanClosure": true,
+  "files": [
+    {
+      "file": "spec.md",
+      "sha256": "d90ba18145c846645c337ab91385ff411da6e8e8d0473ea11717fdde35cfd0be"
+    },
+    {
+      "file": "refine-spec.md",
+      "sha256": "5b6cd3fb9352a0101c5f208dfeaff8f8331e92b0483b3695ddefba446a1585be"
+    },
+    {
+      "file": "plan.md",
+      "sha256": "b669ce0a519d8089be96679bb88556f419c95d8a5779b3fa2e69496129f9644d"
+    },
+    {
+      "file": "discovery.md",
+      "sha256": "e42f894f8765946e57c87bcc846fdc58ffd6bcce085b0b50485a7a717e5da9d0"
+    }
+  ]
+}
