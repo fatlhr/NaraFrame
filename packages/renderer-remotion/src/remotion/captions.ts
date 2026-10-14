@@ -46,7 +46,9 @@ export const captionLayoutFor = (
   const lines: string[] = [];
   let unbreakableOverflow = false;
   let line = "";
-  for (const word of text.trim().split(/\s+/u)) {
+  for (const word of text
+    .replace(/^[ \t\r\n\f]+|[ \t\r\n\f]+$/gu, "")
+    .split(/[ \t\r\n\f]+/u)) {
     const candidate = line ? `${line} ${word}` : word;
     if (measure(candidate) <= textWidth) {
       line = candidate;
@@ -59,9 +61,13 @@ export const captionLayoutFor = (
   if (line) lines.push(line);
 
   const widest = Math.max(0, ...lines.map(measure));
-  const width = Math.min(draft.width - 2 * style.side, widest + 2 * padding.x);
+  const width = Math.max(
+    0,
+    Math.min(draft.width - 2 * style.side, widest + 2 * padding.x),
+  );
   const height =
-    lines.length * style.fontSize * CAPTION_LINE_HEIGHT + 2 * padding.y;
+    lines.length * style.fontSize * (style.lineHeight ?? CAPTION_LINE_HEIGHT) +
+    2 * padding.y;
   return {
     lines,
     unbreakableOverflow,

@@ -47,6 +47,8 @@ const EVIDENCE: Record<string, string[]> = {
   textEmphasis: ["accent", "strong", "quiet"],
   // audio-modes (e2e) exports music and silent finals; audio-boundaries voice.
   audioModes: ["voice", "music", "silent"],
+  // caption-policy (integration/e2e) and caption-preflight exercise each mode.
+  captionModes: ["none", "selected", "full"],
 };
 
 describe("capability registry", () => {

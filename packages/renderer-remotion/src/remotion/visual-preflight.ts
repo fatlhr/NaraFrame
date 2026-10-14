@@ -634,6 +634,23 @@ export const resolveVisualPreflight = (
       captions.cues.forEach((cue, cueIndex) => {
         const layout = captionLayoutFor(draft, captions.style, cue.text);
         if (
+          layout.box.width <= 0 ||
+          layout.box.x < 0 ||
+          layout.box.y < 0 ||
+          layout.box.x + layout.box.width > draft.width ||
+          layout.box.y + layout.box.height > draft.height
+        ) {
+          issues.push(
+            captionIssue(
+              "CAPTION_OUTSIDE_CANVAS",
+              `/captions/cues/${cueIndex}`,
+              `Caption ${cue.id} falls outside the ${draft.width}x${draft.height} canvas.`,
+              "Reduce caption sideOffset/bottomOffset, fontSize or lineHeight so the complete caption box fits on screen.",
+              cue.id,
+            ),
+          );
+        }
+        if (
           layout.unbreakableOverflow ||
           layout.lines.length > captions.style.maxLines
         ) {

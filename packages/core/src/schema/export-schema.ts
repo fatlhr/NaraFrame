@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { SanitizedSvg } from "../asset/svg-sanitize.js";
+import { checkCaptionPolicy } from "../compiler/captions.js";
 import {
   type Issue,
   issuesFromZodError,
@@ -372,6 +373,7 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
     );
   }
 
+  issues.push(...checkCaptionPolicy(profile, captionsResult.data, narration));
   const sortedIssues = sortIssues(issues);
   if (sortedIssues.some((issue) => issue.severity === "error")) {
     return { ok: false, issues: sortedIssues };

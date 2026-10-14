@@ -1,8 +1,8 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 0.8 · 2026-10-13 · Code baseline `e008490`
+Revision 0.9 · 2026-10-14 · Integrated baseline `aab831c`; Batch 1 candidate on `m4-batch-1`
 
-MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is planned as M4. Nothing in this revision advertises a planned capability as available.
+MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3–M4.5 are authorized but not implemented yet.
 
 ## 1. Product
 
@@ -97,7 +97,11 @@ Imported narration can be retained as a master or as block media. Phrase anchors
 
 Audio boundary evidence on the integrated encoding path distinguishes input sample boundaries from encoded/container durations. Visual changes preserve unchanged masters. Changing spoken content in a single master can require broader replacement or re-alignment than a block-level revision.
 
-Current captions use the existing phrase/correction and profile style contracts. Explicit `none/selected/full`, independent caption layout controls, and their no-layout-reservation guarantees are **planned in M4.2**, not available via a hidden-glyph workaround. Empty caption strings, zero-width glyphs, or moving caption UI away are not supported substitutes for that feature.
+The M4.2 candidate adds `captions.json.mode`: `none`, `selected`, or `full`. It overrides an unlocked profile `render.captions.mode`; omission in both preserves legacy `full`. Selected entries name a measured block/phrase and optional phrase-local `startOffsetMs`/`endOffsetMs`, a positive half-open interval bounded by that phrase. Empty selected entries display nothing. Unknown targets and invalid windows are rejected even when currently inactive. No word timing is invented.
+
+Caption display corrections never rewrite narration. Profile caption style defaults are inherited; existing project style overrides obey declared allow/lock paths. A lock on `render.captions` or `render.captions.mode` also prevents a differing source mode. Style uses design-pixel font size, side/bottom offsets, max lines, scrim opacity and line-height multiplier; renderer and preflight share resolved styling and measured wrapping. None/empty selected omit captions entirely, including their glyphs, scrim, preflight boxes and sample frames; the scene layout and narration remain intact. Removing only the scrim leaves the caption text/collision region.
+
+Full/scoped captions share global rounded frame windows whenever the timeline is complete, then clip at scene boundaries, including windows shorter than a frame. Local fallback is used only when a global timeline cannot be placed. Visual policy/style/cue changes affect render keys, not voice generation keys. Candidate renderer identity is `naraframe-draft/12`. Preview/render measure fonts; Node plan validation checks structure, references, timing and locks, not text fit. Empty strings, invisible glyphs and off-canvas caption UI remain unsupported substitutes for a display policy.
 
 External providers remain outside the engine. Existing local import/generation workflows do not authorize a new paid call. Music/SFX rights and listening review remain owner/editorial responsibilities.
 
@@ -140,7 +144,9 @@ M0–M3 acceptance and chronological evidence are retained in [history](history/
 | NF-AC-19 | Parameterized Remotion route accepted; Bang Motion equivalence OPEN. |
 | NF-AC-20 | Repeated LBC production ACCEPTED_INTERNAL, not cleared for public use of photos. |
 | M3.E/F | Integrated explicit recipe identity bindings and opt-in text fit, with their stated coverage limits. |
-| NF-AC-21–25 | PLANNED; no MVP 2 execution evidence yet. |
+| NF-AC-21 | Owner accepted the representative authoring evidence on 2026-10-14; supported fresh-context trial and its limits recorded in plan. Candidate not integrated. |
+| NF-AC-22 | Owner confirmed caption behavior on 2026-10-14; manual/audio/reuse and feature E2E evidence recorded. Full E2E deferred to MVP 2 closure; candidate not integrated. |
+| NF-AC-23–25 | Authorized development; not executed. |
 
 Not in MVP 2's closure requirements: spring, repeater, cross-scene continuity primitives, animated masks, native video layers, and word-level motion. These remain demand-led backlog. No GUI, hosted renderer, provider marketplace, publishing automation, universal cinematic style, or arbitrary untrusted project-code execution is promised.
 

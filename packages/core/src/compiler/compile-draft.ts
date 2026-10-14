@@ -15,7 +15,12 @@ import type {
   Scene,
   Transition,
 } from "../schema/scene.js";
-import { deriveCaptionCues } from "./captions.js";
+import {
+  captionFrameWindow,
+  checkCaptionPolicy,
+  deriveCaptionCues,
+  resolveCaptionMode,
+} from "./captions.js";
 import { checkContrast } from "./contrast.js";
 import { computeAssemblyKey } from "./keys.js";
 import { resolveNarrationTimeline } from "./narration-timeline.js";
@@ -1286,7 +1291,11 @@ export const compileDraft = (
   const fps = format.fps;
   const scaleX = format.width / source.project.format.design.width;
   const scaleY = format.height / source.project.format.design.height;
-  const issues: Issue[] = [];
+  const issues: Issue[] = checkCaptionPolicy(
+    source.profile,
+    source.captions,
+    source.narration,
+  );
 
   if (mode === "final" && requestedScope.type !== "project") {
     return {
@@ -1425,22 +1434,21 @@ export const compileDraft = (
       } else {
         partitionedScenes =
           partitioned.value as unknown as typeof partitionedScenes;
-        const cues = deriveCaptionCues(narrationTimeline, source.captions);
+        const cues = deriveCaptionCues(
+          narrationTimeline,
+          source.captions,
+          resolveCaptionMode(source.profile, source.captions),
+        );
         if (!cues.ok) {
           issues.push(...cues.issues);
-        } else if (requestedScope.type === "project") {
+        } else if (requestedScope.type === "project" && cues.value.length > 0) {
           compiledCaptions = {
             style: captionStyleFor(source, scaleX, scaleY),
             cues: cues.value.map((cue) => {
-              const startFrame = Math.round((cue.startMs * fps) / 1000);
               return {
                 id: cue.id,
                 text: cue.text,
-                startFrame,
-                endFrame: Math.max(
-                  startFrame + 1,
-                  Math.round((cue.endMs * fps) / 1000),
-                ),
+                ...captionFrameWindow(cue, fps),
               };
             }),
           };

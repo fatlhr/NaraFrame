@@ -15,7 +15,11 @@ export {
   type ResolvedAudioMode,
   resolveAudioMode,
 } from "./compiler/audio-mode.js";
-export { type CaptionCue, deriveCaptionCues } from "./compiler/captions.js";
+export {
+  type CaptionCue,
+  deriveCaptionCues,
+  resolveCaptionMode,
+} from "./compiler/captions.js";
 export {
   type CompileOptions,
   compileDraft,
@@ -195,7 +199,11 @@ export {
   AssetManifestSchema,
   AssetSchema,
 } from "./schema/asset.js";
-export type { CaptionCorrection, Captions } from "./schema/captions.js";
+export type {
+  CaptionCorrection,
+  CaptionMode,
+  Captions,
+} from "./schema/captions.js";
 export {
   CaptionCorrectionSchema,
   CaptionsSchema,
