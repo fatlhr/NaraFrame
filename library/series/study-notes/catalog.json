@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "id": "study-notes",
+  "version": "1.0.0",
+  "provenance": {
+    "source": "Repository-authored declarative series identity",
+    "license": "Repository example use"
+  },
+  "assets": [],
+  "patterns": [
+    {
+      "id": "identity",
+      "version": "1.0.0",
+      "description": "Opening overlay, persistent series signature and trailing-hold sign-off. All timing is episode-local; no pre-roll is inserted.",
+      "parameters": {
+        "block": {
+          "type": "string",
+          "pointers": ["/narration/blockId"],
+          "description": "Measured narration block used by this complete scene."
+        },
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Episode headline."
+        },
+        "intro-copy": {
+          "type": "string",
+          "pointers": ["/visual/layers/1/text"],
+          "description": "Opening series label."
+        },
+        "intro-opacity": {
+          "type": "number",
+          "pointers": ["/visual/layers/1/opacity"],
+          "description": "1 shows intro; 0 records intentional omission with zero audio shift."
+        },
+        "signature": {
+          "type": "string",
+          "pointers": ["/visual/layers/2/text"],
+          "description": "Persistent series signature."
+        },
+        "signoff-copy": {
+          "type": "string",
+          "pointers": ["/visual/layers/3/text"],
+          "description": "Explicit sign-off replacement."
+        },
+        "signoff-start-ms": {
+          "type": "number",
+          "pointers": ["/beats/1/startMs"],
+          "description": "Local start at measured speech end; match the narration trailing hold."
+        },
+        "duration-ms": {
+          "type": "number",
+          "pointers": ["/durationMs"],
+          "description": "Documented duration = measured audioDurationMs + pauseAfterMs; narrated partition remains authoritative."
+        },
+        "rundown": {
+          "type": "string",
+          "pointers": ["/visual/layers/4/text"],
+          "description": "Explicit episode numbering/rundown; no inferred sequence."
+        }
+      },
+      "template": {
+        "id": "identity",
+        "narrativeRole": "explanation",
+        "durationMs": 6851,
+        "narration": { "blockId": "question" },
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "text": "Terumbu kehilangan warna",
+              "frame": { "x": 96, "y": 360, "width": 888, "height": 380 },
+              "role": "heading",
+              "maxLines": 3,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "intro",
+              "type": "text",
+              "text": "CATATAN BELAJAR",
+              "frame": { "x": 96, "y": 210, "width": 888, "height": 90 },
+              "role": "label",
+              "maxLines": 1,
+              "color": "palette.accent",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "signature",
+              "type": "text",
+              "text": "Study Notes",
+              "frame": { "x": 96, "y": 160, "width": 620, "height": 50 },
+              "role": "label",
+              "maxLines": 1,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3
+            },
+            {
+              "id": "signoff",
+              "type": "text",
+              "text": "Satu catatan lagi besok",
+              "frame": { "x": 96, "y": 990, "width": 888, "height": 150 },
+              "role": "body",
+              "maxLines": 2,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4
+            },
+            {
+              "id": "rundown",
+              "type": "text",
+              "text": "01 / Terumbu karang",
+              "frame": { "x": 96, "y": 1200, "width": 888, "height": 100 },
+              "role": "label",
+              "maxLines": 2,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "intro-leaves",
+            "action": "exit",
+            "targetId": "intro",
+            "startMs": 900,
+            "durationMs": 200,
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "signoff-arrives",
+            "action": "reveal",
+            "targetId": "signoff",
+            "startMs": 5851,
+            "durationMs": 200,
+            "params": {
+              "direction": "up",
+              "distance": 20,
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": { "type": "cut" }
+      }
+    }
+  ]
+}

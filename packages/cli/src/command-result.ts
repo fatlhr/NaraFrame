@@ -14,6 +14,7 @@ export type CommandName =
   | "profile"
   | "recipe"
   | "library"
+  | "audio"
   | "unknown";
 
 export type CommandReadiness =

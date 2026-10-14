@@ -250,6 +250,16 @@ afterEach(async () => {
 });
 
 describe("public CLI command contract", () => {
+  it("recognizes prepared audio staging and exports its passive package schema", async () => {
+    const usage = await captureJsonResult(["audio", "stage", "--json"]);
+    expect(usage.exitCode).toBe(3);
+    expect(usage.events).toEqual([
+      expect.objectContaining({ command: "audio", success: false }),
+    ]);
+    const schema = await captureJsonResult(["schema", "--json"]);
+    expect(schema.exitCode).toBe(0);
+    expect(JSON.stringify(schema.events)).toContain("PreparedTimingPackage");
+  });
   it("reports missing browser and FFmpeg tools without attempting downloads", async () => {
     vi.stubEnv(
       "NARAFRAME_BROWSER_EXECUTABLE",

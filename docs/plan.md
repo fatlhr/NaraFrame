@@ -2,7 +2,7 @@
 
 Revision 1.9 · 2026-10-14 · Integrated baseline `aab831cd0a30ea53ba6274556729060d8ff29ba5`
 
-**Current step:** M4.3's bounded anchor correction is VERIFIED locally on `m4-batch-2` after Fatih authorized it; uncommitted changes follow `9c01b1e`. Public CLI rejects clipped anchors, focused 22/22 and verify 312/374 pass. Next: commit the correction with explicit permission, then prepare Batch 3 from unchanged main and cherry-pick the cumulative Batch 2 commits. M4.4 has not started; main remains `aab831c`, no PR/merge, E2E deferred to MVP 2 closure.
+**Current step:** M4.4 TECHNICALLY_READY / UNCOMMITTED on `m4-batch-3`, checkpoint `15d67c1`. Prepared import, reusable identity, fresh-context authoring, short output/revision/undo and verify are recorded below. Main remains `aab831c`; no new push/PR/merge. M4.5 is next and not started; confirm costly final E2E/export before running. Listening acceptance is confirmed, not a blanket visual/publication approval.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -64,8 +64,8 @@ Subsequent authorizations: Fatih approved Batch 1 implementation and accepted it
 |---|---|---|---|---|
 | M4.1 Art direction and production vocabulary | OWNER_ACCEPTED / COMMITTED `eb7a7d5`; not in main | Integrated M3 baseline | NF-AC-21, fresh-context representative shot | 1 |
 | M4.2 Captions separate from narration | OWNER_ACCEPTED / COMMITTED `eb7a7d5`; final E2E deferred | M4.1 | NF-AC-22, none/selected/full with intact audio/reuse | 1 |
-| M4.3 Library and pinned assets | OWNER_REVIEWED / COMMITTED `9c01b1e` on `m4-batch-2`; not in main | M4.1–M4.2 committed/cherry-picked under owner exception | NF-AC-23, editable pinned imports and reuse/undo | 2 |
-| M4.4 Prepared audio and series identity | AUTHORIZED; queued after Batch 2 | M4.3 committed/cherry-picked under owner exception | NF-AC-24, verified master/timing and reusable identity | 3 |
+| M4.3 Library and pinned assets | OWNER_REVIEWED / COMMITTED `9c01b1e` + correction `57ac91f`; not in main | M4.1–M4.2 committed/cherry-picked under owner exception | NF-AC-23, editable pinned imports and reuse/undo | 2 |
+| M4.4 Prepared audio and series identity | TECHNICALLY_READY / UNCOMMITTED on `m4-batch-3` | Batch 2 cumulative commits cherry-picked through `15d67c1` | NF-AC-24, verified master/timing and reusable identity | 3 |
 | M4.5 Production trial and MVP 2 handoff | AUTHORIZED; queued after M4.4, confirm costly final gate | M4.1–M4.4 | NF-AC-25, approved MP4 and second profile | 3 |
 
 ### M4.1 — Art direction and production vocabulary
@@ -189,24 +189,43 @@ Prepared timing records source hash, text binding, units, cue boundaries, alignm
 
 Series presets use supported composition/media. Intro omission or sign-off replacement is a recorded override, not a hidden source hack. Timeline shifts, gaps, and numbering are explicit. Do not introduce video layers just to satisfy this task.
 
+**Feature model — 2026-10-14, authorized task:** reuse existing narration blocks, local media, scene partition, captions and revision snapshots. Add the minimum public preparation interface; do not change the narration clock or renderer.
+
+- `audio stage PROJECT --from CLIP --timing PACKAGE.json --block ID --json` captures the clip and timing package once, probes the captured audio, and returns untouched-project staging plus source revision for ordinary `edit --from ... --expect ...`. Store unchanged bytes under a content-addressed audio path. No normalization, stretching, silence insertion, synthesis or provider call. Reject invalid packages and unsupported audio with directed diagnostics.
+- The passive package declares schemaVersion 1, `units: "milliseconds"`, source `audioSha256`, intended `text`, local `phrases` (optional existing words), `pauseAfterMs`, alignment method/source, optional known voice-style signature/license, and verification. Duration is measured from captured media. Cues must fit it; supplied word ranges must be ordered and inside their phrase. Retaining words does not establish native word-motion enforcement.
+- Opt-in `prepared` on a ready narration block records audio/text/timing hashes, measured duration, units, alignment provenance, uncertainties and `verification` (`pending` or `verified`). Verified requires an actual listening attestation with reviewer and timestamp. The engine validates receipt integrity, not what someone heard. Pending is a draft warning and a production/export blocker, and must not assert confirmed `generation.textSha256`. Verified import uses the existing normalized narration text hash and only a truthfully known voice-style signature; never borrow the current profile's style signature.
+- Check receipt hashes against the current block text/phrase/word timing, measured duration and referenced asset hash. Timing hash covers measured audio duration plus local phrases/words, not `pauseAfterMs`: a visual trailing hold may change without claiming a new listening review. Stale bindings reject; keep block-based scoped handling. Blocks without this opt-in retain their behavior/keys. Receipt-only edits change source/approval authority but not identical pixels or generation identity; real text/audio/pause changes follow existing keys. Import is a preparation step, not a production-readiness or permission declaration.
+- Series identity is a local versioned catalog under `library/series/study-notes/`, using ordinary declarative scenes and complete scalar episode values. Intro overlays the opening, signature persists, and sign-off uses the trailing `pauseAfterMs` hold. Explicit intro-opacity (0 omit / 1 show), sign-off copy/start and rundown are pinned in `libraryImports`; profile fonts/palette/locks remain authoritative. There is no new identity runtime or trust. This variant prepends no time: omission shifts audio by zero; changing the trailing hold changes total duration explicitly without changing the spoken clip. Standalone silent pre-roll or arbitrary unvoiced scenes are not claimed.
+- Short acceptance reuses M4.2's 5851 ms coral clip, SHA `6aadd6f0e65d02ba53f8f986854c05f07323f255b92c8eb9d5b69688dd3ebc4a`, phrases `[0,2731)` and `[3019,5851)`. Fatih answered “Sudah didengar, teks dan batas cocok” on 2026-10-14, authorizing this listening attestation only. Prepare two episodes using the same preset, then omit intro/change sign-off/hold through recorded values. Compare master hashes and voice keys after visual/caption edits, undo and stale approval. Synthetic verification/approval records belong only in temporary regression fixtures, never owner evidence.
+
+Additional acceptance before the existing validate/preview commands:
+
+```bash
+pnpm naraframe audio stage ../NaraFrame-projects/mvp2/prepared-audio --from EXISTING_CLIP --timing TIMING_PACKAGE.json --block question --json
+pnpm naraframe edit ../NaraFrame-projects/mvp2/prepared-audio --from STAGING --expect SOURCE_REVISION --json
+pnpm naraframe library inspect library/series/study-notes/catalog.json --json
+```
+
+First prove staging/validation without rendering. Then inspect a short preview against the listening evidence, add focused coverage and run one `pnpm verify`. No E2E. M4.5 and its costly final gate are separate from this checkpoint.
+
 **Acceptance commands:**
 
 ```bash
 pnpm naraframe validate ../NaraFrame-projects/mvp2/prepared-audio --stage production --json
 pnpm naraframe preview ../NaraFrame-projects/mvp2/prepared-audio --resolution 1080 --json
-pnpm naraframe preview ../NaraFrame-projects/mvp2/prepared-audio --draft --scene explanation --json
+pnpm naraframe preview ../NaraFrame-projects/mvp2/prepared-audio --draft --scene opening --resolution 1080 --json
 ```
 
 Expected: a verified local master imports unchanged with usable phrase/cue bindings. Series identity is reused on a second episode; an explicit identity override produces the expected timeline. Visual/caption revisions keep master bytes and voice reuse unchanged. Cue/audio comparisons separate encoded offsets from input timing.
 
-- [ ] Model prepared-audio receipt and timing verification, supported preset fields, and override precedence.
-- [ ] Import existing audio without provider calls; record file/text hashes and verification by listening.
-- [ ] Inspect cues against the actual audio and check scene boundaries, pauses, and scoped/full consistency.
-- [ ] Use the same identity preset twice, then record an intentional override and inspect its timing impact.
-- [ ] Revise visual copy/assets/caption policy without changing or regenerating the spoken master.
-- [ ] Prove undo, media reuse, cache invalidation and approval staleness for changes that do affect audio or identity.
-- [ ] Add regression cases for units, stale text/hash binding, invalid cue bounds, preset pinning, overrides, and key behavior.
-- [ ] Run focused coverage and `pnpm verify`; preserve evidence for Batch 3. E2E deferred to final M4.5 closure under the 2026-10-14 owner instruction.
+- [x] Model prepared-audio receipt and timing verification, supported preset fields, and override precedence. Existing narration clock, optional receipt, complete pinned identity values.
+- [x] Import existing audio without provider calls; record file/text hashes and verification by listening. Fatih's confirmation, captured input 5851 ms, unchanged master.
+- [x] Inspect cues against the actual audio and check scene boundaries, pauses, and scoped/full consistency. Owner listening plus parent frame/decoded-audio audit; full/scoped 206/206 frames identical, decoded lag 0 ms.
+- [x] Use the same identity preset twice, then record an intentional override and inspect its timing impact. General-explainer episode 6851 ms; fresh current-issues draft omits intro/changes sign-off with a 1200 ms hold (7051 ms). Known voice-style mismatch stays visible and blocks production on that second profile.
+- [x] Revise visual copy/assets/caption policy without changing or regenerating the spoken master. This bounded preset has no image assets: identity copy/intro values and caption policy exercised; asset substitution evidence belongs to M4.3. No new master or provider call.
+- [x] Prove undo, media reuse, cache invalidation and approval staleness for changes that do affect audio or identity. Actual caption edit/undo/reuse and unchanged voice key; identity/hold keys and stale approval covered in temporary synthetic regression fixtures, not invented owner approval.
+- [x] Add regression cases for units, stale text/hash binding, invalid cue bounds, preset pinning, overrides, and key behavior. 56 focused integration cases across four files, capability unit 17/17; captured-source mutation and known/unknown style controls included.
+- [x] Run focused coverage and `pnpm verify`; preserve evidence for Batch 3. Parent verify exits 0: Biome 212 files, unit 312, integration 398, typecheck/build. E2E deferred to final M4.5 closure under the 2026-10-14 owner instruction.
 
 **Out of scope:** automatic new paid generation, repairing spoken content without permission, global intro duration, or claims of word-accurate motion without the required data/implementation.
 
@@ -369,6 +388,32 @@ Status: **READY_FOR_REVIEW; commit awaits Fatih's explicit approval.** No separa
 - Actual compiled CLI: the reproduced catalog now returns exit 1, `LIBRARY_ANCHOR_CLIPPED`, invalid readiness and no staging artifact (`anchor-review-cli-after.json`); previously success true/no issues (`anchor-review-before.json`). The helper probe also rejects without staging (`anchor-review-after.json`). No edit or render was applied to the diagnostic project.
 - Fresh pinned `pnpm verify` exits 0: Biome 205 files, unit 312/312, integration 374/374, typecheck/build. Complete log: `anchor-verify.log`. No render or E2E was run. Existing accepted output and earlier failed evidence remain intact. Unrelated AGENTS and the local Batch 2 closure are preserved.
 - Technical blocker is closed. Commit/push/new branch operations were not performed in this correction; M4.4 remains next, unstarted, with the approved batch/cherry-pick workflow and separate confirmation for costly final operations.
+
+### Active handoff — Batch 3 / M4.4 (2026-10-15)
+
+**Status:** TECHNICALLY_READY / UNCOMMITTED; M4.5 is queued, not started by this checkpoint. Fatih authorized the correction commit and M4.4 continuation. No push/PR/merge is authorized here; main remains `aab831cd0a30ea53ba6274556729060d8ff29ba5`.
+
+**Batch transition:** Batch 2's bounded anchor correction is committed as `57ac91faad3a410b6ed2bca27af66f68fd74373e` (three explicit paths: plan, stage helper, library integration tests). The precommit library file passed 22/22 and build passed; the earlier full verify 312/374 is retained, not rerun for the commit. `m4-batch-3` was created from unchanged main and received the three cumulative commits as `3a1d91f`, `655044d`, `15d67c1`. Batch 2 and Batch 3 trees match at `4eb1d80bafbc0b75e4499156a3e690be9c4d81b8`. Earlier “uncommitted/unstarted” entries above are historical checkpoints.
+
+**Listening evidence:** Fatih answered “Sudah didengar, teks dan batas cocok”; recorded at `2026-10-14T16:55:36Z` (2026-10-14 23:55:36 WIB). This attests the reused coral clip and its two phrase boundaries only, not new audio or publication. The original master stays read-only. Prepared receipt checks validate the attestation's bindings, not listening itself.
+
+**Work split:** backend/public staging and series catalog implementation; parent skill/reference and consolidated acceptance. Evidence under `work/m4-batch-3/`, gates under `work/gate-logs/m4-batch-3/`. Development uses only the authorized short output path, focused checks and one verify. E2E stays deferred until final M4.5 confirmation. No provider, dependency, new recipe trust or final export.
+
+Unrelated `AGENTS.md` SHA `c55c4025c99a042ccf845402f5b1c53284edc02c0059d70b43d0d211c5a771cb`, Miss Ayu worktree, old stash/branches and archived evidence remain untouched.
+
+**Implemented/public evidence:** `audio stage` captures clip/package once, probes the captured media, returns guarded-edit staging and refuses mismatched hash/intended text/cues/mode. Opt-in pending receipts are draft warnings and production blockers without a confirmed generation binding; verified receipts require real listening metadata, current hashes and truthful known style. Public schema and registry expose only proven staging/receipt capabilities. Core stays Remotion-free; renderer, narration clock, dependency and engine identity are unchanged. Series catalog uses existing library source/pins, not recipe execution/trust. Detailed implementation/manual command record: `work/m4-batch-3/m4-4-report.md` (implementer evidence; parent did not rerun every reported command).
+
+**Parent output/revision audit:** source-only external acceptance project `../NaraFrame-projects/mvp2/prepared-audio`, production validation ready with only deliberately short-duration recommendation. Native full `b51208404019-0eba0381-820` and scoped `ad463c1c10d4-9270636f-ad6`: 206 frames / 6.866667 encoded seconds; parent inspected contact sheets (intro exit, persistent signature, trailing sign-off and cues). Decoded RGB hashes match on all 206 frames; normalized decoded mono PCM correlation `0.9999919633`, best lag 0 ms at 12 kHz within a ±100 ms search. This is one fixture measurement, not a universal encoding guarantee. Actual input timing remains 5851 ms plus 1000 ms hold. Logs: `full-1080.json`, `scoped-1080.json`; audit: `media-audit.json`.
+
+Caption-none revision yields `41f7b52ecd6d-0e97320a-516`; undo restores source and reuses full `b51208404019-0eba0381-820` as `b51208404019-3026fb0e-034` in 752 ms, MP4 hash identical. Before/after/undo master SHA, voice key `010e0b6b…` and timing hash `c186981f…` match (`revision-evidence.json`). Initial parent caption fixture omitted required `corrections: []`, so edit was refused before any mutation/render; corrected fixture then passed. This is a setup correction, not an engine defect; no failed preview was relabelled successful. Real owner preview approval was not created; approval staleness is synthetic-test evidence only.
+
+**Fresh-context skill/library proof:** independent author read skill/routed references, public schema/catalog/CLI and its own project only; no renderer/private source or prior project reads except the explicitly supplied master. Thirteen public calls produced validated first source, preserved under `fresh-author/first-validated-source`, and ordinary note edit with voice/scene 1/1 reuse (`fresh-author-report.md`). The catalog changed while candidate authoring was underway; the author inspected/pinned actual staged bytes rather than claiming a frozen trial. Parent copied source-only to `../NaraFrame-projects/mvp2/prepared-audio-second` and rendered draft `1394141c048e-d32ff8ba-afd` (212 frames, 540×960). Contact sheet confirms omitted intro, persistent signature and “Pelajari lagi besok” in the 1200 ms hold. Known teaching voice vs editorial current-issues style remains `VOICE_STYLE_MISMATCH`; that draft is not production-ready and no relabel/regeneration was performed. Its source citation is the supplied narration, not independently researched scientific/publication evidence.
+
+**Review/gate:** independent consolidated source review found no concrete blocker (`review-report.md`); it inspected contracts/tests and supplied parent logs, but ran no suite/render/probe. Additional bounded test coverage then protected source mutation during probe, pending-with-generation, verified-without-generation and known/unknown style. Implementer focused 56/56 integration + capability 17/17. Parent's single final `pnpm verify` exits 0: Biome 212, unit 312/312, integration 398/398, typecheck/build. Log `work/gate-logs/m4-batch-3/verify.log`, SHA `9a94daaf440573471aec081c7776037710445a1c030e5fd7192943668971cab2`. `git diff --check` clean. Skill frontmatter/routed links inspected and fresh-author proof succeeded; standalone `quick_validate.py` could not start because ambient Python lacks PyYAML, with no dependency installed. Candidate source/dist/catalog/media hashes recorded in `checkpoint.json`; code/skill stay uncommitted.
+
+**Limits/effort:** four short fresh renders (full/scoped native, caption variant, second draft) plus one pixel reuse; measured render command times 19.8/19.8/20.1/17.4 s, reuse 0.752 s. Manual import/preflight setup failures and test-harness mistakes are retained/reported, not claimed product failures or erased. Owner active time, agent active time and token cost unknown; paid provider calls 0, prior generation spend untracked. No E2E, final export, visual parity, publication claim, new trust or main integration. Next is M4.5 with separate confirmation for costly final operations, not another engine feature by default.
+
+**Commit authorization — 2026-10-15:** Fatih requested “commit” before distribution-scope discovery. All 21 code/test/skill/catalog fingerprints still match the reviewed checkpoint; final verify log hash matches. Fresh precommit focused integration 56/56 and build exit 0 (`work/gate-logs/m4-batch-3/precommit.log`), `git diff --check` clean. Stage only the 24 M4.4 source/document paths; exclude unrelated AGENTS, README and work. No push/PR/merge. The requested distribution/cleanup/onboarding scope will be recorded after this checkpoint commit, not mixed into its implementation.
 
 ### Handoff template for an authorized M4 batch
 

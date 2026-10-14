@@ -46,6 +46,7 @@ export {
   type ResolvedPhrase,
   resolveNarrationTimeline,
 } from "./compiler/narration-timeline.js";
+export { preparedTimingHash } from "./compiler/prepared-audio.js";
 export {
   checkProductionReadiness,
   computeSceneClosure,
@@ -132,6 +133,11 @@ export {
   createSayTtsProvider,
   type SayTtsProviderOptions,
 } from "./production/say-tts-provider.js";
+export {
+  type StageAudioOptions,
+  type StagedAudio,
+  stagePreparedAudio,
+} from "./production/stage-audio.js";
 export {
   type SynthesizeNarrationOutcome,
   type SynthesizeNarrationRequest,
@@ -251,6 +257,12 @@ export type {
   NarrationSource,
 } from "./schema/narration.js";
 export { NarrationBlockSchema, NarrationSchema } from "./schema/narration.js";
+export {
+  type PreparedAudioReceipt,
+  PreparedAudioReceiptSchema,
+  type PreparedTimingPackage,
+  PreparedTimingPackageSchema,
+} from "./schema/prepared-audio.js";
 export type {
   Money,
   ProductionLedger,

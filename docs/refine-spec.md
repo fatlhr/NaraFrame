@@ -1,6 +1,6 @@
 # NaraFrame — Production Findings and Decisions
 
-Updated 2026-10-14 · Integrated baseline `aab831c` · Batch 1 committed; M4.3 ready for review on Batch 2
+Updated 2026-10-15 · Integrated baseline `aab831c` · Batch 1–2 committed and carried into Batch 3; M4.4 technically ready/uncommitted
 
 This document explains the next development priorities. [spec.md](spec.md) defines the contract; [plan.md](plan.md) owns numbered tasks. The prior discovery, decision history, and local Batch F closure are preserved in [history](history/README.md).
 
@@ -13,6 +13,8 @@ The caption candidate demonstrates none/selected/full at 540/1080 with unchanged
 M4.3's bounded old-skill baseline found guidance for copied patterns, profile pins, framing and undo, but not source-pixel ROI/padding, named prop anchors, pose variants, or catalog dependency pins. That baseline did not author or render an episode; its ambient package-manager probe failed before CLI help/schema. The new model therefore pairs a focused library guide with public inspect/stage commands, pinned ordinary scene expansion, and opt-in PNG crop geometry. This is an authoring contract, not a second motion runtime or an automatic character rig. Its first preview attempt failed before frames: a core root import pulled server modules into the browser bundle. A browser-safe placement subpath fixed it, the failed attempt is retained, and a bundle test protects it; the following previews rendered.
 
 The engine can protect a project and produce a valid MP4 without producing a compelling explanation. Production friction also comes from weak authoring instructions, missing reusable artwork metadata, and workflows that repeatedly rediscover the same technique.
+
+M4.4 adds a public capture/stage receipt rather than replacing the narration clock. Human listening confirmation binds the existing master/cues; pending alignment stays draft-only. Series identity is ordinary pinned library data, with intro overlaid and sign-off inside the explicit trailing hold. A fresh author used only skill/public interfaces; its known voice-style mismatch on a different profile remained visible instead of being silently certified. One fixture's full/scoped frames matched, audio lag measured zero, and caption undo reused the original MP4. These establish the bounded preparation/identity path, not publication, a new TTS service or general style compatibility. Plan records source review, gate provenance and the pending M4.5 handoff.
 
 Before proposing an engine primitive, classify the problem:
 

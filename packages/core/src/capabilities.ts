@@ -159,6 +159,8 @@ export const capabilityRegistry = (): CapabilityRegistry => {
       "music",
       "narration",
       "phrase-anchors",
+      "prepared-audio-staging",
+      "prepared-timing-receipt",
       "sfx",
       "ducking",
     ].sort(),

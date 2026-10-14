@@ -13,6 +13,7 @@ import { type Captions, CaptionsSchema } from "./captions.js";
 import { CompiledDraftSchema } from "./compiled.js";
 import { LibraryCatalogSchema } from "./library.js";
 import { type Narration, NarrationSchema } from "./narration.js";
+import { PreparedTimingPackageSchema } from "./prepared-audio.js";
 import { type ProfileLock, ProfileLockSchema } from "./profile.js";
 import { type ProjectConfig, ProjectConfigSchema } from "./project.js";
 import type { LoadedRecipe } from "./recipe.js";
@@ -50,6 +51,7 @@ const artifacts = {
 
 const schemaEntries = [
   ["LibraryCatalog", LibraryCatalogSchema],
+  ["PreparedTimingPackage", PreparedTimingPackageSchema],
   ["ProjectConfig", ProjectConfigSchema],
   ["ProfileLock", ProfileLockSchema],
   ["Scenes", ScenesSchema],

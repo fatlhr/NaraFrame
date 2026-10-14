@@ -33,6 +33,7 @@ import {
   recordRecipeTrust,
   resolveAudioMode,
   stageLibrary,
+  stagePreparedAudio,
   syncWorkingCopy,
   undoProject,
   withProjectLock,
@@ -48,7 +49,7 @@ import {
   systemIssue,
   usageIssue,
 } from "./command-result.js";
-import { runDoctorChecks } from "./doctor.js";
+import { ffprobeExecutable, runDoctorChecks } from "./doctor.js";
 import {
   preflightNarrationAudio,
   preflightSoundtrackAudio,
@@ -96,6 +97,7 @@ Usage:
   naraframe profile inspect <id-or-path> [--json]
   naraframe library inspect <catalog.json> [--json]
   naraframe library stage <project> [--from <catalog.json> --pattern <id> --version <version> --scene <id>] --instance <id> --params <params.json> [--update] [--json]
+  naraframe audio stage <project> --from <clip> --timing <package.json> --block <id> [--json]
   naraframe profile apply <id-or-path> [project] [--dry-run] [--reset-overrides] [--json]
   naraframe cache clean [project] [--dry-run] [--json]`;
 
@@ -1554,6 +1556,61 @@ const libraryCommand = async (args: readonly string[]): Promise<Execution> => {
   };
 };
 
+const audioCommand = async (args: readonly string[]): Promise<Execution> => {
+  const [subcommand, ...rest] = args;
+  const parsed = parseArguments(rest, [], ["--from", "--timing", "--block"]);
+  const from = parsed.values.get("--from"),
+    timing = parsed.values.get("--timing"),
+    block = parsed.values.get("--block");
+  if (
+    parsed.error ||
+    subcommand !== "stage" ||
+    parsed.positionals.length !== 1 ||
+    !from ||
+    !timing ||
+    !block
+  )
+    return usageFailure(
+      "audio",
+      parsed.error ??
+        "audio stage requires <project> --from <clip> --timing <package.json> --block <id>.",
+    );
+  const result = await stagePreparedAudio({
+    root: parsed.positionals[0] ?? "",
+    from,
+    timing,
+    block,
+    ffprobePath: ffprobeExecutable(),
+  });
+  if (!result.ok)
+    return {
+      exitCode: 1,
+      event: commonEvent("audio", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        issues: result.issues,
+      }),
+    };
+  return {
+    exitCode: 0,
+    event: commonEvent("audio", {
+      sourceRevision: result.value.sourceRevision,
+      artifacts: { staging: result.value.staging },
+      data: {
+        ...result.value,
+        edit: {
+          from: result.value.staging,
+          expect: result.value.sourceRevision,
+        },
+      },
+    }),
+    human: [
+      `Staged captured audio for ${block} (${result.value.verification}) in ${result.value.staging}`,
+    ],
+  };
+};
+
 const knownCommand = (value: string | undefined): CommandName =>
   value === "doctor" ||
   value === "schema" ||
@@ -1567,6 +1624,7 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "cache" ||
   value === "profile" ||
   value === "recipe" ||
+  value === "audio" ||
   value === "library"
     ? value
     : "unknown";
@@ -1589,6 +1647,7 @@ const executeCommand = async (
   if (command === "profile") return profileCommand(args);
   if (command === "recipe") return recipeCommand(args);
   if (command === "library") return libraryCommand(args);
+  if (command === "audio") return audioCommand(args);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 

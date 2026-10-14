@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PreparedAudioReceiptSchema } from "./prepared-audio.js";
 import {
   IdSchema,
   NonNegativeIntegerSchema,
@@ -38,6 +39,7 @@ const ReadyBlockSchema = z
     audioDurationMs: z.number().int().positive(),
     pauseAfterMs: NonNegativeIntegerSchema,
     phrases: z.array(PhraseSchema).min(1),
+    prepared: PreparedAudioReceiptSchema.optional(),
     ...provenanceFields,
   })
   .strict();
@@ -78,6 +80,21 @@ export const NarrationSchema = z
       if (!("phrases" in block)) {
         return;
       }
+      if (
+        block.prepared &&
+        block.phrases
+          .map((p) => p.text)
+          .join(" ")
+          .trim()
+          .replace(/\s+/gu, " ") !== block.text.trim().replace(/\s+/gu, " ")
+      ) {
+        context.addIssue({
+          code: "custom",
+          message:
+            "Prepared phrase text must reconstruct the intended block speech",
+          path: ["blocks", blockIndex, "phrases"],
+        });
+      }
 
       const phraseIds = new Set<string>();
       let previousEnd = 0;
@@ -114,6 +131,29 @@ export const NarrationSchema = z
           });
         }
         previousEnd = Math.max(previousEnd, phrase.endMs);
+        // Existing word metadata retains its legacy semantics. Strict bounds
+        // apply only when the author opts into a prepared timing receipt.
+        if (block.prepared) {
+          const wordIds = new Set<string>();
+          let wordEnd = phrase.startMs;
+          phrase.words?.forEach((word, wordIndex) => {
+            if (
+              wordIds.has(word.id) ||
+              word.startMs < wordEnd ||
+              word.endMs <= word.startMs ||
+              word.endMs > phrase.endMs
+            ) {
+              context.addIssue({
+                code: "custom",
+                message:
+                  "Prepared words must have unique IDs, be ordered, and lie inside their phrase",
+                path: [...path, "words", wordIndex],
+              });
+            }
+            wordIds.add(word.id);
+            wordEnd = word.endMs;
+          });
+        }
       });
     });
 

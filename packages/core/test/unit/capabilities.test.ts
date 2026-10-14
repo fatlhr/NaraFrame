@@ -43,7 +43,17 @@ const EVIDENCE: Record<string, string[]> = {
     "palette.accent",
   ],
   // phrase-anchors: compile-draft-m2-4-3.
-  audio: ["narration", "captions", "music", "phrase-anchors", "sfx", "ducking"],
+  // prepared-audio integration plus captured public stage/edit/validate evidence.
+  audio: [
+    "narration",
+    "captions",
+    "music",
+    "phrase-anchors",
+    "sfx",
+    "ducking",
+    "prepared-audio-staging",
+    "prepared-timing-receipt",
+  ],
   textEmphasis: ["accent", "strong", "quiet"],
   // audio-modes (e2e) exports music and silent finals; audio-boundaries voice.
   audioModes: ["voice", "music", "silent"],

@@ -33,7 +33,7 @@ const browserExecutable = (): string =>
 const ffmpegExecutable = (): string =>
   process.env.NARAFRAME_FFMPEG_EXECUTABLE ?? "/opt/homebrew/bin/ffmpeg";
 
-const ffprobeExecutable = (): string =>
+export const ffprobeExecutable = (): string =>
   process.env.NARAFRAME_FFPROBE_EXECUTABLE ??
   join(dirname(ffmpegExecutable()), "ffprobe");
 

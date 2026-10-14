@@ -1,8 +1,8 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 0.9 · 2026-10-14 · Integrated baseline `aab831c`; Batch 1 committed `eb7a7d5`, carried into `m4-batch-2` as `d4f9d82`
+Revision 0.9 · 2026-10-15 · Integrated baseline `aab831c`; cumulative Batch 1–2 candidate carried into `m4-batch-3` through `15d67c1`
 
-MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3 is ready for review on `m4-batch-2` (uncommitted); M4.4–M4.5 are queued, not started.
+MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3 and its cropped-anchor correction are committed on Batch 2 and carried into Batch 3. M4.4 is technically ready/uncommitted; M4.5 remains queued.
 
 ## 1. Product
 
@@ -105,6 +105,14 @@ Projects support `voice`, `music`, and `silent` modes. Explicit project mode tak
 
 Imported narration can be retained as a master or as block media. Phrase anchors refer to verified timing and text bindings. Silence detection alone is not proof of the words spoken. Scene/local offsets are not word-level synchronization. Optional word data does not establish enforced native word-level motion.
 
+### Prepared import — Batch 3 candidate
+
+`audio stage <project> --from <clip> --timing <package.json> --block <id>` captures and probes local audio bytes, then returns staging for guarded `edit`. It neither mutates the project nor alters the take. The passive package declares millisecond-local phrase/optional word timing, the audio hash, intended text, alignment provenance, uncertainties, trailing hold and pending/verified listening state. Intended text must match the existing block; voice intent and profile locks remain authoritative.
+
+An opt-in ready-block `prepared` receipt binds the captured audio, normalized text, measured duration and local timing. Verified state requires a named listening reviewer and timestamp; this is an attestation, not automatic recognition. Pending state permits draft review but blocks production and must not claim a confirmed generation text binding. Changed receipt bindings are rejected. Legacy blocks retain their old shape and behavior. `pauseAfterMs` is excluded from the listening timing hash because it changes a visual hold after the unchanged clip. Receipt-only changes still affect source/approval authority, not identical pixels or voice generation identity.
+
+The reusable `study-notes` catalog expands an intro overlay, persistent signature and sign-off in that trailing hold into ordinary declarative source. Version and complete episode values are pinned. Intro omission inserts no time and shifts audio by zero; changing the hold explicitly changes duration. This preset does not introduce standalone unvoiced pre-roll, new narration-clock semantics, recipe trust or an identity runtime.
+
 Audio boundary evidence on the integrated encoding path distinguishes input sample boundaries from encoded/container durations. Visual changes preserve unchanged masters. Changing spoken content in a single master can require broader replacement or re-alignment than a block-level revision.
 
 The M4.2 candidate adds `captions.json.mode`: `none`, `selected`, or `full`. It overrides an unlocked profile `render.captions.mode`; omission in both preserves legacy `full`. Selected entries name a measured block/phrase and optional phrase-local `startOffsetMs`/`endOffsetMs`, a positive half-open interval bounded by that phrase. Empty selected entries display nothing. Unknown targets and invalid windows are rejected even when currently inactive. No word timing is invented.
@@ -156,7 +164,9 @@ M0–M3 acceptance and chronological evidence are retained in [history](history/
 | M3.E/F | Integrated explicit recipe identity bindings and opt-in text fit, with their stated coverage limits. |
 | NF-AC-21 | Owner accepted the representative authoring evidence on 2026-10-14; supported fresh-context trial and its limits recorded in plan. Candidate not integrated. |
 | NF-AC-22 | Owner confirmed caption behavior on 2026-10-14; manual/audio/reuse and feature E2E evidence recorded. Full E2E deferred to MVP 2 closure; candidate not integrated. |
-| NF-AC-23–25 | Authorized development; not executed. |
+| NF-AC-23 | Library candidate reviewed and committed on Batch 2, with the cropped-anchor correction verified; not integrated into main. Evidence and limits recorded in plan. |
+| NF-AC-24 | M4.4 technically ready/uncommitted on Batch 3: listening confirmation, captured import, two identity episodes, short output/revision/undo and verify evidence recorded in plan. No final export or blanket visual/publication acceptance. |
+| NF-AC-25 | Queued after M4.4; final costly gate needs confirmation. |
 
 Not in MVP 2's closure requirements: spring, repeater, cross-scene continuity primitives, animated masks, native video layers, and word-level motion. These remain demand-led backlog. No GUI, hosted renderer, provider marketplace, publishing automation, universal cinematic style, or arbitrary untrusted project-code execution is promised.
 
