@@ -1,8 +1,8 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 0.9 · 2026-10-15 · Integrated baseline `aab831c`; cumulative Batch 1–2 candidate carried into `m4-batch-3` through `15d67c1`
+Revision 1.0 · 2026-10-15 · Integrated baseline `aab831c`; cumulative MVP 2 candidate on `m4-batch-3`, M4.4 committed `4b49ebe`
 
-MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3 and its cropped-anchor correction are committed on Batch 2 and carried into Batch 3. M4.4 is technically ready/uncommitted; M4.5 remains queued.
+MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3 and its cropped-anchor correction are carried into Batch 3; M4.4 is committed as `4b49ebe`. On 2026-10-15 Fatih added independent engine distribution, Claude/Codex skill access, onboarding and recoverable experiment cleanup to the current scope. M4.5.2–4 has a local packaging/onboarding candidate after his “next” authorization. Frozen production, final E2E/export and recoverable removal retain their separate checkpoint authority.
 
 ## 1. Product
 
@@ -16,7 +16,15 @@ NaraFrame turns a brief, a profile, and local media into editable motion videos.
 
 A **profile** describes brand identity and production preferences. A **pattern** describes a reusable way to explain something. An **episode** supplies its story, copy, assets, and timing. These are different authorities: changing an episode must not silently change its profile or a shared library.
 
-The user works through briefs and ordinary revisions. The agent translates them into project data or parameters of an owner-trusted recipe. The user should not need to read the renderer or understand the schema to make a video.
+With a skill-capable agent, the user works through briefs and ordinary revisions. The agent translates them into project data or parameters of an owner-trusted recipe. The user should not need to read the renderer or understand the schema to make a video through that route. The engine also accepts authored project data directly through its CLI; that route requires neither Claude nor Codex.
+
+### Distribution and access contract — M4.5 scope addition
+
+The engine is an independent local CLI. The canonical NaraFrame skill is an optional authoring layer over that CLI, not a runtime dependency. Scripts, another agent, and future interfaces use the same public project files, structured results and approval/trust rules. A direct CLI workflow is technical authoring, not a promise of prompt-to-video without an agent or of an existing GUI.
+
+Prepare a versioned, installable engine artifact with a `naraframe` executable, runtime packages/resources, bundled profiles/library, a redistributable starter and documented prerequisites. It must run from a user's project directory without depending on this development checkout, its `work/`, private fixture locations or personal paths. Skill distribution carries all routed references/examples from one maintained source, with local install paths/adapters for Claude Code and Codex, a compatible engine version declaration, and conflict-safe update/removal. Host plugins may wrap the skill; they must not become necessary for direct CLI use.
+
+Current source installation remains supported. A packed artifact is not an npm publication, public release or marketplace acceptance. External publication needs its own authorization, code-license decision and resource/dependency rights review. macOS is the initial evidenced platform; Windows/Linux support is not inferred from portable file paths. Engine rendering remains local, with external browser/FFmpeg and provider boundaries documented.
 
 ### Product principles
 
@@ -145,6 +153,8 @@ M4 improves the authoring system first, then adds only the supporting contracts 
 | NF-AC-23 | M4.3 | Versioned library-first authoring, pinned asset/catalog snapshots, editable copy/assets/pose, explicit update, undo/reuse; old projects remain unchanged. |
 | NF-AC-24 | M4.4 | Verified prepared audio/timing import, reusable series identity and recorded overrides; visual revisions leave the master intact. |
 | NF-AC-25 | M4.5 | Frozen fresh-context production through approved MP4, ordinary revisions/undo/reuse and a second profile; motion/editorial/packaging evidence with separate acceptance states. |
+| NF-AC-26 | M4.5 | Install a versioned engine artifact in an isolated consumer directory; CLI and included starter work without the source checkout or agent; preserve JSON/approval/trust contracts. |
+| NF-AC-27 | M4.5 | Install/update the complete skill bundle for Claude Code and Codex; references resolve, engine compatibility is checked, onboarding and terminal-only documentation work from the consumer directory. Actual host activation evidence is distinguished from filesystem/install tests. |
 
 The numbered tasks, concrete acceptance commands, integration gates, and handoff live in [plan.md](plan.md). The reasoning and adopted/rejected production lessons live in [refine-spec.md](refine-spec.md).
 
@@ -165,8 +175,10 @@ M0–M3 acceptance and chronological evidence are retained in [history](history/
 | NF-AC-21 | Owner accepted the representative authoring evidence on 2026-10-14; supported fresh-context trial and its limits recorded in plan. Candidate not integrated. |
 | NF-AC-22 | Owner confirmed caption behavior on 2026-10-14; manual/audio/reuse and feature E2E evidence recorded. Full E2E deferred to MVP 2 closure; candidate not integrated. |
 | NF-AC-23 | Library candidate reviewed and committed on Batch 2, with the cropped-anchor correction verified; not integrated into main. Evidence and limits recorded in plan. |
-| NF-AC-24 | M4.4 technically ready/uncommitted on Batch 3: listening confirmation, captured import, two identity episodes, short output/revision/undo and verify evidence recorded in plan. No final export or blanket visual/publication acceptance. |
-| NF-AC-25 | Queued after M4.4; final costly gate needs confirmation. |
+| NF-AC-24 | M4.4 technically ready and committed `4b49ebe` on Batch 3: listening confirmation, captured import, two identity episodes, short output/revision/undo and verify evidence recorded in plan. No final export or blanket visual/publication acceptance. |
+| NF-AC-25 | Frozen production trial/final gate pending; no publication approval inferred. |
+| NF-AC-26 | Local macOS arm64 archive installed offline outside the checkout; public CLI, included starter and one short draft preview evidenced. Final production/closure gates remain pending. |
+| NF-AC-27 | Canonical install/update/launcher checks evidenced for isolated Codex/Claude directories; real host activation/fresh-session onboarding is not yet observed. No personal installation or marketplace publication. |
 
 Not in MVP 2's closure requirements: spring, repeater, cross-scene continuity primitives, animated masks, native video layers, and word-level motion. These remain demand-led backlog. No GUI, hosted renderer, provider marketplace, publishing automation, universal cinematic style, or arbitrary untrusted project-code execution is promised.
 

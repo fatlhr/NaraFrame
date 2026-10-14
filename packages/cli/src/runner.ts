@@ -25,6 +25,7 @@ import {
   loadPlanProject,
   pendingGeneration,
   planProfileApply,
+  RENDER_ENGINE,
   readApprovals,
   readProductionLedger,
   readRecipeTrust,
@@ -50,6 +51,7 @@ import {
   usageIssue,
 } from "./command-result.js";
 import { ffprobeExecutable, runDoctorChecks } from "./doctor.js";
+import { engineIdentity } from "./engine-identity.js";
 import {
   preflightNarrationAudio,
   preflightSoundtrackAudio,
@@ -87,6 +89,7 @@ interface ParsedArguments {
 const usage = `NaraFrame
 
 Usage:
+  naraframe version [--json]
   naraframe doctor [--json]
   naraframe schema [--json]
   naraframe create <name> --profile <id-or-path> [--json]
@@ -105,6 +108,27 @@ const repositoryRoot = resolve(
   fileURLToPath(new URL(".", import.meta.url)),
   "../../..",
 );
+
+const versionCommand = async (args: readonly string[]): Promise<Execution> => {
+  if (args.length)
+    return usageFailure("version", "version does not accept arguments.");
+  const metadata = JSON.parse(
+    await readFile(resolve(repositoryRoot, "package.json"), "utf8"),
+  );
+  const data = {
+    version: metadata.version,
+    skillApiVersion: 1,
+    sourceSchemaVersion: 1,
+    renderEngine: RENDER_ENGINE,
+    resourceRoot: repositoryRoot,
+    engineIdentity: await engineIdentity(repositoryRoot),
+  };
+  return {
+    exitCode: 0,
+    event: commonEvent("version", { data }),
+    human: [`NaraFrame ${data.version}`],
+  };
+};
 
 const commonEvent = (
   command: CommandName,
@@ -228,7 +252,7 @@ const doctorCommand = async (args: readonly string[]): Promise<Execution> => {
       parsed.error ?? "doctor does not accept positional arguments.",
     );
   }
-  const result = await runDoctorChecks(repositoryRoot);
+  const result = await runDoctorChecks(process.cwd());
   const success = result.issues.length === 0;
   return {
     exitCode: success ? 0 : 2,
@@ -1612,6 +1636,7 @@ const audioCommand = async (args: readonly string[]): Promise<Execution> => {
 };
 
 const knownCommand = (value: string | undefined): CommandName =>
+  value === "version" ||
   value === "doctor" ||
   value === "schema" ||
   value === "create" ||
@@ -1634,6 +1659,7 @@ const executeCommand = async (
   args: readonly string[],
   options: RunCliOptions,
 ): Promise<Execution> => {
+  if (command === "version") return versionCommand(args);
   if (command === "doctor") return doctorCommand(args);
   if (command === "schema") return schemaCommand(args);
   if (command === "create") return createCommand(args);

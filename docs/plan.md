@@ -1,8 +1,8 @@
 # NaraFrame — Development Plan
 
-Revision 1.9 · 2026-10-14 · Integrated baseline `aab831cd0a30ea53ba6274556729060d8ff29ba5`
+Revision 2.0 · 2026-10-15 · Integrated baseline `aab831cd0a30ea53ba6274556729060d8ff29ba5`
 
-**Current step:** M4.4 TECHNICALLY_READY / UNCOMMITTED on `m4-batch-3`, checkpoint `15d67c1`. Prepared import, reusable identity, fresh-context authoring, short output/revision/undo and verify are recorded below. Main remains `aab831c`; no new push/PR/merge. M4.5 is next and not started; confirm costly final E2E/export before running. Listening acceptance is confirmed, not a blanket visual/publication approval.
+**Current step:** M4.5.2–4 packaging/onboarding READY_FOR_REVIEW on `m4-batch-3`; uncommitted after `4b49ebe`. Offline engine/skill installation and a short consumer draft are evidenced; verify 312 unit/421 integration passed. Main remains `aab831c`, no push/PR/merge. Next checkpoint is confirmation for M4.5.5/6 final frozen trial, host activation, approved export, serial E2E and recoverable cleanup. None is silently started; public publication/license selection remains separate.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -50,23 +50,25 @@ The fuller open register is in [refine-spec.md](refine-spec.md). It remains back
 
 **MVP 2 Git exception authorized by Fatih — 2026-10-14:** keep `main` at the integrated baseline while developing the remaining three-batch sequence. Commit each completed batch, create the next branch from main, then cherry-pick the predecessor's cumulative MVP 2 commits before adding that batch's work. This explicitly supersedes the usual requirement to merge a predecessor before starting the next numbered task. Preserve each batch branch/checkpoint; do not rebase/discard user work or silently integrate main. Final E2E and acceptable final output precede main integration. Commit/cherry-pick and development are authorized; no intermediate push/PR/merge is requested.
 
-Every acceptance command below runs from the repository root. Project paths are outside the repository. `SCENE_ID`, `SOURCE_REVISION`, and `BUILD_ID` are values produced by the authored project/status, not literal IDs to hard-code. Future source syntax and new commands must be settled in the feature model before implementation; examples below use existing CLI entry points.
+Current `pnpm naraframe` acceptance commands run from the repository root. M4.5's installed-engine commands intentionally run from an isolated consumer directory. Production project paths stay outside the repository. `SCENE_ID`, `SOURCE_REVISION`, and `BUILD_ID` come from project/status, not literal IDs to hard-code. New commands and packaging syntax are proposed contracts until implementation/manual evidence; do not advertise them as available.
 
 ## 2. M4 — MVP 2: Skill-led recurring production
 
-**Goal:** make repeated content production easier and visually deliberate through better skill instructions, reusable library data, and the minimum supporting engine contracts.
+**Goal:** make repeated content production easier and visually deliberate through better skill instructions, reusable library data, and the minimum supporting engine contracts. The 2026-10-15 addition includes preparing engine/skill distribution and onboarding for use outside this development checkout, with or without Claude/Codex.
 
 **Not authorized by this plan:** M4 feature implementation, recipe trust for new code, or paid generation. All tasks start PLANNED. Fatih's separate 2026-10-13 authorization covers commit/push/PR/squash-merge of this cleanup/documentation package only.
 
 Subsequent authorizations: Fatih approved Batch 1 implementation and accepted its output; on 2026-10-14 he authorized committing it and continuing Batch 2, then Batch 3, under the cherry-pick workflow above. New paid calls, new recipe trust, and publication remain separate decisions.
+
+On 2026-10-15 he authorized the M4.4 commit and inclusion of distribution/cleanup/README in the current scope. This turn implements documentation/research only for that addition. Confirm the expanded M4.5 package before code/install/render work; do not create another roadmap or separate relay task for each internal step. Public npm/GitHub release, changing repository visibility, marketplace submission, licensing and machine-wide installs remain separate decisions.
 
 | Task | Status | Dependencies | Main acceptance | Review batch |
 |---|---|---|---|---|
 | M4.1 Art direction and production vocabulary | OWNER_ACCEPTED / COMMITTED `eb7a7d5`; not in main | Integrated M3 baseline | NF-AC-21, fresh-context representative shot | 1 |
 | M4.2 Captions separate from narration | OWNER_ACCEPTED / COMMITTED `eb7a7d5`; final E2E deferred | M4.1 | NF-AC-22, none/selected/full with intact audio/reuse | 1 |
 | M4.3 Library and pinned assets | OWNER_REVIEWED / COMMITTED `9c01b1e` + correction `57ac91f`; not in main | M4.1–M4.2 committed/cherry-picked under owner exception | NF-AC-23, editable pinned imports and reuse/undo | 2 |
-| M4.4 Prepared audio and series identity | TECHNICALLY_READY / UNCOMMITTED on `m4-batch-3` | Batch 2 cumulative commits cherry-picked through `15d67c1` | NF-AC-24, verified master/timing and reusable identity | 3 |
-| M4.5 Production trial and MVP 2 handoff | AUTHORIZED; queued after M4.4, confirm costly final gate | M4.1–M4.4 | NF-AC-25, approved MP4 and second profile | 3 |
+| M4.4 Prepared audio and series identity | TECHNICALLY_READY / COMMITTED `4b49ebe`; not in main | Batch 2 cumulative commits cherry-picked through `15d67c1` | NF-AC-24, verified master/timing and reusable identity | 3 |
+| M4.5 Distribution, production trial and MVP 2 handoff | IMPLEMENTING packaging/onboarding; final costly gate separately confirmed | M4.1–M4.4 | NF-AC-25–27, approved MP4, consumer engine/skill installation and onboarding | 3 |
 
 ### M4.1 — Art direction and production vocabulary
 
@@ -229,11 +231,48 @@ Expected: a verified local master imports unchanged with usable phrase/cue bindi
 
 **Out of scope:** automatic new paid generation, repairing spoken content without permission, global intro duration, or claims of word-accurate motion without the required data/implementation.
 
-### M4.5 — Production trial and MVP 2 handoff
+### M4.5 — Distribution, production trial and MVP 2 handoff
 
-**Reason:** skill/library improvements count only when another session can use them through production and ordinary revisions, including a different profile.
+**Reason:** skill/library improvements count when another user/session can install and use them through production and ordinary revisions. Engine operation must remain independent of Claude/Codex, including a different profile.
 
-**Scope:** skill covers motion QA, cheap checkpoints, editorial traceability, cover and delivery packaging; library supplies accepted patterns/assets; engine is frozen during trial. No incidental feature work is allowed inside the frozen acceptance.
+**Scope:** one consolidated delivery package: versioned engine distribution, the canonical skill with host adapters, consumer onboarding, motion QA/editorial packaging, then frozen production trial and recoverable cleanup. Library supplies maintained patterns/assets. Packaging changes happen before freeze; no incidental feature work inside the frozen trial. Keep current source installation working and engine/core independent of host apps and Remotion respectively.
+
+#### Numbered work inside Batch 3
+
+| Step | Status | Work and acceptance |
+|---|---|---|
+| M4.5.1 Distribution discovery and model | AUTHORIZED model below | `refine-spec.md` section 8: private workspace/package/path gaps, official host installation routes, source CLI checks from `/private/tmp`, release authority/rights boundaries. |
+| M4.5.2 Installable engine artifact | READY_FOR_REVIEW | Versioned local 0.1.0 archive, offline consumer installation, doctor/schema/create/profile/library and one installed starter draft evidenced. macOS arm64 only; no public release or final export. |
+| M4.5.3 Canonical skill and host installation | FILESYSTEM_READY; host activation pending | Complete copied skill + receipt/launcher verified for isolated Codex/Claude roots; explicit update/removal, identity drift, local-edit/symlink/conflict and rollback checks pass. Actual fresh host discovery/invocation is not yet observed. |
+| M4.5.4 Product README and consumer guide | READY_FOR_REVIEW | English product README covers verified source/archive setup, both host installers and agent-independent usage, maintained starter, current authoring/revisions/audio/caption/approval contracts and limitations. File links checked; full final onboarding trial remains M4.5.5. |
+| M4.5.5 Frozen production/onboarding trial | PLANNED | Freeze the installable engine, skill, profile/library/media and runtime; retain the original NF-AC-25 story/revision/profile requirements below. Demonstrate terminal-only source→preview→approved MP4 as well as fresh-context skill authoring. Use bounded examples and one consolidated review. |
+| M4.5.6 Cleanup, final gate and delivery | PLANNED | After proof is preserved, inventory/archive remaining development experiments and disposable cache with checksum/location index and recovery instructions. Verify before recoverable removal; protect maintained samples/tests/library/history, all external projects, Git/worktrees/stash and AGENTS. Run one approved serial final E2E at closure, audit package contents and hand off versioned artifacts/limitations. Git integration and public publication remain separate. |
+
+**Packaging acceptance model (implemented local candidate and evidence below):**
+
+**Implementation model — 2026-10-15, authorized “next”:** use one local npm-compatible aggregate artifact, retaining compiled CLI/core/renderer module boundaries and pinning runtime dependencies. Bundle the private workspace packages as real captured files (not symlinks back to the checkout); declare pinned third-party dependencies or their captured runtime closure. Do not vendor dev tooling or the entire pnpm store. `scripts/pack-engine.mjs` emits a tarball plus content/rights metadata to an explicit scratch output; npm publication is not part of that command. Keep repository packages private; local candidate metadata may use 0.1.0 with no public availability claim. Initial consumer installation uses offline/cache-local setup; ask before an unavailable network dependency fetch.
+
+Expose `naraframe version --json` with engine version, `skillApiVersion: 1`, source schema version, render-engine identity and installed resource root. It uses the existing structured command-result contract. Resolve built-in profiles/library/demo and recipe React/Remotion from installed resources/modules, retaining source-checkout behavior. No renderer timing/pixel/approval/trust change is intended. A demonstrated runtime change gets deliberate cache treatment rather than a cosmetic engine bump.
+
+`scripts/install-skill.mjs` is a local helper shipped with the artifact, not a paid service or new host dependency. Inputs: `--host codex|claude`, `--scope project|user`, explicit `--project` or optional test/user root, `--engine-entry` (defaults to this engine's compiled entry), `--dry-run`, `--update` or `--remove`, and `--json`. Project installs go to `.agents/skills/naraframe` or `.claude/skills/naraframe`; user installs use the host's documented personal directory. Acceptance only installs under isolated roots, never the real personal folders without explicit permission.
+
+Copy one canonical skill with all relative references/examples. Add an install receipt and an argv-safe Node launcher in the installed folder; it records the chosen engine/version/API/resource root and checks that binding before invoking CLI. Source use remains `pnpm naraframe`; installed skill uses its launcher from any project cwd. Updates/removal require an owned, unchanged receipt/file inventory and refuse unrelated or locally edited destinations, including symlinks. Do not edit host security config or production projects. Installer failure leaves an existing install intact; staging/backup under the exact target parent is recoverable. No silent upgrade through a mutable checkout or catalog.
+
+Ship a maintained neutral, local starter built from supported data with an explicit rights record; keep private media out. Installation tests cover missing/incompatible engine, conflicting/edited destination, missing reference, paths with spaces, dry-run/no mutation and rollback-safe update/removal. Actual Claude/Codex activation is a separate human/fresh-session observation, not a filesystem-test claim.
+
+```bash
+# Candidate artifact path/name is recorded by M4.5.2; no registry publish here.
+npm install --prefix CONSUMER_DIR PACKED_ENGINE_TGZ
+CONSUMER_DIR/node_modules/.bin/naraframe doctor --json
+CONSUMER_DIR/node_modules/.bin/naraframe schema --json
+CONSUMER_DIR/node_modules/.bin/naraframe create PROJECT_PATH --profile current-issues --json
+```
+
+Run from outside the source repository with absolute paths. Network/dependency installation is an explicitly confirmed setup step; rendering afterwards uses local media. Bundle compiled core/renderer entry points, required module resolution, profiles, library and authorized starter files correctly rather than relying on `workspace:*`, hard-coded developer paths or symlinked checkout node_modules. Support the evidenced macOS runtime first; do not claim Windows/Linux until real platform checks exist. Do not silently widen runtime pins or replace the renderer.
+
+Inspectable skill acceptance: installed `SKILL.md` plus each relative reference/example exists under the selected `.agents/skills/naraframe` or `.claude/skills/naraframe` location; engine version/path is explicit; installing/updating does not mutate production projects, host security rules or an unrelated existing skill. Filesystem tests do not prove a Claude/Codex session activated the skill. Record both host versions and actual activation evidence when supplied; unknown stays unknown.
+
+**Release/cleanup contract:** npm metadata/ownership and repository code license need owner decisions before public publication. Inventory redistribution rights for fonts, media and recipes; internal LBC/TutorLog production artifacts and personal assets stay excluded. A package allowlist excludes work/gates, generated MP4/cache, secrets, user config, history-heavy experiments and private media. Preserve gate evidence until final acceptance; do not make this cleanup erase failures. Archive to an explicitly indexed MVP 2 checkpoint before moving source scratch/cache to recoverable Trash. No recursive deletion of workspace or global cache. Re-check active bundling/render first.
 
 **Trial:** short episodes (roughly 15–30 seconds, brief-dependent), using the smallest set that exercises the required revisions and a second profile on compatible content. Use verified prepared voice for at least one episode. Replace brand-bound assets/text explicitly when switching profile. Save first drafts before feedback; no provider cost by default. A neutral/silent-only trial cannot stand in for prepared voice reuse evidence.
 
@@ -249,6 +288,8 @@ pnpm naraframe status ../NaraFrame-projects/mvp2/production/episode-01 --json
 Expected: a fresh-context agent reaches owner-approved MP4 through skill and public interfaces, without reading private renderer source or needing repeated supervisory relay. Revisions, undo/reuse, and the second profile are evidenced. Review covers composition/type, illustration, purposeful motion, continuity, and explanation without inventing a parity verdict.
 
 - [ ] Freeze source trees, all built runtime files, skill, profiles, library/recipe hashes, trust scope, media, audio/timing and runtime versions.
+- [ ] Complete consumer artifact/skill install/update checks before that freeze, including installed resource resolution, unknown/mismatched engine version, collision-safe installs and standalone CLI behavior.
+- [ ] Verify package allowlist, resource rights register, README commands/links and source/installed routes; distinguish local release readiness from public publication.
 - [ ] Record fresh-context reading/command boundaries, first drafts, elapsed/active time, corrections, reuse and provider usage.
 - [ ] Use a representative shot/contact sheet before full previews; review moving frames as well as stills.
 - [ ] Exercise headline, motion tempo, object/asset, caption, and profile revisions through ordinary source edits; show undo and reuse.
@@ -258,9 +299,10 @@ Expected: a fresh-context agent reaches owner-approved MP4 through skill and pub
 - [ ] Report technical, visual, export and publication statuses separately. Simulated platform overlays are QA aids, not guarantees about every platform UI.
 - [ ] Add focused regressions for accepted defects; if a defect forces runtime changes, retain the attempt and start a newly approved freeze.
 - [ ] Run `pnpm verify` and one serial full E2E for closure; document failures/caveats without retry-until-green or weakened assertions.
-- [ ] Consolidate Batch 3 handoff and NF-AC-21–25 disposition; request integration separately.
+- [ ] Archive experiments recoverably after preserving acceptance/gate evidence; verify checksum index and protected source/user state.
+- [ ] Consolidate Batch 3 handoff and NF-AC-21–27 disposition; request integration separately.
 
-**Out of scope:** automatic posting, a universal platform layout, new providers, open-ended polish, or declaring older D-VIS/rights/parity gates passed by proxy.
+**Out of scope:** GUI/hosted runtime/MCP service, stable public SDK expansion, automatic posting, a universal platform layout, new providers, open-ended polish, automatic package/marketplace publication, or declaring older D-VIS/rights/parity gates passed by proxy.
 
 ## 3. Review batches and closure
 
@@ -268,11 +310,11 @@ Expected: a fresh-context agent reaches owner-approved MP4 through skill and pub
 |---|---|---|
 | 1 | M4.1 + M4.2 | One consolidated technical review, with saved authoring/output evidence and caption acceptance. |
 | 2 | M4.3 | One review of import/version/metadata authority, editable patterns and frozen proof. |
-| 3 | M4.4 + M4.5 | One review of prepared audio/identity and production handoff. Visual approvals remain owner's decisions. |
+| 3 | M4.4 + expanded M4.5 | One final review of prepared audio/identity, consumer distribution/onboarding, cleanup and production handoff. Visual/export/publication approvals remain separate owner decisions. |
 
 Use Fatih's 2026-10-14 MVP 2 exception: each next batch branch starts from unchanged main and cherry-picks its predecessor's cumulative batch commits. Keep main untouched until final acceptance. Within an authorized batch, execute its steps without relaying each small command through Fatih; confirm expensive work first. Bring findings together at READY_FOR_REVIEW; stop for materially new authority, a blocking defect outside scope, or a required owner output decision.
 
-MVP 2 closure requires recorded acceptance for NF-AC-21–25, compatible legacy behavior, current capability documentation, and the operating handoff. Any narrowed acceptance needs an explicit owner decision recorded as such. Deferred visual/publication/backlog items remain deferred unless separately accepted.
+MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-15 scope addition, compatible legacy behavior, current capability documentation, consumer onboarding and the operating handoff. Public registry/marketplace publication is not a closure requirement. Any narrowed acceptance needs an explicit owner decision recorded as such. Deferred visual/publication/backlog items remain deferred unless separately accepted.
 
 ## 4. Later backlog (not MVP 2 requirements)
 
@@ -389,7 +431,7 @@ Status: **READY_FOR_REVIEW; commit awaits Fatih's explicit approval.** No separa
 - Fresh pinned `pnpm verify` exits 0: Biome 205 files, unit 312/312, integration 374/374, typecheck/build. Complete log: `anchor-verify.log`. No render or E2E was run. Existing accepted output and earlier failed evidence remain intact. Unrelated AGENTS and the local Batch 2 closure are preserved.
 - Technical blocker is closed. Commit/push/new branch operations were not performed in this correction; M4.4 remains next, unstarted, with the approved batch/cherry-pick workflow and separate confirmation for costly final operations.
 
-### Active handoff — Batch 3 / M4.4 (2026-10-15)
+### Handoff record — Batch 3 / M4.4 (2026-10-15)
 
 **Status:** TECHNICALLY_READY / UNCOMMITTED; M4.5 is queued, not started by this checkpoint. Fatih authorized the correction commit and M4.4 continuation. No push/PR/merge is authorized here; main remains `aab831cd0a30ea53ba6274556729060d8ff29ba5`.
 
@@ -414,6 +456,40 @@ Caption-none revision yields `41f7b52ecd6d-0e97320a-516`; undo restores source a
 **Limits/effort:** four short fresh renders (full/scoped native, caption variant, second draft) plus one pixel reuse; measured render command times 19.8/19.8/20.1/17.4 s, reuse 0.752 s. Manual import/preflight setup failures and test-harness mistakes are retained/reported, not claimed product failures or erased. Owner active time, agent active time and token cost unknown; paid provider calls 0, prior generation spend untracked. No E2E, final export, visual parity, publication claim, new trust or main integration. Next is M4.5 with separate confirmation for costly final operations, not another engine feature by default.
 
 **Commit authorization — 2026-10-15:** Fatih requested “commit” before distribution-scope discovery. All 21 code/test/skill/catalog fingerprints still match the reviewed checkpoint; final verify log hash matches. Fresh precommit focused integration 56/56 and build exit 0 (`work/gate-logs/m4-batch-3/precommit.log`), `git diff --check` clean. Stage only the 24 M4.4 source/document paths; exclude unrelated AGENTS, README and work. No push/PR/merge. The requested distribution/cleanup/onboarding scope will be recorded after this checkpoint commit, not mixed into its implementation.
+
+**Commit closure:** `4b49ebe4974fa70907e0d85148d24ccf6257f763` on `m4-batch-3`, Fatih author/committer, exactly 24 explicit paths, no agent trailer/identity, work or AGENTS. Main/origin-main remain `aab831c`. “Uncommitted” statuses above describe the precommit checkpoint. No push/PR/merge or E2E.
+
+### Active handoff — expanded M4.5 preparation (2026-10-15)
+
+**Status:** READY_FOR_REVIEW for the M4.5.2–4 packaging/onboarding checkpoint, uncommitted. Scope excludes npm publication, host-wide installation, license selection or costly final render/E2E. Current in-place Batch 3 is the explicitly selected workspace; no new worktree and no main changes. Offline isolated artifact installation was part of the authorized consumer acceptance, not a baseline dependency fetch. The prior discovery-only entry is preserved as the starting checkpoint.
+
+**Discovery checkpoint (before implementation):** inspected workspace package metadata/bin/resource resolution, skill folder and README; fetched official Codex/Claude skill, plugin and npm package docs (links and source conclusions in refine section 8). Actual CLI doctor from `/private/tmp` returned ready; absolute-path create with bundled current-issues profile succeeded in isolated `/private/tmp/naraframe-standalone-Dz7BLa/episode`. Neither used an agent session, paid provider, download or render. They still loaded the existing checkout, so clean consumer installation was then PLANNED. `work/` was approximately 12 MB at that discovery checkpoint; it was inventoried read-only, not removed.
+
+**Recommended next package:** M4.5.2–6 as one consolidated Batch 3 delivery after scope confirmation, not five owner relays. Portable CLI artifact + one canonical skill with host adapters is preferred over repo-only links or a hosted MCP/GUI. Existing source/JSON/trust/approval routes stay valid. Build packaging first, then freeze/produce output, preserve receipts, and archive experiments after acceptance. Finish with one separately approved serial E2E and integration decision.
+
+**Documents:** spec/refine/plan and README updates are local after the M4.4 commit. Include them in the next authorized implementation commit; do not create a standalone administrative PR. AGENTS remains owner work and is excluded. Owner must choose code license/redistribution terms before public release; that decision does not authorize a publication in this batch.
+
+**Discovery documentation check (historical):** four updated files had no broken local file links; `git diff --check` passed. README copy was revised around actual recurring production, standalone terminal use and current audio/library/slot contracts; no public npm install or marketplace availability was claimed. Those scope changes were documentation only, so no render/E2E/full verify rerun at that checkpoint. Fresh 56/56 focused + build were run before `4b49ebe`; subsequent CLI doctor/create checks used the same implementation. No archive/removal or global skill installation was performed; AGENTS hash remained `c55c4025…`.
+
+#### Packaging/onboarding checkpoint — 2026-10-15
+
+**Candidate:** uncommitted M4.5.2–4 on `m4-batch-3`, HEAD `4b49ebe`; main/origin-main still `aab831c`. The local npm-compatible artifact is `work/m4-packaging/candidate-3/naraframe-engine-0.1.0.tgz`, SHA-256 `2ee5cae004094abca63b827d0e731f4607bf0c78e9df0d1012176d36445e202a`. Its `engine-manifest.json` inventories 259 captured runtime package placements. Package metadata is private/UNLICENSED, macOS arm64, not an npm/marketplace release. Normal offline install used an empty npm cache and completed without skipping install scripts.
+
+**Engine/library:** public `version --json` reports version/API/schema/resource root plus `engineIdentity`; the latter hashes NaraFrame's built modules, maintained resources, installer and dependency pins. It detects installation drift, not arbitrary third-party binary tampering. Source schema, compiler motion clock, render keys and `naraframe-draft/12` are unchanged. The CLI's entry guard handles npm executable symlinks; doctor tests the consumer cwd; recipe aliases resolve installed React/Remotion instead of assuming pnpm's layout. Core stays independent of Remotion. Neutral resources are allowlisted, with no private episode/media/approval/trust or test fixture dependency.
+
+**Skill:** complete canonical folder copied to isolated `.agents/skills/naraframe` and `.claude/skills/naraframe`; public version/profile commands ran through both generated launchers from the consumer cwd. Dry-run and explicit update succeeded on the actual installed engine. Receipts bind engine path, version/API/resource root and fingerprint; unrelated/edited/symlink installs are refused. Review found and closed backup-loss, same-version drift and parent-replacement cases. The 17 installer regressions pass. Parent inode checks protect cooperative concurrent changes, not a hostile filesystem sandbox. No actual personal installation, host security change or paid agent invocation.
+
+**Public path:** `work/m4-packaging/consumer-check.mjs` installed the artifact under `/private/tmp/naraframe packaging consumer-fLeh95`, outside the checkout. Logs/command receipts: `work/gate-logs/m4-packaging/consumer-check.json`. Doctor, both host installers/launchers and plan/production validation succeeded. First sandbox preview failed with generic SYSTEM_ERROR; the separate uncensored probe found `No available ports found`. Re-running only that public preview with localhost/Chrome permission succeeded: `bc0565e50f56-c9332f4c-d0d`, H.264 540×960, 30 fps, 120 frames/4.000 seconds, no audio, full decode exit 0, MP4 SHA-256 `499568de1b106c81f0e4ea551e404b3c5b5c185370107adeeddd9fc829f95e56`. Contact sheet inspected: headline and path diagram render; it is a technical starter, not a visual benchmark. Receipts are `consumer-preview-local.json`, `consumer-media-check.json` and stderr alongside the failed attempt evidence.
+
+**README:** English product/benefit copy, both source/archive installation routes, safe host installation/update/removal, neutral terminal quickstart, prepared audio/library/captions, revisions, approval/export and troubleshooting. Humanizer/copywriting pass kept claims tied to current behavior. Seven current documents/skill/starter guides have no broken local file links. Packaged README points only to included guides/resources. Documentation does not claim a registry release, public media rights or tested Windows/Linux/Intel artifacts.
+
+**Review/check provenance:** read-only consolidated reviewer audited the capture graph (259 placements/235 names, no source/version resolution mismatches in the current graph) and source changes, then re-reviewed corrections; it ran no render/Git changes. Parent ran the actual consumer/install/media checks and regression gates. Early distribution harness failures (macOS realpath/bin assumptions) and a prematurely started test before tarball completion are retained. A diagnostic probe's initial result-access typo is not classified as an engine defect.
+
+**Gate history:** first `pnpm verify` stopped on unchanged harness.test.ts's 5-second import timeout (311/312 unit; Biome/typecheck succeeded). The file passed alone. The subsequent integration run returned 419/421 with two timeouts; `pmset` proves Low Power Sleep from 04:46:12 to 05:51:34 (3922 seconds), then a second 87-second sleep. That run also invoked npm under ambient Node 22 because PATH assignment did not carry across a shell command; it is not accepted as a valid complete gate. No assertion/timeout was changed. With pinned PATH, 37/37 focused recovery (packaging/installer/preview publication) and 312/312 unit passed. A full pinned verify with command-scoped sleep prevention is recorded separately below; failures are not overwritten.
+
+**Accepted current gate:** `verify-2.log`, exit 0, Biome 219 files, TypeScript/build, unit 312/312 and integration 421/421. Node 24.20.0 and pnpm 12.3.4; inherited PATH also pinned npm's Node. Command-scoped `caffeinate -i -s` used on AC after the observed sleep, without changing assertions. Log SHA-256 `5e72e3a6552239dcbc6c5803d679b7f338bc18ed044fd4a781fc6f45872ddd41`. Focused recovery log SHA-256 `cdb2ab34a65d564b9cada6b862512b1c8779ed137a61e76fc07c3c2ef6bdcc0f`; manifest SHA-256 `028db7a779d248c7f618ac34a20900e4f25f98a6ad8d42282b26bdaf23861a44`. All files in CLI/core/renderer built trees compare byte-identical with the installed candidate after the gate. This is a runtime-file check, not a pixel-equivalence claim. E2E remains deferred, not passed. Final `git diff --check` clean; seven document/skill/starter guides have no broken local file links.
+
+**Limits/next:** actual Claude/Codex activation and fresh-session onboarding are not observed; installed recipe bundling and source-vs-installed pixel equivalence remain separate final proof targets. No final export, E2E, provider calls, publication/license selection, personal installation, archive/removal, commit/push/merge or main sync. M4.5.5/6 remain pending. Preserve this candidate/evidence for the final freeze; include these docs with the next authorized implementation commit, not an administrative PR. Worktree Miss Ayu, old stash/branches and owner AGENTS (`c55c4025…`) remain intact. Active owner time and token cost unknown; command timings are in receipts.
 
 ### Handoff template for an authorized M4 batch
 

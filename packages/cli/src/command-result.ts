@@ -1,6 +1,7 @@
 import type { Issue } from "@naraframe/core";
 
 export type CommandName =
+  | "version"
   | "doctor"
   | "schema"
   | "create"

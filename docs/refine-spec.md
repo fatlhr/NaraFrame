@@ -1,6 +1,6 @@
 # NaraFrame — Production Findings and Decisions
 
-Updated 2026-10-15 · Integrated baseline `aab831c` · Batch 1–2 committed and carried into Batch 3; M4.4 technically ready/uncommitted
+Updated 2026-10-15 · Integrated baseline `aab831c` · M4.4 committed on Batch 3; M4.5 adds distribution/onboarding/cleanup
 
 This document explains the next development priorities. [spec.md](spec.md) defines the contract; [plan.md](plan.md) owns numbered tasks. The prior discovery, decision history, and local Batch F closure are preserved in [history](history/README.md).
 
@@ -119,3 +119,26 @@ M4 has three consolidated execution/review batches: M4.1–M4.2, M4.3, M4.4–M4
 The 2026-10-13 cleanup retains engine, skill, runtime, tests, fixtures, profiles, both Krakatau samples, and an English product README. Production studies and gate artifacts move outside the repository with a verified checksum index; cache goes to recoverable Trash. `.git`, unrelated `AGENTS.md`, linked worktree, stash, and old branches are preserved.
 
 Historical documents are exact snapshots, including the previously uncommitted Batch F closure. Active documents are now concise source-of-truth documents; discovery is historical. This cleanup supplies planning evidence and workspace organization only, not new product capabilities or M4 execution approval.
+
+## 8. Distribution discovery — 2026-10-15
+
+Fatih wants NaraFrame usable as skill + engine in Claude and Codex, and independently of both. This is now current MVP 2 scope under M4.5, not a parallel roadmap or a new motion feature.
+
+**Discovery baseline:** all workspace packages were `private: true`, version `0.0.0`, and CLI dependencies used `workspace:*`. Profiles resolved relative to the checkout layout; the renderer expected package-local React/Remotion. Doctor defaults include macOS/Homebrew paths. README previously documented source installation and skill symlinks. No repository LICENSE file exists. Those were packaging/rights gaps, not evidence that rendering needed an agent.
+
+**Implemented local candidate — 2026-10-15:** `pack-engine.mjs` captures pinned runtime packages as real files, with neutral resources and rights/content metadata. The macOS arm64 0.1.0 archive installs offline with an empty npm cache; it is private/UNLICENSED and unpublished. CLI version metadata now includes an installation fingerprint of NaraFrame built modules/resources and dependency pins. This detects same-version drift for the skill launcher; it is not a sandbox or full third-party binary attestation. The canonical installer copies both host layouts safely, with a receipt and explicit update/removal. Actual local consumer commands and a four-second draft succeeded outside the source checkout. Real host activation, installed recipe/pixel equivalence and final production trial remain distinct evidence gaps. Plan retains the sandbox-port failure and timeout gate provenance rather than treating them as successful runs.
+
+The actual compiled CLI was invoked from `/private/tmp`, outside the repository: `doctor --json` returned ready and `create /private/tmp/naraframe-standalone-Dz7BLa/episode --profile current-issues --json` created a source skeleton without an agent, download or render. These commands still used the existing checkout's packages/resources. They prove cwd-independent invocation on this host, not clean-machine package installation, cross-platform support or a standalone final video.
+
+**Alternatives:** retain source checkout plus manually linked skill (lowest implementation cost, more setup burden); distribute a versioned CLI artifact plus the canonical skill and host install adapters (recommended); build a hosted MCP service/GUI (substantially larger product and operational scope, deferred). Local host plugin manifests can improve discovery, but the engine stays usable without a host/plugin.
+
+**Chosen preparation:** plan the installable CLI and canonical skill bundle as one M4.5 work package. Ship resources through an explicit allowlist; resolve them from the installed artifact rather than current working directory or development fixtures. Verify a consumer install outside the source checkout. Keep machine tools/prerequisites explicit, version upgrades visible, and recipe trust/approval untouched. README leads with recurring editable production and offers agent and terminal routes. Avoid public install commands or availability claims until the named artifact exists and is verified.
+
+Official references inspected on 2026-10-15:
+
+- [Codex skill locations and invocation](https://learn.chatgpt.com/docs/build-skills): user/repository `.agents/skills`, symlink support, complete folder resources, optional plugin distribution.
+- [Claude Code skills](https://code.claude.com/docs/en/skills): personal `~/.claude/skills`, project `.claude/skills`, local invocation and symlink support; personal local files do not automatically reach cloud sessions.
+- [OpenAI plugin packaging](https://developers.openai.com/plugins/build/plugins): portable/root and compatibility manifest options; installing a local skill is distinct from public directory submission.
+- [npm package contents and executable mapping](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/): explicit `files` and `bin` contracts. Declaring a bin alone does not resolve private workspace dependencies or include runtime resources.
+
+**Cleanup order:** preserve MVP 2 drafts, failures, receipts, snapshots and gate logs until final acceptance. Then archive regenerated scratch/cache with a checksum/location index and a restore path before moving the original to recoverable Trash. Keep maintained library/skill examples and test fixtures in source. Package only approved runtime/demo resources; exclude owner media, internal production studies, personal config, secrets and generated output. No public code/media license is selected on Fatih's behalf. npm publication, public release and marketplace submission require separate authorization.

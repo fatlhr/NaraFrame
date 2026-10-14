@@ -8,6 +8,7 @@ import {
   rm,
   writeFile,
 } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -249,7 +250,13 @@ export const renderDraft = async ({
   const baseEntry = await resolveEntryPoint();
   const packageRoot = fileURLToPath(new URL("../", import.meta.url));
   const recipeEntry = await prepareRecipeEntry(draft, projectRoot, baseEntry);
-  const modules = join(packageRoot, "node_modules");
+  const require = createRequire(import.meta.url);
+  const runtimeModules = Object.fromEntries(
+    ["react", "react-dom", "remotion"].map((name) => [
+      name,
+      dirname(require.resolve(`${name}/package.json`)),
+    ]),
+  );
   let serveUrl: string;
   try {
     serveUrl = await bundle({
@@ -271,12 +278,10 @@ export const renderDraft = async ({
           // the renderer's single copies of react and remotion.
           ...(recipeEntry
             ? {
-                modules: [modules, "node_modules"],
+                modules: [join(packageRoot, "node_modules"), "node_modules"],
                 alias: {
                   ...(configuration.resolve?.alias as Record<string, string>),
-                  react: join(modules, "react"),
-                  "react-dom": join(modules, "react-dom"),
-                  remotion: join(modules, "remotion"),
+                  ...runtimeModules,
                 },
               }
             : {}),
