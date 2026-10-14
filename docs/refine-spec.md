@@ -1,6 +1,6 @@
 # NaraFrame — Production Findings and Decisions
 
-Updated 2026-10-14 · Integrated baseline `aab831c` · MVP 2 / M4 Batch 1 under review
+Updated 2026-10-14 · Integrated baseline `aab831c` · Batch 1 committed; M4.3 ready for review on Batch 2
 
 This document explains the next development priorities. [spec.md](spec.md) defines the contract; [plan.md](plan.md) owns numbered tasks. The prior discovery, decision history, and local Batch F closure are preserved in [history](history/README.md).
 
@@ -9,6 +9,8 @@ This document explains the next development priorities. [spec.md](spec.md) defin
 Batch 1 evidence: the old skill produced a valid but generic feedback-card shot and required repeated large-schema reads. The updated skill/reference gives six editable explanatory structures; a fresh author made a progress→feedback→practice diagram and ordinary headline/camera revisions without renderer reads. This is one authoring trial with saved first output, not a visual-quality or cost guarantee. Fatih accepted it as authoring evidence and confirmed caption behavior on 2026-10-14. He then authorized committing and cherry-picking successive batches while main stays unchanged; full E2E is deferred to MVP 2 closure, and expensive actions require confirmation.
 
 The caption candidate demonstrates none/selected/full at 540/1080 with unchanged imported voice, verified boundaries and undo/reuse. Raw crop hash equality was too strong for separately encoded MP4s: inactive-cue differences were tiny while visible-cue differences were substantial. The original failed audit is retained. Frame-window review also found a real 1ms full/scoped boundary defect; shared global rounding/clipping and same/cross-block regressions correct it. Gate results and provenance belong in plan's consolidated handoff.
+
+M4.3's bounded old-skill baseline found guidance for copied patterns, profile pins, framing and undo, but not source-pixel ROI/padding, named prop anchors, pose variants, or catalog dependency pins. That baseline did not author or render an episode; its ambient package-manager probe failed before CLI help/schema. The new model therefore pairs a focused library guide with public inspect/stage commands, pinned ordinary scene expansion, and opt-in PNG crop geometry. This is an authoring contract, not a second motion runtime or an automatic character rig. Its first preview attempt failed before frames: a core root import pulled server modules into the browser bundle. A browser-safe placement subpath fixed it, the failed attempt is retained, and a bundle test protects it; the following previews rendered.
 
 The engine can protect a project and produce a valid MP4 without producing a compelling explanation. Production friction also comes from weak authoring instructions, missing reusable artwork metadata, and workflows that repeatedly rediscover the same technique.
 
@@ -108,7 +110,7 @@ Use FDD: model a feature and its exact acceptance → implement the public path 
 
 Save first drafts before owner feedback. Prefer stills/contact sheets or a representative scoped shot before a full render. Limit planned internal correction passes to two; report remaining issues instead of starting indefinite polish. A frozen trial never patches code, profile, recipe, or asset dependencies silently; record a failed attempt and create a new approved freeze if necessary.
 
-M4 has three consolidated execution/review batches: M4.1–M4.2, M4.3, M4.4–M4.5. Internal steps do not need owner relay one by one. Runtime/renderer-boundary changes require their gate; documentation-only corrections do not justify rerunning a long E2E suite. Paid calls, recipe trust, visual acceptance, publication, and Git integration keep their separate authority boundaries.
+M4 has three consolidated execution/review batches: M4.1–M4.2, M4.3, M4.4–M4.5. Internal steps do not need owner relay one by one. Fatih's 2026-10-14 instruction defers E2E to MVP 2 closure; development uses the authorized output path and focused checks, with expensive work confirmed first. Successive branches carry predecessor commits by cherry-pick while main stays untouched. Paid calls, recipe trust, visual acceptance, publication, and final main integration keep their separate authority boundaries.
 
 ## 7. Cleanup decision
 

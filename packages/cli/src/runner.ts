@@ -20,6 +20,7 @@ import {
   editProject,
   exportSchemas,
   type Issue,
+  inspectLibrary,
   type LoadedPlanProject,
   loadPlanProject,
   pendingGeneration,
@@ -31,6 +32,7 @@ import {
   recordApproval,
   recordRecipeTrust,
   resolveAudioMode,
+  stageLibrary,
   syncWorkingCopy,
   undoProject,
   withProjectLock,
@@ -92,6 +94,8 @@ Usage:
   naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
   naraframe recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>] [--json]
   naraframe profile inspect <id-or-path> [--json]
+  naraframe library inspect <catalog.json> [--json]
+  naraframe library stage <project> [--from <catalog.json> --pattern <id> --version <version> --scene <id>] --instance <id> --params <params.json> [--update] [--json]
   naraframe profile apply <id-or-path> [project] [--dry-run] [--reset-overrides] [--json]
   naraframe cache clean [project] [--dry-run] [--json]`;
 
@@ -1446,6 +1450,110 @@ const recipeCommand = async (args: readonly string[]): Promise<Execution> => {
   };
 };
 
+const libraryCommand = async (args: readonly string[]): Promise<Execution> => {
+  const [subcommand, ...rest] = args;
+  const parsed = parseArguments(
+    rest,
+    ["--update"],
+    ["--from", "--pattern", "--version", "--instance", "--scene", "--params"],
+  );
+  if (
+    parsed.error ||
+    parsed.positionals.length !== 1 ||
+    !["inspect", "stage"].includes(subcommand ?? "")
+  )
+    return usageFailure(
+      "library",
+      parsed.error ??
+        "library requires inspect <catalog> or stage <project> --instance <id> --params <params.json>.",
+    );
+  // Exactly one positional after the check above: the catalog or project.
+  const target = parsed.positionals[0] ?? "";
+  const fail = (issues: Issue[]): Execution => ({
+    exitCode: 1,
+    event: commonEvent("library", {
+      status: "failed",
+      success: false,
+      readiness: "invalid",
+      issues,
+    }),
+  });
+  if (subcommand === "inspect") {
+    if (parsed.values.size || parsed.flags.size)
+      return usageFailure(
+        "library",
+        "inspect accepts only a catalog path and --json.",
+      );
+    const result = await inspectLibrary(target);
+    if (!result.ok) return fail(result.issues);
+    return {
+      exitCode: 0,
+      event: commonEvent("library", { data: { ...result.value } }),
+      humanJson: result.value,
+    };
+  }
+  const instance = parsed.values.get("--instance"),
+    paramsPath = parsed.values.get("--params");
+  if (!instance || !paramsPath)
+    return usageFailure(
+      "library",
+      "stage requires --instance <id> and --params <params.json>.",
+    );
+  let params: unknown;
+  try {
+    params = JSON.parse(await readFile(resolve(paramsPath), "utf8"));
+  } catch {
+    return fail([
+      {
+        code: "LIBRARY_PARAMS_INVALID",
+        severity: "error",
+        responsible: "user",
+        artifact: paramsPath,
+        path: "/",
+        message: "Parameters must be readable JSON.",
+        suggestion:
+          "Provide a JSON object matching the catalog parameter contract.",
+      },
+    ]);
+  }
+  if (!params || typeof params !== "object" || Array.isArray(params))
+    return usageFailure("library", "--params must contain a JSON object.");
+  const optional = <K extends string>(flag: string, key: K) => {
+    const value = parsed.values.get(flag);
+    return value === undefined ? {} : ({ [key]: value } as Record<K, string>);
+  };
+  const result = await stageLibrary({
+    root: target,
+    instance,
+    params: params as Record<string, unknown>,
+    ...optional("--from", "from"),
+    ...optional("--pattern", "pattern"),
+    ...optional("--version", "version"),
+    ...optional("--scene", "scene"),
+    ...(parsed.flags.has("--update") ? { update: true } : {}),
+  });
+  if (!result.ok) return fail(result.issues);
+  return {
+    exitCode: 0,
+    event: commonEvent("library", {
+      sourceRevision: result.value.sourceRevision,
+      artifacts: { staging: result.value.staging },
+      data: {
+        receipt: result.value.receipt,
+        files: result.value.files,
+        edit: {
+          from: result.value.staging,
+          expect: result.value.sourceRevision,
+        },
+      },
+    }),
+    human: [
+      `Staged ${result.value.receipt.instance} (${result.value.receipt.disposition}) in ${result.value.staging}`,
+      `Apply: naraframe edit ${resolve(target)} --from ${result.value.staging} --expect ${result.value.sourceRevision}`,
+    ],
+  };
+};
+
 const knownCommand = (value: string | undefined): CommandName =>
   value === "doctor" ||
   value === "schema" ||
@@ -1458,7 +1566,8 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "render" ||
   value === "cache" ||
   value === "profile" ||
-  value === "recipe"
+  value === "recipe" ||
+  value === "library"
     ? value
     : "unknown";
 
@@ -1479,6 +1588,7 @@ const executeCommand = async (
   if (command === "cache") return cacheCommand(args);
   if (command === "profile") return profileCommand(args);
   if (command === "recipe") return recipeCommand(args);
+  if (command === "library") return libraryCommand(args);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 

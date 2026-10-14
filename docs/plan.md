@@ -2,7 +2,7 @@
 
 Revision 1.9 · 2026-10-14 · Integrated baseline `aab831cd0a30ea53ba6274556729060d8ff29ba5`
 
-**Current step:** Fatih authorized committing M4.1–M4.2 on 2026-10-14, then developing the remaining MVP 2 batches in new branches from unchanged main with predecessor commits cherry-picked. Commit Batch 1 first; next is Batch 2 / M4.3. Main must not be merged/synced until the final package is acceptable. E2E is deferred to the end of MVP 2; confirm expensive actions first. No later feature has started yet.
+**Current step:** M4.3 READY_FOR_REVIEW on `m4-batch-2` (base checkpoint `d4f9d82`, uncommitted candidate recorded in `work/m4-batch-2/candidate.json`). Main remains `aab831c`. Focused checks and `pnpm verify` pass; E2E deferred to MVP 2 closure. The batch commit waits for Fatih's explicit approval. M4.4–M4.5 are not started.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -62,9 +62,9 @@ Subsequent authorizations: Fatih approved Batch 1 implementation and accepted it
 
 | Task | Status | Dependencies | Main acceptance | Review batch |
 |---|---|---|---|---|
-| M4.1 Art direction and production vocabulary | OWNER_ACCEPTED; commit authorized, not integrated | Integrated M3 baseline | NF-AC-21, fresh-context representative shot | 1 |
-| M4.2 Captions separate from narration | OWNER_ACCEPTED; commit authorized, final E2E deferred | M4.1 | NF-AC-22, none/selected/full with intact audio/reuse | 1 |
-| M4.3 Library and pinned assets | AUTHORIZED; starts after Batch 1 commit/cherry-pick | M4.1–M4.2 committed/cherry-picked under owner exception | NF-AC-23, editable pinned imports and reuse/undo | 2 |
+| M4.1 Art direction and production vocabulary | OWNER_ACCEPTED / COMMITTED `eb7a7d5`; not in main | Integrated M3 baseline | NF-AC-21, fresh-context representative shot | 1 |
+| M4.2 Captions separate from narration | OWNER_ACCEPTED / COMMITTED `eb7a7d5`; final E2E deferred | M4.1 | NF-AC-22, none/selected/full with intact audio/reuse | 1 |
+| M4.3 Library and pinned assets | READY_FOR_REVIEW on `m4-batch-2` (uncommitted; commit awaits Fatih's approval) | M4.1–M4.2 committed/cherry-picked under owner exception | NF-AC-23, editable pinned imports and reuse/undo | 2 |
 | M4.4 Prepared audio and series identity | AUTHORIZED; queued after Batch 2 | M4.3 committed/cherry-picked under owner exception | NF-AC-24, verified master/timing and reusable identity | 3 |
 | M4.5 Production trial and MVP 2 handoff | AUTHORIZED; queued after M4.4, confirm costly final gate | M4.1–M4.4 | NF-AC-25, approved MP4 and second profile | 3 |
 
@@ -137,6 +137,25 @@ Expected: full captions follow narration; selected captions appear only at decla
 
 Metadata covers viewport/ROI, focal point, padding, and named attachment anchors for supported asset/pose/prop use. Declare units and transform ownership. Do not assume metadata can infer anatomy or repair every crop. Versioned recipes retain existing trust rules; provenance and license travel with imported assets.
 
+**Feature model — 2026-10-14:** local passive `catalog.json` has schemaVersion1, stable catalog ID/version/provenance, ready asset dependencies, optional local recipe dependencies, and named/versioned scene patterns. Patterns are ordinary source-v1 scene templates with typed string/number/asset parameters bound to explicit JSON pointers; no expressions, remote dependencies, mutable `current`, or alternative motion runtime. Importing expands the template into editable scene data, not a new runtime visual type.
+
+- Public `library inspect CATALOG` reports patterns/dependencies/provenance. `library stage PROJECT --from CATALOG --pattern ID --version VERSION --instance ID --scene SCENE --params PARAMS.json` captures bytes and produces a new staging artifact; it does not mutate the project. The result includes the source revision to pass to existing `edit --from STAGING --expect REVISION`. A version is required, dependencies are checked before staging, and captured bytes rather than later rereads are copied.
+- Optional `naraframe.json.libraryImports` carries each instance's selected pattern/template/parameter contract/current values, exact catalog/pattern hashes and asset/recipe dependency receipts. Assets and recipe files are local source dependencies and use existing revision snapshots. Omission keeps legacy source shape/keys. Catalog edits cannot affect an imported project at validate/render time. `library stage PROJECT --instance ID --params PARAMS.json` uses only this pinned local snapshot; an explicit catalog update uses `--from ... --version ... --update`. An existing instance cannot be silently replaced. Refuse regeneration over a hand-edited scene with a directed local-edit conflict rather than dropping those edits; the author can keep ordinary manual edits or review a separately staged replacement.
+- Ready PNG assets may declare opt-in `layout`: source-pixel dimensions, viewport, ROI, focal point, padding, and named anchors. Bounds/finite numbers and actual PNG dimensions are validated. The skill distinguishes informational ROI/padding from an explicit viewport crop. Original media bytes remain unchanged. Passive SVG remains supported as a catalog asset; PNG-specific layout/crop is not advertised for SVG/audio.
+- One demonstrated engine gap is deliberate source-pixel cropping for declarative PNG layers (currently available only inside recipe parameters). Add optional image-layer `crop`; compile/renderer/preflight and a public pure image-placement helper share its source-to-frame geometry, with a slot-scoped crop rules marker in compiled data. Legacy image behavior/keys stay unchanged; do not bump the global renderer identity unless the actual implementation also changes legacy behavior. Validate against actual PNG dimensions, including scaled 540/1080 frames.
+- Named attachment descriptors belong to the pinned pattern's authoring contract. Staging maps target and prop anchors through the same crop/fit/focal geometry into sibling local frames. They produce explicit source coordinates; no dynamic rig or cross-parent/camera follow is promised. Refuse unsupported layout/coordinate relationships. A common parent group can move the assembled parts. Pose substitution through pinned parameters re-stages both artwork and attachment placement, then existing edit/undo handles the revision.
+- Recipe files/manifests are captured, checked and snapshotted, but library import never writes or transfers trust authorization. New/changed code still requires project/hash-scoped owner trust. Bindings, licenses and provenance are retained, never inferred as compatible or publicly licensed.
+
+**Additional runnable acceptance:**
+
+```bash
+pnpm naraframe library inspect library/starter/catalog.json --json
+pnpm naraframe library stage ../NaraFrame-projects/mvp2/library --from library/starter/catalog.json --pattern anchored-note --version 1.0.0 --instance lesson --scene asset-swap --params PARAMS.json --json
+pnpm naraframe edit ../NaraFrame-projects/mvp2/library --from STAGING --expect SOURCE_REVISION --json
+```
+
+Ship a small starter catalog: an anchored explanatory-object pattern with two padded schematic poses and a prop, plus a second purposeful diagram/note pattern using available motion. Repository-authored examples are technical illustrations, not claims of human-photo rights or competitive visual quality. Prove two project imports, ordinary copy/crop/pose revisions, local re-staging after hiding/changing the catalog, explicit catalog update, stale approval, undo/reuse, and unchanged original media. Then run focused coverage and one `pnpm verify`; no E2E, provider call, or unapproved recipe trust. Fresh-context trial reads skill/catalog/public schema/its own project, not renderer source.
+
 **Acceptance artifact:** an imported-library snapshot receipt containing stable IDs/version/hash, source provenance, resolved local dependencies, and explicit update disposition. Then:
 
 ```bash
@@ -148,15 +167,15 @@ pnpm naraframe undo ../NaraFrame-projects/mvp2/library --json
 
 Expected: fresh-context library-first authoring can substitute copy/assets/pose through ordinary revisions. Crops and attachments remain intentional. Advancing the catalog does not change the pinned old source, approval, or build key. An explicit update is a reviewable revision; undo and media/build reuse are demonstrated.
 
-- [ ] Model library/version/import authority and opt-in metadata before choosing storage or adding CLI surface.
-- [ ] Prepare a small useful pattern set with parameter documentation, pinned dependencies, and editable source; no parallel motion framework.
-- [ ] Add asset ROI/focal/anchor examples including padding, a pose change, and a prop attachment.
-- [ ] Import into two episodes; prove local snapshots are complete and independent of later catalog edits.
-- [ ] Compare copy-only, asset/crop, and pose revisions; inspect reused vs affected dependencies honestly.
-- [ ] Prove old-project stability, explicit update/trust handling, stale approval, undo, and reuse.
-- [ ] Run a fresh-context trial using skill/catalog instructions only; save first draft and help/correction log.
-- [ ] Add focused tests for invalid IDs/versions/paths, metadata units/bounds, missing dependencies, snapshots, keys, bindings and undo.
-- [ ] Run focused coverage and `pnpm verify`; collect Batch 2's handoff. E2E deferred to final M4.5 closure under the 2026-10-14 owner instruction.
+- [x] Model library/version/import authority and opt-in metadata before choosing storage or adding CLI surface. Feature model above (2026-10-14), recorded before implementation.
+- [x] Prepare a small useful pattern set with parameter documentation, pinned dependencies, and editable source; no parallel motion framework. `library/starter`: `anchored-note@1.0.0`, `path-note@1.0.0`, README and deterministic `author-pngs.mjs`.
+- [x] Add asset ROI/focal/anchor examples including padding, a pose change, and a prop attachment. Two padded 320×400 poses and a note prop with source-pixel layout and named anchors.
+- [x] Import into two episodes; prove local snapshots are complete and independent of later catalog edits. proof-a/proof-b and the external project; hidden then advanced catalog left pinned source and fingerprint stable (`library-manual-evidence.json`).
+- [x] Compare copy-only, asset/crop, and pose revisions; inspect reused vs affected dependencies honestly. Each reused original media 3/3 and changed the one affected scene.
+- [x] Prove old-project stability, explicit update/trust handling, stale approval, undo, and reuse. Explicit 1.1.0 update/undo; recipe trust never imported (temporary fixtures); synthetic stale-approval fixture; live undo then 1080 preview reuse.
+- [x] Run a fresh-context trial using skill/catalog instructions only; save first draft and help/correction log. `work/m4-batch-2/fresh-author-report.md` (path-note only; crop/attachment not exercised by the fresh author).
+- [x] Add focused tests for invalid IDs/versions/paths, metadata units/bounds, missing dependencies, snapshots, keys, bindings and undo. `library.test.ts` (17), `image-placement.test.ts`, `capabilities.test.ts`, renderer `browser-bundle.test.ts`.
+- [x] Run focused coverage and `pnpm verify`; collect Batch 2's handoff. E2E deferred to final M4.5 closure under the 2026-10-14 owner instruction (not a pass). Controller focused 59/59 and verify 312/369, exit 0.
 
 **Out of scope:** mutable `current` imports, remote assets at render time, automatic character rigging, or animation primitives deferred below.
 
@@ -232,7 +251,7 @@ Expected: a fresh-context agent reaches owner-approved MP4 through skill and pub
 | 2 | M4.3 | One review of import/version/metadata authority, editable patterns and frozen proof. |
 | 3 | M4.4 + M4.5 | One review of prepared audio/identity and production handoff. Visual approvals remain owner's decisions. |
 
-Start from current `origin/main`, using short-lived feature branches. Do not stack Batch 2/3 on an unmerged predecessor. Within an authorized batch, execute its steps without relaying each small command through Fatih. Bring all findings together at READY_FOR_REVIEW; stop for materially new authority, a blocking defect outside scope, or a required owner output decision.
+Use Fatih's 2026-10-14 MVP 2 exception: each next batch branch starts from unchanged main and cherry-picks its predecessor's cumulative batch commits. Keep main untouched until final acceptance. Within an authorized batch, execute its steps without relaying each small command through Fatih; confirm expensive work first. Bring findings together at READY_FOR_REVIEW; stop for materially new authority, a blocking defect outside scope, or a required owner output decision.
 
 MVP 2 closure requires recorded acceptance for NF-AC-21–25, compatible legacy behavior, current capability documentation, and the operating handoff. Any narrowed acceptance needs an explicit owner decision recorded as such. Deferred visual/publication/backlog items remain deferred unless separately accepted.
 
@@ -273,7 +292,7 @@ Verification: `pnpm typecheck` and `pnpm build` exit 0 with Node 24.20.0 / pnpm 
 
 Protected: unrelated `AGENTS.md`, `.git`, Miss Ayu linked worktree, stash, old branches, samples and runtime source. README was already untracked at task start and is included as the English product document in this authorized integration. Stage documentation paths explicitly; exclude AGENTS.md, generated runtime, work/ and external archive contents. Use a PR and squash-merge with an exact-head guard, then sync main without discarding user changes. The verification receipt records the earlier cleanup checkpoint, before Git authorization.
 
-### Active handoff — Batch 1 / M4.1 + M4.2 (2026-10-14)
+### Handoff record — Batch 1 / M4.1 + M4.2 (2026-10-14)
 
 Status: **OWNER_ACCEPTED / COMMIT_AUTHORIZED; final E2E deferred**. Branch `m4-batch-1` from `aab831c`, no push/merge. Independent task reviews and whole-branch review found no remaining critical/important source defect. Fatih accepted NF-AC-21's representative authoring output and confirmed the caption behavior, then authorized committing Batch 1 and cherry-picking it into the next batch branch. Main integration is withheld until the end of MVP 2; historical failures remain disclosed.
 
@@ -314,7 +333,27 @@ The sleep-affected second run subsequently stopped without a final summary or wr
 
 **Pre-commit verification:** fresh pinned `pnpm verify` exit0 at 18:47 WIB: Biome197, 303 unit / 351 integration, typecheck/build; raw `work/gate-logs/m4-batch-1/verify-commit.log`. No E2E rerun. Staging is limited to the Batch 1 source/test/skill/README/three active documents; exclude user AGENTS and scratch evidence. Commit/cherry-pick preserves the owner-approved feature candidate and does not move main.
 
+**Local commit/cherry-pick closure:** `m4-batch-1` commit `eb7a7d59c87478d4504bf817996c3ef5cc0aadf0`, exactly 27 task files, author Fatih, no agent identity/trailer. New `m4-batch-2` from main contains cherry-pick `d4f9d82cc11915553d9cffaefcc161fb3db4f331`; both trees are `b2f8edf42aea608cd985d098bafb35893d045a7b`. Local main and origin/main remain `aab831cd0a30ea53ba6274556729060d8ff29ba5`. No push, PR, merge, stash, discard or main sync. AGENTS SHA `c55c4025…` remains unchanged and uncommitted. This closure note is local Batch 2 documentation and will travel with its eventual commit.
+
 **Preservation / boundaries:** AGENTS SHA `c55c4025…` unchanged from entry; Miss Ayu worktree at `00942b5`, old stash and branches preserved. Only numbered batch scope and supporting docs/tests changed. Existing repeatability/reliability caveats, D-VIS and publication rights remain open. No final export/production approval. Git integration still requires separate authorization; owner acceptance does not close M4 or waive remaining integration gates.
+
+### Handoff — Batch 2 / M4.3 (2026-10-14)
+
+Status: **READY_FOR_REVIEW; commit awaits Fatih's explicit approval.** No separate supervisor reviews this batch; Fatih reviews it directly. Branch `m4-batch-2`, base checkpoint `d4f9d82` (Batch 1 cherry-pick), unchanged-main base `aab831c`. Implementation, manual acceptance and the fresh-context trial were done by Codex; it stopped at its usage limit before the controller steps. Claude (controller) then reviewed the candidate, ran focused checks and `pnpm verify`, and wrote this handoff. The plan's MVP 2 Git exception authorizes batch commits, but Fatih's standing instruction requires explicit approval before any commit, so nothing is committed, pushed or merged.
+
+**Candidate** (`work/m4-batch-2/candidate.json`): tracked code diff vs `d4f9d82` `087cfe42185d…`, 13 new source/test/library files with hashes, dist trees cli `b32e6c94b9f8…`, core `b3ba1063ba8c…`, renderer `c10799566381…`, skill tree `2a804a17a7f6…` (6 files), `library/` tree `5f5ba20f674b…`, starter catalog `b0e0f3bc8ead…`; Node 24.20.0, pnpm 12.3.4, Remotion 4.0.521.
+
+**What changed.** Core: `schema/library.ts` (passive catalog schema 1), `library/stage.ts` (`inspectLibrary`, `stageLibrary`: capture-once with hash checks, namespaced asset IDs/paths, pinned `libraryImports` receipts, local regeneration, explicit `--update`, local-edit conflict, candidate validation on a hard-linked copy), `asset/image-placement.ts` (pure crop/fit/focal placement, browser-safe subpath `@naraframe/core/image-placement`), PNG `layout` and image-layer `crop` in schemas, compile marker `naraframe-image-crop/1` with source size only on cropped slots, capabilities for proven forms. CLI `library inspect|stage`. Renderer: cropped image path and preflight through the shared helper; uncropped legacy images unchanged; no global renderer bump. Skill: `library.md` and SKILL.md links. Starter catalog under `library/starter`. Not changed: recipe trust rules, audio, motion runtime.
+
+**Evidence (Codex, public CLI; `work/m4-batch-2/task-report.md`, `library-manual-evidence.json`, `fresh-author-report.md`).** First native 1080 preview failed before frames with `SYSTEM_ERROR`; a direct entry bundle showed the core root import pulled `node:child_process` into the browser bundle; fixed with the browser-safe subpath and protected by `browser-bundle.test.ts` (failed attempt retained). External project `../NaraFrame-projects/mvp2/library`: import `anchored-note@1.0.0` → 1080 preview `f435ded12330-49393991-fdf` (crop and left-hand attachment); pinned re-stage (title, `pose-right`, `crop-x` 70) → revision `4cab08f8…`, media 3/3 reused, 540 preview `5e906d5fd36f-8d370416-5cb` (prop moved to the right hand); undo → `7072667b…`, 1080 preview reused `f435ded12330-49393991-fdf` as `f435ded12330-15802d08-208` with the same MP4. Second project imported `path-note`; copy, crop and pose revisions each with edit/status/undo; catalog hidden then advanced without changing pinned source or fingerprint; pinned staging without any catalog; explicit 1.1.0 update and undo; duplicate instance and local-edit regeneration refused; original PNG bytes unchanged. Recipe import (temporary fixtures only): code captured and snapshotted, `RECIPE_NOT_TRUSTED` until trusted, trust never imported. Stale approval shown on a synthetic fixture; no real owner approval was created.
+
+**Fresh-context trial** (`fresh-author-report.md`): read only SKILL.md, library.md, the catalog, its own project and public profile listing; imported `path-note`, 1080 preview `83a54e2e6747-71910345-427` (first draft preserved), pinned copy re-stage, undo and status. Help: one profile pointer from the coordinator, one invalid `--help` recovery, one status retry under a sandbox restriction; zero source repairs. Limits: the fresh author did not exercise crop, pose or attachment (path-note only); the revised copy was not rendered; schema output was too large to read whole (skill now says to save and grep it).
+
+**Controller findings.** Code review of `stage.ts`, the CLI command and the renderer crop path found no blocking defect (dependency paths through the safe resolver, pointer writes refuse prototype keys, candidate validation writes only to unlinked copies, legacy image path untouched). Fixed: seven `noNonNullAssertion` lint warnings in `libraryCommand` (behaviour-neutral refactor). Catalog drift: `library/starter/catalog.json` was edited at 19:29, after the trials, adding `binding: "neutral"` and `origin`/license to the three asset entries without a version change; patterns, provenance, asset bytes and layout are unchanged (pattern hashes `ccf8a4d0…` and `22d81ea6…` match the pins). Trial evidence therefore pins catalog `56431c6d…`; the shipped catalog is `b0e0f3bc…`. A public-CLI check of the shipped catalog (inspect → stage → edit → validate, no render; `work/m4-batch-2/shipped-catalog-check.json`) passes and its receipt carries the neutral bindings and origin. Owner decision (Fatih, 2026-10-14): accepted as pre-release metadata; the catalog stays `schematic-starter@1.0.0` at `b0e0f3bc…`, and the trial evidence keeps its recorded pin `56431c6d…`.
+
+**Gates** (`work/gate-logs/m4-batch-2/`): Codex focused 4 files 42/42; controller focused 6 files 59/59 (`focused-controller.log`: image-placement, capabilities, library, browser-bundle, CLI command-contract, revision-commands); `pnpm verify` exit 0, Biome 205 files, unit 312/312, integration 369/369 (`verify.log`, SHA-256 `cba262e080b9…`). E2E deferred to M4.5 closure by owner instruction; not run, not passed. No provider call, no recipe trust, no Git write.
+
+**Limits.** Import copies the whole small catalog (no per-pattern dependency closure). Parameters are complete scalar values, not expressions. Attachments: unrotated siblings in one absolute parent and plane only; chains, cycles, cross-parent or dynamic rigs refused. SVG/audio stay passive without layout/crop. Crop is a view; files are never edited. Manual edits block regeneration (stage a separate instance to compare). Schematic examples make no claim about artwork quality, human identity or publication rights. Open from earlier: NF-AC-06 repeatability, interruption caveat, D-VIS.
 
 ### Handoff template for an authorized M4 batch
 

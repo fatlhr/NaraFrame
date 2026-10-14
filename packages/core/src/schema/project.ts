@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LibraryImportSchema } from "./library.js";
 import {
   ConfigPathSchema,
   IdSchema,
@@ -53,7 +54,23 @@ export const ProjectConfigSchema = z
     audioMode: AudioModeSchema.optional(),
     /** One optional music bed plus scene-anchored effects; never changes the timeline. */
     soundtrack: SoundtrackSchema.optional(),
+    /** Passive pinned authoring receipts; never reads a catalog during render. */
+    libraryImports: z.array(LibraryImportSchema).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((project, ctx) => {
+    const instances = new Set<string>(),
+      scenes = new Set<string>();
+    for (const [index, receipt] of (project.libraryImports ?? []).entries()) {
+      if (instances.has(receipt.instance) || scenes.has(receipt.sceneId))
+        ctx.addIssue({
+          code: "custom",
+          path: ["libraryImports", index],
+          message: "Library import instance and scene IDs must be unique",
+        });
+      instances.add(receipt.instance);
+      scenes.add(receipt.sceneId);
+    }
+  });
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;

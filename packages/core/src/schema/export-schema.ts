@@ -11,6 +11,7 @@ import { applyProjectOverrides } from "../profile/overrides.js";
 import { type AssetManifest, AssetManifestSchema } from "./asset.js";
 import { type Captions, CaptionsSchema } from "./captions.js";
 import { CompiledDraftSchema } from "./compiled.js";
+import { LibraryCatalogSchema } from "./library.js";
 import { type Narration, NarrationSchema } from "./narration.js";
 import { type ProfileLock, ProfileLockSchema } from "./profile.js";
 import { type ProjectConfig, ProjectConfigSchema } from "./project.js";
@@ -48,6 +49,7 @@ const artifacts = {
 } as const;
 
 const schemaEntries = [
+  ["LibraryCatalog", LibraryCatalogSchema],
   ["ProjectConfig", ProjectConfigSchema],
   ["ProfileLock", ProfileLockSchema],
   ["Scenes", ScenesSchema],

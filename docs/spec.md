@@ -1,8 +1,8 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 0.9 · 2026-10-14 · Integrated baseline `aab831c`; Batch 1 candidate on `m4-batch-1`
+Revision 0.9 · 2026-10-14 · Integrated baseline `aab831c`; Batch 1 committed `eb7a7d5`, carried into `m4-batch-2` as `d4f9d82`
 
-MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3–M4.5 are authorized but not implemented yet.
+MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3 is ready for review on `m4-batch-2` (uncommitted); M4.4–M4.5 are queued, not started.
 
 ## 1. Product
 
@@ -63,6 +63,16 @@ Recipe binding checks cover only declared parameter pointers. They compare brand
 
 Source revisions, media hashes, profile state, timing, and relevant render dependencies determine reuse. Approval is tied to a source revision and preview. An edit can make an approval stale even when some media remains reusable. Visual-only revisions must not regenerate unchanged voice.
 
+### Library authoring — Batch 2 candidate
+
+`library inspect <catalog.json>` exposes a local catalog's patterns, exact versions, provenance and captured dependency hashes. `library stage <project> --from <catalog> --pattern <id> --version <version> --instance <id> --scene <id> --params <json>` captures verified bytes into new staging without changing the project. Its returned staging/revision feed the existing guarded `edit` transaction. A catalog is passive authoring data, not a live renderer dependency or a new motion runtime.
+
+Optional `libraryImports` in project configuration pins the selected template, parameter contract/values, catalog identity/hash and local asset/recipe receipts. Local re-instantiation omits the catalog path; catalog updates require explicit selection and `--update`. Ordinary scene edits are preserved: a changed scene refuses regeneration instead of being overwritten. Copy, pose and crop substitutions become ordinary source revisions; existing undo, approval staleness and build reuse remain authoritative. Import captures the bounded catalog's entire dependency set, not an optimized per-pattern closure. Recipe code remains separately project/hash-trusted; trust is never imported.
+
+Ready PNG assets may carry opt-in `layout` in source pixels: real dimensions, viewport/ROI, focal point, padding and named anchors. Dimensions and bounds are validated. ROI/padding are descriptive; cropping uses an explicit source-pixel image-layer `crop`. A pure browser-safe placement helper is shared by compiler, renderer/preflight and staging. Cropped compiled slots carry `naraframe-image-crop/1`; uncropped legacy visuals keep their former path and keys, without a global renderer bump.
+
+Pattern attachments place unrotated sibling PNG props using named anchors under one supported absolute parent/plane. Staging emits literal local frames, not a dynamic rig. Unsupported cross-parent, chained/cyclic attachment or independent geometric motion is refused. Use a shared parent for assembled motion and re-stage when pose/framing changes. Source-pixel crop units do not change between 540 and 1080 output. Technical schematic examples do not establish finished artwork quality, human identity, publishing rights or visual parity.
+
 ## 4. Composition and motion available today
 
 ### Declarative composition
@@ -108,7 +118,7 @@ External providers remain outside the engine. Existing local import/generation w
 ## 6. Runtime, integrity, and reuse
 
 - Core is independent of Remotion. Dependency direction is CLI → core/renderer and renderer → core.
-- Runtime is pinned: Node `24.20.0`, pnpm `12.3.4`, Remotion `4.0.521`. The current render identity is `naraframe-draft/11`.
+- Runtime is pinned: Node `24.20.0`, pnpm `12.3.4`, Remotion `4.0.521`. Integrated main uses `naraframe-draft/11`; the committed MVP 2 candidate uses `naraframe-draft/12`.
 - Preview supports 540 and native 1080 resolution with distinct render keys. Final export is vertical H.264 MP4; audio streams follow the declared mode.
 - Render identity, profile/font/vector/camera/recipe dependencies, and scope participate in relevant cache keys. Runtime changes that invalidate old results require deliberate identity/key treatment.
 - Publication verifies complete artifacts, media streams, hashes, and metadata before advancing pointers. Failure must not publish a partial build.
@@ -116,7 +126,7 @@ External providers remain outside the engine. Existing local import/generation w
 - Paths, hashes, and symlinks are checked at file boundaries. User source and unrelated work must not be discarded to repair state.
 - Pixel/MP4 repeatability is not guaranteed by green tests: historical variants remain an open reliability item.
 
-## 7. MVP 2 — Skill-led recurring production (PLANNED)
+## 7. MVP 2 — Skill-led recurring production (IN DEVELOPMENT)
 
 M4 improves the authoring system first, then adds only the supporting contracts required by repeated production. Implementation and integration require separate authorization.
 
