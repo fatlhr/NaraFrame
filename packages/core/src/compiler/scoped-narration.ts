@@ -1,7 +1,13 @@
 import type { Issue, Result } from "../model/issue.js";
 import type { CompiledDraft } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
+import {
+  captionFrameWindow,
+  deriveCaptionCues,
+  resolveCaptionMode,
+} from "./captions.js";
 import type { ResolvedNarrationTimeline } from "./narration-timeline.js";
+import { resolveNarrationTimeline } from "./narration-timeline.js";
 import {
   partitionScenes,
   type SceneNarrationRef,
@@ -23,7 +29,13 @@ export const captionStyleFor = (
     fontSize: Math.round((style?.fontSize ?? 44) * scaleX),
     maxLines: style?.maxLines ?? 2,
     bottom: Math.round((safe.bottom + (style?.bottomOffset ?? 24)) * scaleY),
-    side: Math.round((safe.left + 48) * scaleX),
+    side: Math.round((safe.left + (style?.sideOffset ?? 48)) * scaleX),
+    ...(style?.scrimOpacity !== undefined
+      ? { scrimOpacity: style.scrimOpacity }
+      : {}),
+    ...(style?.lineHeight !== undefined
+      ? { lineHeight: style.lineHeight }
+      : {}),
   };
 };
 
@@ -99,26 +111,55 @@ export const compileSceneNarration = (options: {
     Math.min(durationInFrames, audioFrames - trimStartFrames),
   );
 
-  const corrections = new Map(
-    (options.source.captions?.corrections ?? []).map((correction) => [
-      `${correction.blockId}/${correction.phraseId}`,
-      correction.displayText,
-    ]),
+  // A one-block local timeline works even when an earlier block is unmeasured.
+  const localTimeline = resolveNarrationTimeline({
+    schemaVersion: 1,
+    order: [block.id],
+    blocks: [block],
+  });
+  const globalStart = timeline.blocks.find(
+    (candidate) => candidate.id === block.id,
+  )?.startMs;
+  const globallyPlaced =
+    placed !== undefined && globalStart !== null && globalStart !== undefined;
+  const derived = deriveCaptionCues(
+    globallyPlaced ? timeline : localTimeline,
+    !globallyPlaced && source.captions
+      ? {
+          ...source.captions,
+          corrections: source.captions.corrections.filter(
+            (correction) => correction.blockId === block.id,
+          ),
+        }
+      : source.captions,
+    resolveCaptionMode(source.profile, source.captions),
   );
-  const cues = block.phrases.flatMap((phrase) => {
-    const start = Math.max(phrase.startMs, localStartMs) - localStartMs;
-    const end = Math.min(phrase.endMs, localEndMs) - localStartMs;
-    if (end <= start) return [];
-    const startFrame = Math.round((start * fps) / 1000);
+  if (!derived.ok) return derived;
+  const cues = derived.value.flatMap((cue) => {
+    const start = Math.max(cue.startMs, localStartMs) - localStartMs;
+    const end = Math.min(cue.endMs, localEndMs) - localStartMs;
+    // When placed, overlap belongs to the rounded global frame intervals.
+    // A sub-frame window can round across the millisecond scene boundary.
+    if (!globallyPlaced && end <= start) return [];
+    const raw = captionFrameWindow(cue, fps);
+    const startFrame =
+      globallyPlaced && placed
+        ? Math.max(placed.startFrame, raw.startFrame) - placed.startFrame
+        : Math.round((start * fps) / 1000);
+    const endFrame =
+      globallyPlaced && placed
+        ? Math.min(placed.endFrame, raw.endFrame) - placed.startFrame
+        : Math.min(
+            durationInFrames,
+            Math.max(startFrame + 1, Math.round((end * fps) / 1000)),
+          );
+    if (endFrame <= startFrame) return [];
     return [
       {
-        id: `${block.id}/${phrase.id}`,
-        text: corrections.get(`${block.id}/${phrase.id}`) ?? phrase.text,
+        id: cue.id,
+        text: cue.text,
         startFrame,
-        endFrame: Math.min(
-          durationInFrames,
-          Math.max(startFrame + 1, Math.round((end * fps) / 1000)),
-        ),
+        endFrame,
       },
     ];
   });

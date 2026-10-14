@@ -232,6 +232,12 @@ Record durations and pauses, plus phrase timing when available. `generation.text
 
 Use your preferred TTS tool or record your own voice, then give the audio to the agent. The CLI does not call TTS providers automatically. If you change the spoken copy, update the audio. A visual headline change does not always require new narration.
 
+### Caption choices
+
+Keep the voice and choose how much caption text to show: `full`, `selected`, or `none`. Set the policy in `captions.json`; selected cues refer to the project's measured narration phrases. Caption revisions do not regenerate voice. The profile supplies styling and can lock the policy; permitted style overrides can change font size, spacing or scrim opacity. See the [caption guide](skills/naraframe/captions.md) for source examples and ordinary revision steps.
+
+The skill also includes [six editable art-direction patterns](skills/naraframe/art-direction.md), from explanatory objects and route diagrams to a quiet held shot. Adapt them to the story and profile rather than applying one entrance to every scene.
+
 ### Quick previews and final review
 
 ```sh
@@ -406,6 +412,6 @@ pnpm test:e2e
 - [Fixture README](test-fixtures/README.md): origins and scope of the included examples.
 - [AGENTS.md](AGENTS.md): contribution rules, FDD, and Git integration.
 
-Keep production projects outside this checkout, for example in `../NaraFrame-projects/`. The local `work/` directory is reserved for development scratch. MVP 2 is planned in M4; planned features are not part of the current capability registry.
+Keep production projects outside this checkout, for example in `../NaraFrame-projects/`. The local `work/` directory is reserved for development scratch. Further MVP 2 work is tracked in M4; the capability registry lists only implemented forms with test evidence.
 
 The repository does not include a LICENSE file. Confirm permission before distributing code or media; their presence in the repository does not automatically grant redistribution rights.

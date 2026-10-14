@@ -1,10 +1,14 @@
 # NaraFrame — Production Findings and Decisions
 
-Updated 2026-10-13 · Baseline `e008490` · MVP 2 / M4 PLANNED
+Updated 2026-10-14 · Integrated baseline `aab831c` · MVP 2 / M4 Batch 1 under review
 
 This document explains the next development priorities. [spec.md](spec.md) defines the contract; [plan.md](plan.md) owns numbered tasks. The prior discovery, decision history, and local Batch F closure are preserved in [history](history/README.md).
 
 ## 1. What production taught us
+
+Batch 1 evidence: the old skill produced a valid but generic feedback-card shot and required repeated large-schema reads. The updated skill/reference gives six editable explanatory structures; a fresh author made a progress→feedback→practice diagram and ordinary headline/camera revisions without renderer reads. This is one authoring trial with saved first output, not a visual-quality or cost guarantee. Fatih accepted it as authoring evidence and confirmed caption behavior on 2026-10-14. He then authorized committing and cherry-picking successive batches while main stays unchanged; full E2E is deferred to MVP 2 closure, and expensive actions require confirmation.
+
+The caption candidate demonstrates none/selected/full at 540/1080 with unchanged imported voice, verified boundaries and undo/reuse. Raw crop hash equality was too strong for separately encoded MP4s: inactive-cue differences were tiny while visible-cue differences were substantial. The original failed audit is retained. Frame-window review also found a real 1ms full/scoped boundary defect; shared global rounding/clipping and same/cross-block regressions correct it. Gate results and provenance belong in plan's consolidated handoff.
 
 The engine can protect a project and produce a valid MP4 without producing a compelling explanation. Production friction also comes from weak authoring instructions, missing reusable artwork metadata, and workflows that repeatedly rediscover the same technique.
 

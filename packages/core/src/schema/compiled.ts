@@ -440,6 +440,8 @@ const CompiledCaptionsSchema = z
         maxLines: PositiveIntegerSchema,
         bottom: z.number().nonnegative(),
         side: z.number().nonnegative(),
+        scrimOpacity: z.number().min(0).max(1).optional(),
+        lineHeight: z.number().min(1).max(3).optional(),
       })
       .strict(),
     cues: z.array(
