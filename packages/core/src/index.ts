@@ -1,5 +1,11 @@
 export const corePackage = "@naraframe/core";
-
+export {
+  cropWithinImage,
+  type ImageCrop,
+  ImageCropSchema,
+  imagePlacement,
+  PngLayoutSchema,
+} from "./asset/image-placement.js";
 export {
   type SanitizedSvg,
   sanitizeSvg,
@@ -76,6 +82,12 @@ export {
   type LoadedPlanProject,
   loadPlanProject,
 } from "./io/load-project.js";
+export {
+  inspectLibrary,
+  type StageLibraryOptions,
+  type StageLibraryResult,
+  stageLibrary,
+} from "./library/stage.js";
 export type {
   Issue,
   IssueResponsible,
@@ -225,6 +237,14 @@ export {
 } from "./schema/compiled.js";
 export type { PlanSource } from "./schema/export-schema.js";
 export { exportSchemas, validatePlanSource } from "./schema/export-schema.js";
+export {
+  type LibraryCatalog,
+  LibraryCatalogSchema,
+  type LibraryImport,
+  LibraryImportSchema,
+  type LibraryPattern,
+  LibraryPatternSchema,
+} from "./schema/library.js";
 export type {
   Narration,
   NarrationBlock,

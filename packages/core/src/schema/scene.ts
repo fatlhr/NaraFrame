@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ImageCropSchema } from "../asset/image-placement.js";
 import {
   ColorSchema,
   ColorValueSchema,
@@ -128,6 +129,16 @@ const ImageLayerSchema = z
     fit: z.enum(["cover", "contain"]),
     frame: FrameSchema,
     focalPoint: FocalPointSchema.optional(),
+    crop: ImageCropSchema.optional(),
+    /** Compiled only for cropped slots; invalidates only their render keys. */
+    cropRules: z.literal("naraframe-image-crop/1").optional(),
+    sourceSize: z
+      .object({
+        width: z.number().int().positive(),
+        height: z.number().int().positive(),
+      })
+      .strict()
+      .optional(),
     cornerRadius: z.number().min(0).max(960).optional(),
     stroke: StrokeSchema.optional(),
     shadow: ShadowSchema.optional(),

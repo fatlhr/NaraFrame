@@ -1,4 +1,8 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
+import {
+  type ImageCrop,
+  imagePlacement,
+} from "@naraframe/core/image-placement";
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
@@ -81,14 +85,47 @@ const AssetView = ({
   assetId,
   fit,
   focalPoint = { x: 0.5, y: 0.5 },
+  placement,
 }: {
   draft: CompiledDraft;
   assetId: string;
   fit: "cover" | "contain";
   focalPoint?: { x: number; y: number };
+  placement?: {
+    crop: ImageCrop;
+    source: { width: number; height: number };
+    frame: { width: number; height: number };
+  };
 }) => {
   const asset = draft.assets[assetId];
   if (asset?.kind === "png") {
+    if (placement) {
+      const mapped = imagePlacement({ ...placement, fit, focalPoint });
+      return (
+        <div
+          style={{
+            position: "absolute",
+            left: mapped.clip.x,
+            top: mapped.clip.y,
+            width: mapped.clip.width,
+            height: mapped.clip.height,
+            overflow: "hidden",
+          }}
+        >
+          <Img
+            src={staticFile(asset.publicPath)}
+            style={{
+              position: "absolute",
+              left: -mapped.crop.x * mapped.scale,
+              top: -mapped.crop.y * mapped.scale,
+              width: mapped.image.width,
+              height: mapped.image.height,
+              maxWidth: "none",
+            }}
+          />
+        </div>
+      );
+    }
     return (
       <Img
         src={staticFile(asset.publicPath)}
@@ -294,6 +331,15 @@ export const LayerView = ({
         draft={draft}
         assetId={layer.assetId}
         fit={layer.fit}
+        {...(layer.crop && layer.sourceSize
+          ? {
+              placement: {
+                crop: layer.crop,
+                source: layer.sourceSize,
+                frame: layer.frame,
+              },
+            }
+          : {})}
         {...(layer.focalPoint ? { focalPoint: layer.focalPoint } : {})}
       />
     </div>

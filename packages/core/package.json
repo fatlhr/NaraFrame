@@ -13,6 +13,10 @@
     "./count-format": {
       "types": "./dist/count-format.d.ts",
       "import": "./dist/count-format.js"
+    },
+    "./image-placement": {
+      "types": "./dist/asset/image-placement.d.ts",
+      "import": "./dist/asset/image-placement.js"
     }
   },
   "dependencies": {

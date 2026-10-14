@@ -13,6 +13,7 @@ export type CommandName =
   | "cache"
   | "profile"
   | "recipe"
+  | "library"
   | "unknown";
 
 export type CommandReadiness =

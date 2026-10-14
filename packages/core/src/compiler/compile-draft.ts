@@ -1,3 +1,4 @@
+import { imagePlacement } from "../asset/image-placement.js";
 import { formatCount } from "../count-format.js";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
 import { checkBrandBindings } from "../profile/brand-bindings.js";
@@ -1673,6 +1674,41 @@ export const compileDraft = (
     // units, exactly as preflight measures it.
     layout.layers.forEach((layer, layerIndex) => {
       if (layer.type !== "image") return;
+      if (layer.crop) {
+        const size = source.imageSizes?.[layer.assetId];
+        if (size) {
+          try {
+            imagePlacement({
+              source: size,
+              frame: layer.frame,
+              crop: layer.crop,
+              fit: layer.fit,
+              ...(layer.focalPoint ? { focalPoint: layer.focalPoint } : {}),
+            });
+            layer.cropRules = "naraframe-image-crop/1";
+            layer.sourceSize = size;
+          } catch {
+            issues.push({
+              code: "IMAGE_CROP_INVALID",
+              severity: "error",
+              responsible: "user",
+              artifact: "scenes.json",
+              path: `/scenes/${sceneIndex}/visual/layers/${layerIndex}`,
+              message: "Image crop must stay within actual source dimensions.",
+              suggestion: "Correct the crop in source pixels.",
+            });
+          }
+        } else
+          issues.push({
+            code: "IMAGE_CROP_SIZE_UNKNOWN",
+            severity: "error",
+            responsible: "user",
+            artifact: "scenes.json",
+            path: `/scenes/${sceneIndex}/visual/layers/${layerIndex}`,
+            message: "Cropped image requires validated PNG source dimensions.",
+            suggestion: "Load the project through the public loader.",
+          });
+      }
       const scaled = scaleLayer(layer, scaleX, scaleY);
       if (scaled.type !== "image") return;
       const radius = scaled.cornerRadius ?? 0;

@@ -2,6 +2,9 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 const alias = {
+  "@naraframe/core/image-placement": fileURLToPath(
+    new URL("./packages/core/src/asset/image-placement.ts", import.meta.url),
+  ),
   // Before the package alias, which would otherwise swallow the subpath.
   "@naraframe/core/count-format": fileURLToPath(
     new URL("./packages/core/src/count-format.ts", import.meta.url),

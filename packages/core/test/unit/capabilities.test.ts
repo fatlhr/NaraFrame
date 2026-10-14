@@ -49,6 +49,17 @@ const EVIDENCE: Record<string, string[]> = {
   audioModes: ["voice", "music", "silent"],
   // caption-policy (integration/e2e) and caption-preflight exercise each mode.
   captionModes: ["none", "selected", "full"],
+  // library integration + manual public inspect/stage/edit/preview evidence.
+  library: [
+    "local-catalog",
+    "pinned-import",
+    "explicit-update",
+    "scalar-parameters",
+    "sibling-anchors",
+    "recipe-dependencies-no-trust-transfer",
+  ],
+  // image-placement unit + library integration + manual native/half previews.
+  imageLayout: ["png-source-pixel-metadata", "png-source-pixel-crop"],
 };
 
 describe("capability registry", () => {

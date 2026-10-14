@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "id": "schematic-starter",
+  "version": "1.0.0",
+  "provenance": {
+    "source": "Repository-authored technical illustrations",
+    "license": "Repository example use; no human-photo rights claimed"
+  },
+  "assets": [
+    {
+      "id": "pose-left",
+      "status": "ready",
+      "kind": "png",
+      "path": "pose-left.png",
+      "sha256": "cbaa0fd16e434b3d41c0f400f0fc1e9ed34308f5eff4c1dda65c5293d4052d83",
+      "binding": "neutral",
+      "origin": {
+        "type": "user",
+        "source": "author-pngs.mjs schematic",
+        "license": "Repository example use"
+      },
+      "layout": {
+        "units": "source-pixels",
+        "width": 320,
+        "height": 400,
+        "viewport": { "x": 60, "y": 50, "width": 200, "height": 300 },
+        "roi": { "x": 80, "y": 70, "width": 160, "height": 260 },
+        "focalPoint": { "x": 160, "y": 200 },
+        "padding": { "top": 50, "right": 60, "bottom": 50, "left": 60 },
+        "anchors": { "hand": { "x": 100, "y": 190 } }
+      }
+    },
+    {
+      "id": "pose-right",
+      "status": "ready",
+      "kind": "png",
+      "path": "pose-right.png",
+      "sha256": "2dd429355b05e955b06e438bb9f0aa92b654208aebaeaf7eaf4c514b667bcaa3",
+      "binding": "neutral",
+      "origin": {
+        "type": "user",
+        "source": "author-pngs.mjs schematic",
+        "license": "Repository example use"
+      },
+      "layout": {
+        "units": "source-pixels",
+        "width": 320,
+        "height": 400,
+        "viewport": { "x": 60, "y": 50, "width": 200, "height": 300 },
+        "roi": { "x": 80, "y": 70, "width": 160, "height": 260 },
+        "focalPoint": { "x": 160, "y": 200 },
+        "padding": { "top": 50, "right": 60, "bottom": 50, "left": 60 },
+        "anchors": { "hand": { "x": 220, "y": 190 } }
+      }
+    },
+    {
+      "id": "note-prop",
+      "status": "ready",
+      "kind": "png",
+      "path": "note-prop.png",
+      "sha256": "c69f910a37ab444f49e8e51643b6857caf6b85533696f90eb2671acfbf2d077d",
+      "binding": "neutral",
+      "origin": {
+        "type": "user",
+        "source": "author-pngs.mjs schematic",
+        "license": "Repository example use"
+      },
+      "layout": {
+        "units": "source-pixels",
+        "width": 320,
+        "height": 400,
+        "viewport": { "x": 100, "y": 140, "width": 120, "height": 120 },
+        "roi": { "x": 110, "y": 150, "width": 100, "height": 100 },
+        "padding": { "top": 140, "right": 100, "bottom": 140, "left": 100 },
+        "anchors": { "grip": { "x": 160, "y": 200 } }
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "id": "anchored-note",
+      "version": "1.0.0",
+      "description": "An explanatory schematic object holds a note. Copy, pose and explicit source crop are editable; move assembled siblings through their common parent.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/2/text"],
+          "description": "Short explanatory title; keep it within two heading lines."
+        },
+        "pose": {
+          "type": "asset",
+          "pointers": ["/visual/layers/0/assetId"],
+          "description": "Choose either padded schematic pose; note placement is regenerated from the named hand anchor.",
+          "choices": ["pose-left", "pose-right"]
+        },
+        "crop-x": {
+          "type": "number",
+          "pointers": ["/visual/layers/0/crop/x"],
+          "description": "Explicit viewport crop x in source pixels. Start at 60; stay within PNG width and keep the hand visible."
+        }
+      },
+      "attachments": [
+        {
+          "targetLayer": "object",
+          "targetAnchor": "hand",
+          "propLayer": "note",
+          "propAnchor": "grip"
+        }
+      ],
+      "template": {
+        "id": "template",
+        "narrativeRole": "explanation",
+        "durationMs": 4000,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "object",
+              "type": "image",
+              "assetId": "pose-left",
+              "fit": "contain",
+              "crop": { "x": 60, "y": 50, "width": 200, "height": 300 },
+              "frame": { "x": 260, "y": 640, "width": 560, "height": 840 },
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "note",
+              "type": "image",
+              "assetId": "note-prop",
+              "fit": "contain",
+              "crop": { "x": 100, "y": 140, "width": 120, "height": 120 },
+              "frame": { "x": 260, "y": 640, "width": 224, "height": 224 },
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "text": "One clear idea",
+              "frame": { "x": 96, "y": 240, "width": 888, "height": 250 },
+              "role": "heading",
+              "fontSize": 72,
+              "maxLines": 2,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3
+            },
+            {
+              "id": "assembled",
+              "type": "group",
+              "memberIds": ["object", "note"],
+              "layout": { "type": "absolute" },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 1
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "arrive",
+            "action": "reveal",
+            "targetId": "assembled",
+            "startMs": 0,
+            "durationMs": 600,
+            "params": {
+              "direction": "up",
+              "distance": 60,
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": { "type": "cut" }
+      }
+    },
+    {
+      "id": "path-note",
+      "version": "1.0.0",
+      "description": "A two-step diagram draws a connector after revealing its explanation; uses the existing reveal/draw motion vocabulary.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "A short explanation for the connection."
+        }
+      },
+      "template": {
+        "id": "template",
+        "narrativeRole": "explanation",
+        "durationMs": 4000,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "text": "From idea to action",
+              "frame": { "x": 96, "y": 280, "width": 888, "height": 240 },
+              "fontSize": 72,
+              "role": "heading",
+              "maxLines": 2,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "start",
+              "type": "shape",
+              "shape": "circle",
+              "fill": "palette.accent",
+              "frame": { "x": 210, "y": 780, "width": 120, "height": 120 },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "end",
+              "type": "shape",
+              "shape": "circle",
+              "fill": "palette.accent",
+              "frame": { "x": 750, "y": 780, "width": 120, "height": 120 },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "connection",
+              "type": "path",
+              "d": "M 0 0 L 420 0",
+              "viewBox": { "minX": 0, "minY": -10, "width": 420, "height": 20 },
+              "frame": { "x": 330, "y": 830, "width": 420, "height": 20 },
+              "stroke": { "color": "palette.text", "width": 8 },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "arrive",
+            "action": "reveal",
+            "targetId": "title",
+            "startMs": 0,
+            "durationMs": 500,
+            "params": { "direction": "up", "distance": 30 }
+          },
+          {
+            "id": "connect",
+            "action": "draw",
+            "targetId": "connection",
+            "startMs": 500,
+            "durationMs": 1200,
+            "params": { "from": 0, "to": 1, "easingPreset": "smooth" }
+          }
+        ],
+        "transition": { "type": "cut" }
+      }
+    }
+  ]
+}
