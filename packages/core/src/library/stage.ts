@@ -310,14 +310,21 @@ const applyAttachments = (scene: Scene, receipt: LibraryImport): void => {
           "IMAGE_CROP_INVALID",
           `Crop ${layer.id} is outside source pixels.`,
         );
-      const mapped = imagePlacement({
+      const placement = imagePlacement({
         source: asset.layout,
         frame: layer.frame,
         fit: layer.fit,
         ...(layer.crop ? { crop: layer.crop } : {}),
         ...(layer.focalPoint ? { focalPoint: layer.focalPoint } : {}),
-      }).mapPoint(anchor);
+      });
+      const mapped = placement.mapPoint(anchor);
+      // A contain frame may include letterbox space outside the painted crop.
+      // Check the source viewport as well as the frame visible after fitting.
       if (
+        anchor.x < placement.crop.x ||
+        anchor.x > placement.crop.x + placement.crop.width ||
+        anchor.y < placement.crop.y ||
+        anchor.y > placement.crop.y + placement.crop.height ||
         mapped.x < 0 ||
         mapped.x > layer.frame.width ||
         mapped.y < 0 ||

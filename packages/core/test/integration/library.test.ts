@@ -447,6 +447,84 @@ describe("passive pinned library imports", () => {
       "LIBRARY_ANCHOR_CLIPPED",
     );
   });
+  it.each([
+    {
+      anchor: { x: 40, y: 190 },
+      frame: { x: 140, y: 640, width: 800, height: 840 },
+    },
+    {
+      anchor: { x: 280, y: 190 },
+      frame: { x: 140, y: 640, width: 800, height: 840 },
+    },
+    {
+      anchor: { x: 100, y: 30 },
+      frame: { x: 260, y: 500, width: 560, height: 1100 },
+    },
+    {
+      anchor: { x: 100, y: 370 },
+      frame: { x: 260, y: 500, width: 560, height: 1100 },
+    },
+  ])(
+    "rejects a cropped anchor inside contain letterbox space: $anchor",
+    async ({ anchor, frame }) => {
+      const fixture = await setup();
+      await catalogChange(fixture, (catalog) => {
+        const asset = required(catalog.assets[0]);
+        if (
+          asset.status !== "ready" ||
+          asset.kind !== "png" ||
+          !asset.layout?.anchors
+        )
+          throw new Error("Expected PNG layout fixture");
+        asset.layout.anchors.hand = anchor;
+        const template = required(catalog.patterns[0]).template;
+        if (template.visual.type !== "composition")
+          throw new Error("Expected composition fixture");
+        required(template.visual.layers[0]).frame = frame;
+      });
+      const result = await stage({
+        ...fixture,
+        pattern: "anchored-note",
+        version: "1.0.0",
+        instance: "lesson",
+        scene: "asset-swap",
+        params: values,
+      });
+      expect(result.ok).toBe(false);
+      expect(result.issues.map((issue) => issue.code)).toContain(
+        "LIBRARY_ANCHOR_CLIPPED",
+      );
+    },
+  );
+  it("accepts a visible anchor in a letterboxed contain frame", async () => {
+    const fixture = await setup();
+    await catalogChange(fixture, (catalog) => {
+      const template = required(catalog.patterns[0]).template;
+      if (template.visual.type !== "composition")
+        throw new Error("Expected composition fixture");
+      required(template.visual.layers[0]).frame = {
+        x: 140,
+        y: 640,
+        width: 800,
+        height: 840,
+      };
+    });
+    const result = await stage({
+      ...fixture,
+      pattern: "anchored-note",
+      version: "1.0.0",
+      instance: "lesson",
+      scene: "asset-swap",
+      params: values,
+    });
+    expect(result.ok, JSON.stringify(result.issues)).toBe(true);
+    if (!result.ok) throw new Error("Expected visible anchor staging");
+    const scenes = await json(result.value.staging, "scenes.json");
+    expect(scenes.scenes[0].visual.layers[1].frame).toMatchObject({
+      x: 260,
+      y: 920,
+    });
+  });
   it("marks crop slots only and keeps source pixel crop identical at native/half resolutions", async () => {
     const fixture = await imported(),
       native = await compiled(fixture.root, 1080),
