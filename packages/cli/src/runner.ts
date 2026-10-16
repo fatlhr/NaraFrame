@@ -58,6 +58,7 @@ import {
   publishFinalBuild,
   readCurrentOutput,
 } from "./final-build.js";
+import { isFrameIntegrityError } from "./frame-integrity.js";
 import {
   carriesAudio,
   findReusablePreview,
@@ -1717,7 +1718,9 @@ export const runCommandLine = async (
           ? [interruptedIssue()]
           : visualPreflightFailed
             ? error.issues
-            : [systemIssue(error)],
+            : isFrameIntegrityError(error)
+              ? error.issues
+              : [systemIssue(error)],
       }),
     };
   }

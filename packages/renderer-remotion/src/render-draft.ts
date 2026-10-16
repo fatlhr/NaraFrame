@@ -35,6 +35,15 @@ import {
   visualPreflightProperty,
 } from "./remotion/visual-preflight.js";
 
+/**
+ * Frames are captured one browser tab at a time. With Remotion's default of
+ * several parallel tabs, a machine under CPU load occasionally captured a
+ * frame before its tab had finished painting (a repeated top band, or missing
+ * elements) and still reported success. Serial capture removed it in testing
+ * at a cost of a few seconds per draft.
+ */
+export const RENDER_CONCURRENCY = 1;
+
 const macChrome =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
@@ -345,6 +354,7 @@ export const renderDraft = async ({
           }
         : {}),
       overwrite: true,
+      concurrency: RENDER_CONCURRENCY,
       logLevel: "warn",
       cancelSignal: cancellation.cancelSignal,
       onProgress: ({ progress }) => onProgress?.(progress),

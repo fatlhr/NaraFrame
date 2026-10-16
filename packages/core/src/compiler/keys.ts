@@ -17,7 +17,9 @@ import { narrationTextHash } from "./voice-binding.js";
 // 10: path layers, and draw, follow and count beats paint new motion.
 // 11: AAC is encoded directly into MP4 to preserve audio priming timestamps.
 // 12: explicit caption policy, selectable cue windows and shared layout tokens.
-export const RENDER_ENGINE = "naraframe-draft/12";
+// 13: frames are captured serially; builds from parallel capture could hold
+//     frames grabbed before they finished painting and are not reused.
+export const RENDER_ENGINE = "naraframe-draft/13";
 
 /**
  * Finds a retained voice clip for a block: the spoken text (whitespace

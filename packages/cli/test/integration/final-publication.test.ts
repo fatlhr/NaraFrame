@@ -17,6 +17,10 @@ import type { RenderedDraft } from "@naraframe/renderer-remotion";
 import { afterEach, describe, expect, it } from "vitest";
 import { narratedSource } from "../../../core/test/integration/narrated-source.js";
 import { promoteFinalBuild, publishFinalBuild } from "../../src/final-build.js";
+import {
+  FRAME_INTEGRITY_METHOD,
+  isFrameIntegrityError,
+} from "../../src/frame-integrity.js";
 
 const sha = (value: Buffer | string) =>
   createHash("sha256").update(value).digest("hex");
@@ -68,6 +72,11 @@ const media = {
   decode: async () => undefined,
   audioDecode: async () => undefined,
 };
+const cleanIntegrity = async () => ({
+  method: FRAME_INTEGRITY_METHOD,
+  frames: draft.totalFrames,
+  outliers: [],
+});
 const mp4 = Buffer.concat([
   Buffer.alloc(4),
   Buffer.from("ftypisom"),
@@ -293,6 +302,7 @@ describe.skipIf(!existsSync(ffmpeg))("publishFinalBuild", () => {
       issues: [],
       cost,
       render: fakeRender(),
+      frameIntegrity: cleanIntegrity,
       ...media,
     });
     const report = JSON.parse(
@@ -304,6 +314,11 @@ describe.skipIf(!existsSync(ffmpeg))("publishFinalBuild", () => {
       approval,
       cost,
       status: "success",
+    });
+    expect(report.frameIntegrity).toEqual({
+      method: FRAME_INTEGRITY_METHOD,
+      frames: draft.totalFrames,
+      outliers: [],
     });
     expect(report.render).toMatchObject({
       width: 1080,
@@ -339,6 +354,42 @@ describe.skipIf(!existsSync(ffmpeg))("publishFinalBuild", () => {
     expect(await readdir(join(root, ".naraframe", "attempts"))).toEqual([]);
   });
 
+  it("publishes nothing when the new render has incomplete frames", async () => {
+    const root = await tmp("naraframe-final-");
+    const failure = await publishFinalBuild({
+      projectRoot: root,
+      draft,
+      approval,
+      issues: [],
+      cost: null,
+      render: fakeRender(),
+      frameIntegrity: async () => ({
+        method: FRAME_INTEGRITY_METHOD,
+        frames: draft.totalFrames,
+        outliers: [
+          { frame: 14, dp: 30, dn: 31, dpn: 1 },
+          { frame: 106, dp: 28, dn: 29, dpn: 2 },
+        ],
+      }),
+      ...media,
+    }).catch((error: unknown) => error);
+
+    expect(isFrameIntegrityError(failure)).toBe(true);
+    if (!isFrameIntegrityError(failure)) return;
+    expect(failure.issues).toEqual([
+      expect.objectContaining({
+        code: "RENDER_FRAME_INTEGRITY",
+        artifact: "final.mp4",
+        message: expect.stringContaining("frame 14, 106"),
+      }),
+    ]);
+    await expect(
+      stat(join(root, "output", "current.json")),
+    ).rejects.toMatchObject({ code: "ENOENT" });
+    expect(await readdir(join(root, "output", "builds"))).toEqual([]);
+    expect(await readdir(join(root, ".naraframe", "attempts"))).toEqual([]);
+  });
+
   it("keeps the earlier build current when a later export is interrupted before the pointer", async () => {
     const root = await tmp("naraframe-final-");
     const first = await publishFinalBuild({
@@ -348,6 +399,7 @@ describe.skipIf(!existsSync(ffmpeg))("publishFinalBuild", () => {
       issues: [],
       cost: null,
       render: fakeRender(),
+      frameIntegrity: cleanIntegrity,
       ...media,
     });
     await expect(
@@ -359,6 +411,7 @@ describe.skipIf(!existsSync(ffmpeg))("publishFinalBuild", () => {
         cost: null,
         render: fakeRender(),
         failureInjection: "before-pointer",
+        frameIntegrity: cleanIntegrity,
         ...media,
       }),
     ).rejects.toThrow("Injected final publication failure");

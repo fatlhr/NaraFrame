@@ -10,6 +10,7 @@ export type {
 } from "./render-draft.js";
 export {
   isVisualPreflightError,
+  RENDER_CONCURRENCY,
   renderDraft,
   resolveBrowserExecutable,
   VisualPreflightError,

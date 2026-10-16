@@ -15,6 +15,10 @@ import { fileURLToPath } from "node:url";
 import { type CliProcessHost, runCli, runCliProcess } from "@naraframe/cli";
 import { compileDraft, loadPlanProject } from "@naraframe/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  FrameIntegrityError,
+  frameIntegrityIssue,
+} from "../../src/frame-integrity.js";
 import * as previewBuild from "../../src/preview-build.js";
 
 const sampleRoot = fileURLToPath(
@@ -328,6 +332,41 @@ describe("public CLI command contract", () => {
     ]);
     expect(publicOutput).not.toContain(secret);
     expect(publicOutput).not.toContain("/private/owner/path");
+  });
+
+  it("reports a frame integrity failure with its own code and frames", async () => {
+    vi.spyOn(previewBuild, "publishPreviewBuild").mockRejectedValue(
+      new FrameIntegrityError([
+        frameIntegrityIssue("preview.mp4", [
+          { frame: 14, dp: 30, dn: 31, dpn: 1 },
+          { frame: 106, dp: 28, dn: 29, dpn: 2 },
+        ]),
+      ]),
+    );
+
+    const result = await captureJsonResult([
+      "preview",
+      await copySourceOnly(),
+      "--draft",
+      "--json",
+    ]);
+
+    expect(result.exitCode).toBe(2);
+    expect(result.events).toEqual([
+      expect.objectContaining({
+        command: "preview",
+        status: "failed",
+        success: false,
+        readiness: "not-ready",
+        issues: [
+          expect.objectContaining({
+            code: "RENDER_FRAME_INTEGRITY",
+            responsible: "system",
+            message: expect.stringContaining("frame 14, 106"),
+          }),
+        ],
+      }),
+    ]);
   });
 
   it("writes exactly one versioned result event for schema and plan validation", async () => {

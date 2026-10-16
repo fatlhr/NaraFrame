@@ -20,6 +20,10 @@ import type {
 } from "@naraframe/core";
 import { type RenderedDraft, renderDraft } from "@naraframe/renderer-remotion";
 import {
+  assertFrameIntegrity,
+  type FrameIntegrityRecord,
+} from "./frame-integrity.js";
+import {
   carriesAudio,
   commandVersion,
   execute,
@@ -270,6 +274,8 @@ export interface PublishFinalOptions extends MediaChecks {
   signal?: AbortSignal;
   failureInjection?: "before-pointer";
   render?: typeof renderDraft;
+  /** Test seam: stands in for the frame integrity scan of the new render. */
+  frameIntegrity?: (path: string) => Promise<FrameIntegrityRecord>;
 }
 
 export interface PublishedFinalBuild {
@@ -307,6 +313,13 @@ export const publishFinalBuild = async (
     });
     throwIfAborted(options.signal);
     await verifyFinalMedia(outputPath, draft, options);
+    const integrity = await assertFrameIntegrity(
+      outputPath,
+      "final.mp4",
+      options.ffmpegExecutable ?? ffmpegExecutable(),
+      options.frameIntegrity,
+    );
+    throwIfAborted(options.signal);
 
     const allIssues = [...options.issues, ...rendered.visualPreflight.issues];
     const runtime = {
@@ -346,6 +359,7 @@ export const publishFinalBuild = async (
           codec: "h264",
           audio: carriesAudio(draft) ? "aac" : "none",
         },
+        frameIntegrity: integrity,
         ...(options.audioMode ? { audioMode: options.audioMode } : {}),
         approval: options.approval,
         cost: options.cost,
