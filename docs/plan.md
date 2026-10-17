@@ -2,7 +2,7 @@
 
 Revision 2.1 · 2026-10-17 · Integrated baseline `a701c399211ba2584f439b59814e8a2d41614e0f` (MVP 2 Batch 3, PR #34)
 
-**Current step:** MVP 2 is integrated; follow-up batches B1–B4 (F1, F6, F2+F3, F4) are integrated through their own PRs. Next is B5 (F5, lingering processes after parallel renders) when Fatih schedules it, then the closing task C1 (public README).
+**Current step:** MVP 2 is integrated; follow-up batches B1–B5 (F1, F6, F2+F3, F4, F5) are integrated through their own PRs. Next is B6 (F7 with the public README C1), which needs Fatih's decisions on engine publication and the code licence.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -332,7 +332,7 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 | F2 (DONE, B3) | Narration cannot be removed through `edit`; the author had to delete `narration.json` by hand after `SCENE_NARRATION_MISSING`. | An ordinary, revision-recorded way to make a voiced project silent. |
 | F3 (DONE, B3) | `profile apply` lists `regenerate-narration` for a project without narration and does not name layers bound to palette slots, image plates or literal colours that clash with the new direction. | The dry run reports only relevant effects and names the affected layers and assets. |
 | F4 (DONE, B4) | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
-| F5 | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
+| F5 (DONE, B5; Chrome helpers may still outlive Chrome) | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
 | F6 (DONE, B2) | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
 | F7 | A skill without a working engine fails poorly. The launcher prints a Node stack trace before `SKILL_ENGINE_MISSING` (its `version` probe inherits stderr) and gives no next step. A skill folder copied without an engine (for example from GitHub) has no install receipt; it is sent to `pnpm naraframe`, fails, and reports a "system blocker" with no concrete install route. | Missing-engine paths end in one clean message. The skill opens with an engine check; when no engine is available the agent offers to install it and, after one yes from the user, performs the setup itself (manual steps stay documented). A clearly labelled director-only plan is available only if the user prefers to wait (see the B6 model). |
 
@@ -451,6 +451,33 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   - Revision kinds are `baseline`, `edit` and `manual-capture`; a profile apply shows as `edit` and its summary names it.
 - **Gates:** `pnpm verify` exit 0 (Biome 231, unit 352/352, integration 463/463). E2E is not run because no render key or compiled draft changed. Logs are in `work/gate-logs/b4/`.
 - **Left for later:** shadow colours stay hex-only. `README.md` lacks `history`, and C1 rewrites it.
+
+**B5 / F5 model — commands exit promptly after rendering (diagnosis first).** In the M4.5 corruption diagnosis, `node` and orphaned `chrome_crashpad_handler` processes stayed alive 7–9 minutes after `preview` wrote its JSON result. This happened in parallel renders and once in a serial loaded run; the output was unaffected. The cause is unknown.
+- **Diagnose before changing code.**
+  - Reproduce on the current main (serial capture, concurrency 1), with the time from the final JSON line to process exit measured for single, back-to-back and two-parallel renders, plus the process tree and leftover Chrome and crashpad processes 30 s after exit.
+  - Identify what keeps the process alive, for example open handles or timers, a browser or compositor not closed, or a server still listening.
+  - The diagnosis may show that the cause is outside NaraFrame (Chrome's crashpad handler outliving its parent by design). In that case document it and stop; do not mask it.
+- **Fix only the identified cause.** Close or release the resource in the normal path and on failure or interruption. A forced `process.exit` that could skip publication cleanup is not a fix.
+- **Acceptance:** after the fix, preview and render commands exit within a few seconds of their result in single, back-to-back and parallel runs, and no Chrome or crashpad process started by the command remains 30 s later. Interruption and recovery behaviour is unchanged. A regression check covers the identified cause.
+
+**B5 / F5 evidence — 2026-10-18 (branch `b5-lingering-processes`; owner-approved and integrated through its own PR):**
+- **Reproduced on the pre-fix main:** the time from the final JSON line to process exit was 2.9 s median (max 5.4 s) for single runs and 3.5 s median for back-to-back runs. Two of three parallel pairs never exited within a 150 s cap; one earlier uncapped pair lived 15 min 18 s. The load scenario did not linger.
+- **Root cause:** Remotion starts Chrome with piped stdout and stderr and keeps those pipes referenced. On close it kills Chrome's process group, but Chrome's crashpad handler and the Google updater helpers it launches (`--wake-all`, `--wake`, `--crash-handler`) sit outside that group and inherit the pipe. Node therefore stayed alive until the last helper exited.
+  - Evidence: `process.getActiveResourcesInfo()` showed pipe handles for up to 111 s after the result, and `lsof` matched the stuck node's socket peer in a ppid-1 crashpad handler and updater helpers (`work/m4-followups/b5/diag/`).
+  - NaraFrame's own spawns (ffmpeg, ffprobe) had finished before the result.
+- **Fix:** `render-draft.ts` opens each browser itself (`openBrowser`) for composition selection and for the render, passes it as `puppeteerInstance`, and releases it in `finally`: an awaited `close`, then `runner.forgetEventLoop()`.
+  - Close errors cannot replace the render outcome, and there is no forced exit.
+  - Preflight now runs before the render browser opens, so a rejected draft never launches it.
+- **Result after the fix:** exit 0.026 s after the result for single and back-to-back runs, 0.034–0.06 s for parallel pairs and 0.04 s under load. SIGINT mid-render still exits 130 with one `COMMAND_INTERRUPTED` result.
+- **Acceptance not fully met:** after parallel runs, Chrome's crashpad handler and updater helpers can still outlive Chrome by minutes. They belong to Chrome and the OS, carry an empty environment and ppid 1, and are deliberately not hunted down. They no longer keep NaraFrame alive.
+- **Options left for later:** `chrome-headless-shell` or Chrome for Testing through `NARAFRAME_BROWSER_EXECUTABLE`, or an updater-disabling launch flag, which is untested.
+- **Remotion internals:** `runner.forgetEventLoop` is public on Remotion 4.0.521's browser handle but internal-leaning, so re-check it on a Remotion upgrade. A replacement browser that Remotion launches after a crash is not ours to release.
+- **Regression:** `render-browser-release.test.ts` (8 tests, mocked Remotion) covers release on success, selection failure, render failure and interruption, no render browser on preflight rejection, and tolerant release.
+- **Frames:** frame md5s matched between a before run and two of three after runs. Before-run variance also exists, which is the known repeatability item NF-AC-06.
+- **Gates:**
+  - The corepack pnpm cache had disappeared, so the supervisor ran the `verify` sequence and E2E through the same `node_modules/.bin` binaries. pnpm 12.3.4 was then restored through corepack with Fatih's permission.
+  - Biome 232 files, unit 360/360, integration 463/463, `verify-exit 0`.
+  - Full serial E2E 14 files / 24 tests, 1007 s, exit 0 (1085 s before the fix). Logs are in `work/gate-logs/b5/`.
 
 **B6 / F7 model — a skill that still helps without an engine (draft, to be confirmed when B6 starts).**
 - **Engine check first.** The skill decides its route before any authoring:
