@@ -1,8 +1,8 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 1.0 · 2026-10-15 · Integrated baseline `aab831c`; cumulative MVP 2 candidate on `m4-batch-3`, M4.4 committed `4b49ebe`
+Revision 1.1 · 2026-10-17 · Integrated baseline `a701c39` (MVP 2 Batch 3, PR #34)
 
-MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3 and its cropped-anchor correction are carried into Batch 3; M4.4 is committed as `4b49ebe`. On 2026-10-15 Fatih added independent engine distribution, Claude/Codex skill access, onboarding and recoverable experiment cleanup to the current scope. M4.5.2–4 has a local packaging/onboarding candidate after his “next” authorization. Frozen production, final E2E/export and recoverable removal retain their separate checkpoint authority.
+MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. All three MVP 2 batches (M4.1–M4.5) are integrated in main as of `a701c39`: art direction and captions, library imports, prepared audio and series identity, the installable engine and skill, and a frozen production trial that ended in two owner-approved exports. Exported is not published: public rights for the trial media stay open. Follow-up findings F1–F6 are recorded in the plan backlog and need their own authorization.
 
 ## 1. Product
 
@@ -134,15 +134,16 @@ External providers remain outside the engine. Existing local import/generation w
 ## 6. Runtime, integrity, and reuse
 
 - Core is independent of Remotion. Dependency direction is CLI → core/renderer and renderer → core.
-- Runtime is pinned: Node `24.20.0`, pnpm `12.3.4`, Remotion `4.0.521`. Integrated main uses `naraframe-draft/11`; the committed MVP 2 candidate uses `naraframe-draft/12`.
+- Runtime is pinned: Node `24.20.0`, pnpm `12.3.4`, Remotion `4.0.521`. Integrated main uses `naraframe-draft/13`: frames are captured one browser tab at a time, because parallel capture under CPU load produced silent single-frame corruption.
 - Preview supports 540 and native 1080 resolution with distinct render keys. Final export is vertical H.264 MP4; audio streams follow the declared mode.
 - Render identity, profile/font/vector/camera/recipe dependencies, and scope participate in relevant cache keys. Runtime changes that invalidate old results require deliberate identity/key treatment.
 - Publication verifies complete artifacts, media streams, hashes, and metadata before advancing pointers. Failure must not publish a partial build.
+- Every newly rendered preview and final MP4 passes a frame-integrity scan (`neighbour-outlier/1`): a frame that differs sharply from both neighbours while they match each other fails the build with `RENDER_FRAME_INTEGRITY` before publication. The passing record is stored as `frameIntegrity` in the build report. A deliberate one-frame flash is refused the same way. Reused builds inherit their source report.
 - SIGINT evidence shows graceful interruption and recovery during rendering. SIGKILL can leave browser descendants; cache cleanup handles files, not arbitrary process cleanup.
 - Paths, hashes, and symlinks are checked at file boundaries. User source and unrelated work must not be discarded to repair state.
 - Pixel/MP4 repeatability is not guaranteed by green tests: historical variants remain an open reliability item.
 
-## 7. MVP 2 — Skill-led recurring production (IN DEVELOPMENT)
+## 7. MVP 2 — Skill-led recurring production (INTEGRATED)
 
 M4 improves the authoring system first, then adds only the supporting contracts required by repeated production. Implementation and integration require separate authorization.
 
@@ -172,13 +173,13 @@ M0–M3 acceptance and chronological evidence are retained in [history](history/
 | NF-AC-19 | Parameterized Remotion route accepted; Bang Motion equivalence OPEN. |
 | NF-AC-20 | Repeated LBC production ACCEPTED_INTERNAL, not cleared for public use of photos. |
 | M3.E/F | Integrated explicit recipe identity bindings and opt-in text fit, with their stated coverage limits. |
-| NF-AC-21 | Owner accepted the representative authoring evidence on 2026-10-14; supported fresh-context trial and its limits recorded in plan. Candidate not integrated. |
-| NF-AC-22 | Owner confirmed caption behavior on 2026-10-14; manual/audio/reuse and feature E2E evidence recorded. Full E2E deferred to MVP 2 closure; candidate not integrated. |
-| NF-AC-23 | Library candidate reviewed and committed on Batch 2, with the cropped-anchor correction verified; not integrated into main. Evidence and limits recorded in plan. |
-| NF-AC-24 | M4.4 technically ready and committed `4b49ebe` on Batch 3: listening confirmation, captured import, two identity episodes, short output/revision/undo and verify evidence recorded in plan. No final export or blanket visual/publication acceptance. |
-| NF-AC-25 | Trial attempt 2 on freeze 2 (after the renderer frame-corruption fix) evidenced: fresh-context authoring through the installed skill, headline/tempo/object revisions, undo, reuse, a second profile on a silent episode, 1080 candidates and delivery notes. Partial-phrase captioning declined honestly (no word timing). Owner visual acceptance and approved export pending; no publication approval inferred. |
-| NF-AC-26 | Local macOS arm64 archive installed offline outside the checkout; public CLI, included starter and one short draft preview evidenced. Candidate-4 (render identity `naraframe-draft/13`) installed offline into the production root, byte-identical to the build, and used for the whole attempt-2 trial. Final verify and serial E2E passed. Approved export pending. |
-| NF-AC-27 | Canonical install/update/launcher checks evidenced for isolated Codex/Claude directories; the shipped installer updated the production project skill to candidate-4. Fresh-context agents onboarded from the installed skill folder and launcher alone, but they were pointed at the folder: automatic host discovery/activation is still not observed. No personal installation or marketplace publication. |
+| NF-AC-21 | Owner accepted the representative authoring evidence on 2026-10-14; repeated with the installed skill in the M4.5 trial. Integrated (`a701c39`). |
+| NF-AC-22 | Owner confirmed caption behavior on 2026-10-14; manual/audio/reuse and feature E2E evidence recorded; final serial E2E passed at M4.5 closure. Partial-phrase captions need word timing and are not guessed. Integrated (`a701c39`). |
+| NF-AC-23 | Library candidate reviewed and committed on Batch 2, with the cropped-anchor correction verified. Integrated (`a701c39`). Evidence and limits recorded in plan. |
+| NF-AC-24 | M4.4 committed `4b49ebe`: listening confirmation, captured import, two identity episodes, short output/revision/undo and verify evidence recorded in plan; prepared voice reused in the M4.5 trial export. Integrated (`a701c39`). No blanket visual/publication acceptance. |
+| NF-AC-25 | Met for the recorded trial: fresh-context authoring through the installed skill on a frozen engine, headline/tempo/object revisions, undo, reuse, a second profile on a silent episode, then owner visual acceptance and two verified exports (`e470d85201ba-4cbfbbf3-368`, `944926cda123-7c5f110b-bdc`) with covers from the finals. Exported, not published; rights stay open and episode-02 claims are an unsourced illustrative restatement by owner decision. Integrated (`a701c39`). |
+| NF-AC-26 | Met on macOS arm64: versioned local archive installed offline outside the checkout, byte-identical to the build, used for the whole trial including both exports; final verify and serial E2E passed. Not a registry release. Integrated (`a701c39`). |
+| NF-AC-27 | Install/update/launcher checks evidenced for isolated Codex/Claude directories; the shipped installer updated the production project skill. Fresh-context agents onboarded from the installed skill folder and launcher alone, but they were pointed at the folder: automatic host discovery/activation is still not observed. No personal installation or marketplace publication. Integrated (`a701c39`). |
 
 Not in MVP 2's closure requirements: spring, repeater, cross-scene continuity primitives, animated masks, native video layers, and word-level motion. These remain demand-led backlog. No GUI, hosted renderer, provider marketplace, publishing automation, universal cinematic style, or arbitrary untrusted project-code execution is promised.
 

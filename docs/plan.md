@@ -1,8 +1,8 @@
 # NaraFrame — Development Plan
 
-Revision 2.0 · 2026-10-15 · Integrated baseline `aab831cd0a30ea53ba6274556729060d8ff29ba5`
+Revision 2.1 · 2026-10-17 · Integrated baseline `a701c399211ba2584f439b59814e8a2d41614e0f` (MVP 2 Batch 3, PR #34)
 
-**Current step:** M4.5 closure executed 2026-10-16. Renderer fix committed `8b22c94`; both 1080 candidates owner-approved and exported (`e470d85201ba-4cbfbbf3-368` / `944926cda123-7c5f110b-bdc`, covers retaken from finals); episode-02 sourcing resolved as illustrative restatement (b); recoverable cleanup executed (archive `NaraFrame-archive/2026-10-16/`, originals in Trash); findings F1–F5 scheduled. Fatih authorized this evidence commit plus push/PR/squash-merge to main and confirmed the open publication-rights status (exported, not published). After merge, MVP 2 Batch 3 integration and M4 handoff are complete; remaining work is the F1–F5 backlog.
+**Current step:** MVP 2 (M4.1–M4.5) is integrated in main as `a701c39` (PR #34, squash-merged 2026-10-17). An independent read-only review of the closure returned ACCEPT_WITH_NOTES; its document corrections are recorded below. Next is the follow-up backlog F1–F6 in section 4, each with its own feature model and authorization, and then the closing task C1 (public README). Nothing in that backlog is started by this update.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -64,11 +64,11 @@ On 2026-10-15 he authorized the M4.4 commit and inclusion of distribution/cleanu
 
 | Task | Status | Dependencies | Main acceptance | Review batch |
 |---|---|---|---|---|
-| M4.1 Art direction and production vocabulary | OWNER_ACCEPTED / COMMITTED `eb7a7d5`; not in main | Integrated M3 baseline | NF-AC-21, fresh-context representative shot | 1 |
-| M4.2 Captions separate from narration | OWNER_ACCEPTED / COMMITTED `eb7a7d5`; final E2E deferred | M4.1 | NF-AC-22, none/selected/full with intact audio/reuse | 1 |
-| M4.3 Library and pinned assets | OWNER_REVIEWED / COMMITTED `9c01b1e` + correction `57ac91f`; not in main | M4.1–M4.2 committed/cherry-picked under owner exception | NF-AC-23, editable pinned imports and reuse/undo | 2 |
-| M4.4 Prepared audio and series identity | TECHNICALLY_READY / COMMITTED `4b49ebe`; not in main | Batch 2 cumulative commits cherry-picked through `15d67c1` | NF-AC-24, verified master/timing and reusable identity | 3 |
-| M4.5 Distribution, production trial and MVP 2 handoff | IMPLEMENTING packaging/onboarding; final costly gate separately confirmed | M4.1–M4.4 | NF-AC-25–27, approved MP4, consumer engine/skill installation and onboarding | 3 |
+| M4.1 Art direction and production vocabulary | OWNER_ACCEPTED / INTEGRATED `a701c39` | Integrated M3 baseline | NF-AC-21, fresh-context representative shot | 1 |
+| M4.2 Captions separate from narration | OWNER_ACCEPTED / INTEGRATED `a701c39`; final serial E2E passed | M4.1 | NF-AC-22, none/selected/full with intact audio/reuse | 1 |
+| M4.3 Library and pinned assets | OWNER_REVIEWED / INTEGRATED `a701c39` | M4.1–M4.2 committed/cherry-picked under owner exception | NF-AC-23, editable pinned imports and reuse/undo | 2 |
+| M4.4 Prepared audio and series identity | TECHNICALLY_READY / INTEGRATED `a701c39` | Batch 2 cumulative commits cherry-picked through `15d67c1` | NF-AC-24, verified master/timing and reusable identity | 3 |
+| M4.5 Distribution, production trial and MVP 2 handoff | CLOSED / INTEGRATED `a701c39`; exported, not published | M4.1–M4.4 | NF-AC-25–27, approved MP4, consumer engine/skill installation and onboarding | 3 |
 
 ### M4.1 — Art direction and production vocabulary
 
@@ -242,11 +242,11 @@ Expected: a verified local master imports unchanged with usable phrase/cue bindi
 | Step | Status | Work and acceptance |
 |---|---|---|
 | M4.5.1 Distribution discovery and model | AUTHORIZED model below | `refine-spec.md` section 8: private workspace/package/path gaps, official host installation routes, source CLI checks from `/private/tmp`, release authority/rights boundaries. |
-| M4.5.2 Installable engine artifact | READY_FOR_REVIEW | Versioned local 0.1.0 archive, offline consumer installation, doctor/schema/create/profile/library and one installed starter draft evidenced. macOS arm64 only; no public release or final export. |
-| M4.5.3 Canonical skill and host installation | FILESYSTEM_READY; host activation pending | Complete copied skill + receipt/launcher verified for isolated Codex/Claude roots; explicit update/removal, identity drift, local-edit/symlink/conflict and rollback checks pass. Actual fresh host discovery/invocation is not yet observed. |
-| M4.5.4 Product README and consumer guide | READY_FOR_REVIEW | English product README covers verified source/archive setup, both host installers and agent-independent usage, maintained starter, current authoring/revisions/audio/caption/approval contracts and limitations. File links checked; full final onboarding trial remains M4.5.5. |
-| M4.5.5 Frozen production/onboarding trial | ATTEMPT 2 READY_FOR_OWNER_REVIEW (attempt 1 retained; renderer fix uncommitted) | Freeze the installable engine, skill, profile/library/media and runtime; retain the original NF-AC-25 story/revision/profile requirements below. Demonstrate terminal-only source→preview→approved MP4 as well as fresh-context skill authoring. Use bounded examples and one consolidated review. |
-| M4.5.6 Cleanup, final gate and delivery | GATES PASSED (verify, serial E2E); delivery package drafted; cleanup proposed, not executed | After proof is preserved, inventory/archive remaining development experiments and disposable cache with checksum/location index and recovery instructions. Verify before recoverable removal; protect maintained samples/tests/library/history, all external projects, Git/worktrees/stash and AGENTS. Run one approved serial final E2E at closure, audit package contents and hand off versioned artifacts/limitations. Git integration and public publication remain separate. |
+| M4.5.2 Installable engine artifact | INTEGRATED (candidate-4 used for the trial exports) | Versioned local 0.1.0 archive, offline consumer installation, doctor/schema/create/profile/library and one installed starter draft evidenced. macOS arm64 only; no public release or final export. |
+| M4.5.3 Canonical skill and host installation | INTEGRATED; automatic host activation not observed | Complete copied skill + receipt/launcher verified for isolated Codex/Claude roots; explicit update/removal, identity drift, local-edit/symlink/conflict and rollback checks pass. Actual fresh host discovery/invocation is not yet observed. |
+| M4.5.4 Product README and consumer guide | INTEGRATED; public-facing rewrite scheduled as closing task C1 | English product README covers verified source/archive setup, both host installers and agent-independent usage, maintained starter, current authoring/revisions/audio/caption/approval contracts and limitations. File links checked; full final onboarding trial remains M4.5.5. |
+| M4.5.5 Frozen production/onboarding trial | CLOSED: attempt 2 exported and owner-accepted; attempt 1 retained; fix `8b22c94` | Freeze the installable engine, skill, profile/library/media and runtime; retain the original NF-AC-25 story/revision/profile requirements below. Demonstrate terminal-only source→preview→approved MP4 as well as fresh-context skill authoring. Use bounded examples and one consolidated review. |
+| M4.5.6 Cleanup, final gate and delivery | CLOSED: verify and serial E2E passed, covers retaken from finals, recoverable cleanup executed | After proof is preserved, inventory/archive remaining development experiments and disposable cache with checksum/location index and recovery instructions. Verify before recoverable removal; protect maintained samples/tests/library/history, all external projects, Git/worktrees/stash and AGENTS. Run one approved serial final E2E at closure, audit package contents and hand off versioned artifacts/limitations. Git integration and public publication remain separate. |
 
 **Packaging acceptance model (implemented local candidate and evidence below):**
 
@@ -323,6 +323,19 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 - Reliability: pixel repeatability, SIGKILL orphan handling, issue #16 diagnostics/cancellation, harness timeouts and full raw gate logs.
 - Targeted undo, fuller reuse reporting, leftover assets after undo, older final-key mismatch.
 - D-VIS, Bang Motion parity, publication rights, and unresolved historical claims.
+
+**MVP 2 follow-ups (scheduled 2026-10-16/17 from the M4.5 trial and review; evidence in the M4.5 closure section):**
+
+| ID | Finding | Expected outcome |
+|---|---|---|
+| F1 | Visual preflight samples scene-final/entry frames only, so text pushed off frame by a `match-cut` zoom, or entry motion that starts outside the safe area, passes validate and preview silently. | Text and safe-area checks cover transition and entry-motion frames, with a regression built from the trial seam. |
+| F2 | Narration cannot be removed through `edit`; the author had to delete `narration.json` by hand after `SCENE_NARRATION_MISSING`. | An ordinary, revision-recorded way to make a voiced project silent. |
+| F3 | `profile apply` lists `regenerate-narration` for a project without narration and does not name layers bound to palette slots, image plates or literal colours that clash with the new direction. | The dry run reports only relevant effects and names the affected layers and assets. |
+| F4 | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
+| F5 | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
+| F6 | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
+
+**Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
 Each needs its own demand/evidence and authorization. None is automatically a new task just because M4 is documented.
 
@@ -520,16 +533,16 @@ Caption-none revision yields `41f7b52ecd6d-0e97320a-516`; undo restores source a
 
 **Delivery package (drafts for owner review):** `NaraFrame-projects/mvp2/production/delivery/`, containing `REVIEW.md` (what to watch and listen for, with a decision line per episode), plus per episode `cover.png`, `cover-candidates.png` and `delivery-notes.md` (identity and hashes, claims, rights inventory, Indonesian post copy and alt text, limitations, and the export commands for the owner). The 1080 candidate MP4 SHA-256 values are `7665cab5…802da` (episode-01) and `d20d0e6d…f8ed` (episode-02). Covers come from DRAFT-labelled previews and must be retaken from the approved exports. Rights are not cleared for public use: synthetic plate, locally synthesised Damayanti voice from the repository fixture, agent-drawn artwork, system Arial/Helvetica.
 
-**Proposed recoverable cleanup (not executed; needs Fatih's confirmation):** archive with a checksum index under `NaraFrame-archive/<date>/`, then move to Trash. Candidates are the `work/m4-batch-3/m4-5-trial/repro/` episode copies and builds (209 MB; keep the extracted frames, summaries and two representative corrupt MP4s in place), `production/engine-attempt1/` (462 MB, after the attempt-2 export is accepted) and `work/m4-packaging/candidate-3/` (archive only, attempt-1 evidence). Episode projects, first drafts, reports, freezes, gate logs and maintained repository files stay where they are.
+**Recoverable cleanup proposal (approved and executed 2026-10-16; see closure execution below):** archive with a checksum index under `NaraFrame-archive/<date>/`, then move to Trash. Candidates are the `work/m4-batch-3/m4-5-trial/repro/` episode copies and builds (209 MB; keep the extracted frames, summaries and two representative corrupt MP4s in place), `production/engine-attempt1/` (462 MB, after the attempt-2 export is accepted) and `work/m4-packaging/candidate-3/` (archive only, attempt-1 evidence). Episode projects, first drafts, reports, freezes, gate logs and maintained repository files stay where they are.
 
 **Waiting for Fatih (decisions received 2026-10-16, execution below):**
 1. DONE — both 1080 candidates approved as is.
-2. DONE — renderer fix committed as `8b22c94` on `m4-batch-3` (17 paths: 15 source/test + `docs/spec.md` + `docs/plan.md`; AGENTS excluded). No push/PR/merge.
+2. DONE — renderer fix committed as `8b22c94` on `m4-batch-3` (17 paths: 15 source/test + `docs/spec.md` + `docs/plan.md`; AGENTS excluded). Integrated later through PR #34.
 3. DONE — episode-02 sourcing resolved as (b) illustrative restatement: the three on-screen statements restate `inputs/brief-02.md`/episode-01 narration with no new numbers/places/dates; episode stays "claims unsourced"; `contrast` profile unchanged and strict for future factual work; post copy must not add claims beyond the on-screen text.
 4. DONE — recoverable cleanup executed (evidence below).
-5. DONE — attempt-2 engine findings + lingering-process finding scheduled as backlog (section 4, new rows).
+5. DONE — attempt-2 engine findings + lingering-process finding scheduled as backlog F1–F5; the review added F6 (section 4).
 
-Integration (push/PR/merge) remains a separate request.
+Integration: Fatih authorized push/PR/squash-merge; PR #34 merged as `a701c39` on 2026-10-17.
 
 #### Closure execution — 2026-10-16 (fix commit `8b22c94`; this evidence follows in the same PR)
 
@@ -546,6 +559,17 @@ Integration (push/PR/merge) remains a separate request.
 - F3 `profile apply` report gaps (`regenerate-narration` on narration-less projects; unnamed palette/plate clashes).
 - F4 `shape.stroke.color` hex-only, undocumented `reveal`/`strong` semantics, skill missing revision-list/reuse explanation.
 - F5 node/Chrome crashpad processes lingering 7–9 min after parallel renders (undiagnosed, output unaffected).
+- F6 claim labelling is trust-based (added 2026-10-17 from the closure review): see section 4.
+
+#### Independent closure review — 2026-10-17
+
+Read-only review of `a701c39`; verdict **ACCEPT_WITH_NOTES**. Verified independently: refs and PR metadata (author Fatih, no AGENTS/work paths, no agent identity); the fix diff (no approval/trust/schema change; diagnosis knobs only in a negative test); a fresh build of main byte-identical to the installed candidate-4 (41/277/53 files); frame-integrity, publication and contract tests 57/57; both final MP4 hashes, manifests, pointers, approvals, `frameIntegrity`, empty `visualPreflight.issues`, ffprobe streams, full decode and an independent rescan; covers identical to final frames 30/33; 31 random archive entries across all roots; keepers present and still corrupt; removed paths gone; Trash folder present.
+
+Corrections recorded here rather than rewriting earlier evidence:
+- Spec and plan status rows had lagged behind the closure. They were updated in this revision.
+- The source-diff hash `3023d45c…` recorded with freeze 2 cannot be reproduced from the commits (`git diff eac6eea 8b22c94 --diff-filter=M -- packages scripts skills` gives `f7c824c1…`). Runtime identity is established by the byte-identical build. The five modified test files cannot be matched to the reviewed tree by that hash.
+- The archive `index.json` notes describe three `node_modules/.bin` entries of `engine-attempt1` as links left dangling. In the archive they are regular files with their targets' bytes, so a restore produces copies rather than symlinks. Run `npm rebuild` in a restored engine before use. The archive itself is not edited.
+- `~/.Trash/naraframe-cleanup-2026-10-16/` exists, but its contents are not readable from an agent session (macOS privacy), so the originals there were not re-hashed.
 
 ### Handoff template for an authorized M4 batch
 
