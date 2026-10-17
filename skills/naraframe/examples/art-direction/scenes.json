@@ -1,5 +1,11 @@
 {
   "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "example-feedback-source",
+      "title": "Example source: replace with the real study or document for your episode"
+    }
+  ],
   "scenes": [
     {
       "id": "object-explanation",
@@ -285,8 +291,9 @@
       "transition": {
         "type": "cut"
       },
-      "carriesFactualClaim": false,
-      "note": "Takeaway: feedback exposes what worked and what to practise. Object: separate paper, binding, notes, marks and progress stroke. Frame: fixed headline above sheet, takeaway below. Pace: notes arrive before progress trace; settled final hold. Cut follows the sheet's reading direction."
+      "carriesFactualClaim": true,
+      "sourceIds": ["example-feedback-source"],
+      "note": "Claim: the headline says feedback clarifies progress, a statement about the world, so the scene is labelled and cites the declared example source. Takeaway: feedback exposes what worked and what to practise. Object: separate paper, binding, notes, marks and progress stroke. Frame: fixed headline above sheet, takeaway below. Pace: notes arrive before progress trace; settled final hold. Cut follows the sheet's reading direction."
     },
     {
       "id": "route-diagram",
@@ -482,7 +489,7 @@
         "type": "cut"
       },
       "carriesFactualClaim": false,
-      "note": "Takeaway: feedback connects lesson and action. Object: three nodes linked by one path. Frame: diagonal downward reading direction with labels away from route. Choreography: trace the relation, then travel it; keep path fixed. Pace: follow ends with quiet hold. Cut keeps next-step focus."
+      "note": "No claim: the diagram labels a sequence and asserts no fact. Takeaway: feedback connects lesson and action. Object: three nodes linked by one path. Frame: diagonal downward reading direction with labels away from route. Choreography: trace the relation, then travel it; keep path fixed. Pace: follow ends with quiet hold. Cut keeps next-step focus."
     },
     {
       "id": "data-comparison",
@@ -696,7 +703,7 @@
         "type": "cut"
       },
       "carriesFactualClaim": false,
-      "note": "Takeaway: comparison needs a shared baseline and unit. Object: two bars on one baseline, illustrative 2 and 5 values. Hierarchy: headline, dominant quantities, labels. Pace: earlier first, later second, then hold. Keep unit, source and bar scaling coherent when adapting; cut separates this illustrative comparison."
+      "note": "No claim: the 2 and 5 values are marked illustrative, not results. Takeaway: comparison needs a shared baseline and unit. Object: two bars on one baseline, illustrative 2 and 5 values. Hierarchy: headline, dominant quantities, labels. Pace: earlier first, later second, then hold. Keep unit, source and bar scaling coherent when adapting; cut separates this illustrative comparison."
     },
     {
       "id": "spatial-pullback",
@@ -846,7 +853,7 @@
         "type": "cut"
       },
       "carriesFactualClaim": false,
-      "note": "Takeaway: one feedback note belongs to a continuing journey. Object: three world nodes and connecting strokes. Start close on centre node; pull back to reveal neighbours. Overlay headline/context stay fixed. Pace: still entry, smooth expansion, then settle. Neutral cut changes scale intentionally.",
+      "note": "No claim: a metaphor with no checkable fact. Takeaway: one feedback note belongs to a continuing journey. Object: three world nodes and connecting strokes. Start close on centre node; pull back to reveal neighbours. Overlay headline/context stay fixed. Pace: still entry, smooth expansion, then settle. Neutral cut changes scale intentionally.",
       "camera": {
         "initial": {
           "x": 0,
@@ -1019,7 +1026,7 @@
         "type": "cut"
       },
       "carriesFactualClaim": false,
-      "note": "Takeaway: feedback points to an actionable next step. Object: independently drawn ascending stair treads; headline turning phrase uses profile accent. Framing leaves text separate from staircase. Pace: steps reveal, phrase emphasis, settled hold. A type-led statement is deliberate here, not the default for every shot."
+      "note": "No claim: the headline urges an action and states no checkable fact. Takeaway: feedback points to an actionable next step. Object: independently drawn ascending stair treads; headline turning phrase uses profile accent. Framing leaves text separate from staircase. Pace: steps reveal, phrase emphasis, settled hold. A type-led statement is deliberate here, not the default for every shot."
     },
     {
       "id": "quiet-shot",
@@ -1118,7 +1125,7 @@
         "type": "cut"
       },
       "carriesFactualClaim": false,
-      "note": "Takeaway: let one next action land. Object: a still written note. Hierarchy: dominant action, supporting context. Fixed framing; no camera or beats. Quiet hold is intentional. Neutral cut is correct when moving to another thought, not a missing transition."
+      "note": "No claim: an instruction to the viewer. Takeaway: let one next action land. Object: a still written note. Hierarchy: dominant action, supporting context. Fixed framing; no camera or beats. Quiet hold is intentional. Neutral cut is correct when moving to another thought, not a missing transition."
     }
   ]
 }

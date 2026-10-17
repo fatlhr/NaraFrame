@@ -48,7 +48,23 @@ for (const scene of document.scenes) {
   required(scene, sceneSchema);
   assert.equal(scene.visual.type, "composition");
   assert.ok(scene.durationMs >= 8000 && scene.durationMs <= 12000);
-  assert.equal(scene.carriesFactualClaim, false);
+  // Only the object-explanation headline states a fact: it is labelled and
+  // cites a declared example source. The other five make no claim.
+  assert.equal(
+    scene.carriesFactualClaim,
+    scene.id === "object-explanation",
+    `${scene.id}: claim label`,
+  );
+  for (const sourceId of scene.sourceIds ?? [])
+    assert.ok(
+      document.sources?.some((source) => source.id === sourceId),
+      `${scene.id}: cites undeclared source ${sourceId}`,
+    );
+  assert.equal(
+    scene.carriesFactualClaim,
+    (scene.sourceIds ?? []).length > 0,
+    `${scene.id}: a labelled claim cites a source`,
+  );
   const layers = scene.visual.layers;
   assert.equal(new Set(layers.map((layer) => layer.id)).size, layers.length);
   for (const layer of layers) {

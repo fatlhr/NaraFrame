@@ -105,7 +105,9 @@ export const checkProvenance = (
 /**
  * Checks every block and every scene against the union of sources declared in
  * narration.json and scenes.json, so a claim shown on screen is as accountable
- * as one that is spoken. A source id declared twice is an error.
+ * as one that is spoken. A source id declared twice is an error. When the
+ * profile requires sourcing and nothing is labelled as a claim, reports one
+ * info note (`CLAIMS_UNLABELLED`); it never blocks.
  */
 export const checkSourceProvenance = (source: PlanSource): Issue[] => {
   const requireSourcing = Boolean(source.profile.production.requireSourcing);
@@ -148,5 +150,25 @@ export const checkSourceProvenance = (source: PlanSource): Issue[] => {
     })),
   ];
 
-  return [...issues, ...checkClaimants(claimants, declared, requireSourcing)];
+  issues.push(...checkClaimants(claimants, declared, requireSourcing));
+
+  // The engine never detects claims: it trusts the labels. A profile that
+  // requires sourcing but sees no label would otherwise pass in silence.
+  if (
+    requireSourcing &&
+    !claimants.some((claimant) => claimant.carriesFactualClaim)
+  ) {
+    issues.push(
+      issue(
+        "CLAIMS_UNLABELLED",
+        "info",
+        "scenes.json",
+        "/scenes",
+        "The profile requires sourcing, but no scene or narration block is labelled carriesFactualClaim: true. The engine cannot see claims, so this only means none was declared.",
+        "Confirm the episode states no factual claim (causes, quantities, dates, places, named people or events), or set carriesFactualClaim: true on each scene or block that does and cite a declared source in sourceIds.",
+      ),
+    );
+  }
+
+  return issues;
 };
