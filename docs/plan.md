@@ -334,8 +334,9 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 | F4 (DONE, B4) | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
 | F5 | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
 | F6 (DONE, B2) | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
+| F7 | A skill without a working engine fails poorly. The launcher prints a Node stack trace before `SKILL_ENGINE_MISSING` (its `version` probe inherits stderr) and gives no next step. A skill folder copied without an engine (for example from GitHub) has no install receipt; it is sent to `pnpm naraframe`, fails, and reports a "system blocker" with no concrete install route. | Missing-engine paths end in one clean message. The skill opens with an engine check; when no engine is available the agent offers to install it and, after one yes from the user, performs the setup itself (manual steps stay documented). A clearly labelled director-only plan is available only if the user prefers to wait (see the B6 model). |
 
-**Delivery order (owner, 2026-10-17):** one batch per relevance, each confirmed by Fatih before commit, push and squash-merge: B1 = F1, B2 = F6, B3 = F2 + F3, B4 = F4, B5 = F5, then C1.
+**Delivery order (owner, 2026-10-17):** one batch per relevance, each confirmed by Fatih before commit, push and squash-merge: B1 = F1, B2 = F6, B3 = F2 + F3, B4 = F4, B5 = F5, then B6 = F7 together with C1, because the public README and the skill must give the same install route.
 
 **B1 / F1 model — motion-aware text checks in visual preflight.** Cause: `TEXT_OUTSIDE_CANVAS` in `visual-preflight.ts` runs only when a scene has a camera or a `transform`/`follow` beat, so a `match-cut` zoom (scene transition state) or an entry `reveal` never reaches it, although the transition's final frame is sampled. Model:
 - The canvas check (error, existing `TEXT_OUTSIDE_CANVAS`) runs on every sampled frame for text at on-screen opacity ≥ 0.9, folding layer motion, group, plane, camera and scene-transition state as today. Fading `push-through` stays below that threshold where it travels.
@@ -450,6 +451,39 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   - Revision kinds are `baseline`, `edit` and `manual-capture`; a profile apply shows as `edit` and its summary names it.
 - **Gates:** `pnpm verify` exit 0 (Biome 231, unit 352/352, integration 463/463). E2E is not run because no render key or compiled draft changed. Logs are in `work/gate-logs/b4/`.
 - **Left for later:** shadow colours stay hex-only. `README.md` lacks `history`, and C1 rewrites it.
+
+**B6 / F7 model — a skill that still helps without an engine (draft, to be confirmed when B6 starts).**
+- **Engine check first.** The skill decides its route before any authoring:
+  - installed launcher (receipt present);
+  - built source checkout;
+  - no engine.
+  The check is a quiet probe (`doctor --json` through the chosen route) and treats a failure as "no engine", not as an error to retry.
+- **No engine → the agent installs it (primary route).** The user should not need to read documentation first. The agent explains in one short message:
+  - that NaraFrame needs its local engine to check and render videos;
+  - what it will install, where (default a per-user folder such as `~/.naraframe/engine/<version>`), roughly how much space and time it takes;
+  - which system tools are missing.
+  After **one** yes from the user, it runs the whole setup itself:
+  - check prerequisites (pinned Node, Chrome/Chromium, FFmpeg/FFprobe), proposing the platform's usual install for any that are missing;
+  - fetch the pinned engine version from the project's published source and verify its checksum before use;
+  - install offline-style into the chosen folder;
+  - run `doctor`;
+  - bind the skill through the shipped installer, adopting a copied skill folder when its files match the canonical skill and refusing edited ones as today.
+
+  Manual installation stays documented for people who prefer it. Nothing is fetched or installed before that yes, and a failed step leaves an existing install untouched and reports the one next step.
+- **Distribution prerequisite.** Agent-led setup needs a published, checksummed engine source that the skill can name. Options are a release asset of the packed archive or a tagged source build. Publishing it, and the licence it ships under, are owner decisions tied to C1. Until then the route can run only from a local archive or a checkout.
+- **Director-only mode, only on request.** If the user wants to continue without the engine, the skill produces a planning document instead of a project:
+  - audience and takeaway;
+  - a shot rundown with one explanatory object per beat;
+  - on-screen text and caption choices;
+  - claims that need sources;
+  - timing intent.
+  It is marked "not validated, not rendered". It writes no `scenes.json` or other engine source, because the schema comes from the engine and an unvalidated source would look finished when it is not. Once an engine is installed, the plan is the brief for a normal project.
+- **Launcher:** the `version` probe no longer inherits the engine's stderr. Every bootstrap failure prints one line with its code plus a next step pointing to `installation.md`, keeping exit 2.
+- **Acceptance:**
+  1. A copied skill folder with no engine, in a fresh agent session, asks once, installs the engine and binds the skill after a yes, then runs `doctor` green. That run happens on a clean user account or machine profile, without reading documentation.
+  2. Declining gives a director-only plan only when asked.
+  3. An installed skill whose engine was removed prints one clean line with a next step, and no stack trace.
+  4. Installer and launcher regressions stay green.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
