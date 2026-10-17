@@ -13,6 +13,10 @@ vi.mock("@remotion/bundler", () => ({
 }));
 vi.mock("@remotion/renderer", () => ({
   makeCancelSignal: () => ({ cancel: () => undefined, cancelSignal: {} }),
+  openBrowser: vi.fn(async () => ({
+    close: vi.fn(async () => undefined),
+    runner: { forgetEventLoop: vi.fn() },
+  })),
   renderMedia,
   selectComposition,
 }));

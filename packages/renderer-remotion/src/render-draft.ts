@@ -24,6 +24,7 @@ import {
 import { bundle } from "@remotion/bundler";
 import {
   makeCancelSignal,
+  openBrowser,
   renderMedia,
   selectComposition,
 } from "@remotion/renderer";
@@ -43,6 +44,39 @@ import {
  * at a cost of a few seconds per draft.
  */
 export const RENDER_CONCURRENCY = 1;
+
+/** The part of Remotion's browser handle that releasing it needs. */
+export interface ReleasableBrowser {
+  close(options: { silent: boolean }): Promise<void>;
+  runner: { forgetEventLoop(): void };
+}
+
+/**
+ * Chrome is started with piped stdout and stderr, and Remotion keeps those
+ * pipes referenced by the event loop. Chrome hands the same descriptors to
+ * helpers it starts outside its own process group (its crash handler and the
+ * Google updater wake-up), and those can outlive Chrome by minutes. Until the
+ * last holder exits, the pipes stay open and the command stays alive even
+ * though it has already printed its result. Closing the browser ourselves and
+ * then dropping the pipes from the event loop lets the command end when its
+ * own work is done; the helpers are left to exit on their own.
+ */
+export const releaseBrowser = async (
+  browser: ReleasableBrowser,
+): Promise<void> => {
+  try {
+    await browser.close({ silent: true });
+  } catch {
+    // Closing runs after the render has already succeeded or failed; a browser
+    // that is already gone must not replace that outcome.
+  }
+  try {
+    browser.runner.forgetEventLoop();
+  } catch {
+    // The transport socket is already gone after close; the process and its
+    // pipes were unreferenced before that step ran.
+  }
+};
 
 const macChrome =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -302,13 +336,28 @@ export const renderDraft = async ({
       await rm(recipeEntry.directory, { recursive: true, force: true });
     }
   }
-  const composition = await selectComposition({
-    serveUrl,
-    id: "NaraFrameDraft",
-    inputProps: draft,
+  if (signal?.aborted) {
+    throw interrupted();
+  }
+  // Each browser is opened here and closed here whether its step finishes,
+  // fails or is interrupted, so no handle on it outlives the command.
+  const selectBrowser = await openBrowser("chrome", {
     browserExecutable,
     logLevel: "warn",
   });
+  let composition: Awaited<ReturnType<typeof selectComposition>>;
+  try {
+    composition = await selectComposition({
+      serveUrl,
+      id: "NaraFrameDraft",
+      inputProps: draft,
+      puppeteerInstance: selectBrowser,
+      browserExecutable,
+      logLevel: "warn",
+    });
+  } finally {
+    await releaseBrowser(selectBrowser);
+  }
   const preflight = preflightFromComposition(composition);
   const blockingIssues = preflight.report.issues.filter(
     (issue) => issue.severity === "error",
@@ -320,86 +369,96 @@ export const renderDraft = async ({
   if (signal?.aborted) {
     throw interrupted();
   }
-  const cancellation = makeCancelSignal();
-  const onAbort = () => cancellation.cancel();
-  signal?.addEventListener("abort", onAbort, { once: true });
-  const hasNarration = Boolean(
-    preflight.draft.narration || preflight.draft.soundtrack,
-  );
-  // Remotion requires a .mkv/.mov filename when mixing PCM. Our stitcher
-  // encodes that PCM directly into MP4, then publishes it at the requested path.
-  let audioRenderDirectory: string | null = null;
-  try {
-    if (hasNarration) {
-      audioRenderDirectory = await mkdtemp(
-        join(dirname(outputPath), ".audio-render-"),
-      );
-    }
-    await renderMedia({
-      serveUrl,
-      composition,
-      inputProps: preflight.draft,
-      outputLocation: audioRenderDirectory
-        ? join(audioRenderDirectory, "render.mkv")
-        : outputPath,
-      browserExecutable,
-      codec: "h264",
-      muted: !hasNarration,
-      // Remotion's AAC/ADTS intermediate loses priming timestamps on copy.
-      // Keep the mix lossless and encode once into the final MP4 instead.
-      ...(hasNarration
-        ? {
-            audioCodec: "pcm-16" as const,
-            ffmpegOverride: encodeAudioWhenMuxing,
-          }
-        : {}),
-      overwrite: true,
-      concurrency: RENDER_CONCURRENCY,
-      logLevel: "warn",
-      cancelSignal: cancellation.cancelSignal,
-      onProgress: ({ progress }) => onProgress?.(progress),
-    });
-    if (audioRenderDirectory) {
-      await rename(join(audioRenderDirectory, "render.mkv"), outputPath);
-    }
-  } catch (error) {
-    if (signal?.aborted) {
-      throw interrupted();
-    }
-    const families = fontFailureFrom(error);
-    if (families) {
-      // A face that never became usable in the frame context is a source
-      // problem with a fix the author can act on, not an opaque renderer
-      // fault, so it is reported as one instead of a redacted system error.
-      throw new VisualPreflightError([
-        {
-          code: "FONT_NOT_LOADED",
-          severity: "error",
-          responsible: "user",
-          artifact: "profile.lock.json",
-          path: "/assets",
-          message: `The render context could not use the bundled font(s): ${families}.`,
-          suggestion:
-            "Check that each declared font asset is a valid font file whose hash matches, then preview again.",
-        },
-      ]);
-    }
-    throw error;
-  } finally {
-    signal?.removeEventListener("abort", onAbort);
-    if (audioRenderDirectory) {
-      await rm(audioRenderDirectory, { recursive: true, force: true });
-    }
-  }
-
-  return {
-    outputPath,
-    durationInFrames: composition.durationInFrames,
-    width: composition.width,
-    height: composition.height,
-    fps: composition.fps,
+  const browser = await openBrowser("chrome", {
     browserExecutable,
-    remotionVersion,
-    visualPreflight: preflight.report,
-  };
+    forceDeviceScaleFactor: 1,
+    logLevel: "warn",
+  });
+  try {
+    const cancellation = makeCancelSignal();
+    const onAbort = () => cancellation.cancel();
+    signal?.addEventListener("abort", onAbort, { once: true });
+    const hasNarration = Boolean(
+      preflight.draft.narration || preflight.draft.soundtrack,
+    );
+    // Remotion requires a .mkv/.mov filename when mixing PCM. Our stitcher
+    // encodes that PCM directly into MP4, then publishes it at the requested path.
+    let audioRenderDirectory: string | null = null;
+    try {
+      if (hasNarration) {
+        audioRenderDirectory = await mkdtemp(
+          join(dirname(outputPath), ".audio-render-"),
+        );
+      }
+      await renderMedia({
+        serveUrl,
+        composition,
+        inputProps: preflight.draft,
+        outputLocation: audioRenderDirectory
+          ? join(audioRenderDirectory, "render.mkv")
+          : outputPath,
+        puppeteerInstance: browser,
+        browserExecutable,
+        codec: "h264",
+        muted: !hasNarration,
+        // Remotion's AAC/ADTS intermediate loses priming timestamps on copy.
+        // Keep the mix lossless and encode once into the final MP4 instead.
+        ...(hasNarration
+          ? {
+              audioCodec: "pcm-16" as const,
+              ffmpegOverride: encodeAudioWhenMuxing,
+            }
+          : {}),
+        overwrite: true,
+        concurrency: RENDER_CONCURRENCY,
+        logLevel: "warn",
+        cancelSignal: cancellation.cancelSignal,
+        onProgress: ({ progress }) => onProgress?.(progress),
+      });
+      if (audioRenderDirectory) {
+        await rename(join(audioRenderDirectory, "render.mkv"), outputPath);
+      }
+    } catch (error) {
+      if (signal?.aborted) {
+        throw interrupted();
+      }
+      const families = fontFailureFrom(error);
+      if (families) {
+        // A face that never became usable in the frame context is a source
+        // problem with a fix the author can act on, not an opaque renderer
+        // fault, so it is reported as one instead of a redacted system error.
+        throw new VisualPreflightError([
+          {
+            code: "FONT_NOT_LOADED",
+            severity: "error",
+            responsible: "user",
+            artifact: "profile.lock.json",
+            path: "/assets",
+            message: `The render context could not use the bundled font(s): ${families}.`,
+            suggestion:
+              "Check that each declared font asset is a valid font file whose hash matches, then preview again.",
+          },
+        ]);
+      }
+      throw error;
+    } finally {
+      signal?.removeEventListener("abort", onAbort);
+      if (audioRenderDirectory) {
+        await rm(audioRenderDirectory, { recursive: true, force: true });
+      }
+    }
+
+    return {
+      outputPath,
+      durationInFrames: composition.durationInFrames,
+      width: composition.width,
+      height: composition.height,
+      fps: composition.fps,
+      browserExecutable,
+      remotionVersion,
+      visualPreflight: preflight.report,
+    };
+  } finally {
+    await releaseBrowser(browser);
+  }
 };
