@@ -1,8 +1,8 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 0.8 · 2026-10-13 · Code baseline `e008490`
+Revision 1.0 · 2026-10-15 · Integrated baseline `aab831c`; cumulative MVP 2 candidate on `m4-batch-3`, M4.4 committed `4b49ebe`
 
-MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is planned as M4. Nothing in this revision advertises a planned capability as available.
+MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. Fatih accepted Batch 1 (M4.1–M4.2) and authorized its commit and the remaining development batches on 2026-10-14. Candidates remain outside main until final acceptance; plan records the batch cherry-pick workflow and E2E deferral. M4.3 and its cropped-anchor correction are carried into Batch 3; M4.4 is committed as `4b49ebe`. On 2026-10-15 Fatih added independent engine distribution, Claude/Codex skill access, onboarding and recoverable experiment cleanup to the current scope. M4.5.2–4 has a local packaging/onboarding candidate after his “next” authorization. Frozen production, final E2E/export and recoverable removal retain their separate checkpoint authority.
 
 ## 1. Product
 
@@ -16,7 +16,15 @@ NaraFrame turns a brief, a profile, and local media into editable motion videos.
 
 A **profile** describes brand identity and production preferences. A **pattern** describes a reusable way to explain something. An **episode** supplies its story, copy, assets, and timing. These are different authorities: changing an episode must not silently change its profile or a shared library.
 
-The user works through briefs and ordinary revisions. The agent translates them into project data or parameters of an owner-trusted recipe. The user should not need to read the renderer or understand the schema to make a video.
+With a skill-capable agent, the user works through briefs and ordinary revisions. The agent translates them into project data or parameters of an owner-trusted recipe. The user should not need to read the renderer or understand the schema to make a video through that route. The engine also accepts authored project data directly through its CLI; that route requires neither Claude nor Codex.
+
+### Distribution and access contract — M4.5 scope addition
+
+The engine is an independent local CLI. The canonical NaraFrame skill is an optional authoring layer over that CLI, not a runtime dependency. Scripts, another agent, and future interfaces use the same public project files, structured results and approval/trust rules. A direct CLI workflow is technical authoring, not a promise of prompt-to-video without an agent or of an existing GUI.
+
+Prepare a versioned, installable engine artifact with a `naraframe` executable, runtime packages/resources, bundled profiles/library, a redistributable starter and documented prerequisites. It must run from a user's project directory without depending on this development checkout, its `work/`, private fixture locations or personal paths. Skill distribution carries all routed references/examples from one maintained source, with local install paths/adapters for Claude Code and Codex, a compatible engine version declaration, and conflict-safe update/removal. Host plugins may wrap the skill; they must not become necessary for direct CLI use.
+
+Current source installation remains supported. A packed artifact is not an npm publication, public release or marketplace acceptance. External publication needs its own authorization, code-license decision and resource/dependency rights review. macOS is the initial evidenced platform; Windows/Linux support is not inferred from portable file paths. Engine rendering remains local, with external browser/FFmpeg and provider boundaries documented.
 
 ### Product principles
 
@@ -63,6 +71,16 @@ Recipe binding checks cover only declared parameter pointers. They compare brand
 
 Source revisions, media hashes, profile state, timing, and relevant render dependencies determine reuse. Approval is tied to a source revision and preview. An edit can make an approval stale even when some media remains reusable. Visual-only revisions must not regenerate unchanged voice.
 
+### Library authoring — Batch 2 candidate
+
+`library inspect <catalog.json>` exposes a local catalog's patterns, exact versions, provenance and captured dependency hashes. `library stage <project> --from <catalog> --pattern <id> --version <version> --instance <id> --scene <id> --params <json>` captures verified bytes into new staging without changing the project. Its returned staging/revision feed the existing guarded `edit` transaction. A catalog is passive authoring data, not a live renderer dependency or a new motion runtime.
+
+Optional `libraryImports` in project configuration pins the selected template, parameter contract/values, catalog identity/hash and local asset/recipe receipts. Local re-instantiation omits the catalog path; catalog updates require explicit selection and `--update`. Ordinary scene edits are preserved: a changed scene refuses regeneration instead of being overwritten. Copy, pose and crop substitutions become ordinary source revisions; existing undo, approval staleness and build reuse remain authoritative. Import captures the bounded catalog's entire dependency set, not an optimized per-pattern closure. Recipe code remains separately project/hash-trusted; trust is never imported.
+
+Ready PNG assets may carry opt-in `layout` in source pixels: real dimensions, viewport/ROI, focal point, padding and named anchors. Dimensions and bounds are validated. ROI/padding are descriptive; cropping uses an explicit source-pixel image-layer `crop`. A pure browser-safe placement helper is shared by compiler, renderer/preflight and staging. Cropped compiled slots carry `naraframe-image-crop/1`; uncropped legacy visuals keep their former path and keys, without a global renderer bump.
+
+Pattern attachments place unrotated sibling PNG props using named anchors under one supported absolute parent/plane. Staging emits literal local frames, not a dynamic rig. Unsupported cross-parent, chained/cyclic attachment or independent geometric motion is refused. Use a shared parent for assembled motion and re-stage when pose/framing changes. Source-pixel crop units do not change between 540 and 1080 output. Technical schematic examples do not establish finished artwork quality, human identity, publishing rights or visual parity.
+
 ## 4. Composition and motion available today
 
 ### Declarative composition
@@ -95,16 +113,28 @@ Projects support `voice`, `music`, and `silent` modes. Explicit project mode tak
 
 Imported narration can be retained as a master or as block media. Phrase anchors refer to verified timing and text bindings. Silence detection alone is not proof of the words spoken. Scene/local offsets are not word-level synchronization. Optional word data does not establish enforced native word-level motion.
 
+### Prepared import — Batch 3 candidate
+
+`audio stage <project> --from <clip> --timing <package.json> --block <id>` captures and probes local audio bytes, then returns staging for guarded `edit`. It neither mutates the project nor alters the take. The passive package declares millisecond-local phrase/optional word timing, the audio hash, intended text, alignment provenance, uncertainties, trailing hold and pending/verified listening state. Intended text must match the existing block; voice intent and profile locks remain authoritative.
+
+An opt-in ready-block `prepared` receipt binds the captured audio, normalized text, measured duration and local timing. Verified state requires a named listening reviewer and timestamp; this is an attestation, not automatic recognition. Pending state permits draft review but blocks production and must not claim a confirmed generation text binding. Changed receipt bindings are rejected. Legacy blocks retain their old shape and behavior. `pauseAfterMs` is excluded from the listening timing hash because it changes a visual hold after the unchanged clip. Receipt-only changes still affect source/approval authority, not identical pixels or voice generation identity.
+
+The reusable `study-notes` catalog expands an intro overlay, persistent signature and sign-off in that trailing hold into ordinary declarative source. Version and complete episode values are pinned. Intro omission inserts no time and shifts audio by zero; changing the hold explicitly changes duration. This preset does not introduce standalone unvoiced pre-roll, new narration-clock semantics, recipe trust or an identity runtime.
+
 Audio boundary evidence on the integrated encoding path distinguishes input sample boundaries from encoded/container durations. Visual changes preserve unchanged masters. Changing spoken content in a single master can require broader replacement or re-alignment than a block-level revision.
 
-Current captions use the existing phrase/correction and profile style contracts. Explicit `none/selected/full`, independent caption layout controls, and their no-layout-reservation guarantees are **planned in M4.2**, not available via a hidden-glyph workaround. Empty caption strings, zero-width glyphs, or moving caption UI away are not supported substitutes for that feature.
+The M4.2 candidate adds `captions.json.mode`: `none`, `selected`, or `full`. It overrides an unlocked profile `render.captions.mode`; omission in both preserves legacy `full`. Selected entries name a measured block/phrase and optional phrase-local `startOffsetMs`/`endOffsetMs`, a positive half-open interval bounded by that phrase. Empty selected entries display nothing. Unknown targets and invalid windows are rejected even when currently inactive. No word timing is invented.
+
+Caption display corrections never rewrite narration. Profile caption style defaults are inherited; existing project style overrides obey declared allow/lock paths. A lock on `render.captions` or `render.captions.mode` also prevents a differing source mode. Style uses design-pixel font size, side/bottom offsets, max lines, scrim opacity and line-height multiplier; renderer and preflight share resolved styling and measured wrapping. None/empty selected omit captions entirely, including their glyphs, scrim, preflight boxes and sample frames; the scene layout and narration remain intact. Removing only the scrim leaves the caption text/collision region.
+
+Full/scoped captions share global rounded frame windows whenever the timeline is complete, then clip at scene boundaries, including windows shorter than a frame. Local fallback is used only when a global timeline cannot be placed. Visual policy/style/cue changes affect render keys, not voice generation keys. Candidate renderer identity is `naraframe-draft/12`. Preview/render measure fonts; Node plan validation checks structure, references, timing and locks, not text fit. Empty strings, invisible glyphs and off-canvas caption UI remain unsupported substitutes for a display policy.
 
 External providers remain outside the engine. Existing local import/generation workflows do not authorize a new paid call. Music/SFX rights and listening review remain owner/editorial responsibilities.
 
 ## 6. Runtime, integrity, and reuse
 
 - Core is independent of Remotion. Dependency direction is CLI → core/renderer and renderer → core.
-- Runtime is pinned: Node `24.20.0`, pnpm `12.3.4`, Remotion `4.0.521`. The current render identity is `naraframe-draft/11`.
+- Runtime is pinned: Node `24.20.0`, pnpm `12.3.4`, Remotion `4.0.521`. Integrated main uses `naraframe-draft/11`; the committed MVP 2 candidate uses `naraframe-draft/12`.
 - Preview supports 540 and native 1080 resolution with distinct render keys. Final export is vertical H.264 MP4; audio streams follow the declared mode.
 - Render identity, profile/font/vector/camera/recipe dependencies, and scope participate in relevant cache keys. Runtime changes that invalidate old results require deliberate identity/key treatment.
 - Publication verifies complete artifacts, media streams, hashes, and metadata before advancing pointers. Failure must not publish a partial build.
@@ -112,7 +142,7 @@ External providers remain outside the engine. Existing local import/generation w
 - Paths, hashes, and symlinks are checked at file boundaries. User source and unrelated work must not be discarded to repair state.
 - Pixel/MP4 repeatability is not guaranteed by green tests: historical variants remain an open reliability item.
 
-## 7. MVP 2 — Skill-led recurring production (PLANNED)
+## 7. MVP 2 — Skill-led recurring production (IN DEVELOPMENT)
 
 M4 improves the authoring system first, then adds only the supporting contracts required by repeated production. Implementation and integration require separate authorization.
 
@@ -123,6 +153,8 @@ M4 improves the authoring system first, then adds only the supporting contracts 
 | NF-AC-23 | M4.3 | Versioned library-first authoring, pinned asset/catalog snapshots, editable copy/assets/pose, explicit update, undo/reuse; old projects remain unchanged. |
 | NF-AC-24 | M4.4 | Verified prepared audio/timing import, reusable series identity and recorded overrides; visual revisions leave the master intact. |
 | NF-AC-25 | M4.5 | Frozen fresh-context production through approved MP4, ordinary revisions/undo/reuse and a second profile; motion/editorial/packaging evidence with separate acceptance states. |
+| NF-AC-26 | M4.5 | Install a versioned engine artifact in an isolated consumer directory; CLI and included starter work without the source checkout or agent; preserve JSON/approval/trust contracts. |
+| NF-AC-27 | M4.5 | Install/update the complete skill bundle for Claude Code and Codex; references resolve, engine compatibility is checked, onboarding and terminal-only documentation work from the consumer directory. Actual host activation evidence is distinguished from filesystem/install tests. |
 
 The numbered tasks, concrete acceptance commands, integration gates, and handoff live in [plan.md](plan.md). The reasoning and adopted/rejected production lessons live in [refine-spec.md](refine-spec.md).
 
@@ -140,7 +172,13 @@ M0–M3 acceptance and chronological evidence are retained in [history](history/
 | NF-AC-19 | Parameterized Remotion route accepted; Bang Motion equivalence OPEN. |
 | NF-AC-20 | Repeated LBC production ACCEPTED_INTERNAL, not cleared for public use of photos. |
 | M3.E/F | Integrated explicit recipe identity bindings and opt-in text fit, with their stated coverage limits. |
-| NF-AC-21–25 | PLANNED; no MVP 2 execution evidence yet. |
+| NF-AC-21 | Owner accepted the representative authoring evidence on 2026-10-14; supported fresh-context trial and its limits recorded in plan. Candidate not integrated. |
+| NF-AC-22 | Owner confirmed caption behavior on 2026-10-14; manual/audio/reuse and feature E2E evidence recorded. Full E2E deferred to MVP 2 closure; candidate not integrated. |
+| NF-AC-23 | Library candidate reviewed and committed on Batch 2, with the cropped-anchor correction verified; not integrated into main. Evidence and limits recorded in plan. |
+| NF-AC-24 | M4.4 technically ready and committed `4b49ebe` on Batch 3: listening confirmation, captured import, two identity episodes, short output/revision/undo and verify evidence recorded in plan. No final export or blanket visual/publication acceptance. |
+| NF-AC-25 | Trial attempt 2 on freeze 2 (after the renderer frame-corruption fix) evidenced: fresh-context authoring through the installed skill, headline/tempo/object revisions, undo, reuse, a second profile on a silent episode, 1080 candidates and delivery notes. Partial-phrase captioning declined honestly (no word timing). Owner visual acceptance and approved export pending; no publication approval inferred. |
+| NF-AC-26 | Local macOS arm64 archive installed offline outside the checkout; public CLI, included starter and one short draft preview evidenced. Candidate-4 (render identity `naraframe-draft/13`) installed offline into the production root, byte-identical to the build, and used for the whole attempt-2 trial. Final verify and serial E2E passed. Approved export pending. |
+| NF-AC-27 | Canonical install/update/launcher checks evidenced for isolated Codex/Claude directories; the shipped installer updated the production project skill to candidate-4. Fresh-context agents onboarded from the installed skill folder and launcher alone, but they were pointed at the folder: automatic host discovery/activation is still not observed. No personal installation or marketplace publication. |
 
 Not in MVP 2's closure requirements: spring, repeater, cross-scene continuity primitives, animated masks, native video layers, and word-level motion. These remain demand-led backlog. No GUI, hosted renderer, provider marketplace, publishing automation, universal cinematic style, or arbitrary untrusted project-code execution is promised.
 

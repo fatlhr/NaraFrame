@@ -1,6 +1,7 @@
 import type { Issue } from "../model/issue.js";
 import { sha256Text } from "../project/hash.js";
 import type { PlanSource } from "../schema/export-schema.js";
+import { preparedTimingHash } from "./prepared-audio.js";
 
 /** Hash of the intended speech, ignoring only whitespace differences. */
 export const narrationTextHash = (text: string): string =>
@@ -42,6 +43,61 @@ export const checkVoiceBindings = (source: PlanSource): Issue[] => {
 
     const expected = narrationTextHash(block.text);
     const generation = "generation" in asset ? asset.generation : undefined;
+    if (block.prepared) {
+      const prepared = block.prepared;
+      if (
+        prepared.audioSha256 !== asset.sha256 ||
+        prepared.textSha256 !== expected ||
+        prepared.audioDurationMs !== block.audioDurationMs ||
+        prepared.timingSha256 !== preparedTimingHash(block)
+      ) {
+        issues.push(
+          bindingIssue(
+            "PREPARED_AUDIO_STALE",
+            "error",
+            index,
+            block.id,
+            "Prepared audio receipt no longer matches the referenced audio, spoken text or local timing.",
+            "Restore the reviewed bindings or stage a new timing package with a new listening review.",
+          ),
+        );
+      }
+      if (prepared.verification.state === "pending") {
+        issues.push(
+          bindingIssue(
+            "PREPARED_AUDIO_PENDING",
+            "warning",
+            index,
+            block.id,
+            "Prepared audio is awaiting listening review; its speech has not been confirmed.",
+            "Listen to the captured master against the text and cue boundaries, then stage an attested timing package.",
+          ),
+        );
+        if (generation)
+          issues.push(
+            bindingIssue(
+              "PREPARED_AUDIO_UNCONFIRMED_BINDING",
+              "error",
+              index,
+              block.id,
+              "Pending prepared audio must not assert a confirmed generation text binding.",
+              "Remove the generation binding or complete listening review.",
+            ),
+          );
+        return;
+      }
+      if (!generation)
+        issues.push(
+          bindingIssue(
+            "PREPARED_AUDIO_BINDING_MISSING",
+            "error",
+            index,
+            block.id,
+            "Verified prepared audio requires its confirmed generation text binding.",
+            "Stage the reviewed package again.",
+          ),
+        );
+    }
     if (!generation) {
       issues.push(
         bindingIssue(

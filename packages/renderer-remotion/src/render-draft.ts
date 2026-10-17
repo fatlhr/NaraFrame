@@ -8,6 +8,7 @@ import {
   rm,
   writeFile,
 } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,6 +34,15 @@ import {
   type VisualPreflightReport,
   visualPreflightProperty,
 } from "./remotion/visual-preflight.js";
+
+/**
+ * Frames are captured one browser tab at a time. With Remotion's default of
+ * several parallel tabs, a machine under CPU load occasionally captured a
+ * frame before its tab had finished painting (a repeated top band, or missing
+ * elements) and still reported success. Serial capture removed it in testing
+ * at a cost of a few seconds per draft.
+ */
+export const RENDER_CONCURRENCY = 1;
 
 const macChrome =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -249,7 +259,13 @@ export const renderDraft = async ({
   const baseEntry = await resolveEntryPoint();
   const packageRoot = fileURLToPath(new URL("../", import.meta.url));
   const recipeEntry = await prepareRecipeEntry(draft, projectRoot, baseEntry);
-  const modules = join(packageRoot, "node_modules");
+  const require = createRequire(import.meta.url);
+  const runtimeModules = Object.fromEntries(
+    ["react", "react-dom", "remotion"].map((name) => [
+      name,
+      dirname(require.resolve(`${name}/package.json`)),
+    ]),
+  );
   let serveUrl: string;
   try {
     serveUrl = await bundle({
@@ -271,12 +287,10 @@ export const renderDraft = async ({
           // the renderer's single copies of react and remotion.
           ...(recipeEntry
             ? {
-                modules: [modules, "node_modules"],
+                modules: [join(packageRoot, "node_modules"), "node_modules"],
                 alias: {
                   ...(configuration.resolve?.alias as Record<string, string>),
-                  react: join(modules, "react"),
-                  "react-dom": join(modules, "react-dom"),
-                  remotion: join(modules, "remotion"),
+                  ...runtimeModules,
                 },
               }
             : {}),
@@ -340,6 +354,7 @@ export const renderDraft = async ({
           }
         : {}),
       overwrite: true,
+      concurrency: RENDER_CONCURRENCY,
       logLevel: "warn",
       cancelSignal: cancellation.cancelSignal,
       onProgress: ({ progress }) => onProgress?.(progress),

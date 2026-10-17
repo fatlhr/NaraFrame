@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { SanitizedSvg } from "../asset/svg-sanitize.js";
+import { checkCaptionPolicy } from "../compiler/captions.js";
 import {
   type Issue,
   issuesFromZodError,
@@ -10,7 +11,9 @@ import { applyProjectOverrides } from "../profile/overrides.js";
 import { type AssetManifest, AssetManifestSchema } from "./asset.js";
 import { type Captions, CaptionsSchema } from "./captions.js";
 import { CompiledDraftSchema } from "./compiled.js";
+import { LibraryCatalogSchema } from "./library.js";
 import { type Narration, NarrationSchema } from "./narration.js";
+import { PreparedTimingPackageSchema } from "./prepared-audio.js";
 import { type ProfileLock, ProfileLockSchema } from "./profile.js";
 import { type ProjectConfig, ProjectConfigSchema } from "./project.js";
 import type { LoadedRecipe } from "./recipe.js";
@@ -47,6 +50,8 @@ const artifacts = {
 } as const;
 
 const schemaEntries = [
+  ["LibraryCatalog", LibraryCatalogSchema],
+  ["PreparedTimingPackage", PreparedTimingPackageSchema],
   ["ProjectConfig", ProjectConfigSchema],
   ["ProfileLock", ProfileLockSchema],
   ["Scenes", ScenesSchema],
@@ -372,6 +377,7 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
     );
   }
 
+  issues.push(...checkCaptionPolicy(profile, captionsResult.data, narration));
   const sortedIssues = sortIssues(issues);
   if (sortedIssues.some((issue) => issue.severity === "error")) {
     return { ok: false, issues: sortedIssues };

@@ -1,5 +1,11 @@
 export const corePackage = "@naraframe/core";
-
+export {
+  cropWithinImage,
+  type ImageCrop,
+  ImageCropSchema,
+  imagePlacement,
+  PngLayoutSchema,
+} from "./asset/image-placement.js";
 export {
   type SanitizedSvg,
   sanitizeSvg,
@@ -15,7 +21,11 @@ export {
   type ResolvedAudioMode,
   resolveAudioMode,
 } from "./compiler/audio-mode.js";
-export { type CaptionCue, deriveCaptionCues } from "./compiler/captions.js";
+export {
+  type CaptionCue,
+  deriveCaptionCues,
+  resolveCaptionMode,
+} from "./compiler/captions.js";
 export {
   type CompileOptions,
   compileDraft,
@@ -36,6 +46,7 @@ export {
   type ResolvedPhrase,
   resolveNarrationTimeline,
 } from "./compiler/narration-timeline.js";
+export { preparedTimingHash } from "./compiler/prepared-audio.js";
 export {
   checkProductionReadiness,
   computeSceneClosure,
@@ -72,6 +83,12 @@ export {
   type LoadedPlanProject,
   loadPlanProject,
 } from "./io/load-project.js";
+export {
+  inspectLibrary,
+  type StageLibraryOptions,
+  type StageLibraryResult,
+  stageLibrary,
+} from "./library/stage.js";
 export type {
   Issue,
   IssueResponsible,
@@ -116,6 +133,11 @@ export {
   createSayTtsProvider,
   type SayTtsProviderOptions,
 } from "./production/say-tts-provider.js";
+export {
+  type StageAudioOptions,
+  type StagedAudio,
+  stagePreparedAudio,
+} from "./production/stage-audio.js";
 export {
   type SynthesizeNarrationOutcome,
   type SynthesizeNarrationRequest,
@@ -195,7 +217,11 @@ export {
   AssetManifestSchema,
   AssetSchema,
 } from "./schema/asset.js";
-export type { CaptionCorrection, Captions } from "./schema/captions.js";
+export type {
+  CaptionCorrection,
+  CaptionMode,
+  Captions,
+} from "./schema/captions.js";
 export {
   CaptionCorrectionSchema,
   CaptionsSchema,
@@ -217,12 +243,26 @@ export {
 } from "./schema/compiled.js";
 export type { PlanSource } from "./schema/export-schema.js";
 export { exportSchemas, validatePlanSource } from "./schema/export-schema.js";
+export {
+  type LibraryCatalog,
+  LibraryCatalogSchema,
+  type LibraryImport,
+  LibraryImportSchema,
+  type LibraryPattern,
+  LibraryPatternSchema,
+} from "./schema/library.js";
 export type {
   Narration,
   NarrationBlock,
   NarrationSource,
 } from "./schema/narration.js";
 export { NarrationBlockSchema, NarrationSchema } from "./schema/narration.js";
+export {
+  type PreparedAudioReceipt,
+  PreparedAudioReceiptSchema,
+  type PreparedTimingPackage,
+  PreparedTimingPackageSchema,
+} from "./schema/prepared-audio.js";
 export type {
   Money,
   ProductionLedger,

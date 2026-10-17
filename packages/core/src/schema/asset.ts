@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PngLayoutSchema } from "../asset/image-placement.js";
 import {
   IdSchema,
   RelativeAudioPathSchema,
@@ -77,6 +78,7 @@ const ReadyPngAssetSchema = z
     kind: z.literal("png"),
     path: RelativePngPathSchema,
     sha256: Sha256Schema,
+    layout: PngLayoutSchema.optional(),
     binding: AssetBindingSchema.optional(),
     origin: z
       .object({

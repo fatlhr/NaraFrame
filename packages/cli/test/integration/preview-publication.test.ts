@@ -1,4 +1,6 @@
+import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import {
   access,
   cp,
@@ -15,6 +17,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import { deflateSync } from "node:zlib";
 import {
   type CompiledDraft,
@@ -22,6 +25,10 @@ import {
   loadPlanProject,
 } from "@naraframe/core";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import {
+  FRAME_INTEGRITY_METHOD,
+  isFrameIntegrityError,
+} from "../../src/frame-integrity.js";
 import {
   contactSheetLayoutFor,
   preparePreviewOutputRoots,
@@ -911,5 +918,92 @@ describe("atomic preview publication", () => {
       publishedDirectory,
     );
     expect(published.outputPath).toBe(join(publishedDirectory, "preview.mp4"));
+  });
+});
+
+const ffmpeg =
+  process.env.NARAFRAME_FFMPEG_EXECUTABLE ?? "/opt/homebrew/bin/ffmpeg";
+
+describe.skipIf(!existsSync(ffmpeg))("frame integrity of a new render", () => {
+  /** Stands in for the renderer: a real, flat H.264 clip of the draft's size. */
+  const fakeRender = (async ({ outputPath }: { outputPath?: string }) => {
+    if (!outputPath) throw new Error("fixture needs an output path");
+    await promisify(execFile)(ffmpeg, [
+      "-v",
+      "error",
+      "-f",
+      "lavfi",
+      "-i",
+      `color=c=0x305070:s=${draft.width}x${draft.height}:r=${draft.fps}`,
+      "-frames:v",
+      String(draft.totalFrames),
+      "-c:v",
+      "libx264",
+      "-pix_fmt",
+      "yuv420p",
+      outputPath,
+    ]);
+    return {
+      outputPath,
+      durationInFrames: draft.totalFrames,
+      width: draft.width,
+      height: draft.height,
+      fps: draft.fps,
+      browserExecutable: process.execPath,
+      remotionVersion: "test",
+      visualPreflight: { issues: [], frames: [] },
+    };
+  }) as never;
+
+  it("records a passing check in the report and manifest", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-integrity-"));
+    temporaryRoots.push(root);
+    const published = await publishPreviewBuild({
+      draft,
+      projectRoot: root,
+      issues: [],
+      render: fakeRender,
+    });
+    for (const name of ["report.json", "manifest.json"]) {
+      const metadata = JSON.parse(
+        await readFile(join(published.buildDirectory, name), "utf8"),
+      );
+      expect(metadata.frameIntegrity).toEqual({
+        method: FRAME_INTEGRITY_METHOD,
+        frames: draft.totalFrames,
+        outliers: [],
+      });
+    }
+  });
+
+  it("publishes nothing when the new render has incomplete frames", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-integrity-"));
+    temporaryRoots.push(root);
+    const failure = await publishPreviewBuild({
+      draft,
+      projectRoot: root,
+      issues: [],
+      render: fakeRender,
+      frameIntegrity: async () => ({
+        method: FRAME_INTEGRITY_METHOD,
+        frames: draft.totalFrames,
+        outliers: [{ frame: 223, dp: 40, dn: 41, dpn: 2 }],
+      }),
+    }).catch((error: unknown) => error);
+
+    expect(isFrameIntegrityError(failure)).toBe(true);
+    if (!isFrameIntegrityError(failure)) return;
+    expect(failure.issues).toEqual([
+      expect.objectContaining({
+        code: "RENDER_FRAME_INTEGRITY",
+        artifact: "preview.mp4",
+        message: expect.stringContaining("frame 223"),
+      }),
+    ]);
+    expect(await readdir(join(root, "preview", "builds"))).toEqual([]);
+    await expect(
+      access(join(root, "preview", "current.json")),
+    ).rejects.toThrow();
+    expect(await readdir(join(root, ".naraframe", "attempts"))).toEqual([]);
   });
 });

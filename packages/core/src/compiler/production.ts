@@ -171,6 +171,7 @@ export const checkProductionReadiness = (
   for (const issue of compileIssues) {
     if (
       issue.code !== "VOICE_BINDING_MISSING" &&
+      issue.code !== "PREPARED_AUDIO_PENDING" &&
       issue.code !== "VOICE_STYLE_MISMATCH"
     )
       continue;

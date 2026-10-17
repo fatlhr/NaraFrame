@@ -1,5 +1,6 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { captionLayoutFor } from "../../src/remotion/captions.js";
 import { resolveVisualPreflight } from "../../src/remotion/visual-preflight.js";
 
 // 0.6 em per character: at fontSize 20 each character is 12 px wide.
@@ -88,6 +89,55 @@ afterEach(() => {
 });
 
 describe("caption preflight", () => {
+  it("removes caption measurement, collision regions and sample reasons when cues are absent", () => {
+    const withCaption = draftWith("Halo dunia.", [textLayer("title", 850)]);
+    expect(codes(withCaption)).toContain("CAPTION_COLLISION");
+    if (!withCaption.captions) throw Error("fixture");
+    withCaption.captions.style.scrimOpacity = 0;
+    expect(codes(withCaption)).toContain("CAPTION_COLLISION");
+    delete withCaption.captions;
+    const { report } = resolveVisualPreflight(withCaption);
+    expect(
+      report.issues.some((issue) => issue.code.startsWith("CAPTION_")),
+    ).toBe(false);
+    expect(
+      report.frames.some((frame) =>
+        frame.reasons.some((reason) => reason.startsWith("caption:")),
+      ),
+    ).toBe(false);
+  });
+
+  it("uses resolved lineHeight in the same measured box the renderer wraps", () => {
+    const draft = draftWith("Halo dunia.");
+    if (!draft.captions) throw Error("fixture");
+    expect(
+      captionLayoutFor(draft, draft.captions.style, "Halo dunia.").box.height,
+    ).toBe(36);
+    draft.captions.style.lineHeight = 2;
+    expect(
+      captionLayoutFor(draft, draft.captions.style, "Halo dunia.").box.height,
+    ).toBe(50);
+    expect(codes(draft)).toEqual([]);
+  });
+
+  it("does not break nonbreaking spaces into narrower ordinary spaces", () => {
+    expect(codes(draftWith(`${"\u00a0".repeat(40)}word`))).toContain(
+      "CAPTION_OVERFLOW",
+    );
+  });
+
+  it.each(["side", "bottom"] as const)(
+    "refuses a %s setting that places the caption outside the canvas",
+    (field) => {
+      const draft = draftWith("Halo dunia.");
+      if (!draft.captions) throw Error("fixture");
+      draft.captions.style[field] = 1000;
+      expect(codes(draft)).toContain("CAPTION_OUTSIDE_CANVAS");
+      delete draft.captions;
+      expect(codes(draft)).toEqual([]);
+    },
+  );
+
   it("accepts a caption that fits within the allowed lines", () => {
     expect(codes(draftWith("Krakatau meletus pada tahun 1883."))).toEqual([]);
   });

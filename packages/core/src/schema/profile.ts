@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CaptionModeSchema } from "./captions.js";
 import {
   ColorSchema,
   ConfigPathSchema,
@@ -120,9 +121,13 @@ export const RenderTokensSchema = z
     /** Caption style in design pixels; unset fields use renderer defaults. */
     captions: z
       .object({
+        mode: CaptionModeSchema.optional(),
         fontSize: z.number().int().min(16).max(96).optional(),
         maxLines: z.number().int().min(1).max(4).optional(),
         bottomOffset: z.number().int().nonnegative().optional(),
+        sideOffset: z.number().int().nonnegative().optional(),
+        scrimOpacity: z.number().min(0).max(1).optional(),
+        lineHeight: z.number().min(1).max(3).optional(),
       })
       .strict()
       .optional(),

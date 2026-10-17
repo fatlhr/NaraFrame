@@ -43,10 +43,33 @@ const EVIDENCE: Record<string, string[]> = {
     "palette.accent",
   ],
   // phrase-anchors: compile-draft-m2-4-3.
-  audio: ["narration", "captions", "music", "phrase-anchors", "sfx", "ducking"],
+  // prepared-audio integration plus captured public stage/edit/validate evidence.
+  audio: [
+    "narration",
+    "captions",
+    "music",
+    "phrase-anchors",
+    "sfx",
+    "ducking",
+    "prepared-audio-staging",
+    "prepared-timing-receipt",
+  ],
   textEmphasis: ["accent", "strong", "quiet"],
   // audio-modes (e2e) exports music and silent finals; audio-boundaries voice.
   audioModes: ["voice", "music", "silent"],
+  // caption-policy (integration/e2e) and caption-preflight exercise each mode.
+  captionModes: ["none", "selected", "full"],
+  // library integration + manual public inspect/stage/edit/preview evidence.
+  library: [
+    "local-catalog",
+    "pinned-import",
+    "explicit-update",
+    "scalar-parameters",
+    "sibling-anchors",
+    "recipe-dependencies-no-trust-transfer",
+  ],
+  // image-placement unit + library integration + manual native/half previews.
+  imageLayout: ["png-source-pixel-metadata", "png-source-pixel-crop"],
 };
 
 describe("capability registry", () => {

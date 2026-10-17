@@ -8,6 +8,7 @@
     "node": "24.20.x"
   },
   "scripts": {
+    "pack:engine": "node scripts/pack-engine.mjs",
     "build": "tsc -b packages/core packages/renderer-remotion packages/cli",
     "typecheck": "tsc -b packages/core packages/renderer-remotion packages/cli --pretty false",
     "lint": "biome check .",

@@ -1,4 +1,8 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
+import {
+  type ImageCrop,
+  imagePlacement,
+} from "@naraframe/core/image-placement";
 import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
@@ -12,7 +16,11 @@ import {
   staticFile,
   useCurrentFrame,
 } from "remotion";
-import { CAPTION_LINE_HEIGHT, captionPadding } from "./captions.js";
+import {
+  CAPTION_LINE_HEIGHT,
+  captionLayoutFor,
+  captionPadding,
+} from "./captions.js";
 import {
   countedTextFor,
   drawnPathFor,
@@ -77,14 +85,47 @@ const AssetView = ({
   assetId,
   fit,
   focalPoint = { x: 0.5, y: 0.5 },
+  placement,
 }: {
   draft: CompiledDraft;
   assetId: string;
   fit: "cover" | "contain";
   focalPoint?: { x: number; y: number };
+  placement?: {
+    crop: ImageCrop;
+    source: { width: number; height: number };
+    frame: { width: number; height: number };
+  };
 }) => {
   const asset = draft.assets[assetId];
   if (asset?.kind === "png") {
+    if (placement) {
+      const mapped = imagePlacement({ ...placement, fit, focalPoint });
+      return (
+        <div
+          style={{
+            position: "absolute",
+            left: mapped.clip.x,
+            top: mapped.clip.y,
+            width: mapped.clip.width,
+            height: mapped.clip.height,
+            overflow: "hidden",
+          }}
+        >
+          <Img
+            src={staticFile(asset.publicPath)}
+            style={{
+              position: "absolute",
+              left: -mapped.crop.x * mapped.scale,
+              top: -mapped.crop.y * mapped.scale,
+              width: mapped.image.width,
+              height: mapped.image.height,
+              maxWidth: "none",
+            }}
+          />
+        </div>
+      );
+    }
     return (
       <Img
         src={staticFile(asset.publicPath)}
@@ -290,6 +331,15 @@ export const LayerView = ({
         draft={draft}
         assetId={layer.assetId}
         fit={layer.fit}
+        {...(layer.crop && layer.sourceSize
+          ? {
+              placement: {
+                crop: layer.crop,
+                source: layer.sourceSize,
+                frame: layer.frame,
+              },
+            }
+          : {})}
         {...(layer.focalPoint ? { focalPoint: layer.focalPoint } : {})}
       />
     </div>
@@ -701,16 +751,20 @@ const CaptionLayer = ({ draft }: { draft: CompiledDraft }) => {
                 // The scrim is the project's own background, so a light
                 // profile gets a light caption with its dark type instead of
                 // dark type on a black box.
-                backgroundColor: withAlpha(render.palette.background, 0.72),
+                backgroundColor: withAlpha(
+                  render.palette.background,
+                  style.scrimOpacity ?? 0.72,
+                ),
                 color: render.palette.text,
                 fontFamily: render.typography.fontFamily,
                 fontSize: style.fontSize,
                 fontWeight: render.typography.headingWeight,
-                lineHeight: CAPTION_LINE_HEIGHT,
+                lineHeight: style.lineHeight ?? CAPTION_LINE_HEIGHT,
                 textAlign: "center",
+                whiteSpace: "pre",
               }}
             >
-              {cue.text}
+              {captionLayoutFor(draft, style, cue.text).lines.join("\n")}
             </div>
           </div>
         </Sequence>
@@ -733,8 +787,9 @@ const CaptionLayer = ({ draft }: { draft: CompiledDraft }) => {
  * Only the message survives the browser boundary, so the reason travels in it.
  */
 
-const useBundledFonts = (fonts: CompiledDraft["fonts"]): void => {
+const useBundledFonts = (fonts: CompiledDraft["fonts"]): boolean => {
   const [handle] = useState(() => delayRender("Loading bundled fonts"));
+  const [ready, setReady] = useState(false);
   useEffect(() => {
     let cancelled = false;
     loadBundledFonts(fonts, { requireAllFaces: true })
@@ -763,7 +818,10 @@ const useBundledFonts = (fonts: CompiledDraft["fonts"]): void => {
               .join(", ")}`,
           );
         }
-        if (!cancelled) continueRender(handle);
+        if (!cancelled) {
+          setReady(true);
+          continueRender(handle);
+        }
       })
       .catch((error: unknown) => {
         if (cancelled) return;
@@ -773,10 +831,13 @@ const useBundledFonts = (fonts: CompiledDraft["fonts"]): void => {
       cancelled = true;
     };
   }, [fonts, handle]);
+  return ready;
 };
 
 export const DraftVideo = (draft: CompiledDraft) => {
-  useBundledFonts(draft.fonts);
+  const fontsReady = useBundledFonts(draft.fonts);
+  // Caption line wrapping measures the actual face, never a pre-load fallback.
+  if (!fontsReady) return null;
   const labelScale = draft.width / 540;
   return (
     <AbsoluteFill

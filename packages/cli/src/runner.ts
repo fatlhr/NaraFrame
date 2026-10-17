@@ -20,10 +20,12 @@ import {
   editProject,
   exportSchemas,
   type Issue,
+  inspectLibrary,
   type LoadedPlanProject,
   loadPlanProject,
   pendingGeneration,
   planProfileApply,
+  RENDER_ENGINE,
   readApprovals,
   readProductionLedger,
   readRecipeTrust,
@@ -31,6 +33,8 @@ import {
   recordApproval,
   recordRecipeTrust,
   resolveAudioMode,
+  stageLibrary,
+  stagePreparedAudio,
   syncWorkingCopy,
   undoProject,
   withProjectLock,
@@ -46,13 +50,15 @@ import {
   systemIssue,
   usageIssue,
 } from "./command-result.js";
-import { runDoctorChecks } from "./doctor.js";
+import { ffprobeExecutable, runDoctorChecks } from "./doctor.js";
+import { engineIdentity } from "./engine-identity.js";
 import {
   preflightNarrationAudio,
   preflightSoundtrackAudio,
   publishFinalBuild,
   readCurrentOutput,
 } from "./final-build.js";
+import { isFrameIntegrityError } from "./frame-integrity.js";
 import {
   carriesAudio,
   findReusablePreview,
@@ -84,6 +90,7 @@ interface ParsedArguments {
 const usage = `NaraFrame
 
 Usage:
+  naraframe version [--json]
   naraframe doctor [--json]
   naraframe schema [--json]
   naraframe create <name> --profile <id-or-path> [--json]
@@ -92,6 +99,9 @@ Usage:
   naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
   naraframe recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>] [--json]
   naraframe profile inspect <id-or-path> [--json]
+  naraframe library inspect <catalog.json> [--json]
+  naraframe library stage <project> [--from <catalog.json> --pattern <id> --version <version> --scene <id>] --instance <id> --params <params.json> [--update] [--json]
+  naraframe audio stage <project> --from <clip> --timing <package.json> --block <id> [--json]
   naraframe profile apply <id-or-path> [project] [--dry-run] [--reset-overrides] [--json]
   naraframe cache clean [project] [--dry-run] [--json]`;
 
@@ -99,6 +109,27 @@ const repositoryRoot = resolve(
   fileURLToPath(new URL(".", import.meta.url)),
   "../../..",
 );
+
+const versionCommand = async (args: readonly string[]): Promise<Execution> => {
+  if (args.length)
+    return usageFailure("version", "version does not accept arguments.");
+  const metadata = JSON.parse(
+    await readFile(resolve(repositoryRoot, "package.json"), "utf8"),
+  );
+  const data = {
+    version: metadata.version,
+    skillApiVersion: 1,
+    sourceSchemaVersion: 1,
+    renderEngine: RENDER_ENGINE,
+    resourceRoot: repositoryRoot,
+    engineIdentity: await engineIdentity(repositoryRoot),
+  };
+  return {
+    exitCode: 0,
+    event: commonEvent("version", { data }),
+    human: [`NaraFrame ${data.version}`],
+  };
+};
 
 const commonEvent = (
   command: CommandName,
@@ -222,7 +253,7 @@ const doctorCommand = async (args: readonly string[]): Promise<Execution> => {
       parsed.error ?? "doctor does not accept positional arguments.",
     );
   }
-  const result = await runDoctorChecks(repositoryRoot);
+  const result = await runDoctorChecks(process.cwd());
   const success = result.issues.length === 0;
   return {
     exitCode: success ? 0 : 2,
@@ -1446,7 +1477,167 @@ const recipeCommand = async (args: readonly string[]): Promise<Execution> => {
   };
 };
 
+const libraryCommand = async (args: readonly string[]): Promise<Execution> => {
+  const [subcommand, ...rest] = args;
+  const parsed = parseArguments(
+    rest,
+    ["--update"],
+    ["--from", "--pattern", "--version", "--instance", "--scene", "--params"],
+  );
+  if (
+    parsed.error ||
+    parsed.positionals.length !== 1 ||
+    !["inspect", "stage"].includes(subcommand ?? "")
+  )
+    return usageFailure(
+      "library",
+      parsed.error ??
+        "library requires inspect <catalog> or stage <project> --instance <id> --params <params.json>.",
+    );
+  // Exactly one positional after the check above: the catalog or project.
+  const target = parsed.positionals[0] ?? "";
+  const fail = (issues: Issue[]): Execution => ({
+    exitCode: 1,
+    event: commonEvent("library", {
+      status: "failed",
+      success: false,
+      readiness: "invalid",
+      issues,
+    }),
+  });
+  if (subcommand === "inspect") {
+    if (parsed.values.size || parsed.flags.size)
+      return usageFailure(
+        "library",
+        "inspect accepts only a catalog path and --json.",
+      );
+    const result = await inspectLibrary(target);
+    if (!result.ok) return fail(result.issues);
+    return {
+      exitCode: 0,
+      event: commonEvent("library", { data: { ...result.value } }),
+      humanJson: result.value,
+    };
+  }
+  const instance = parsed.values.get("--instance"),
+    paramsPath = parsed.values.get("--params");
+  if (!instance || !paramsPath)
+    return usageFailure(
+      "library",
+      "stage requires --instance <id> and --params <params.json>.",
+    );
+  let params: unknown;
+  try {
+    params = JSON.parse(await readFile(resolve(paramsPath), "utf8"));
+  } catch {
+    return fail([
+      {
+        code: "LIBRARY_PARAMS_INVALID",
+        severity: "error",
+        responsible: "user",
+        artifact: paramsPath,
+        path: "/",
+        message: "Parameters must be readable JSON.",
+        suggestion:
+          "Provide a JSON object matching the catalog parameter contract.",
+      },
+    ]);
+  }
+  if (!params || typeof params !== "object" || Array.isArray(params))
+    return usageFailure("library", "--params must contain a JSON object.");
+  const optional = <K extends string>(flag: string, key: K) => {
+    const value = parsed.values.get(flag);
+    return value === undefined ? {} : ({ [key]: value } as Record<K, string>);
+  };
+  const result = await stageLibrary({
+    root: target,
+    instance,
+    params: params as Record<string, unknown>,
+    ...optional("--from", "from"),
+    ...optional("--pattern", "pattern"),
+    ...optional("--version", "version"),
+    ...optional("--scene", "scene"),
+    ...(parsed.flags.has("--update") ? { update: true } : {}),
+  });
+  if (!result.ok) return fail(result.issues);
+  return {
+    exitCode: 0,
+    event: commonEvent("library", {
+      sourceRevision: result.value.sourceRevision,
+      artifacts: { staging: result.value.staging },
+      data: {
+        receipt: result.value.receipt,
+        files: result.value.files,
+        edit: {
+          from: result.value.staging,
+          expect: result.value.sourceRevision,
+        },
+      },
+    }),
+    human: [
+      `Staged ${result.value.receipt.instance} (${result.value.receipt.disposition}) in ${result.value.staging}`,
+      `Apply: naraframe edit ${resolve(target)} --from ${result.value.staging} --expect ${result.value.sourceRevision}`,
+    ],
+  };
+};
+
+const audioCommand = async (args: readonly string[]): Promise<Execution> => {
+  const [subcommand, ...rest] = args;
+  const parsed = parseArguments(rest, [], ["--from", "--timing", "--block"]);
+  const from = parsed.values.get("--from"),
+    timing = parsed.values.get("--timing"),
+    block = parsed.values.get("--block");
+  if (
+    parsed.error ||
+    subcommand !== "stage" ||
+    parsed.positionals.length !== 1 ||
+    !from ||
+    !timing ||
+    !block
+  )
+    return usageFailure(
+      "audio",
+      parsed.error ??
+        "audio stage requires <project> --from <clip> --timing <package.json> --block <id>.",
+    );
+  const result = await stagePreparedAudio({
+    root: parsed.positionals[0] ?? "",
+    from,
+    timing,
+    block,
+    ffprobePath: ffprobeExecutable(),
+  });
+  if (!result.ok)
+    return {
+      exitCode: 1,
+      event: commonEvent("audio", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        issues: result.issues,
+      }),
+    };
+  return {
+    exitCode: 0,
+    event: commonEvent("audio", {
+      sourceRevision: result.value.sourceRevision,
+      artifacts: { staging: result.value.staging },
+      data: {
+        ...result.value,
+        edit: {
+          from: result.value.staging,
+          expect: result.value.sourceRevision,
+        },
+      },
+    }),
+    human: [
+      `Staged captured audio for ${block} (${result.value.verification}) in ${result.value.staging}`,
+    ],
+  };
+};
+
 const knownCommand = (value: string | undefined): CommandName =>
+  value === "version" ||
   value === "doctor" ||
   value === "schema" ||
   value === "create" ||
@@ -1458,7 +1649,9 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "render" ||
   value === "cache" ||
   value === "profile" ||
-  value === "recipe"
+  value === "recipe" ||
+  value === "audio" ||
+  value === "library"
     ? value
     : "unknown";
 
@@ -1467,6 +1660,7 @@ const executeCommand = async (
   args: readonly string[],
   options: RunCliOptions,
 ): Promise<Execution> => {
+  if (command === "version") return versionCommand(args);
   if (command === "doctor") return doctorCommand(args);
   if (command === "schema") return schemaCommand(args);
   if (command === "create") return createCommand(args);
@@ -1479,6 +1673,8 @@ const executeCommand = async (
   if (command === "cache") return cacheCommand(args);
   if (command === "profile") return profileCommand(args);
   if (command === "recipe") return recipeCommand(args);
+  if (command === "library") return libraryCommand(args);
+  if (command === "audio") return audioCommand(args);
   return usageFailure("unknown", "Unknown or missing command.");
 };
 
@@ -1522,7 +1718,9 @@ export const runCommandLine = async (
           ? [interruptedIssue()]
           : visualPreflightFailed
             ? error.issues
-            : [systemIssue(error)],
+            : isFrameIntegrityError(error)
+              ? error.issues
+              : [systemIssue(error)],
       }),
     };
   }

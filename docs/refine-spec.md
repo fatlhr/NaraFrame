@@ -1,12 +1,20 @@
 # NaraFrame — Production Findings and Decisions
 
-Updated 2026-10-13 · Baseline `e008490` · MVP 2 / M4 PLANNED
+Updated 2026-10-15 · Integrated baseline `aab831c` · M4.4 committed on Batch 3; M4.5 adds distribution/onboarding/cleanup
 
 This document explains the next development priorities. [spec.md](spec.md) defines the contract; [plan.md](plan.md) owns numbered tasks. The prior discovery, decision history, and local Batch F closure are preserved in [history](history/README.md).
 
 ## 1. What production taught us
 
+Batch 1 evidence: the old skill produced a valid but generic feedback-card shot and required repeated large-schema reads. The updated skill/reference gives six editable explanatory structures; a fresh author made a progress→feedback→practice diagram and ordinary headline/camera revisions without renderer reads. This is one authoring trial with saved first output, not a visual-quality or cost guarantee. Fatih accepted it as authoring evidence and confirmed caption behavior on 2026-10-14. He then authorized committing and cherry-picking successive batches while main stays unchanged; full E2E is deferred to MVP 2 closure, and expensive actions require confirmation.
+
+The caption candidate demonstrates none/selected/full at 540/1080 with unchanged imported voice, verified boundaries and undo/reuse. Raw crop hash equality was too strong for separately encoded MP4s: inactive-cue differences were tiny while visible-cue differences were substantial. The original failed audit is retained. Frame-window review also found a real 1ms full/scoped boundary defect; shared global rounding/clipping and same/cross-block regressions correct it. Gate results and provenance belong in plan's consolidated handoff.
+
+M4.3's bounded old-skill baseline found guidance for copied patterns, profile pins, framing and undo, but not source-pixel ROI/padding, named prop anchors, pose variants, or catalog dependency pins. That baseline did not author or render an episode; its ambient package-manager probe failed before CLI help/schema. The new model therefore pairs a focused library guide with public inspect/stage commands, pinned ordinary scene expansion, and opt-in PNG crop geometry. This is an authoring contract, not a second motion runtime or an automatic character rig. Its first preview attempt failed before frames: a core root import pulled server modules into the browser bundle. A browser-safe placement subpath fixed it, the failed attempt is retained, and a bundle test protects it; the following previews rendered.
+
 The engine can protect a project and produce a valid MP4 without producing a compelling explanation. Production friction also comes from weak authoring instructions, missing reusable artwork metadata, and workflows that repeatedly rediscover the same technique.
+
+M4.4 adds a public capture/stage receipt rather than replacing the narration clock. Human listening confirmation binds the existing master/cues; pending alignment stays draft-only. Series identity is ordinary pinned library data, with intro overlaid and sign-off inside the explicit trailing hold. A fresh author used only skill/public interfaces; its known voice-style mismatch on a different profile remained visible instead of being silently certified. One fixture's full/scoped frames matched, audio lag measured zero, and caption undo reused the original MP4. These establish the bounded preparation/identity path, not publication, a new TTS service or general style compatibility. Plan records source review, gate provenance and the pending M4.5 handoff.
 
 Before proposing an engine primitive, classify the problem:
 
@@ -104,10 +112,33 @@ Use FDD: model a feature and its exact acceptance → implement the public path 
 
 Save first drafts before owner feedback. Prefer stills/contact sheets or a representative scoped shot before a full render. Limit planned internal correction passes to two; report remaining issues instead of starting indefinite polish. A frozen trial never patches code, profile, recipe, or asset dependencies silently; record a failed attempt and create a new approved freeze if necessary.
 
-M4 has three consolidated execution/review batches: M4.1–M4.2, M4.3, M4.4–M4.5. Internal steps do not need owner relay one by one. Runtime/renderer-boundary changes require their gate; documentation-only corrections do not justify rerunning a long E2E suite. Paid calls, recipe trust, visual acceptance, publication, and Git integration keep their separate authority boundaries.
+M4 has three consolidated execution/review batches: M4.1–M4.2, M4.3, M4.4–M4.5. Internal steps do not need owner relay one by one. Fatih's 2026-10-14 instruction defers E2E to MVP 2 closure; development uses the authorized output path and focused checks, with expensive work confirmed first. Successive branches carry predecessor commits by cherry-pick while main stays untouched. Paid calls, recipe trust, visual acceptance, publication, and final main integration keep their separate authority boundaries.
 
 ## 7. Cleanup decision
 
 The 2026-10-13 cleanup retains engine, skill, runtime, tests, fixtures, profiles, both Krakatau samples, and an English product README. Production studies and gate artifacts move outside the repository with a verified checksum index; cache goes to recoverable Trash. `.git`, unrelated `AGENTS.md`, linked worktree, stash, and old branches are preserved.
 
 Historical documents are exact snapshots, including the previously uncommitted Batch F closure. Active documents are now concise source-of-truth documents; discovery is historical. This cleanup supplies planning evidence and workspace organization only, not new product capabilities or M4 execution approval.
+
+## 8. Distribution discovery — 2026-10-15
+
+Fatih wants NaraFrame usable as skill + engine in Claude and Codex, and independently of both. This is now current MVP 2 scope under M4.5, not a parallel roadmap or a new motion feature.
+
+**Discovery baseline:** all workspace packages were `private: true`, version `0.0.0`, and CLI dependencies used `workspace:*`. Profiles resolved relative to the checkout layout; the renderer expected package-local React/Remotion. Doctor defaults include macOS/Homebrew paths. README previously documented source installation and skill symlinks. No repository LICENSE file exists. Those were packaging/rights gaps, not evidence that rendering needed an agent.
+
+**Implemented local candidate — 2026-10-15:** `pack-engine.mjs` captures pinned runtime packages as real files, with neutral resources and rights/content metadata. The macOS arm64 0.1.0 archive installs offline with an empty npm cache; it is private/UNLICENSED and unpublished. CLI version metadata now includes an installation fingerprint of NaraFrame built modules/resources and dependency pins. This detects same-version drift for the skill launcher; it is not a sandbox or full third-party binary attestation. The canonical installer copies both host layouts safely, with a receipt and explicit update/removal. Actual local consumer commands and a four-second draft succeeded outside the source checkout. Real host activation, installed recipe/pixel equivalence and final production trial remain distinct evidence gaps. Plan retains the sandbox-port failure and timeout gate provenance rather than treating them as successful runs.
+
+The actual compiled CLI was invoked from `/private/tmp`, outside the repository: `doctor --json` returned ready and `create /private/tmp/naraframe-standalone-Dz7BLa/episode --profile current-issues --json` created a source skeleton without an agent, download or render. These commands still used the existing checkout's packages/resources. They prove cwd-independent invocation on this host, not clean-machine package installation, cross-platform support or a standalone final video.
+
+**Alternatives:** retain source checkout plus manually linked skill (lowest implementation cost, more setup burden); distribute a versioned CLI artifact plus the canonical skill and host install adapters (recommended); build a hosted MCP service/GUI (substantially larger product and operational scope, deferred). Local host plugin manifests can improve discovery, but the engine stays usable without a host/plugin.
+
+**Chosen preparation:** plan the installable CLI and canonical skill bundle as one M4.5 work package. Ship resources through an explicit allowlist; resolve them from the installed artifact rather than current working directory or development fixtures. Verify a consumer install outside the source checkout. Keep machine tools/prerequisites explicit, version upgrades visible, and recipe trust/approval untouched. README leads with recurring editable production and offers agent and terminal routes. Avoid public install commands or availability claims until the named artifact exists and is verified.
+
+Official references inspected on 2026-10-15:
+
+- [Codex skill locations and invocation](https://learn.chatgpt.com/docs/build-skills): user/repository `.agents/skills`, symlink support, complete folder resources, optional plugin distribution.
+- [Claude Code skills](https://code.claude.com/docs/en/skills): personal `~/.claude/skills`, project `.claude/skills`, local invocation and symlink support; personal local files do not automatically reach cloud sessions.
+- [OpenAI plugin packaging](https://developers.openai.com/plugins/build/plugins): portable/root and compatibility manifest options; installing a local skill is distinct from public directory submission.
+- [npm package contents and executable mapping](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/): explicit `files` and `bin` contracts. Declaring a bin alone does not resolve private workspace dependencies or include runtime resources.
+
+**Cleanup order:** preserve MVP 2 drafts, failures, receipts, snapshots and gate logs until final acceptance. Then archive regenerated scratch/cache with a checksum/location index and a restore path before moving the original to recoverable Trash. Keep maintained library/skill examples and test fixtures in source. Package only approved runtime/demo resources; exclude owner media, internal production studies, personal config, secrets and generated output. No public code/media license is selected on Fatih's behalf. npm publication, public release and marketplace submission require separate authorization.

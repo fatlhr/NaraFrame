@@ -31,6 +31,10 @@ import {
   rendererRemotionVersion,
   resolveBrowserExecutable,
 } from "@naraframe/renderer-remotion";
+import {
+  assertFrameIntegrity,
+  type FrameIntegrityRecord,
+} from "./frame-integrity.js";
 
 const artifactNames = [
   "preview.mp4",
@@ -107,6 +111,8 @@ interface PreviewMetadata {
    * from the final compiled draft rather than a screenshot. */
   varietyMetrics: VarietyMetrics;
   readability: ReadabilityMetrics;
+  /** Set on builds whose frames were scanned for incomplete captures. */
+  frameIntegrity?: FrameIntegrityRecord;
   startedAt: string;
   completedAt: string;
   status: "success";
@@ -136,6 +142,9 @@ export interface PreviewBuildOptions {
   failureInjection?: "before-pointer";
   signal?: AbortSignal;
   onPointerRenameDispatched?: () => void;
+  /** Test seams: stand in for the renderer and the frame integrity scan. */
+  render?: typeof renderDraft;
+  frameIntegrity?: (path: string) => Promise<FrameIntegrityRecord>;
 }
 
 export interface IntegrityOptions {
@@ -1288,6 +1297,8 @@ export const publishPreviewBuild = async ({
   failureInjection,
   signal,
   onPointerRenameDispatched,
+  render = renderDraft,
+  frameIntegrity,
 }: PreviewBuildOptions): Promise<PublishedPreviewBuild> => {
   throwIfAborted(signal);
   const startedAt = new Date().toISOString();
@@ -1304,7 +1315,7 @@ export const publishPreviewBuild = async ({
     });
 
     const outputPath = join(stagedBuildDirectory, "preview.mp4");
-    const rendered = await renderDraft({
+    const rendered = await render({
       draft,
       projectRoot: outputRoots.project,
       outputPath,
@@ -1334,6 +1345,13 @@ export const publishPreviewBuild = async ({
       ffmpegExecutable: ffmpeg,
       ffprobeExecutable: ffprobe,
     });
+    const integrity = await assertFrameIntegrity(
+      outputPath,
+      "preview.mp4",
+      ffmpeg,
+      frameIntegrity,
+    );
+    throwIfAborted(signal);
     await validateContactSheet({
       path: join(stagedBuildDirectory, "contact-sheet.png"),
       layout: contactSheet,
@@ -1403,6 +1421,7 @@ export const publishPreviewBuild = async ({
       },
       varietyMetrics: computeVarietyMetrics(draft),
       readability: computeReadabilityMetrics(draft),
+      frameIntegrity: integrity,
       startedAt,
       completedAt,
       status: "success",

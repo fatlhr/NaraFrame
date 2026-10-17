@@ -1,4 +1,5 @@
 import type { CompiledDraft, Issue, Layer } from "@naraframe/core";
+import { imagePlacement } from "@naraframe/core/image-placement";
 import { measureText } from "@remotion/layout-utils";
 import { captionLayoutFor } from "./captions.js";
 import {
@@ -634,6 +635,23 @@ export const resolveVisualPreflight = (
       captions.cues.forEach((cue, cueIndex) => {
         const layout = captionLayoutFor(draft, captions.style, cue.text);
         if (
+          layout.box.width <= 0 ||
+          layout.box.x < 0 ||
+          layout.box.y < 0 ||
+          layout.box.x + layout.box.width > draft.width ||
+          layout.box.y + layout.box.height > draft.height
+        ) {
+          issues.push(
+            captionIssue(
+              "CAPTION_OUTSIDE_CANVAS",
+              `/captions/cues/${cueIndex}`,
+              `Caption ${cue.id} falls outside the ${draft.width}x${draft.height} canvas.`,
+              "Reduce caption sideOffset/bottomOffset, fontSize or lineHeight so the complete caption box fits on screen.",
+              cue.id,
+            ),
+          );
+        }
+        if (
           layout.unbreakableOverflow ||
           layout.lines.length > captions.style.maxLines
         ) {
@@ -680,6 +698,33 @@ export const resolveVisualPreflight = (
         return;
       }
       if (layer.type === "image") {
+        if (layer.crop) {
+          try {
+            if (
+              !layer.sourceSize ||
+              layer.cropRules !== "naraframe-image-crop/1"
+            )
+              throw new Error("Missing validated PNG placement");
+            imagePlacement({
+              source: layer.sourceSize,
+              frame: layer.frame,
+              crop: layer.crop,
+              fit: layer.fit,
+              ...(layer.focalPoint ? { focalPoint: layer.focalPoint } : {}),
+            });
+          } catch {
+            issues.push(
+              issueFor(
+                "IMAGE_CROP_INVALID",
+                sceneIndex,
+                layerIndex,
+                layer.id,
+                `Image ${layer.id} has invalid source-pixel crop geometry.`,
+                "Use a crop inside the validated PNG source dimensions.",
+              ),
+            );
+          }
+        }
         const radius = layer.cornerRadius ?? 0;
         if (radius > Math.min(layer.frame.width, layer.frame.height) / 2) {
           issues.push(

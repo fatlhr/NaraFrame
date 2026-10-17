@@ -1,0 +1,1124 @@
+{
+  "schemaVersion": 1,
+  "scenes": [
+    {
+      "id": "object-explanation",
+      "narrativeRole": "object-explanation",
+      "durationMs": 10000,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "headline",
+            "type": "text",
+            "text": "Umpan balik memperjelas kemajuan",
+            "frame": {
+              "x": 96,
+              "y": 190,
+              "width": 888,
+              "height": 250
+            },
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "paper",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 180,
+              "y": 610,
+              "width": 720,
+              "height": 850
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 0,
+            "cornerRadius": 24
+          },
+          {
+            "id": "binding",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 206,
+              "y": 650,
+              "width": 12,
+              "height": 760
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "sheet-title",
+            "type": "text",
+            "text": "Catatan belajar",
+            "frame": {
+              "x": 262,
+              "y": 668,
+              "width": 560,
+              "height": 90
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "color": "palette.background"
+          },
+          {
+            "id": "row-a",
+            "type": "text",
+            "text": "Sudah dipahami",
+            "frame": {
+              "x": 310,
+              "y": 855,
+              "width": 500,
+              "height": 80
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "color": "palette.background"
+          },
+          {
+            "id": "row-b",
+            "type": "text",
+            "text": "Perlu latihan",
+            "frame": {
+              "x": 310,
+              "y": 1055,
+              "width": 500,
+              "height": 120
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "color": "palette.background"
+          },
+          {
+            "id": "mark-a",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 250,
+              "y": 880,
+              "width": 24,
+              "height": 24
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "mark-b",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.text",
+            "frame": {
+              "x": 250,
+              "y": 1080,
+              "width": 24,
+              "height": 24
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "progress-stroke",
+            "type": "path",
+            "d": "M 0 70 L 150 70 L 230 20 L 480 20",
+            "viewBox": {
+              "minX": 0,
+              "minY": 0,
+              "width": 480,
+              "height": 100
+            },
+            "frame": {
+              "x": 300,
+              "y": 1280,
+              "width": 480,
+              "height": 100
+            },
+            "stroke": {
+              "color": "palette.accent",
+              "width": 8
+            },
+            "lineCap": "round",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "takeaway",
+            "type": "text",
+            "text": "Catatan memberi arah berikutnya.",
+            "frame": {
+              "x": 96,
+              "y": 1540,
+              "width": 888,
+              "height": 160
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "paper-in",
+          "targetId": "paper",
+          "startMs": 0,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "title-in",
+          "targetId": "sheet-title",
+          "startMs": 700,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "row-a-in",
+          "targetId": "row-a",
+          "startMs": 1600,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "mark-a-in",
+          "targetId": "mark-a",
+          "startMs": 1600,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "row-b-in",
+          "targetId": "row-b",
+          "startMs": 2800,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "mark-b-in",
+          "targetId": "mark-b",
+          "startMs": 2800,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "trace-progress",
+          "targetId": "progress-stroke",
+          "startMs": 4100,
+          "durationMs": 1600,
+          "action": "draw",
+          "params": {
+            "from": 0,
+            "to": 1,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "takeaway-in",
+          "targetId": "takeaway",
+          "startMs": 6200,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      },
+      "carriesFactualClaim": false,
+      "note": "Takeaway: feedback exposes what worked and what to practise. Object: separate paper, binding, notes, marks and progress stroke. Frame: fixed headline above sheet, takeaway below. Pace: notes arrive before progress trace; settled final hold. Cut follows the sheet's reading direction."
+    },
+    {
+      "id": "route-diagram",
+      "narrativeRole": "route-diagram",
+      "durationMs": 10000,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "headline",
+            "type": "text",
+            "text": "Dari les ke langkah berikutnya",
+            "frame": {
+              "x": 96,
+              "y": 190,
+              "width": 888,
+              "height": 250
+            },
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "lesson-node",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 140,
+              "y": 700,
+              "width": 150,
+              "height": 150
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "feedback-node",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 465,
+              "y": 1000,
+              "width": 150,
+              "height": 150
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "next-node",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 790,
+              "y": 1300,
+              "width": 150,
+              "height": 150
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "lesson-label",
+            "type": "text",
+            "text": "Lesson",
+            "frame": {
+              "x": 96,
+              "y": 560,
+              "width": 350,
+              "height": 90
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "feedback-label",
+            "type": "text",
+            "text": "Umpan balik",
+            "frame": {
+              "x": 96,
+              "y": 1000,
+              "width": 340,
+              "height": 120
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "next-label",
+            "type": "text",
+            "text": "Next step",
+            "frame": {
+              "x": 635,
+              "y": 1510,
+              "width": 350,
+              "height": 120
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "route",
+            "type": "path",
+            "d": "M 0 0 C 160 0 165 300 325 300 S 490 600 650 600",
+            "viewBox": {
+              "minX": 0,
+              "minY": 0,
+              "width": 650,
+              "height": 600
+            },
+            "frame": {
+              "x": 215,
+              "y": 775,
+              "width": 650,
+              "height": 600
+            },
+            "stroke": {
+              "color": "palette.accent",
+              "width": 8
+            },
+            "lineCap": "round",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "traveller",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 197,
+              "y": 757,
+              "width": 36,
+              "height": 36
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 4
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "draw-route",
+          "targetId": "route",
+          "startMs": 700,
+          "durationMs": 2800,
+          "action": "draw",
+          "params": {
+            "from": 0,
+            "to": 1,
+            "easingPreset": "linear"
+          }
+        },
+        {
+          "id": "follow-route",
+          "targetId": "traveller",
+          "startMs": 3600,
+          "durationMs": 2800,
+          "action": "follow",
+          "params": {
+            "pathId": "route",
+            "from": 0,
+            "to": 1,
+            "orient": false,
+            "easingPreset": "smooth"
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      },
+      "carriesFactualClaim": false,
+      "note": "Takeaway: feedback connects lesson and action. Object: three nodes linked by one path. Frame: diagonal downward reading direction with labels away from route. Choreography: trace the relation, then travel it; keep path fixed. Pace: follow ends with quiet hold. Cut keeps next-step focus."
+    },
+    {
+      "id": "data-comparison",
+      "narrativeRole": "data-comparison",
+      "durationMs": 10000,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "headline",
+            "type": "text",
+            "text": "Bandingkan ukuran yang sama",
+            "frame": {
+              "x": 96,
+              "y": 190,
+              "width": 888,
+              "height": 250
+            },
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "illustrative",
+            "type": "text",
+            "text": "Nilai ilustrasi, bukan hasil belajar",
+            "frame": {
+              "x": 96,
+              "y": 450,
+              "width": 888,
+              "height": 50
+            },
+            "role": "label",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "baseline",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.text",
+            "frame": {
+              "x": 180,
+              "y": 1390,
+              "width": 720,
+              "height": 8
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "bar-a",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 280,
+              "y": 1110,
+              "width": 180,
+              "height": 280
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "bar-b",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 620,
+              "y": 690,
+              "width": 180,
+              "height": 700
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "value-a",
+            "type": "text",
+            "text": "2",
+            "frame": {
+              "x": 280,
+              "y": 930,
+              "width": 180,
+              "height": 160
+            },
+            "role": "display",
+            "maxLines": 1,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "textAlign": "center"
+          },
+          {
+            "id": "value-b",
+            "type": "text",
+            "text": "5",
+            "frame": {
+              "x": 620,
+              "y": 510,
+              "width": 180,
+              "height": 160
+            },
+            "role": "display",
+            "maxLines": 1,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "textAlign": "center"
+          },
+          {
+            "id": "label-a",
+            "type": "text",
+            "text": "Earlier",
+            "frame": {
+              "x": 230,
+              "y": 1460,
+              "width": 280,
+              "height": 100
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "textAlign": "center"
+          },
+          {
+            "id": "label-b",
+            "type": "text",
+            "text": "Later",
+            "frame": {
+              "x": 570,
+              "y": 1460,
+              "width": 280,
+              "height": 100
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "textAlign": "center"
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "compare-a",
+          "targetId": "bar-a",
+          "startMs": 400,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "compare-b",
+          "targetId": "bar-b",
+          "startMs": 1800,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "count-a",
+          "targetId": "value-a",
+          "startMs": 400,
+          "durationMs": 1200,
+          "action": "count",
+          "params": {
+            "from": 0,
+            "to": 2
+          }
+        },
+        {
+          "id": "count-b",
+          "targetId": "value-b",
+          "startMs": 1800,
+          "durationMs": 1800,
+          "action": "count",
+          "params": {
+            "from": 0,
+            "to": 5
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      },
+      "carriesFactualClaim": false,
+      "note": "Takeaway: comparison needs a shared baseline and unit. Object: two bars on one baseline, illustrative 2 and 5 values. Hierarchy: headline, dominant quantities, labels. Pace: earlier first, later second, then hold. Keep unit, source and bar scaling coherent when adapting; cut separates this illustrative comparison."
+    },
+    {
+      "id": "spatial-pullback",
+      "narrativeRole": "spatial-pullback",
+      "durationMs": 10000,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "headline",
+            "type": "text",
+            "text": "Satu catatan, satu perjalanan",
+            "frame": {
+              "x": 96,
+              "y": 190,
+              "width": 888,
+              "height": 250
+            },
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "node-left",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 185,
+              "y": 910,
+              "width": 170,
+              "height": 170
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "space": "world"
+          },
+          {
+            "id": "node-centre",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 455,
+              "y": 875,
+              "width": 170,
+              "height": 170
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "space": "world"
+          },
+          {
+            "id": "node-right",
+            "type": "shape",
+            "shape": "circle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 725,
+              "y": 910,
+              "width": 170,
+              "height": 170
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "space": "world"
+          },
+          {
+            "id": "link-left",
+            "type": "path",
+            "d": "M 0 40 L 100 0",
+            "viewBox": {
+              "minX": 0,
+              "minY": 0,
+              "width": 100,
+              "height": 40
+            },
+            "frame": {
+              "x": 355,
+              "y": 960,
+              "width": 100,
+              "height": 40
+            },
+            "stroke": {
+              "color": "palette.accent",
+              "width": 8
+            },
+            "lineCap": "round",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "space": "world"
+          },
+          {
+            "id": "link-right",
+            "type": "path",
+            "d": "M 0 0 L 100 40",
+            "viewBox": {
+              "minX": 0,
+              "minY": 0,
+              "width": 100,
+              "height": 40
+            },
+            "frame": {
+              "x": 625,
+              "y": 960,
+              "width": 100,
+              "height": 40
+            },
+            "stroke": {
+              "color": "palette.accent",
+              "width": 8
+            },
+            "lineCap": "round",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "space": "world"
+          },
+          {
+            "id": "context",
+            "type": "text",
+            "text": "The camera reveals the relationship.",
+            "frame": {
+              "x": 96,
+              "y": 1450,
+              "width": 888,
+              "height": 180
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          }
+        ]
+      },
+      "beats": [],
+      "transition": {
+        "type": "cut"
+      },
+      "carriesFactualClaim": false,
+      "note": "Takeaway: one feedback note belongs to a continuing journey. Object: three world nodes and connecting strokes. Start close on centre node; pull back to reveal neighbours. Overlay headline/context stay fixed. Pace: still entry, smooth expansion, then settle. Neutral cut changes scale intentionally.",
+      "camera": {
+        "initial": {
+          "x": 0,
+          "y": 0,
+          "zoom": 2.2
+        },
+        "moves": [
+          {
+            "id": "pullback",
+            "startMs": 1800,
+            "durationMs": 2600,
+            "to": {
+              "x": 0,
+              "y": 0,
+              "zoom": 1
+            },
+            "easingPreset": "smooth"
+          }
+        ]
+      }
+    },
+    {
+      "id": "headline-emphasis",
+      "narrativeRole": "headline-emphasis",
+      "durationMs": 10000,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "headline",
+            "type": "text",
+            "text": "Kemajuan butuh langkah berikutnya.",
+            "frame": {
+              "x": 96,
+              "y": 190,
+              "width": 888,
+              "height": 390
+            },
+            "role": "display",
+            "maxLines": 3,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "spans": [
+              {
+                "text": "Kemajuan butuh "
+              },
+              {
+                "text": "langkah berikutnya.",
+                "emphasis": "accent"
+              }
+            ],
+            "fontSize": 104
+          },
+          {
+            "id": "step-one",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 150,
+              "y": 1260,
+              "width": 260,
+              "height": 120
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "step-two",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 410,
+              "y": 1100,
+              "width": 260,
+              "height": 280
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "step-three",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 670,
+              "y": 940,
+              "width": 260,
+              "height": 440
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "step-label",
+            "type": "text",
+            "text": "A staircase makes the idea concrete.",
+            "frame": {
+              "x": 96,
+              "y": 1510,
+              "width": 888,
+              "height": 160
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "step-a",
+          "targetId": "step-one",
+          "startMs": 0,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "step-b",
+          "targetId": "step-two",
+          "startMs": 700,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "step-c",
+          "targetId": "step-three",
+          "startMs": 1400,
+          "durationMs": 600,
+          "action": "reveal",
+          "params": {
+            "direction": "up",
+            "distance": 24,
+            "easingPreset": "smooth"
+          }
+        },
+        {
+          "id": "headline-cue",
+          "targetId": "headline",
+          "startMs": 2400,
+          "durationMs": 800,
+          "action": "emphasize",
+          "params": {
+            "scale": 1.04,
+            "easingPreset": "smooth"
+          }
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      },
+      "carriesFactualClaim": false,
+      "note": "Takeaway: feedback points to an actionable next step. Object: independently drawn ascending stair treads; headline turning phrase uses profile accent. Framing leaves text separate from staircase. Pace: steps reveal, phrase emphasis, settled hold. A type-led statement is deliberate here, not the default for every shot."
+    },
+    {
+      "id": "quiet-shot",
+      "narrativeRole": "quiet-shot",
+      "durationMs": 10000,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "headline",
+            "type": "text",
+            "text": "Jeda untuk langkah berikutnya",
+            "frame": {
+              "x": 96,
+              "y": 190,
+              "width": 888,
+              "height": 250
+            },
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          },
+          {
+            "id": "paper",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.surface",
+            "frame": {
+              "x": 220,
+              "y": 700,
+              "width": 640,
+              "height": 660
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 0,
+            "cornerRadius": 24
+          },
+          {
+            "id": "next-step",
+            "type": "text",
+            "text": "Latih satu hal.",
+            "frame": {
+              "x": 280,
+              "y": 865,
+              "width": 520,
+              "height": 240
+            },
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "color": "palette.background"
+          },
+          {
+            "id": "underline",
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "palette.accent",
+            "frame": {
+              "x": 280,
+              "y": 1165,
+              "width": 300,
+              "height": 12
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1
+          },
+          {
+            "id": "context",
+            "type": "text",
+            "text": "Beri waktu untuk memahami.",
+            "frame": {
+              "x": 96,
+              "y": 1500,
+              "width": 888,
+              "height": 180
+            },
+            "role": "body",
+            "maxLines": 2,
+            "overflowPolicy": "error",
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3
+          }
+        ]
+      },
+      "beats": [],
+      "transition": {
+        "type": "cut"
+      },
+      "carriesFactualClaim": false,
+      "note": "Takeaway: let one next action land. Object: a still written note. Hierarchy: dominant action, supporting context. Fixed framing; no camera or beats. Quiet hold is intentional. Neutral cut is correct when moving to another thought, not a missing transition."
+    }
+  ]
+}

@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { cropWithinImage } from "../asset/image-placement.js";
 import { type SanitizedSvg, sanitizeSvg } from "../asset/svg-sanitize.js";
 import { type Issue, type Result, sortIssues } from "../model/issue.js";
 import { sha256File, sha256Text } from "../project/hash.js";
 import { resolveSafeExistingFile } from "../project/safe-path.js";
-import { loadRecipes } from "../recipe/load-recipes.js";
+import { loadRecipes, pngSize } from "../recipe/load-recipes.js";
 import {
   type PlanSource,
   validatePlanSource,
@@ -287,6 +288,82 @@ export const loadPlanProject = async (
     };
   }
 
+  const imageSizes: NonNullable<PlanSource["imageSizes"]> = {};
+  const optedIn = new Set(
+    validated.value.assets.assets
+      .filter((a) => a.status === "ready" && a.kind === "png" && a.layout)
+      .map((a) => a.id),
+  );
+  for (const scene of validated.value.scenes.scenes)
+    if (scene.visual.type === "composition")
+      for (const layer of scene.visual.layers)
+        if (layer.type === "image" && layer.crop) optedIn.add(layer.assetId);
+  for (const assetId of optedIn) {
+    const asset = validated.value.assets.assets.find((a) => a.id === assetId);
+    if (asset?.status !== "ready" || asset.kind !== "png")
+      return {
+        ok: false,
+        issues: [
+          {
+            code: "IMAGE_CROP_ASSET_INVALID",
+            severity: "error",
+            responsible: "user",
+            artifact: "scenes.json",
+            path: "/scenes",
+            message: `Crop/layout requires a ready PNG: ${assetId}.`,
+            suggestion: "Use a ready PNG with source-pixel metadata.",
+          },
+        ],
+      };
+    const size = pngSize(
+      (await readFile(resolve(root, asset.path))).subarray(0, 24),
+    );
+    if (
+      !size ||
+      (asset.layout &&
+        (asset.layout.width !== size.width ||
+          asset.layout.height !== size.height))
+    )
+      return {
+        ok: false,
+        issues: [
+          {
+            code: "PNG_LAYOUT_SIZE_MISMATCH",
+            severity: "error",
+            responsible: "user",
+            artifact: "assets/manifest.json",
+            path: "/assets",
+            message: `PNG ${assetId} does not match its declared source dimensions.`,
+            suggestion: "Read the actual PNG dimensions and correct layout.",
+          },
+        ],
+      };
+    imageSizes[assetId] = size;
+    for (const scene of validated.value.scenes.scenes)
+      if (scene.visual.type === "composition")
+        for (const layer of scene.visual.layers)
+          if (
+            layer.type === "image" &&
+            layer.assetId === assetId &&
+            layer.crop &&
+            !cropWithinImage(layer.crop, size)
+          )
+            return {
+              ok: false,
+              issues: [
+                {
+                  code: "IMAGE_CROP_INVALID",
+                  severity: "error",
+                  responsible: "user",
+                  artifact: "scenes.json",
+                  path: "/scenes",
+                  message: `Crop for ${layer.id} exceeds PNG source dimensions.`,
+                  suggestion: "Keep crop bounds inside the original PNG.",
+                },
+              ],
+            };
+  }
+
   return {
     ok: true,
     value: {
@@ -296,6 +373,16 @@ export const loadPlanProject = async (
           ? { ...validated.value, vectors: vectors.value }
           : validated.value),
         ...recipes.value,
+        ...(optedIn.size
+          ? {
+              imageSizes: {
+                ...("imageSizes" in recipes.value
+                  ? recipes.value.imageSizes
+                  : {}),
+                ...imageSizes,
+              },
+            }
+          : {}),
       },
     },
     issues: validated.issues,

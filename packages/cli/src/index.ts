@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { resolve } from "node:path";
+import { realpathSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { corePackage } from "@naraframe/core";
 import { rendererPackage } from "@naraframe/renderer-remotion";
@@ -78,7 +78,7 @@ export const runCliProcess = async (
   }
 };
 
-const entryPath = process.argv[1] ? resolve(process.argv[1]) : undefined;
+const entryPath = process.argv[1] ? realpathSync(process.argv[1]) : undefined;
 if (entryPath && import.meta.url === pathToFileURL(entryPath).href) {
   process.exitCode = await runCliProcess();
 }

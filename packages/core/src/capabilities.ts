@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AssetManifestSchema } from "./schema/asset.js";
+import { CaptionModeSchema } from "./schema/captions.js";
 import { ProfileLockSchema } from "./schema/profile.js";
 import { AudioModeSchema } from "./schema/project.js";
 import {
@@ -45,6 +46,11 @@ export interface CapabilityRegistry {
   audio: string[];
   /** Production audio modes a project may declare as `audioMode`. */
   audioModes: string[];
+  /** Caption display policies, independent of narration/audio mode. */
+  captionModes: string[];
+  /** Proven passive authoring catalog and deliberately scoped PNG geometry. */
+  library: string[];
+  imageLayout: string[];
   /** Forms deliberately not implemented, with the reason. */
   unsupported: Array<{ name: string; reason: string }>;
 }
@@ -153,10 +159,22 @@ export const capabilityRegistry = (): CapabilityRegistry => {
       "music",
       "narration",
       "phrase-anchors",
+      "prepared-audio-staging",
+      "prepared-timing-receipt",
       "sfx",
       "ducking",
     ].sort(),
     audioModes: enumOf(AudioModeSchema),
+    captionModes: enumOf(CaptionModeSchema),
+    library: [
+      "local-catalog",
+      "pinned-import",
+      "explicit-update",
+      "scalar-parameters",
+      "sibling-anchors",
+      "recipe-dependencies-no-trust-transfer",
+    ],
+    imageLayout: ["png-source-pixel-metadata", "png-source-pixel-crop"],
     unsupported: [
       { name: "video-asset", reason: "No decode or timing test has been run." },
       {
