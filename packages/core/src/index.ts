@@ -202,6 +202,11 @@ export {
   type EditResult,
   editProject,
 } from "./revision/edit.js";
+export {
+  type HistoryEntry,
+  type HistoryReport,
+  readRevisionHistory,
+} from "./revision/history.js";
 export { withProjectLock } from "./revision/lock.js";
 export {
   checkRecipeTrust,
@@ -324,6 +329,7 @@ export {
   FrameSchema,
   InsetsSchema,
   LayerSchema,
+  LayerStrokeSchema,
   SceneNarrationSchema,
   SceneSchema,
   ScenesSchema,

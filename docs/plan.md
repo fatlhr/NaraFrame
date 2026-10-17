@@ -2,7 +2,7 @@
 
 Revision 2.1 · 2026-10-17 · Integrated baseline `a701c399211ba2584f439b59814e8a2d41614e0f` (MVP 2 Batch 3, PR #34)
 
-**Current step:** MVP 2 (M4.1–M4.5) is integrated in main as `a701c39` (PR #34, squash-merged 2026-10-17). An independent read-only review of the closure returned ACCEPT_WITH_NOTES; its document corrections are recorded below. Next is the follow-up backlog F1–F6 in section 4, each with its own feature model and authorization, and then the closing task C1 (public README). Nothing in that backlog is started by this update.
+**Current step:** MVP 2 is integrated; follow-up batches B1–B4 (F1, F6, F2+F3, F4) are integrated through their own PRs. Next is B5 (F5, lingering processes after parallel renders) when Fatih schedules it, then the closing task C1 (public README).
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -331,7 +331,7 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 | F1 (DONE, B1) | Visual preflight samples scene-final/entry frames only, so text pushed off frame by a `match-cut` zoom, or entry motion that starts outside the safe area, passes validate and preview silently. | Text and safe-area checks cover transition and entry-motion frames, with a regression built from the trial seam. |
 | F2 (DONE, B3) | Narration cannot be removed through `edit`; the author had to delete `narration.json` by hand after `SCENE_NARRATION_MISSING`. | An ordinary, revision-recorded way to make a voiced project silent. |
 | F3 (DONE, B3) | `profile apply` lists `regenerate-narration` for a project without narration and does not name layers bound to palette slots, image plates or literal colours that clash with the new direction. | The dry run reports only relevant effects and names the affected layers and assets. |
-| F4 | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
+| F4 (DONE, B4) | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
 | F5 | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
 | F6 (DONE, B2) | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
 
@@ -421,6 +421,35 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   - The production episodes were not touched; their revisions are still `3ff723d6…` and `d41ecb8d…`.
 - **Gates:** `pnpm verify` exit 0 (Biome 229, unit 350/350, integration 453/453). Two existing assertions dropped `regenerate-narration` deliberately, because those created projects have no narration.
 - **E2E subset:** the six files that exercise `edit`/`profile apply`/narration codes (caption-policy, font-readiness, recipe-brand-switch, recipe-production, recipe-text-fit, reference-projects) passed 10/10 in 426 s. There is no render change, so the full suite was not rerun. Logs are in `work/gate-logs/b3/`.
+
+**B4 / F4 model — consistent colour tokens, documented motion and emphasis, revision history.**
+- **Stroke colours:** shape (and image) `stroke.color` accepts the same palette tokens as path strokes. Tokens resolve through the profile palette in the renderer and in contrast and preflight checks exactly as path strokes do. Hex stays valid. The F3 review already reads tokens on these properties.
+- **Motion and emphasis documented in the skill:**
+  - `reveal` direction semantics: which edge the layer starts from and how distance applies.
+  - `strong`: +200 font weight, capped at 900. With faces that have only regular and bold (for example system Arial), headings at weight 600 or more already render bold, so `strong` can be indistinct. Use `accent` or `quiet` contrast instead.
+  - Why a reused preview gets a new build id while its MP4 bytes are reused, and how to recognise reuse (`reusedFromBuildId`).
+- **Revision history:** a read-only `history <project> [--limit n] [--json]` command lists the current revision chain from the current revision backwards: id, parent, kind (edit, undo, capture, profile apply…), summary and time, with the current revision marked. `undo` targets stay as they are. The skill points to it before `undo`.
+- **Acceptance:**
+  1. A shape with `stroke.color: "palette.accent"` validates and renders in the profile accent under two profiles.
+  2. `history` on a copy of trial episode-01 lists the revision chain and matches `revisions/` metadata. Undo is a pointer move with no redo, so revisions stepped away from are on disk but not in the chain.
+  3. Skill text reviewed against the actual renderer behaviour (reveal offsets and strong weights) with a scoped preview still per claim.
+  4. Unit, integration and focused render tests. A full E2E run happens only if render keys change.
+
+**B4 / F4 evidence — 2026-10-17 (branch `b4-colour-motion-docs`; owner-approved and integrated through its own PR):**
+- **Stroke tokens:** shape and image strokes use a new `LayerStrokeSchema` (`ColorValueSchema`), resolved by the compiler's existing `resolveColor` exactly as path strokes are; the renderer needed no change. The profile's `appearance.stroke` stays hex-only. An unknown token is refused identically on shape, image and path.
+- **Render keys:** a dump of scene keys, assembly keys and compiled-draft hashes for 10 projects (fixtures, samples, both trial episodes, art-direction, captions, prepared-audio, library) is byte-identical before and after. A token that resolves to the same colour as a hex gives the same keys.
+- **Pixels:** a scoped preview with `stroke.color: "palette.accent"` sampled `#fb5c36` under current-issues (accent `#FF5A36`) and `#0c7a76` under contrast (`#0B7A75`); the differences are H.264 rounding. Image-layer strokes are covered at compile level only.
+- **Skill, each claim backed by a scoped preview still (`work/m4-followups/b4/stills/`, checked by the supervisor):**
+  - `reveal` `direction` is the travel direction: `up` starts below its frame, `right` starts to the left. `exit` mirrors this.
+  - `strong` is base weight +200 and is indistinct from plain text at base weight ≥ 600 in regular/bold-only faces such as system Arial.
+  - A reused preview keeps its assembly-key prefix with a new attempt suffix, and `reusedFromBuildId` names the source.
+- **`history <project> [--limit n] [--json]`:** read-only. It follows the current chain through `parentId`, takes no lock and captures nothing.
+  - The text marks the current revision with `*`.
+  - Errors: `REVISION_HISTORY_MISSING`, `REVISION_CORRUPT`, `CLI_USAGE`.
+  - On a copy of trial episode-01 it lists 11 revisions with current `3ff723d6…`, and the copy's `revisions/` is byte-identical to production afterwards.
+  - Revision kinds are `baseline`, `edit` and `manual-capture`; a profile apply shows as `edit` and its summary names it.
+- **Gates:** `pnpm verify` exit 0 (Biome 231, unit 352/352, integration 463/463). E2E is not run because no render key or compiled draft changed. Logs are in `work/gate-logs/b4/`.
+- **Left for later:** shadow colours stay hex-only. `README.md` lacks `history`, and C1 rewrites it.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 

@@ -52,7 +52,7 @@ The live `schema --json` is authoritative; these excerpts save repeated reconstr
 }
 ```
 
-Check field unions/required keys against the returned public schema before copying a different type. Time is in milliseconds; motion is rounded to design fps. Give a changed state a settled hold, not a continuous zoom by default. With verified narration, existing phrase anchors replace guessed word timestamps. A camera reframe changes explanation when it reveals context or isolates the cause; moving the whole card without changing what is understood adds no explanatory relation.
+A reveal's `direction` is the way the layer travels: this `up` reveal starts 24 px below the note's frame and rises into place; `left` would start to its right. Check field unions/required keys against the returned public schema before copying a different type. Time is in milliseconds; motion is rounded to design fps. Give a changed state a settled hold, not a continuous zoom by default. With verified narration, existing phrase anchors replace guessed word timestamps. A camera reframe changes explanation when it reveals context or isolates the cause; moving the whole card without changing what is understood adds no explanatory relation.
 
 ## Revision and visual check
 

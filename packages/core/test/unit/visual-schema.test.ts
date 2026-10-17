@@ -290,3 +290,87 @@ describe("count label length (M2.4.4)", () => {
     expect(compiled({ suffix: "x".repeat(49) }).success).toBe(false);
   });
 });
+
+describe("palette tokens in layer strokes", () => {
+  const frame = { x: 100, y: 100, width: 300, height: 120 };
+  const base = { opacity: 1, rotationDeg: 0, zIndex: 0, frame };
+  const documentWith = (layers: unknown[]) => ({
+    ...sceneDocument(),
+    scenes: [
+      {
+        ...firstScene(sceneDocument()),
+        visual: { type: "composition", layers },
+        beats: [],
+      },
+    ],
+  });
+  const strokeOf = (type: "shape" | "image" | "path", color: string) => {
+    const stroke = { color, width: 6 };
+    if (type === "shape") {
+      return {
+        ...base,
+        id: "panel",
+        type,
+        shape: "rectangle",
+        fill: "#123456",
+        stroke,
+      };
+    }
+    if (type === "image") {
+      return {
+        ...base,
+        id: "photo",
+        type,
+        assetId: "photo",
+        fit: "cover",
+        stroke,
+      };
+    }
+    return {
+      ...base,
+      id: "route",
+      type,
+      d: "M 0 0 L 10 10",
+      viewBox: { minX: 0, minY: 0, width: 10, height: 10 },
+      stroke,
+    };
+  };
+  const parse = (type: "shape" | "image" | "path", color: string) =>
+    ScenesSchema.safeParse(documentWith([strokeOf(type, color)]));
+
+  it("accepts palette slots on shape, image and path strokes alike", () => {
+    for (const type of ["shape", "image", "path"] as const) {
+      for (const color of [
+        "palette.accent",
+        "palette.surface",
+        "palette.text",
+        "palette.background",
+        "#FF5A36",
+      ]) {
+        const parsed = parse(type, color);
+        expect(
+          parsed.success,
+          `${type} ${color} ${parsed.success ? "" : JSON.stringify(parsed.error.issues)}`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("refuses an unknown slot on shape and image exactly as on a path", () => {
+    const issuesOf = (type: "shape" | "image" | "path") => {
+      const result = parse(type, "palette.nope");
+      if (result.success) throw new Error(`${type} accepted palette.nope`);
+      return result.error.issues.map((issue) => ({
+        code: issue.code,
+        // Everything after the layer's own position in the document.
+        path: issue.path.slice(-2).join("/"),
+      }));
+    };
+    const reference = issuesOf("path");
+    expect(reference.map((issue) => issue.code)).toEqual(["invalid_format"]);
+    expect(issuesOf("shape")).toEqual(reference);
+    expect(issuesOf("image")).toEqual(reference);
+    expect(parse("shape", "accent").success).toBe(false);
+    expect(parse("shape", "#12345").success).toBe(false);
+  });
+});

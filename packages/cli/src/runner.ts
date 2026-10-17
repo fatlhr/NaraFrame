@@ -30,6 +30,7 @@ import {
   readApprovals,
   readProductionLedger,
   readRecipeTrust,
+  readRevisionHistory,
   readRevisionState,
   recordApproval,
   recordRecipeTrust,
@@ -102,6 +103,7 @@ Usage:
   naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
   naraframe recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>] [--json]
   naraframe edit <project> --expect <revision> [--from <staging-dir>] [--remove narration.json|captions.json]... [--summary <text>] [--json]
+  naraframe history <project> [--limit <n>] [--json]
   naraframe profile inspect <id-or-path> [--json]
   naraframe library inspect <catalog.json> [--json]
   naraframe library stage <project> [--from <catalog.json> --pattern <id> --version <version> --scene <id>] --instance <id> --params <params.json> [--update] [--json]
@@ -941,6 +943,63 @@ const undoCommand = async (args: readonly string[]): Promise<Execution> => {
   };
 };
 
+const historyCommand = async (args: readonly string[]): Promise<Execution> => {
+  const parsed = parseArguments(args, [], ["--limit"]);
+  const limitText = parsed.values.get("--limit");
+  const limit = limitText === undefined ? undefined : Number(limitText);
+  if (
+    parsed.error ||
+    parsed.positionals.length !== 1 ||
+    (limit !== undefined && (!Number.isInteger(limit) || limit < 1))
+  ) {
+    return usageFailure(
+      "history",
+      parsed.error ??
+        (parsed.positionals.length !== 1
+          ? "history requires exactly one project."
+          : "--limit must be a positive whole number."),
+    );
+  }
+  const result = await readRevisionHistory({
+    root: resolve(parsed.positionals[0] ?? "."),
+    ...(limit === undefined ? {} : { limit }),
+  });
+  if (!result.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("history", {
+        status: "failed",
+        success: false,
+        readiness: "unknown",
+        issues: result.issues,
+      }),
+    };
+  }
+  const { currentId, total, entries } = result.value;
+  return {
+    exitCode: 0,
+    event: commonEvent("history", {
+      sourceRevision: currentId,
+      issues: result.issues,
+      data: {
+        currentRevision: currentId,
+        total,
+        truncated: entries.length < total,
+        revisions: entries,
+      },
+    }),
+    human: [
+      ...entries.map(
+        (entry) =>
+          `${entry.current ? "*" : " "} ${entry.id.slice(0, 12)} ${entry.kind.padEnd(14)} ${entry.createdAt}  ${entry.summary}`,
+      ),
+      ...(entries.length < total
+        ? [`  ... ${total - entries.length} older revision(s); raise --limit.`]
+        : []),
+    ],
+  };
+};
+
 interface ProductionChecks {
   ok: boolean;
   issues: Issue[];
@@ -1690,6 +1749,7 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "preview" ||
   value === "edit" ||
   value === "undo" ||
+  value === "history" ||
   value === "render" ||
   value === "cache" ||
   value === "profile" ||
@@ -1713,6 +1773,7 @@ const executeCommand = async (
   if (command === "preview") return previewCommand(args, options);
   if (command === "edit") return editCommand(args);
   if (command === "undo") return undoCommand(args);
+  if (command === "history") return historyCommand(args);
   if (command === "render") return renderCommand(args, options);
   if (command === "cache") return cacheCommand(args);
   if (command === "profile") return profileCommand(args);
