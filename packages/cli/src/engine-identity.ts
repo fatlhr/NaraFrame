@@ -1,7 +1,28 @@
 import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname, join, parse } from "node:path";
 import { fileURLToPath } from "node:url";
+
+// Version of a dependency as npm or pnpm actually placed it, found the way
+// Node resolves it. The result does not depend on where the tree was hoisted.
+const installedVersion = async (
+  from: string,
+  dependency: string,
+): Promise<string> => {
+  for (let directory = from; ; directory = dirname(directory)) {
+    try {
+      return JSON.parse(
+        await readFile(
+          join(directory, "node_modules", dependency, "package.json"),
+          "utf8",
+        ),
+      ).version;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+    if (directory === parse(directory).root) return "unresolved";
+  }
+};
 
 // Installation binding only: this does not change source revisions or render keys.
 // Hash our built runtime/resources plus dependency pins, not private projects/cache.
@@ -23,8 +44,27 @@ export const engineIdentity = async (root: string): Promise<string> => {
     }
   };
   await visit(join(root, "packages/cli/dist"), "cli");
-  for (const name of ["@naraframe/core", "@naraframe/renderer-remotion"])
-    await visit(dirname(fileURLToPath(import.meta.resolve(name))), name);
+  for (const name of ["@naraframe/core", "@naraframe/renderer-remotion"]) {
+    const modules = dirname(fileURLToPath(import.meta.resolve(name)));
+    await visit(modules, name);
+    // Declared and installed versions of every third-party runtime dependency.
+    const packageRoot = dirname(modules);
+    const metadata = JSON.parse(
+      await readFile(join(packageRoot, "package.json"), "utf8"),
+    );
+    for (const [dependency, declared] of Object.entries(
+      (metadata.dependencies ?? {}) as Record<string, string>,
+    ).sort(([a], [b]) => a.localeCompare(b, "en")))
+      if (!dependency.startsWith("@naraframe/"))
+        hash.update(
+          JSON.stringify([
+            "dependency",
+            dependency,
+            declared,
+            await installedVersion(packageRoot, dependency),
+          ]),
+        );
+  }
   for (const resource of [
     "profiles/current-issues",
     "library",

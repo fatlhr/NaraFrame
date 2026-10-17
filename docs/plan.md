@@ -529,6 +529,49 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   2. NaraFrame renders with Remotion, which has its own licence: free for individuals and small companies, with a company licence required above that threshold. A NaraFrame code licence (for example MIT or Apache-2.0, as in the references) does not change that. The README and installer must state it plainly before anyone installs. Verify the current Remotion terms at the time of C1.
   3. The README follows the outcome-first order: hero still and gallery from synthetic or rights-cleared examples, what you can make, how it works with an agent, example prompts, then install and requirements (macOS arm64, Node, Chrome, FFmpeg).
 
+**B6 decisions and split (owner, 2026-10-18):** the engine is published on npm and NaraFrame's code is MIT-licensed. B6 ships as three reviewable PRs: B6a licence and npm package shape, B6b F7 (skill engine check and agent-led install from npm), B6c C1 (public README with marketing skills and images). `npm publish` needs the owner's npm account and is run by the owner after B6a–B6c are on main; the agent prepares the exact commands.
+
+**B6a model — MIT licence and a publishable npm package.**
+- **Licence:**
+  - A root `LICENSE` with the MIT text covers NaraFrame's own code.
+  - Package metadata says `MIT`.
+  - Third-party packages keep their own licences. Remotion 4.0.521's licence is free for individuals, organisations with up to 3 employees, non-profits and evaluation, and requires a company licence above that. It forbids copying or modifying Remotion code to sell, licence or sublicense a derivative.
+- **Package shape:**
+  - The published package `naraframe` (the name is free on npm as of 2026-10-18) contains only NaraFrame's compiled CLI, core and renderer modules plus maintained resources: profiles, library, starter, skill and installer.
+  - Third-party runtime packages, including Remotion and React, are declared as regular dependencies pinned to exact versions, so npm installs them from the registry under their own licences. The local aggregate archive that captured 259 third-party placements is not the published form.
+  - The `bin` is `naraframe`, with `engines.node` pinned to the supported runtime. `os`/`cpu` stay unrestricted unless install fails elsewhere; documentation states macOS arm64 as the only verified platform.
+- **Engine identity:** `version --json` and the skill receipt keep working from an npm install. `engineIdentity` covers NaraFrame's own modules and resources plus the pinned dependency versions.
+- **Acceptance:**
+  1. `npm pack` produces a tarball whose file list contains no third-party package code and no private, work or test-fixture files.
+  2. In a clean temporary consumer directory, `npm install <tarball>` (third-party dependencies fetched from the public registry), `npx naraframe doctor --json`, `create` and one scoped draft preview succeed, and the skill installer binds to it.
+  3. The source checkout routes and existing packaging tests stay green, or are updated deliberately.
+  4. No publish.
+
+**B6a evidence — 2026-10-18 (branch `b6a-mit-npm-package`; owner-approved and integrated through its own PR):**
+- **Licence:** root `LICENSE` is MIT, `Copyright (c) 2026 Fatiha Rahmat` (owner's GitHub name). `THIRD-PARTY-NOTICES.md` lists the nine direct dependencies with versions and licences and calls out Remotion's free/company tiers and derivative restriction. It also notes the platform compositor binaries and that Chrome, FFmpeg and fonts are user-installed. `starter/RIGHTS.json` now states MIT.
+- **Package:** `pnpm pack:npm` (`pack-engine.mjs --registry`) builds `naraframe@0.1.0`.
+  - 231 KB, 129 files.
+  - NaraFrame's compiled core and renderer are bundled under `node_modules/@naraframe/*` (`bundleDependencies`). Third-party runtime packages are exact-version `dependencies` fetched from the registry, with no vendored third-party code.
+  - `bin: naraframe` and `engines.node 24.20.x`.
+  - A post-pack guard and a test reject third-party `node_modules`, work, fixtures, samples, logs and personal path strings.
+  - The offline aggregate mode is kept; its private archive now says `SEE LICENSE IN LICENSE`.
+- **`engineIdentity`:** it now also hashes each third-party dependency's declared pin and installed version. This closes a gap: the source checkout previously hashed none. Two independent installs of the tarball, and an extraction elsewhere, gave the same identity.
+- **Acceptance:** in a clean consumer directory whose path contains a space, with an isolated npm cache:
+  - `npm install` added 252 packages in about 20 s (391 MB);
+  - `version`, `doctor` (8/8), `create`, `library stage` + `edit`, and `validate` all succeeded;
+  - a scoped draft preview rendered 540x960, 120 frames, with the frame-integrity guard passing;
+  - the skill installer bound to it and its launcher reported the same identity.
+- **Skill docs:** six example paths that named `../NaraFrame-projects/…` became `../…`.
+- **Gates:** `pnpm verify` exit 0, re-run by the supervisor (Biome 233, unit 360/360, integration 470/470, including 7 new npm-package tests). No render change, so no E2E.
+- **Findings for B6b/C1 and publication:**
+  - Bare `npx naraframe create … --profile …` is swallowed by npm's own `--profile` flag; documentation and the skill use `npx -y naraframe@<version> …`.
+  - Transitive dependencies are not pinned; an `npm-shrinkwrap.json` would pin the whole tree.
+  - Yarn Berry ignores `bundleDependencies`.
+  - npm skips esbuild's postinstall, which rendering does not need.
+  - Only macOS arm64 is verified.
+  - `doctor` expects a writable package root, so a root-owned global install reports a filesystem issue.
+- **Owner decisions (2026-10-18):** add an `npm-shrinkwrap.json` so an agent-led install gets the whole dependency tree pinned (done in B6b); keep `engines.node 24.20.x`, which only warns on other Node 24 releases.
+
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
 Each needs its own demand/evidence and authorization. None is automatically a new task just because M4 is documented.

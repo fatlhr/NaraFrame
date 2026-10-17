@@ -11,11 +11,11 @@ From the repository root, after activating pinned Node/pnpm:
 ```bash
 pnpm naraframe doctor --json
 pnpm naraframe schema --json
-pnpm naraframe create ../NaraFrame-projects/art-direction-patterns --profile current-issues --json
-cp skills/naraframe/examples/art-direction/scenes.json ../NaraFrame-projects/art-direction-patterns/scenes.json
-pnpm naraframe validate ../NaraFrame-projects/art-direction-patterns --stage plan --json
-pnpm naraframe preview ../NaraFrame-projects/art-direction-patterns --draft --scene object-explanation --json
-pnpm naraframe status ../NaraFrame-projects/art-direction-patterns --json
+pnpm naraframe create ../art-direction-patterns --profile current-issues --json
+cp skills/naraframe/examples/art-direction/scenes.json ../art-direction-patterns/scenes.json
+pnpm naraframe validate ../art-direction-patterns --stage plan --json
+pnpm naraframe preview ../art-direction-patterns --draft --scene object-explanation --json
+pnpm naraframe status ../art-direction-patterns --json
 ```
 
 The initial copy populates only the newly created empty `scenes.json`; empty projects have no valid compiled revision yet. It keeps the created project config/profile/manifest. Subsequent revisions use `status`'s `sourceRevision` with `edit --from STAGING --expect SOURCE_REVISION`. This example is a no-narration draft, not a final export. For an intentionally silent production project, stage the created `naraframe.json` with `audioMode: "silent"` alongside the scenes through an ordinary edit. Never change voice intent to bypass missing narration. Use any scene ID below in the same scoped preview command; get artifact paths from its result. For a real episode, author a new project outside the repository and copy only the chosen editable structure into its initial source or staged revision, rather than changing the shared example.
@@ -65,7 +65,7 @@ A neutral cut intentionally changes thought or scale. Continuity is authored by 
 After inspecting output, run focused example/registry checks with the created project profile:
 
 ```bash
-pnpm naraframe schema --json | node skills/naraframe/check-art-direction.mjs ../NaraFrame-projects/art-direction-patterns
+pnpm naraframe schema --json | node skills/naraframe/check-art-direction.mjs ../art-direction-patterns
 ```
 
 These checks protect the six pattern structures and the number-box height regression; public validate and browser preflight still own complete schema and visual validation.
