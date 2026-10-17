@@ -29,6 +29,8 @@ The initial copy populates only the newly created empty `scenes.json`; empty pro
 | Headline / `headline-emphasis` | A turning phrase names the actionable next step | Role/spans plus mild `emphasize`, independently revealed staircase | Copy and spans, headline frame, emphasis scale/window, tread frames | Joined spans must reproduce `text`; phrase emphasis is profile-owned. Scaling still needs fit/collision inspection. Type-led shots can be intentional. |
 | Quiet / `quiet-shot` | One action has room to land | Static composition, empty `beats`, explicit `cut` | Copy, object scale, white space, duration | No camera/motion is required. Hold length follows reading/voice needs; profile warnings are not a global motion quota. |
 
+Claim labels. `object-explanation` says feedback clarifies progress, which is a statement about the world, so it is `carriesFactualClaim: true` and cites the declared `example-feedback-source`; replace that source with your own. The other five make no claim (a diagram of a sequence, values marked illustrative, a metaphor, an exhortation, an instruction) and stay `false`, with the reason in each `note`. Adapted copy that states a fact needs its own label and source: see Claims and sources in `SKILL.md`.
+
 ## Small schema-shaped starting points
 
 The live `schema --json` is authoritative; these excerpts save repeated reconstruction, not replace it. Every text/shape/path layer needs `id`, its type-specific content, `frame`, `opacity`, `rotationDeg`, and `zIndex`. A text needs `text` even with spans; a shape needs `shape` and `fill`. A group instead needs `memberIds`, `transform`, and `zIndex`. Scene fields are `id`, `narrativeRole`, `durationMs`, `visual`, `beats`, and `transition`.

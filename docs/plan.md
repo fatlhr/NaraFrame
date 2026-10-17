@@ -333,7 +333,7 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 | F3 | `profile apply` lists `regenerate-narration` for a project without narration and does not name layers bound to palette slots, image plates or literal colours that clash with the new direction. | The dry run reports only relevant effects and names the affected layers and assets. |
 | F4 | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
 | F5 | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
-| F6 | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
+| F6 (DONE, B2) | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
 
 **Delivery order (owner, 2026-10-17):** one batch per relevance, each confirmed by Fatih before commit, push and squash-merge: B1 = F1, B2 = F6, B3 = F2 + F3, B4 = F4, B5 = F5, then C1.
 
@@ -360,6 +360,30 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   - full serial E2E 14 files / 24 tests, 1085 s, exit 0 (log SHA-256 `72c30ffb…`).
 - Chrome had auto-updated to 155.0.8059.84 by this run; the M4.5 freeze recorded .40. The engine does not pin the browser.
 - Known limits: the canvas error still uses the full text box, which is conservative. Checks run on sampled frames only. Exit-beat travel that stays at least half opaque can warn.
+
+**B2 / F6 model — explicit claim labelling.** The engine trusts `carriesFactualClaim`; it never detects claims, and that stays true. The gap is guidance and a silent strict profile. Model:
+- Skill: a short "Claims and sources" section saying what counts as a factual claim. A factual claim is a statement about the world presented as true: causes, quantities, dates, places, named people or events. Questions, instructions, opinions marked as such, and on-screen labels are not claims. The section covers how to declare `sources` and cite `sourceIds` on scenes or narration blocks, what `requireSourcing` changes (`SOURCE_MISSING` becomes an error), and that an unsourced restatement needs the owner's decision recorded in the project notes rather than a silent `false`.
+- Examples: the art-direction example scenes keep `carriesFactualClaim: false` only where they make no claim, and the guide says why. If an example states a fact, it is labelled and cites a declared example source.
+- Validation: when the active profile sets `requireSourcing: true` and no scene or narration block is labelled `carriesFactualClaim: true`, `validate` and later stages report one info issue, `CLAIMS_UNLABELLED`. The issue says the engine cannot see claims, and asks the author to confirm that the episode makes none or to label and source them. It never blocks.
+- No render key, schema or approval change.
+- Acceptance:
+  1. `validate` on a copy of trial episode-02 (contrast, all `false`) reports `CLAIMS_UNLABELLED`.
+  2. A copy of episode-01 (general-explainer, sourcing not required) does not.
+  3. A contrast fixture with one labelled, sourced claim reports neither `CLAIMS_UNLABELLED` nor `SOURCE_MISSING`.
+  4. The same fixture with the source removed reports `SOURCE_MISSING` as an error.
+  5. Unit, integration and skill-example checks stay green.
+
+**B2 / F6 evidence — 2026-10-17 (branch `f6-claim-labelling`; owner-approved and integrated through its own PR):**
+- `checkSourceProvenance` raises `CLAIMS_UNLABELLED` once, as an info issue on `scenes.json` `/scenes`, through the normal compile issues (validate, preview, render, status).
+- The production-check early return in `runner.ts` now deduplicates issues. Before this, a failed draft-plus-final compile printed each issue twice, which is a pre-existing duplication of `SOURCE_MISSING`.
+- The skill gains "Claims and sources". In the art-direction examples, `object-explanation` is labelled and cites a declared placeholder source. The other five examples state their "No claim" reason in the scene note, and `check-art-direction.mjs` enforces labelled-cites-declared-source.
+- Acceptance, re-run by the supervisor:
+  - copy of episode-02: `CLAIMS_UNLABELLED` info, success;
+  - copy of episode-01: none;
+  - labelled + sourced fixture: neither code;
+  - source removed: `SOURCE_MISSING` error, exit 1;
+  - the art-direction check passes with schema input.
+- Gates: `pnpm verify` exit 0 (Biome 226, unit 345/345 including 6 new, integration 431/431 including 3 new). E2E is not rerun: there is no render change, and E2E issue assertions filter info. Logs are in `work/gate-logs/f6/`.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 

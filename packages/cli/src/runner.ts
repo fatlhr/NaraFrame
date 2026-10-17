@@ -949,7 +949,8 @@ const runProductionChecks = async (
     { mode: "final" },
   );
   const issues: Issue[] = [...draft.issues, ...final.issues];
-  if (!draft.ok || !final.ok) return { ok: false, issues };
+  if (!draft.ok || !final.ok)
+    return { ok: false, issues: dedupeIssues(issues) };
   issues.push(
     ...checkProductionReadiness(loaded.source, final.value, final.issues),
     ...checkRecipeTrust(final.value, await readRecipeTrust(loaded.root)),

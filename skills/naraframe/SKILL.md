@@ -58,6 +58,15 @@ So camera (0, 0, 1) shows world coordinates as screen coordinates, d = 1 is the 
 
 **Timing in frames.** A beat starts at frame round(startMs · fps / 1000) and lasts max(1, round(durationMs · fps / 1000)) frames, up to but not including its end frame; with narration, `at` resolves first, and the scene's length comes from its phrases. Writes to one target property by `transform`, `exit`, `draw`, `follow` or `count` must not overlap after this rounding (`MOTION_PROPERTY_OVERLAP`), and every beat must end inside its scene (`BEAT_OUTSIDE_SCENE`). Their messages give the frames involved and a start or duration that clears the problem; apply it and validate again. Steps shorter than about two frames need a frame of margin (at 30 fps, 60 ms nudges spaced 67 ms apart, not 60).
 
+## Claims and sources
+
+The engine never detects claims; it trusts the labels you write. A factual claim is a statement about the world presented as true: a cause, quantity, date, place, or named person or event. Questions, instructions, opinions marked as such and on-screen labels are not claims. Decide per scene and per narration block, from the words the viewer reads or hears, and ask the user about facts you cannot verify.
+
+- Label each claim with `carriesFactualClaim: true` on the scene in `scenes.json` or the block in `narration.json`. Leave it `false` only when nothing is claimed; do not copy `false` from an example. Say why in the scene `note`.
+- Declare each source once under `sources` (`id`, `title`, optional `url` and `retrievedAt`) in either file, then cite it from `sourceIds`. Ids are unique across both files; a cited id that is not declared is `SOURCE_UNKNOWN`.
+- A labelled claim without a source is a `SOURCE_MISSING` warning, and an error when the profile sets `requireSourcing` (`validate`, `preview` and `render` then stop). If a claim is restated without a source, record the owner's decision in the project notes; do not relabel it `false` to pass.
+- When `requireSourcing` is set and nothing is labelled, `validate` reports one info issue, `CLAIMS_UNLABELLED`. It never blocks. Reread every scene and block, then either label and source the claims or tell the user the episode makes none.
+
 ## Boundaries
 
 - Treat one newline-terminated `CommandResultEvent` on stdout as the machine result; diagnostics and progress on stderr are not the result.
