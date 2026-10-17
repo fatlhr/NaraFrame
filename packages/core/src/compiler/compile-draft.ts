@@ -432,6 +432,15 @@ const resolveLayerAppearance = (layer: Layer, render: RenderTokens): Layer => {
   if (layer.type === "image") {
     return {
       ...layer,
+      ...(layer.stroke
+        ? {
+            stroke: {
+              ...layer.stroke,
+              color:
+                resolveColor(layer.stroke.color, render) ?? layer.stroke.color,
+            },
+          }
+        : {}),
       focalPoint: layer.focalPoint ?? { x: 0.5, y: 0.5 },
       cornerRadius:
         layer.cornerRadius ?? render.appearance?.media.cornerRadius ?? 0,
@@ -442,6 +451,15 @@ const resolveLayerAppearance = (layer: Layer, render: RenderTokens): Layer => {
     return {
       ...layer,
       fill: resolveColor(layer.fill, render) ?? layer.fill,
+      ...(layer.stroke
+        ? {
+            stroke: {
+              ...layer.stroke,
+              color:
+                resolveColor(layer.stroke.color, render) ?? layer.stroke.color,
+            },
+          }
+        : {}),
       cornerRadius:
         layer.shape === "circle"
           ? Math.min(layer.frame.width, layer.frame.height) / 2

@@ -10,6 +10,7 @@ export type CommandName =
   | "preview"
   | "edit"
   | "undo"
+  | "history"
   | "render"
   | "cache"
   | "profile"

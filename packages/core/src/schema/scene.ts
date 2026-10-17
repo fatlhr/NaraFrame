@@ -36,6 +36,15 @@ export const StrokeSchema = z
   .object({ color: ColorSchema, width: z.number().min(0).max(40) })
   .strict();
 
+/**
+ * A stroke on a shape or image layer. The colour may name a profile palette
+ * slot, exactly like a path stroke, a fill or a text colour. The profile's
+ * own `appearance.stroke` default stays literal hex (`StrokeSchema`).
+ */
+export const LayerStrokeSchema = z
+  .object({ color: ColorValueSchema, width: z.number().min(0).max(40) })
+  .strict();
+
 export const ShadowSchema = z
   .object({
     color: ColorSchema,
@@ -140,7 +149,7 @@ const ImageLayerSchema = z
       .strict()
       .optional(),
     cornerRadius: z.number().min(0).max(960).optional(),
-    stroke: StrokeSchema.optional(),
+    stroke: LayerStrokeSchema.optional(),
     shadow: ShadowSchema.optional(),
     ...LayerPresentationShape,
   })
@@ -154,7 +163,7 @@ const ShapeLayerSchema = z
     fill: ColorValueSchema,
     frame: FrameSchema,
     cornerRadius: z.number().min(0).max(960).optional(),
-    stroke: StrokeSchema.optional(),
+    stroke: LayerStrokeSchema.optional(),
     shadow: ShadowSchema.optional(),
     ...LayerPresentationShape,
   })

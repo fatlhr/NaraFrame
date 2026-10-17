@@ -210,6 +210,124 @@ describe("edit and undo commands", () => {
     expect(again.event.issues[0]?.code).toBe("NOTHING_TO_UNDO");
   });
 
+  it("history lists the current chain newest first and marks the current revision", async () => {
+    const root = await makeProject();
+    const baseline = (await run("status", root)).event.sourceRevision as string;
+    const one = await run(
+      "edit",
+      root,
+      "--from",
+      await stageText(root, "Satu"),
+      "--expect",
+      baseline,
+      "--summary",
+      "First edit",
+    );
+    const oneId = one.event.sourceRevision as string;
+    const two = await run(
+      "edit",
+      root,
+      "--from",
+      await stageText(root, "Dua"),
+      "--expect",
+      oneId,
+      "--summary",
+      "Second edit",
+    );
+    expect(two.exitCode).toBe(0);
+    expect((await run("undo", root)).exitCode).toBe(0);
+    const three = await run(
+      "edit",
+      root,
+      "--from",
+      await stageText(root, "Tiga"),
+      "--expect",
+      oneId,
+      "--summary",
+      "Third edit",
+    );
+    const threeId = three.event.sourceRevision as string;
+
+    const history = await run("history", root);
+    expect(history.exitCode).toBe(0);
+    expect(history.event).toMatchObject({
+      command: "history",
+      success: true,
+      sourceRevision: threeId,
+    });
+    expect(history.event.data).toMatchObject({
+      currentRevision: threeId,
+      total: 3,
+      truncated: false,
+    });
+    const revisions = history.event.data.revisions as Array<
+      Record<string, unknown>
+    >;
+    expect(revisions.map((entry) => entry.summary)).toEqual([
+      "Third edit",
+      "First edit",
+      "Baseline of the existing project",
+    ]);
+    expect(revisions[0]).toEqual({
+      id: threeId,
+      parentId: oneId,
+      kind: "edit",
+      summary: "Third edit",
+      createdAt: expect.any(String),
+      current: true,
+    });
+    expect(revisions.map((entry) => entry.current)).toEqual([
+      true,
+      false,
+      false,
+    ]);
+
+    const limited = await run("history", root, "--limit", "1");
+    expect(limited.event.data).toMatchObject({ total: 3, truncated: true });
+    expect(limited.event.data.revisions).toHaveLength(1);
+  });
+
+  it("history prints one line per revision with a current marker", async () => {
+    const root = await makeProject();
+    const baseline = (await run("status", root)).event.sourceRevision as string;
+    await run(
+      "edit",
+      root,
+      "--from",
+      await stageText(root, "Satu"),
+      "--expect",
+      baseline,
+      "--summary",
+      "First edit",
+    );
+    const lines: string[] = [];
+    vi.spyOn(console, "log").mockImplementation((value: unknown) => {
+      lines.push(String(value));
+    });
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const exitCode = await runCli(["history", root]);
+    vi.restoreAllMocks();
+    expect(exitCode).toBe(0);
+    const rendered = lines.join("\n").split("\n");
+    expect(rendered).toHaveLength(2);
+    expect(rendered[0]).toMatch(/^\* [0-9a-f]{12} edit +\S+ +First edit$/);
+    expect(rendered[1]).toMatch(/^ {2}[0-9a-f]{12} baseline +\S+ +Baseline/);
+  });
+
+  it("history refuses a folder without revisions and bad usage", async () => {
+    const empty = await mkdtemp(join(tmpdir(), "naraframe-rev-empty-"));
+    roots.push(empty);
+    const missing = await run("history", empty);
+    expect(missing.exitCode).toBe(1);
+    expect(missing.event.success).toBe(false);
+    expect(missing.event.issues[0]?.code).toBe("REVISION_HISTORY_MISSING");
+    const root = await makeProject();
+    await run("status", root);
+    expect((await run("history")).exitCode).toBe(3);
+    expect((await run("history", root, "--limit", "0")).exitCode).toBe(3);
+    expect((await run("history", root, "--limit", "x")).exitCode).toBe(3);
+  });
+
   it("rejects incorrect usage with exit code 3", async () => {
     const root = await makeProject();
     expect((await run("edit", root)).exitCode).toBe(3);
