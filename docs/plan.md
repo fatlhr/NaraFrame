@@ -485,6 +485,23 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   3. An installed skill whose engine was removed prints one clean line with a next step, and no stack trace.
   4. Installer and launcher regressions stay green.
 
+**References for B6/C1 (owner-supplied, read 2026-10-17; patterns only, no copied text or assets):**
+- **`bangtutorial/bang-motion`** (MIT; an agent skill, no engine):
+  - the README sells outcomes first: an icon, "works with" badges, a hero image, a style gallery of stills with one-line captions, "Why", "What you can make", workflow and example prompts;
+  - installation comes last;
+  - it ships a `.claude-plugin` marketplace manifest.
+- **`heygen-com/hyperframes`** (Apache-2.0; engine plus skills):
+  - the engine is an npm package run through `npx`;
+  - skills install through the Claude plugin marketplace (`claude plugin install …`) or `npx skills add`;
+  - the quick start is agent-first;
+  - it has versioned releases plus SECURITY, CONTRIBUTING and CODE_OF_CONDUCT files.
+- **`buildwithhanif/hyperframe-pro`** (MIT; a production layer on HyperFrames):
+  - a short README covering why it exists, a one-line plugin install with explicit requirements, the loop, and what it is not.
+- **Implications for NaraFrame:**
+  1. An npm-published engine run through `npx` with a pinned version is the simplest agent-led install route (registry integrity instead of a hand-rolled checksum). A Claude plugin marketplace entry is the simplest skill route. Both are publication decisions.
+  2. NaraFrame renders with Remotion, which has its own licence: free for individuals and small companies, with a company licence required above that threshold. A NaraFrame code licence (for example MIT or Apache-2.0, as in the references) does not change that. The README and installer must state it plainly before anyone installs. Verify the current Remotion terms at the time of C1.
+  3. The README follows the outcome-first order: hero still and gallery from synthetic or rights-cleared examples, what you can make, how it works with an agent, example prompts, then install and requirements (macOS arm64, Node, Chrome, FFmpeg).
+
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
 Each needs its own demand/evidence and authorization. None is automatically a new task just because M4 is documented.
