@@ -1416,6 +1416,8 @@ export const compileDraft = (
             "SCENE_NARRATION_MISSING",
             `/scenes/${index}/narration`,
             `Scene ${scene.id} has no narration reference but the project has narration.json.`,
+            "error",
+            "Give every scene a narration reference. To make the project silent instead, stage naraframe.json with the new audioMode and run edit with --remove narration.json in the same revision.",
           ),
         );
       } else {

@@ -23,6 +23,7 @@ import {
   inspectLibrary,
   type LoadedPlanProject,
   loadPlanProject,
+  type ProfileReview,
   pendingGeneration,
   planProfileApply,
   RENDER_ENGINE,
@@ -84,6 +85,8 @@ interface ParsedArguments {
   positionals: string[];
   flags: Set<string>;
   values: Map<string, string>;
+  /** Repeatable value options, in the order given. */
+  lists: Map<string, string[]>;
   error?: string;
 }
 
@@ -98,6 +101,7 @@ Usage:
   naraframe status [project] [--json]
   naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
   naraframe recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>] [--json]
+  naraframe edit <project> --expect <revision> [--from <staging-dir>] [--remove narration.json|captions.json]... [--summary <text>] [--json]
   naraframe profile inspect <id-or-path> [--json]
   naraframe library inspect <catalog.json> [--json]
   naraframe library stage <project> [--from <catalog.json> --pattern <id> --version <version> --scene <id>] --instance <id> --params <params.json> [--update] [--json]
@@ -154,12 +158,22 @@ const parseArguments = (
   args: readonly string[],
   allowedFlags: readonly string[],
   allowedValues: readonly string[],
+  allowedLists: readonly string[] = [],
 ): ParsedArguments => {
   const positionals: string[] = [];
   const flags = new Set<string>();
   const values = new Map<string, string>();
+  const lists = new Map<string, string[]>();
   const allowedFlagSet = new Set(allowedFlags);
   const allowedValueSet = new Set(allowedValues);
+  const allowedListSet = new Set(allowedLists);
+  const fail = (error: string): ParsedArguments => ({
+    positionals,
+    flags,
+    values,
+    lists,
+    error,
+  });
 
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
@@ -170,46 +184,30 @@ const parseArguments = (
     }
     if (allowedFlagSet.has(argument)) {
       if (flags.has(argument)) {
-        return {
-          positionals,
-          flags,
-          values,
-          error: `Option ${argument} may only be provided once.`,
-        };
+        return fail(`Option ${argument} may only be provided once.`);
       }
       flags.add(argument);
       continue;
     }
-    if (allowedValueSet.has(argument)) {
-      if (values.has(argument)) {
-        return {
-          positionals,
-          flags,
-          values,
-          error: `Option ${argument} may only be provided once.`,
-        };
+    if (allowedValueSet.has(argument) || allowedListSet.has(argument)) {
+      if (allowedValueSet.has(argument) && values.has(argument)) {
+        return fail(`Option ${argument} may only be provided once.`);
       }
       const value = args[index + 1];
       if (!value || value.startsWith("--")) {
-        return {
-          positionals,
-          flags,
-          values,
-          error: `Option ${argument} requires a value.`,
-        };
+        return fail(`Option ${argument} requires a value.`);
       }
-      values.set(argument, value);
+      if (allowedListSet.has(argument)) {
+        lists.set(argument, [...(lists.get(argument) ?? []), value]);
+      } else {
+        values.set(argument, value);
+      }
       index += 1;
       continue;
     }
-    return {
-      positionals,
-      flags,
-      values,
-      error: `Unknown option ${argument}.`,
-    };
+    return fail(`Unknown option ${argument}.`);
   }
-  return { positionals, flags, values };
+  return { positionals, flags, values, lists };
 };
 
 const usageFailure = (command: CommandName, message: string): Execution => ({
@@ -832,23 +830,31 @@ const previewCommand = async (
 };
 
 const editCommand = async (args: readonly string[]): Promise<Execution> => {
-  const parsed = parseArguments(args, [], ["--from", "--expect", "--summary"]);
+  const parsed = parseArguments(
+    args,
+    [],
+    ["--from", "--expect", "--summary"],
+    ["--remove"],
+  );
+  const removals = parsed.lists.get("--remove") ?? [];
   if (
     parsed.error ||
     parsed.positionals.length !== 1 ||
-    !parsed.values.has("--from") ||
-    !parsed.values.has("--expect")
+    !parsed.values.has("--expect") ||
+    (!parsed.values.has("--from") && removals.length === 0)
   ) {
     return usageFailure(
       "edit",
       parsed.error ??
-        "edit requires one project, --from <staging-dir>, and --expect <revision>.",
+        "edit requires one project, --expect <revision>, and --from <staging-dir> and/or at least one --remove <narration.json|captions.json>.",
     );
   }
   const root = resolve(parsed.positionals[0] ?? ".");
+  const stagingDirectory = parsed.values.get("--from");
   const result = await editProject({
     root,
-    from: resolve(parsed.values.get("--from") ?? ""),
+    ...(stagingDirectory ? { from: resolve(stagingDirectory) } : {}),
+    ...(removals.length > 0 ? { remove: removals } : {}),
     expect: parsed.values.get("--expect") ?? "",
     summary:
       parsed.values.get("--summary") ?? "Edit applied from a staging directory",
@@ -874,12 +880,16 @@ const editCommand = async (args: readonly string[]): Promise<Execution> => {
       data: {
         parentRevision: result.value.parentId,
         files: result.value.files,
+        removedFiles: result.value.removed,
         capturedDirectEdits: result.value.captured,
         reuse: reuse.ok ? reuse.value : null,
       },
     }),
     human: [
-      `Revision ${result.value.revisionId.slice(0, 12)} (from ${result.value.parentId.slice(0, 12)}): ${result.value.files.join(", ")}`,
+      `Revision ${result.value.revisionId.slice(0, 12)} (from ${result.value.parentId.slice(0, 12)}): ${[
+        ...result.value.files,
+        ...result.value.removed.map((path) => `removed ${path}`),
+      ].join(", ")}`,
       ...(reuse.ok && reuse.value?.overallRatio != null
         ? [
             `Reuse: ${Math.round(reuse.value.overallRatio * 100)}% of voice clips, images, and scenes survived unchanged`,
@@ -1232,6 +1242,38 @@ const renderCommand = async (
   };
 };
 
+/** A few lines per review group; the full layer list is in the JSON plan. */
+const reviewLines = (review: ProfileReview | undefined): string[] => {
+  if (!review) return [];
+  const count = (n: number) => (n === 1 ? "1 layer" : `${n} layers`);
+  const distinct = (values: readonly string[]) => [...new Set(values)];
+  const slots = new Map<string, { change: string; layers: number }>();
+  for (const item of review.paletteBound) {
+    const entry = slots.get(item.token) ?? {
+      change: `${item.before} -> ${item.after}`,
+      layers: 0,
+    };
+    entry.layers += 1;
+    slots.set(item.token, entry);
+  }
+  return [
+    ...[...slots].map(
+      ([token, entry]) =>
+        `Review: ${token} ${entry.change} repaints ${count(entry.layers)}`,
+    ),
+    ...(review.literalColors.length
+      ? [
+          `Review: hex colours the switch will not repaint on ${count(review.literalColors.length)} (${distinct(review.literalColors.map((item) => item.color)).join(", ")})`,
+        ]
+      : []),
+    ...(review.imageLayers.length
+      ? [
+          `Review: images to check against the new profile on ${count(review.imageLayers.length)} (${distinct(review.imageLayers.map((item) => item.assetId)).join(", ")})`,
+        ]
+      : []),
+  ];
+};
+
 const profileCommand = async (args: readonly string[]): Promise<Execution> => {
   const [subcommand, ...rest] = args;
   const parsed = parseArguments(rest, ["--dry-run", "--reset-overrides"], []);
@@ -1315,6 +1357,7 @@ const profileCommand = async (args: readonly string[]): Promise<Execution> => {
       (conflict) =>
         `Conflicting override: ${conflict.path} (${conflict.reason})`,
     ),
+    ...reviewLines(plan.review),
   ];
   if (dryRun || plan.blocked) {
     return {

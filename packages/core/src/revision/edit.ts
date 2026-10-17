@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { loadPlanProject } from "../io/load-project.js";
-import type { Result } from "../model/issue.js";
+import type { Issue, Result } from "../model/issue.js";
 import { syncWorkingCopy, writeSnapshot } from "./capture.js";
 import { withProjectLock } from "./lock.js";
 import {
@@ -20,8 +20,17 @@ import {
 
 export interface EditOptions {
   root: string;
-  /** Directory holding replacement files, laid out like the project. */
-  from: string;
+  /**
+   * Directory holding replacement files, laid out like the project. Optional
+   * when `remove` names at least one file.
+   */
+  from?: string;
+  /**
+   * Optional source files to delete in this revision (`narration.json`,
+   * `captions.json`). The snapshot records their absence, so `undo` restores
+   * them.
+   */
+  remove?: readonly string[];
   /** The revision the caller read before preparing this edit. */
   expect: string;
   summary: string;
@@ -32,8 +41,13 @@ export interface EditResult {
   revisionId: string;
   parentId: string;
   files: string[];
+  /** Optional source files this revision deleted. */
+  removed: string[];
   captured: boolean;
 }
+
+/** The only source files an edit may delete: the optional ones. */
+const REMOVABLE_FILES: readonly string[] = ["narration.json", "captions.json"];
 
 const isSafe = (path: string): boolean => {
   const segments = path.split("/");
@@ -47,6 +61,42 @@ const isSafe = (path: string): boolean => {
   );
 };
 
+/** Refuses removals of required, unknown, absent or also-staged files. */
+const refuseRemovals = async (
+  root: string,
+  removals: readonly string[],
+  staged: readonly string[],
+): Promise<Issue | null> => {
+  const notAllowed = removals.filter((path) => !REMOVABLE_FILES.includes(path));
+  if (notAllowed.length > 0) {
+    return issueFor(
+      "REMOVE_NOT_ALLOWED",
+      `Only optional source files can be removed (${REMOVABLE_FILES.join(", ")}); refused: ${notAllowed.join(", ")}.`,
+      "Required sources are replaced by staging a new version, never removed.",
+    );
+  }
+  const alsoStaged = removals.filter((path) => staged.includes(path));
+  if (alsoStaged.length > 0) {
+    return issueFor(
+      "REMOVE_AND_STAGED",
+      `The same file is staged and removed: ${alsoStaged.join(", ")}.`,
+      "Either stage a replacement or remove the file, not both.",
+    );
+  }
+  const absent: string[] = [];
+  for (const path of removals) {
+    if (!(await pathExists(absolute(root, path)))) absent.push(path);
+  }
+  if (absent.length > 0) {
+    return issueFor(
+      "REMOVE_TARGET_ABSENT",
+      `The project has no such file to remove: ${absent.join(", ")}.`,
+      "Check the project's source files; nothing was changed.",
+    );
+  }
+  return null;
+};
+
 /**
  * Applies a staged set of files as one revision: validate, snapshot, update
  * the working copy, then switch `revisions/current.json`. Any earlier failure
@@ -56,7 +106,9 @@ export const editProject = async (
   options: EditOptions,
 ): Promise<Result<EditResult>> => {
   const root = resolve(options.root);
-  const from = resolve(options.from);
+  const from = options.from === undefined ? null : resolve(options.from);
+  const stagedFile = (path: string): string => absolute(from ?? "", path);
+  const removals = [...new Set(options.remove ?? [])].sort();
 
   return withProjectLock(root, async (): Promise<Result<EditResult>> => {
     const synced = await syncWorkingCopy(root, options.now);
@@ -76,7 +128,19 @@ export const editProject = async (
       };
     }
 
-    if (!(await pathExists(from))) {
+    if (from === null && removals.length === 0) {
+      return {
+        ok: false,
+        issues: [
+          issueFor(
+            "STAGING_EMPTY",
+            "Nothing to apply: no staging directory and no files to remove.",
+            "Provide a staging directory with the changed source files, or name an optional file to remove.",
+          ),
+        ],
+      };
+    }
+    if (from !== null && !(await pathExists(from))) {
       return {
         ok: false,
         issues: [
@@ -88,8 +152,8 @@ export const editProject = async (
         ],
       };
     }
-    const staged = (await listFiles(from)).sort();
-    if (staged.length === 0) {
+    const staged = from === null ? [] : (await listFiles(from)).sort();
+    if (staged.length === 0 && removals.length === 0) {
       return {
         ok: false,
         issues: [
@@ -115,6 +179,9 @@ export const editProject = async (
       };
     }
 
+    const refused = await refuseRemovals(root, removals, staged);
+    if (refused) return { ok: false, issues: [refused] };
+
     const candidate = join(
       root,
       ".naraframe",
@@ -126,7 +193,12 @@ export const editProject = async (
       await linkTree(root, candidate);
       for (const path of staged) {
         await removeIfExists(absolute(candidate, path));
-        await copyAtomic(absolute(from, path), absolute(candidate, path));
+        await copyAtomic(stagedFile(path), absolute(candidate, path));
+      }
+      // Hard links share data with the working copy: unlinking only drops the
+      // candidate's name for the file.
+      for (const path of removals) {
+        await removeIfExists(absolute(candidate, path));
       }
 
       const loaded = await loadPlanProject(candidate);
@@ -169,7 +241,10 @@ export const editProject = async (
       }
 
       for (const path of staged) {
-        await copyAtomic(absolute(from, path), absolute(root, path));
+        await copyAtomic(stagedFile(path), absolute(root, path));
+      }
+      for (const path of removals) {
+        await removeIfExists(absolute(root, path));
       }
       await writeCurrentRevision(root, snapshot.id);
 
@@ -179,6 +254,7 @@ export const editProject = async (
           revisionId: snapshot.id,
           parentId: current,
           files: staged,
+          removed: removals,
           captured: synced.value.status === "captured",
         },
         issues: [],

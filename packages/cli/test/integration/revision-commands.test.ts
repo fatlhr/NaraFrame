@@ -50,6 +50,47 @@ const makeProject = async (): Promise<string> => {
   return root;
 };
 
+const narratedRoot = fileURLToPath(
+  new URL("../../../../samples/krakatau-narrated", import.meta.url),
+);
+
+/** A voiced project with an optional captions file beside the narration. */
+const makeVoicedProject = async (): Promise<string> => {
+  const root = await mkdtemp(join(tmpdir(), "naraframe-rev-voiced-"));
+  roots.push(root);
+  for (const entry of [
+    "naraframe.json",
+    "profile.lock.json",
+    "scenes.json",
+    "narration.json",
+    "assets",
+    "audio",
+  ]) {
+    await cp(join(narratedRoot, entry), join(root, entry), { recursive: true });
+  }
+  await writeFile(
+    join(root, "captions.json"),
+    JSON.stringify({ schemaVersion: 1, corrections: [], mode: "none" }),
+  );
+  return root;
+};
+
+const stageSilent = async (root: string): Promise<string> => {
+  const project = JSON.parse(
+    await readFile(join(root, "naraframe.json"), "utf8"),
+  );
+  project.audioMode = "silent";
+  const staging = join(
+    root,
+    "..",
+    `silent-${Math.random().toString(36).slice(2)}`,
+  );
+  await mkdir(staging, { recursive: true });
+  roots.push(staging);
+  await writeFile(join(staging, "naraframe.json"), JSON.stringify(project));
+  return staging;
+};
+
 const stageText = async (root: string, text: string): Promise<string> => {
   const scenes = JSON.parse(await readFile(join(root, "scenes.json"), "utf8"));
   scenes.scenes[0].visual.text = text;
@@ -174,5 +215,96 @@ describe("edit and undo commands", () => {
     expect((await run("edit", root)).exitCode).toBe(3);
     expect((await run("edit", root, "--from", root)).exitCode).toBe(3);
     expect((await run("undo")).exitCode).toBe(3);
+  });
+
+  it("makes a voiced project silent with --remove, reports the removal, and undoes it", async () => {
+    const root = await makeVoicedProject();
+    const before = (await run("status", root)).event.sourceRevision as string;
+    const narration = await readFile(join(root, "narration.json"));
+
+    const edited = await run(
+      "edit",
+      root,
+      "--from",
+      await stageSilent(root),
+      "--remove",
+      "narration.json",
+      "--remove",
+      "captions.json",
+      "--expect",
+      before,
+      "--summary",
+      "Make silent",
+    );
+    expect(edited.exitCode, JSON.stringify(edited.event.issues)).toBe(0);
+    expect(edited.event.data).toMatchObject({
+      parentRevision: before,
+      files: ["naraframe.json"],
+      removedFiles: ["captions.json", "narration.json"],
+    });
+    await expect(readFile(join(root, "narration.json"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
+    const valid = await run("validate", root, "--stage", "plan");
+    expect(valid.exitCode).toBe(0);
+
+    const undone = await run("undo", root);
+    expect(undone.event.sourceRevision).toBe(before);
+    expect(await readFile(join(root, "narration.json"))).toEqual(narration);
+  });
+
+  it("accepts --remove without --from, and refuses required or absent files with exit code 1", async () => {
+    const root = await makeVoicedProject();
+    const before = (await run("status", root)).event.sourceRevision as string;
+
+    const required = await run(
+      "edit",
+      root,
+      "--remove",
+      "scenes.json",
+      "--expect",
+      before,
+    );
+    expect(required.exitCode).toBe(1);
+    expect(required.event.issues[0]?.code).toBe("REMOVE_NOT_ALLOWED");
+
+    const removed = await run(
+      "edit",
+      root,
+      "--remove",
+      "captions.json",
+      "--expect",
+      before,
+    );
+    expect(removed.exitCode).toBe(0);
+    expect(removed.event.data).toMatchObject({
+      files: [],
+      removedFiles: ["captions.json"],
+    });
+
+    const absent = await run(
+      "edit",
+      root,
+      "--remove",
+      "captions.json",
+      "--expect",
+      removed.event.sourceRevision as string,
+    );
+    expect(absent.exitCode).toBe(1);
+    expect(absent.event.issues[0]?.code).toBe("REMOVE_TARGET_ABSENT");
+  });
+
+  it("rejects --remove usage mistakes with exit code 3", async () => {
+    const root = await makeVoicedProject();
+    const before = (await run("status", root)).event.sourceRevision as string;
+    // No value, and no staging or removal at all.
+    expect(
+      (await run("edit", root, "--expect", before, "--remove")).exitCode,
+    ).toBe(3);
+    expect((await run("edit", root, "--expect", before)).exitCode).toBe(3);
+    // --remove cannot replace --expect.
+    expect(
+      (await run("edit", root, "--remove", "captions.json")).exitCode,
+    ).toBe(3);
   });
 });

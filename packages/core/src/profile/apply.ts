@@ -12,6 +12,7 @@ import { type ProfileLock, ProfileLockSchema } from "../schema/profile.js";
 import { type ProjectConfig, ProjectConfigSchema } from "../schema/project.js";
 import { type BrandBindingPlan, planBrandBindings } from "./brand-bindings.js";
 import { applyProjectOverrides, classifyOverridePath } from "./overrides.js";
+import { type ProfileReview, planProfileReview } from "./review.js";
 
 export type ProfileEffect =
   | "recompile"
@@ -51,6 +52,13 @@ export interface ProfileApplyPlan {
    * when either profile manages a brand or the project binds assets/text.
    */
   bindings?: BrandBindingPlan;
+  /**
+   * Scene content to look at under the new profile: layers painted from a
+   * palette slot whose colour changes (before and after), hex colours the
+   * switch does not repaint, and image layers. Read from `scenes.json`;
+   * apply rewrites none of it. Absent when nothing applies.
+   */
+  review?: ProfileReview;
   blocked: boolean;
 }
 
@@ -172,6 +180,14 @@ const prepare = async (
   const directionChanged =
     currentLock.direction.sha256 !== candidate.direction.sha256;
 
+  // Identity is reviewed, never rewritten: the same read of the project feeds
+  // the narration check, the brand bindings and the scene review.
+  const loaded = await loadPlanProject(root);
+  // Without a readable project, keep the voice effect rather than hide it.
+  const hasNarration = loaded.ok
+    ? loaded.value.source.narration !== undefined
+    : true;
+
   const effects = new Set<ProfileEffect>();
   for (const change of changes) {
     if (
@@ -184,8 +200,9 @@ const prepare = async (
       effects.add("revalidate-layout");
     }
     if (
-      change.path === "production.voiceStyleSignature" ||
-      change.path.startsWith("production.timing")
+      hasNarration &&
+      (change.path === "production.voiceStyleSignature" ||
+        change.path.startsWith("production.timing"))
     ) {
       effects.add("regenerate-narration");
     }
@@ -215,9 +232,8 @@ const prepare = async (
     ? conflicts.map((conflict) => conflict.path)
     : [];
 
-  // Identity is reviewed, never rewritten: report what the switch touches.
-  // Recipe palette bindings compare with the target as the project would
-  // see it, with the overrides that survive the switch.
+  // Recipe palette bindings and the scene review compare with the target as
+  // the project would see it, with the overrides that survive the switch.
   const surviving = applyProjectOverrides(
     candidate,
     Object.fromEntries(
@@ -226,7 +242,6 @@ const prepare = async (
       ),
     ),
   );
-  const loaded = await loadPlanProject(root);
   const bindings = loaded.ok
     ? planBrandBindings(
         loaded.value.source,
@@ -256,6 +271,23 @@ const prepare = async (
     }
   }
 
+  const current = applyProjectOverrides(currentLock, currentProject.overrides);
+  const review = loaded.ok
+    ? planProfileReview(
+        loaded.value.source,
+        {
+          before: (current.ok ? current.value : currentLock).render.palette,
+          after: (surviving.ok ? surviving.value : candidate).render.palette,
+        },
+        {
+          direction: directionChanged,
+          illustration: changes.some(
+            (change) => change.path === "production.illustrationStyleSignature",
+          ),
+        },
+      )
+    : undefined;
+
   const remaining = Object.fromEntries(
     Object.entries(currentProject.overrides ?? {}).filter(
       ([path]) => !resetOverrides.includes(path),
@@ -282,6 +314,7 @@ const prepare = async (
         conflicts,
         resetOverrides,
         ...(bindings && bindingsRelevant ? { bindings } : {}),
+        ...(review ? { review } : {}),
         blocked: conflicts.length > resetOverrides.length,
       },
       project,

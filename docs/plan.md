@@ -329,8 +329,8 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 | ID | Finding | Expected outcome |
 |---|---|---|
 | F1 (DONE, B1) | Visual preflight samples scene-final/entry frames only, so text pushed off frame by a `match-cut` zoom, or entry motion that starts outside the safe area, passes validate and preview silently. | Text and safe-area checks cover transition and entry-motion frames, with a regression built from the trial seam. |
-| F2 | Narration cannot be removed through `edit`; the author had to delete `narration.json` by hand after `SCENE_NARRATION_MISSING`. | An ordinary, revision-recorded way to make a voiced project silent. |
-| F3 | `profile apply` lists `regenerate-narration` for a project without narration and does not name layers bound to palette slots, image plates or literal colours that clash with the new direction. | The dry run reports only relevant effects and names the affected layers and assets. |
+| F2 (DONE, B3) | Narration cannot be removed through `edit`; the author had to delete `narration.json` by hand after `SCENE_NARRATION_MISSING`. | An ordinary, revision-recorded way to make a voiced project silent. |
+| F3 (DONE, B3) | `profile apply` lists `regenerate-narration` for a project without narration and does not name layers bound to palette slots, image plates or literal colours that clash with the new direction. | The dry run reports only relevant effects and names the affected layers and assets. |
 | F4 | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
 | F5 | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
 | F6 (DONE, B2) | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
@@ -384,6 +384,43 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   - source removed: `SOURCE_MISSING` error, exit 1;
   - the art-direction check passes with schema input.
 - Gates: `pnpm verify` exit 0 (Biome 226, unit 345/345 including 6 new, integration 431/431 including 3 new). E2E is not rerun: there is no render change, and E2E issue assertions filter info. Logs are in `work/gate-logs/f6/`.
+
+**B3 / F2 + F3 model — silent edits and a profile-switch report that names what changes.**
+- **F2:**
+  - `edit` accepts a repeatable `--remove <path>`, limited to the optional source files `narration.json` and `captions.json`.
+  - Removal applies to the validation candidate before validation, and to the working copy only after the snapshot is written. The revision records the file's absence, so `undo` restores it.
+  - An edit may consist of removals only.
+  - Removing a required or absent file is refused with a structured issue, and nothing changes.
+  - `SCENE_NARRATION_MISSING`'s suggestion points to this route, and the skill documents "make a voiced project silent" as one staged `naraframe.json` change plus `--remove narration.json`.
+- **F3:**
+  - `profile apply --dry-run` lists `regenerate-narration` only when the project has narration.
+  - The plan gains an additive review section naming:
+    - layers whose colours reference palette tokens that change value, with scene, layer, property, token, before and after;
+    - layers with literal colours that the switch will not repaint, when the palette or direction changes;
+    - image layers to review, with scene, layer and asset, when the palette, direction or illustration signature changes. `replace-assets` names them.
+  - No apply behaviour, schema version or render key changes.
+- **Acceptance:**
+  1. On a copy of trial episode-01, staging `audioMode: silent` with `--remove narration.json` yields a valid silent revision. `undo` brings narration back, and the bad cases are refused.
+  2. On that silent copy, `profile apply contrast --dry-run` omits `regenerate-narration` and lists the coral layers bound to `palette.text`, the literal coral/algae colours and the reef plate image. These are the items the trial author found only by previewing.
+  3. Unit and integration coverage for both. Existing profile-switch tests stay green.
+
+**B3 / F2 + F3 evidence — 2026-10-17 (branch `b3-silent-edit-profile-report`; owner-approved and integrated through its own PR):**
+- **F2 surface:** `edit <project> --expect <rev> [--from <dir>] [--remove narration.json|captions.json]...`, with `--from` optional when something is removed.
+  - Refusals change nothing: `REMOVE_NOT_ALLOWED` (required, unknown or unsafe path), `REMOVE_TARGET_ABSENT`, and `REMOVE_AND_STAGED`. Usage errors exit 3.
+  - Removal unlinks the hard-linked candidate before validation and touches the working copy only after the snapshot. JSON reports `removedFiles`.
+  - `SCENE_NARRATION_MISSING` and the narration `AUDIO_MODE_CONFLICT` now point to the route.
+  - The CLI usage text gained its missing `edit` line.
+- **F3 surface:** `regenerate-narration` appears only when the project has narration.
+  - Dry run and apply carry an additive `plan.review` with `paletteBound` (token, before, after), `literalColors` and `imageLayers`. The section is omitted when nothing applies.
+  - The text output summarises it per token.
+  - Shadow colours, scene-level media visuals and recipe params are not listed; recipe params stay in `plan.bindings`.
+- **Acceptance:**
+  - On a copy of trial episode-01, staged `audioMode: silent` with `--remove narration.json` alone was refused: its selected captions target removed phrases, so nothing changed. Adding `--remove captions.json`, or staging `captions.json` as `mode: none`, gave a valid silent revision. The skill says so.
+  - `undo` restored both files byte for byte, and redo reproduced the same revision id. Required, absent and staged-and-removed cases were refused.
+  - The contrast dry run on the silent copy omits `regenerate-narration`. It reports `palette.text #F2EFE6 → #16202B` repainting 39 layers (the trial's white coral), literal `#D27D4A`/`#7A3F17` on 57 layers, and the reef plate on 3 layers. The supervisor re-ran this independently.
+  - The production episodes were not touched; their revisions are still `3ff723d6…` and `d41ecb8d…`.
+- **Gates:** `pnpm verify` exit 0 (Biome 229, unit 350/350, integration 453/453). Two existing assertions dropped `regenerate-narration` deliberately, because those created projects have no narration.
+- **E2E subset:** the six files that exercise `edit`/`profile apply`/narration codes (caption-policy, font-readiness, recipe-brand-switch, recipe-production, recipe-text-fit, reference-projects) passed 10/10 in 426 s. There is no render change, so the full suite was not rerun. Logs are in `work/gate-logs/b3/`.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
