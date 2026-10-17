@@ -17,14 +17,18 @@ import { fileURLToPath } from "node:url";
 import { createProject } from "../packages/core/dist/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const usage =
+  "Usage: node scripts/pack-engine.mjs [--registry] --out <scratch-directory>";
 const args = process.argv.slice(2);
-if (args.length !== 2 || args[0] !== "--out")
-  throw new Error(
-    "Usage: node scripts/pack-engine.mjs --out <scratch-directory>",
-  );
+const registry = args.includes("--registry");
+const flags = args.filter((argument) => argument !== "--registry");
+if (flags.length !== 2 || flags[0] !== "--out") throw new Error(usage);
 if (process.versions.node !== "24.20.0")
   throw new Error("Use pinned Node 24.20.0");
-const out = resolve(args[1]);
+const out = resolve(flags[1]);
+const PACKAGE_VERSION = "0.1.0";
+const REPOSITORY = "https://github.com/fatlhr/NaraFrame";
+const INTERNAL = ["@naraframe/core", "@naraframe/renderer-remotion"];
 await mkdir(out, { recursive: true });
 const stage = await mkdtemp(join(tmpdir(), "naraframe-pack-"));
 const target = join(stage, "package");
@@ -125,13 +129,89 @@ const capture = async (
   });
 };
 
+// Registry packages need neither declarations nor source maps: nothing imports
+// them as a library and the sources they point to are not shipped.
+const runtimeOnly = (path) =>
+  !/\.(d\.ts|d\.ts\.map|js\.map)$|\.tsbuildinfo$|\.DS_Store$/.test(path);
+const exactVersion = /^\d+\.\d+\.\d+$/;
+// Version found by Node resolution from a workspace package, for the rights record.
+const installedPackage = async (from, name) => {
+  for (let directory = from; ; directory = dirname(directory)) {
+    try {
+      return await json(join(directory, "node_modules", name, "package.json"));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    if (dirname(directory) === directory)
+      throw new Error(`${name} is not installed; run pnpm install`);
+  }
+};
+
 // Keep compiled module boundaries; the CLI's relative resource root remains package root.
 await mkdir(join(target, "packages/cli"), { recursive: true });
 await cp(join(root, "packages/cli/dist"), join(target, "packages/cli/dist"), {
   recursive: true,
+  filter: registry ? runtimeOnly : undefined,
 });
-for (const name of ["@naraframe/core", "@naraframe/renderer-remotion"])
-  await capture(join(root, "packages", name.split("/")[1]), name);
+const thirdParty = new Map();
+const registryDependencies = {};
+if (registry) {
+  // NaraFrame's own two library packages travel inside the tarball as bundled
+  // dependencies. Every third-party package stays an exact-version dependency
+  // that npm installs from the registry; none of its code is copied here.
+  for (const name of INTERNAL) {
+    const source = join(root, "packages", name.split("/")[1]);
+    const metadata = await json(join(source, "package.json"));
+    const destination = join(target, "node_modules", name);
+    await cp(join(source, "dist"), join(destination, "dist"), {
+      recursive: true,
+      filter: runtimeOnly,
+    });
+    const dependencies = {};
+    for (const [dependency, range] of Object.entries(
+      metadata.dependencies ?? {},
+    )) {
+      if (INTERNAL.includes(dependency)) {
+        dependencies[dependency] = PACKAGE_VERSION;
+        continue;
+      }
+      if (!exactVersion.test(range))
+        throw new Error(
+          `${name} depends on ${dependency}@${range}; the published package needs an exact version.`,
+        );
+      if (thirdParty.get(dependency) && thirdParty.get(dependency) !== range)
+        throw new Error(`Conflicting versions of ${dependency}.`);
+      const installed = await installedPackage(source, dependency);
+      if (installed.version !== range)
+        throw new Error(
+          `${dependency} is ${installed.version} here but ${range} is pinned; run pnpm install.`,
+        );
+      thirdParty.set(dependency, range);
+      registryDependencies[dependency] = {
+        version: range,
+        license: installed.license ?? "UNKNOWN",
+      };
+      dependencies[dependency] = range;
+    }
+    // Declaration-only conditions point at files this package does not ship.
+    const exportsMap = JSON.parse(
+      JSON.stringify(metadata.exports, (key, value) =>
+        key === "types" ? undefined : value,
+      ),
+    );
+    await save(join(destination, "package.json"), {
+      name,
+      version: PACKAGE_VERSION,
+      license: "MIT",
+      type: metadata.type,
+      main: metadata.main,
+      exports: exportsMap,
+      dependencies,
+    });
+  }
+} else
+  for (const name of INTERNAL)
+    await capture(join(root, "packages", name.split("/")[1]), name);
 for (const path of [
   "profiles/current-issues",
   "library",
@@ -151,24 +231,51 @@ await cp(
   join(root, "scripts/install-skill.mjs"),
   join(target, "scripts/install-skill.mjs"),
 );
+for (const file of ["LICENSE", "THIRD-PARTY-NOTICES.md"])
+  await cp(join(root, file), join(target, file));
+const registryReadme = [
+  "# NaraFrame",
+  "",
+  "Create editable vertical motion videos locally, with an optional authoring skill for Codex or Claude Code.",
+  "",
+  "Verified on macOS Apple Silicon with Node 24.20.0. It also needs Chrome or Chromium, FFmpeg/FFprobe and a local font installed on your machine.",
+  "",
+  "```sh",
+  "npm install naraframe",
+  "npx naraframe version --json",
+  "npx naraframe doctor --json",
+  "npx naraframe create my-episode --profile current-issues --json",
+  "```",
+  "",
+  "Edit the files in your project, then run `npx naraframe validate` and `npx naraframe preview`. Final export requires approval of a full preview. A neutral editable demo is in [starter/demo](starter/demo); [starter instructions](starter/README.md) explain the included library pattern.",
+  "",
+  "[Skill installation](skills/naraframe/installation.md) covers project and user installs, explicit updates and conflict-safe removal. The skill is optional; the CLI works without an agent account.",
+  "",
+  "## Licence",
+  "",
+  "NaraFrame's own code is MIT-licensed ([LICENSE](LICENSE)). Rendering uses Remotion, which has its own licence: free for individuals, for-profit organisations with up to 3 employees, non-profits and evaluation, and a company licence from <https://www.remotion.pro/license> for larger organisations. npm installs Remotion and the other dependencies from the registry; none of their code is in this package. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) and [distribution-rights.json](distribution-rights.json). Rendering a file is not publication permission for the media in it.",
+  "",
+].join("\n");
 await writeFile(
   join(target, "README.md"),
-  [
-    "# NaraFrame engine",
-    "",
-    "Create editable vertical motion videos locally, with an optional authoring skill for Codex or Claude Code.",
-    "",
-    "This local macOS Apple Silicon candidate needs Node 24.20.0, Chrome/Chromium, FFmpeg/FFprobe and a local font. It includes runtime dependencies; it does not download a browser or generate media.",
-    "",
-    "Run `node packages/cli/dist/index.js version --json` and `node packages/cli/dist/index.js doctor --json` from this package directory. From another directory, use an absolute CLI entry path.",
-    "",
-    "Copy [starter/demo](starter/demo) to a new project outside this installation, then validate and preview it through the CLI. [Starter instructions](starter/README.md) explain the included editable library pattern. Final export requires approval of a full preview.",
-    "",
-    "[Skill installation](skills/naraframe/installation.md) covers project/user installs, explicit updates and conflict-safe removal. The skill is optional; the CLI works without an agent account.",
-    "",
-    "Check [distribution rights](distribution-rights.json) and [starter rights](starter/RIGHTS.json). The candidate is UNLICENSED pending the owner's public redistribution decision; third-party runtime licenses still apply. Rendering a file is not publication permission.",
-    "",
-  ].join("\n"),
+  registry
+    ? registryReadme
+    : [
+        "# NaraFrame engine",
+        "",
+        "Create editable vertical motion videos locally, with an optional authoring skill for Codex or Claude Code.",
+        "",
+        "This local macOS Apple Silicon candidate needs Node 24.20.0, Chrome/Chromium, FFmpeg/FFprobe and a local font. It includes runtime dependencies; it does not download a browser or generate media.",
+        "",
+        "Run `node packages/cli/dist/index.js version --json` and `node packages/cli/dist/index.js doctor --json` from this package directory. From another directory, use an absolute CLI entry path.",
+        "",
+        "Copy [starter/demo](starter/demo) to a new project outside this installation, then validate and preview it through the CLI. [Starter instructions](starter/README.md) explain the included editable library pattern. Final export requires approval of a full preview.",
+        "",
+        "[Skill installation](skills/naraframe/installation.md) covers project/user installs, explicit updates and conflict-safe removal. The skill is optional; the CLI works without an agent account.",
+        "",
+        "Check [distribution rights](distribution-rights.json) and [starter rights](starter/RIGHTS.json). NaraFrame's own code is MIT ([LICENSE](LICENSE)); this archive also contains third-party packages under their own licenses ([notices](THIRD-PARTY-NOTICES.md)) and is a local offline artifact, not a redistribution of them. Rendering a file is not publication permission.",
+        "",
+      ].join("\n"),
 );
 const demo = join(target, "starter/demo");
 const created = await createProject({
@@ -206,38 +313,86 @@ await save(join(demo, "scenes.json"), {
     },
   ],
 });
-const dependencies = Object.fromEntries(
-  [...installed].map(([name, info]) => [
-    name,
-    inventory.find(
-      (entry) => entry.path === info.destination.slice(target.length + 1),
-    ).version,
-  ]),
-);
-await save(join(target, "package.json"), {
-  name: "naraframe-engine",
-  version: "0.1.0",
-  private: true,
-  license: "UNLICENSED",
-  type: "module",
-  engines: { node: "24.20.x" },
-  bin: { naraframe: "packages/cli/dist/index.js" },
-  dependencies,
-  bundledDependencies: Object.keys(dependencies),
-});
-await save(join(target, "distribution-rights.json"), {
-  status: "local-candidate-only",
-  code: "UNLICENSED; owner license decision required before publication",
-  platform: process.platform,
-  architecture: process.arch,
-  resources: [
-    "profiles/current-issues: repository-authored data, system font names only",
-    "library/starter: repository-authored technical schematic PNGs, internal example use",
-    "library/series/study-notes: repository-authored declarative templates and example values; no audio",
-    "starter: neutral authored data, no media or fonts",
-  ],
-  packages: inventory,
-});
+const resources = [
+  "profiles/current-issues: repository-authored data, system font names only",
+  "library/starter: repository-authored technical schematic PNGs, internal example use",
+  "library/series/study-notes: repository-authored declarative templates and example values; no audio",
+  "starter: neutral authored data, no media or fonts",
+];
+if (registry) {
+  const dependencies = {
+    ...Object.fromEntries(INTERNAL.map((name) => [name, PACKAGE_VERSION])),
+    ...Object.fromEntries(
+      [...thirdParty].sort(([a], [b]) => a.localeCompare(b, "en")),
+    ),
+  };
+  await save(join(target, "package.json"), {
+    name: "naraframe",
+    version: PACKAGE_VERSION,
+    description:
+      "Create editable vertical motion videos locally, with an optional authoring skill for Codex or Claude Code.",
+    license: "MIT",
+    type: "module",
+    engines: { node: "24.20.x" },
+    bin: { naraframe: "packages/cli/dist/index.js" },
+    files: [
+      "packages/cli/dist",
+      "profiles",
+      "library",
+      "starter",
+      "skills",
+      "scripts/install-skill.mjs",
+      "LICENSE",
+      "THIRD-PARTY-NOTICES.md",
+      "distribution-rights.json",
+    ],
+    dependencies,
+    bundleDependencies: INTERNAL,
+    repository: { type: "git", url: `git+${REPOSITORY}.git` },
+    homepage: `${REPOSITORY}#readme`,
+    bugs: { url: `${REPOSITORY}/issues` },
+  });
+  await save(join(target, "distribution-rights.json"), {
+    status: "mit-code-third-party-separate",
+    code: "MIT (LICENSE); covers NaraFrame's own code and the resources listed below",
+    thirdParty:
+      "No third-party package code is in this package. npm installs the packages below from the registry under their own licences; Remotion's licence has company-size conditions (THIRD-PARTY-NOTICES.md).",
+    resources,
+    dependencies: Object.fromEntries(
+      Object.entries(registryDependencies).sort(([a], [b]) =>
+        a.localeCompare(b, "en"),
+      ),
+    ),
+  });
+} else {
+  const dependencies = Object.fromEntries(
+    [...installed].map(([name, info]) => [
+      name,
+      inventory.find(
+        (entry) => entry.path === info.destination.slice(target.length + 1),
+      ).version,
+    ]),
+  );
+  await save(join(target, "package.json"), {
+    name: "naraframe-engine",
+    version: PACKAGE_VERSION,
+    private: true,
+    license: "SEE LICENSE IN LICENSE",
+    type: "module",
+    engines: { node: "24.20.x" },
+    bin: { naraframe: "packages/cli/dist/index.js" },
+    dependencies,
+    bundledDependencies: Object.keys(dependencies),
+  });
+  await save(join(target, "distribution-rights.json"), {
+    status: "local-candidate-only",
+    code: "NaraFrame's own code is MIT (LICENSE). This offline aggregate vendors third-party packages under their own licences (THIRD-PARTY-NOTICES.md); it is a local artifact, not a publication of them.",
+    platform: process.platform,
+    architecture: process.arch,
+    resources,
+    packages: inventory,
+  });
+}
 const packed = JSON.parse(
   execFileSync(
     "npm",
@@ -255,18 +410,43 @@ const packed = JSON.parse(
   ),
 )[0];
 const artifact = join(out, packed.filename);
-await save(join(out, "engine-manifest.json"), {
+if (registry) {
+  // The published package may carry only NaraFrame's own files.
+  const unexpected = packed.files
+    .map((file) => file.path)
+    .filter(
+      (path) =>
+        (path.startsWith("node_modules/") &&
+          !path.startsWith("node_modules/@naraframe/")) ||
+        /(^|\/)(work|test-fixtures|samples|\.git|\.pnpm-store)\//.test(path) ||
+        /(^|\/)\.env/.test(path) ||
+        /\.log$/.test(path),
+    );
+  if (unexpected.length)
+    throw new Error(
+      `Unexpected files in the package: ${unexpected.join(", ")}`,
+    );
+}
+const manifestPath = join(
+  out,
+  registry ? "registry-manifest.json" : "engine-manifest.json",
+);
+await save(manifestPath, {
   artifact,
   sha256: createHash("sha256")
     .update(await readFile(artifact))
     .digest("hex"),
   ...packed,
-  runtimePackages: inventory,
+  ...(registry
+    ? { thirdPartyDependencies: registryDependencies }
+    : { runtimePackages: inventory }),
 });
 console.log(
   JSON.stringify({
     artifact,
-    manifest: join(out, "engine-manifest.json"),
-    capturedPackages: inventory.length,
+    manifest: manifestPath,
+    ...(registry
+      ? { dependencies: Object.keys(registryDependencies).length }
+      : { capturedPackages: inventory.length }),
   }),
 );

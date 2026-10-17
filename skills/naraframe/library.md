@@ -61,7 +61,7 @@ Keep brand bindings on assets and managed text. Before changing profiles, use `p
 For a technical starter trial, use the bundled `current-issues` profile:
 
 ```bash
-pnpm naraframe create ../NaraFrame-projects/library-example --profile current-issues --json
+pnpm naraframe create ../library-example --profile current-issues --json
 ```
 
 For production use the profile named in the brief, not this demonstration default. Read its pinned direction and validate fit after substitution. Use the public schema and documented commands; this CLI prints usage on invalid or missing commands rather than supplying a per-command `--help` interface.

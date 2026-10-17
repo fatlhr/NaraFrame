@@ -164,7 +164,15 @@ describe("offline engine distribution", () => {
     const packageJson = JSON.parse(
       await readFile(join(engine, "package.json"), "utf8"),
     );
-    expect(packageJson.license).toBe("UNLICENSED");
+    // Vendors third-party packages, so it names the files instead of claiming MIT.
+    expect(packageJson.license).toBe("SEE LICENSE IN LICENSE");
+    expect(packageJson.private).toBe(true);
+    expect(await readFile(join(engine, "LICENSE"), "utf8")).toBe(
+      await readFile(join(repository, "LICENSE"), "utf8"),
+    );
+    expect(
+      await readFile(join(engine, "THIRD-PARTY-NOTICES.md"), "utf8"),
+    ).toContain("remotion.pro/license");
     expect(packageJson.dependencies["@naraframe/core"]).toBe("0.0.0");
     expect(packageJson.dependencies.remotion).toBe("4.0.521");
     expect(JSON.stringify(packageJson)).not.toContain("workspace:");
@@ -172,6 +180,8 @@ describe("offline engine distribution", () => {
       await readFile(join(engine, "distribution-rights.json"), "utf8"),
     );
     expect(rights.status).toBe("local-candidate-only");
+    expect(rights.code).toContain("MIT");
+    expect(rights.code).not.toContain("UNLICENSED");
     expect(rights.packages.length).toBeGreaterThan(0);
     const entries = await readdir(engine);
     for (const excluded of [

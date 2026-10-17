@@ -3,6 +3,6 @@
   "source": "Repository-authored neutral starter text and supported library parameters",
   "media": "None",
   "fonts": "None; system font names in bundled profile",
-  "codeLicense": "UNLICENSED pending owner decision",
-  "distribution": "Local candidate evaluation only; public redistribution requires owner approval"
+  "codeLicense": "MIT (see LICENSE in the package root)",
+  "distribution": "Covered by the package licence. Rendering a file is not publication permission: rights to any media you add stay with you."
 }
