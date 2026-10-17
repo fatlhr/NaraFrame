@@ -37,6 +37,7 @@ export {
   computeAssemblyKey,
   computeSceneRenderKeys,
   generationKeyForBlock,
+  PREFLIGHT_TEXT_RULES,
   RENDER_ENGINE,
   type SceneRenderKey,
 } from "./compiler/keys.js";

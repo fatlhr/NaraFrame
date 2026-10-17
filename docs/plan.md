@@ -328,12 +328,38 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 
 | ID | Finding | Expected outcome |
 |---|---|---|
-| F1 | Visual preflight samples scene-final/entry frames only, so text pushed off frame by a `match-cut` zoom, or entry motion that starts outside the safe area, passes validate and preview silently. | Text and safe-area checks cover transition and entry-motion frames, with a regression built from the trial seam. |
+| F1 (DONE, B1) | Visual preflight samples scene-final/entry frames only, so text pushed off frame by a `match-cut` zoom, or entry motion that starts outside the safe area, passes validate and preview silently. | Text and safe-area checks cover transition and entry-motion frames, with a regression built from the trial seam. |
 | F2 | Narration cannot be removed through `edit`; the author had to delete `narration.json` by hand after `SCENE_NARRATION_MISSING`. | An ordinary, revision-recorded way to make a voiced project silent. |
 | F3 | `profile apply` lists `regenerate-narration` for a project without narration and does not name layers bound to palette slots, image plates or literal colours that clash with the new direction. | The dry run reports only relevant effects and names the affected layers and assets. |
 | F4 | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
 | F5 | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
 | F6 | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
+
+**Delivery order (owner, 2026-10-17):** one batch per relevance, each confirmed by Fatih before commit, push and squash-merge: B1 = F1, B2 = F6, B3 = F2 + F3, B4 = F4, B5 = F5, then C1.
+
+**B1 / F1 model — motion-aware text checks in visual preflight.** Cause: `TEXT_OUTSIDE_CANVAS` in `visual-preflight.ts` runs only when a scene has a camera or a `transform`/`follow` beat, so a `match-cut` zoom (scene transition state) or an entry `reveal` never reaches it, although the transition's final frame is sampled. Model:
+- The canvas check (error, existing `TEXT_OUTSIDE_CANVAS`) runs on every sampled frame for text at on-screen opacity ≥ 0.9, folding layer motion, group, plane, camera and scene-transition state as today. Fading `push-through` stays below that threshold where it travels.
+- New sampled frames: the start and midpoint of each transition window (exit tail and entry head).
+- Motion safe-zone check (warning, `TEXT_OUTSIDE_SAFE_ZONE` with the frame): text at on-screen opacity ≥ 0.5 whose static frame is inside the safe zone but whose on-screen bounds leave it, on sampled frames outside transition windows. Camera-framed world text keeps its existing exemption.
+- Builds checked by the weaker rules are not reused: a deliberate key/identity treatment, recorded with the change.
+- Acceptance: (1) a copy of the trial episode-01 reverted to its pre-correction source is refused by `preview` with `TEXT_OUTSIDE_CANVAS` for the `cause` headline in the match-cut window, and the corrected source previews; (2) a copy of episode-02 at its correction-2 source warns `TEXT_OUTSIDE_SAFE_ZONE` for the scene-2 text during its reveal; (3) unit cases for match-cut off-canvas, fading push-through accepted, slide-in reveal warning, static text unchanged; (4) existing integration and fixtures stay green with no new issues on maintained samples.
+
+**B1 / F1 evidence — 2026-10-17 (branch `f1-preflight-motion-frames`; owner-approved and integrated through its own PR):**
+- The canvas check is ungated (on-screen opacity ≥ 0.9, every sampled frame). Transition windows are sampled at start and midpoint through a shared `sceneTransitionWindowsFor`, so sampled and applied windows cannot drift. The motion `TEXT_OUTSIDE_SAFE_ZONE` warning measures the painted glyph extent rather than the box, because full-width boxes always touch the safe edge.
+- Cache treatment: `PREFLIGHT_TEXT_RULES = "naraframe-preflight-text/2"` enters the render key of scenes with text layers only, following the Batch F text-fit marker. Pixels are unchanged, so `RENDER_ENGINE` stays `naraframe-draft/13`. Builds checked under the old rules are neither reused nor reported current, so existing production previews read as stale by design.
+- Acceptance:
+  - episode-01 reverted to `a8a488f8…`: refused with `TEXT_OUTSIDE_CANVAS` for `headline` at frame 229 (scoped `cause`) and 432 (full). Supervisor re-ran the scoped case independently and got the same result. The corrected source previews (`576be4d406f3-80f0385a-0d0`) and reuses.
+  - episode-02 correction 2 restored from its own revision object (same revision `aff48e87…`): warns at frame 141 and still previews. The current source does not warn.
+  - The maintained Krakatau draft/narrated and current-issues samples raise no new issues.
+- Real defect found in a maintained fixture: `test-fixtures/project-general-explainer` `comparison-copy` (x 88–992) left the canvas under its match-cut zoom. It is narrowed to x 128 / width 824, matching the panel text inset. Its `stat-number` now warns `TEXT_OUTSIDE_SAFE_ZONE` while its 1.06 emphasis plays; the warning is kept as a real finding.
+- An existing unit test's reveal was slowed (25→40 frames) because the new `transition-out-start` sample showed two genuinely overlapping opaque layers.
+- Gates (logs `work/gate-logs/f1/`):
+  - lint, typecheck and build exit 0;
+  - unit 339/339, including 12 new tests;
+  - integration 428/428;
+  - full serial E2E 14 files / 24 tests, 1085 s, exit 0 (log SHA-256 `72c30ffb…`).
+- Chrome had auto-updated to 155.0.8059.84 by this run; the M4.5 freeze recorded .40. The engine does not pin the browser.
+- Known limits: the canvas error still uses the full text box, which is conservative. Checks run on sampled frames only. Exit-beat travel that stays at least half opaque can warn.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 

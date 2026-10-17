@@ -535,6 +535,68 @@ const boundedTransitionState = (
   };
 };
 
+/** The transition this scene plays in its own tail, if it plays one at all. */
+const exitTransitionFor = (draft: CompiledDraft, sceneIndex: number) => {
+  const scene = draft.scenes[sceneIndex];
+  if (
+    scene &&
+    scene.transitionOut.type !== "cut" &&
+    (sceneIndex < draft.scenes.length - 1 || scene.hasNextScene === true)
+  ) {
+    return scene.transitionOut;
+  }
+  return null;
+};
+
+/** The transition that plays in this scene's head, if there is one. */
+const entryTransitionFor = (draft: CompiledDraft, sceneIndex: number) => {
+  const incoming =
+    draft.scenes[sceneIndex]?.transitionIn ??
+    draft.scenes[sceneIndex - 1]?.transitionOut;
+  return incoming && incoming.type !== "cut" ? incoming : null;
+};
+
+export interface SceneTransitionWindow {
+  mode: "exit" | "entry";
+  /** Scene-local, inclusive. */
+  startFrame: number;
+  /** Scene-local, exclusive. */
+  endFrame: number;
+}
+
+/**
+ * The scene-local frame ranges in which a boundary transition moves, fades or
+ * scales this scene: its own exit near the tail and the entry half near the
+ * head. `sceneTransitionStateFor` applies exactly these windows, and
+ * `visual-preflight` samples them.
+ */
+export const sceneTransitionWindowsFor = (
+  draft: CompiledDraft,
+  sceneIndex: number,
+): SceneTransitionWindow[] => {
+  const scene = draft.scenes[sceneIndex];
+  if (!scene) return [];
+  const sceneDurationInFrames = scene.endFrame - scene.startFrame;
+  const windows: SceneTransitionWindow[] = [];
+  const entry = entryTransitionFor(draft, sceneIndex);
+  if (entry) {
+    windows.push({
+      mode: "entry",
+      startFrame: 0,
+      endFrame: entry.durationInFrames,
+    });
+  }
+  const exit = exitTransitionFor(draft, sceneIndex);
+  if (exit) {
+    windows.push({
+      mode: "exit",
+      startFrame: sceneDurationInFrames - exit.durationInFrames,
+      endFrame: sceneDurationInFrames,
+    });
+  }
+  return windows;
+};
+
 /**
  * Whichever of this scene's own boundary transitions is active at
  * `localFrame`: its own `transitionOut` near its tail (skipped on the last
@@ -556,12 +618,9 @@ export const sceneTransitionStateFor = (
   if (!scene) return IDENTITY_SCENE_TRANSITION;
   const sceneDurationInFrames = scene.endFrame - scene.startFrame;
 
-  if (
-    scene.transitionOut.type !== "cut" &&
-    (sceneIndex < draft.scenes.length - 1 || scene.hasNextScene === true)
-  ) {
-    const windowStart =
-      sceneDurationInFrames - scene.transitionOut.durationInFrames;
+  const exit = exitTransitionFor(draft, sceneIndex);
+  if (exit) {
+    const windowStart = sceneDurationInFrames - exit.durationInFrames;
     if (localFrame >= windowStart) {
       const eased = interpolate(
         localFrame,
@@ -570,7 +629,7 @@ export const sceneTransitionStateFor = (
         { ...clamp, easing: transitionEasing },
       );
       return boundedTransitionState(
-        scene.transitionOut,
+        exit,
         eased,
         "exit",
         draft.width,
@@ -579,9 +638,8 @@ export const sceneTransitionStateFor = (
     }
   }
 
-  const incoming =
-    scene.transitionIn ?? draft.scenes[sceneIndex - 1]?.transitionOut;
-  if (incoming && incoming.type !== "cut") {
+  const incoming = entryTransitionFor(draft, sceneIndex);
+  if (incoming) {
     const durationInFrames = incoming.durationInFrames;
     if (localFrame < durationInFrames) {
       const eased = interpolate(localFrame, [0, durationInFrames], [0, 1], {
