@@ -336,9 +336,9 @@
             "type": "text",
             "text": "Bukan karangnya yang berwarna, melainkan alga yang hidup di dalamnya.",
             "frame": {
-              "x": 88,
+              "x": 128,
               "y": 1030,
-              "width": 904,
+              "width": 824,
               "height": 220
             },
             "role": "body",

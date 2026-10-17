@@ -22,6 +22,16 @@ import { narrationTextHash } from "./voice-binding.js";
 export const RENDER_ENGINE = "naraframe-draft/13";
 
 /**
+ * Version of the text checks the visual preflight applies to a scene's text
+ * layers. It leaves pixels alone, so it is not a RENDER_ENGINE bump; it enters
+ * the keys of scenes that have text layers only, because a build checked under
+ * older rules must not stand in for one checked under these (preview reuse
+ * skips the preflight). 2: the canvas check runs on every sampled frame,
+ * transition windows are sampled, and motion that leaves the safe zone warns.
+ */
+export const PREFLIGHT_TEXT_RULES = "naraframe-preflight-text/2";
+
+/**
  * Finds a retained voice clip for a block: the spoken text (whitespace
  * normalised) and the profile's voice style. Not a promise that AI sampling is
  * reproducible. Use it as the receipt `requestKey` so spend can be traced back.
@@ -135,6 +145,10 @@ export const computeSceneRenderKeys = (
           camera: scene.camera,
           transitionOut: scene.transitionOut,
         },
+        // Only with text layers, so other scenes keep their keys.
+        ...(scene.layers.some((layer) => layer.type === "text")
+          ? { preflightTextRules: PREFLIGHT_TEXT_RULES }
+          : {}),
         durationInFrames: scene.endFrame - scene.startFrame,
         incomingTransition:
           incoming && incoming.type !== "cut" ? incoming : null,

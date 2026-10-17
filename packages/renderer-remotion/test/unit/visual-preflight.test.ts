@@ -288,19 +288,18 @@ describe("resolveVisualPreflight — scene-transition folding", () => {
   });
 
   it("folds the exit transition's fade into visibility, suppressing a collision that is only ever on-screen at low opacity", () => {
-    // Each layer reveals in fully by frame 25 (own opacity reaches 1 well
-    // before the checked "scene-settled" frame ~7 is even reached in
-    // progress terms — it stays below the 0.9 gate on its own until then),
-    // then the scene's own push-through exit (window [15,30)) fades the
-    // whole scene back down through the "scene-final" checkpoint (29). If
-    // that scene-level fade were not folded into the opacity gate, this
-    // pair would read as fully opaque and colliding at frame 29.
+    // Each layer reveals slowly (40 frames), so its own opacity stays below
+    // the 0.9 gate through the window's first sampled frame (15) and the
+    // scene's own push-through exit (window [15,30)) fades the whole scene
+    // back down through the later checkpoints (22 and 29). If that
+    // scene-level fade were not folded into the opacity gate, this pair would
+    // read as fully opaque and colliding at frame 29.
     const revealBeat = (targetId: string) => ({
       id: `${targetId}-reveal`,
       targetId,
       action: "reveal" as const,
       startFrame: 0,
-      durationInFrames: 25,
+      durationInFrames: 40,
       params: { direction: "up" as const, distance: 0 },
     });
     const overlapping: Layer[] = [
@@ -882,5 +881,229 @@ describe("M2.4.3 preflight", () => {
       ),
     );
     expect(report.issues.map((i) => i.code)).toContain("TEXT_OVERFLOW");
+  });
+});
+
+describe("resolveVisualPreflight — motion-aware text checks (F1)", () => {
+  const headline = (id = "headline"): Extract<Layer, { type: "text" }> =>
+    text({
+      id,
+      text: "A",
+      // Close to both side edges of the 540px canvas.
+      frame: { x: 20, y: 400, width: 500, height: 100 },
+    });
+
+  const frameOf = (message: string): number =>
+    Number(/at frame (\d+)/.exec(message)?.[1]);
+
+  const withSafeZone = (
+    draft: CompiledDraft,
+    safeZone: CompiledDraft["profile"]["render"]["safeZone"],
+  ): CompiledDraft => ({
+    ...draft,
+    profile: {
+      ...draft.profile,
+      render: { ...draft.profile.render, safeZone },
+    },
+  });
+
+  const issuesOf = (draft: CompiledDraft, code: string) =>
+    resolveVisualPreflight(draft).report.issues.filter(
+      (issue) => issue.code === code,
+    );
+
+  it("flags a near-edge headline pushed off the canvas by a match-cut zoom, inside the transition window", () => {
+    // No camera and no transform beat: the scene transition alone carries it.
+    const draft = draftWithScenes([
+      {
+        layers: [headline()],
+        startFrame: 0,
+        endFrame: 60,
+        transitionOut: {
+          type: "match-cut",
+          durationInFrames: 20,
+          anchor: { x: 0.5, y: 0.5 },
+        },
+      },
+      { layers: [], startFrame: 60, endFrame: 120 },
+    ]);
+
+    const { report } = resolveVisualPreflight(draft);
+    const issues = report.issues.filter(
+      (issue) => issue.code === "TEXT_OUTSIDE_CANVAS",
+    );
+
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.severity).toBe("error");
+    expect(issues[0]?.entityId).toBe("headline");
+    const frame = frameOf(issues[0]?.message ?? "");
+    expect(frame).toBeGreaterThanOrEqual(40);
+    expect(frame).toBeLessThan(60);
+  });
+
+  it("flags the same headline while a match-cut zoom settles into its scene", () => {
+    const draft = draftWithScenes([
+      {
+        layers: [],
+        startFrame: 0,
+        endFrame: 60,
+        transitionOut: {
+          type: "match-cut",
+          durationInFrames: 20,
+          anchor: { x: 0.5, y: 0.5 },
+        },
+      },
+      { layers: [headline()], startFrame: 60, endFrame: 120 },
+    ]);
+
+    const issues = issuesOf(draft, "TEXT_OUTSIDE_CANVAS");
+
+    expect(issues).toHaveLength(1);
+    expect(frameOf(issues[0]?.message ?? "")).toBeLessThan(80);
+  });
+
+  it("accepts the same headline under a fading push-through, which is below full opacity wherever it travels", () => {
+    const draft = draftWithScenes([
+      {
+        layers: [headline()],
+        startFrame: 0,
+        endFrame: 60,
+        transitionOut: {
+          type: "push-through",
+          durationInFrames: 20,
+          direction: "left",
+        },
+      },
+      { layers: [], startFrame: 60, endFrame: 120 },
+    ]);
+
+    expect(resolveVisualPreflight(draft).report.issues).toEqual([]);
+  });
+
+  it("samples the start and midpoint of each transition window", () => {
+    const draft = draftWithScenes([
+      {
+        layers: [],
+        startFrame: 0,
+        endFrame: 60,
+        transitionOut: {
+          type: "push-through",
+          durationInFrames: 20,
+          direction: "left",
+        },
+      },
+      { layers: [], startFrame: 60, endFrame: 120 },
+    ]);
+
+    const { report } = resolveVisualPreflight(draft);
+    const reasonsAt = (frame: number) =>
+      report.frames.find((item) => item.frame === frame)?.reasons ?? [];
+
+    expect(reasonsAt(40)).toContain("transition-out-start");
+    expect(reasonsAt(50)).toContain("transition-out-mid");
+    expect(reasonsAt(60)).toContain("transition-in-start");
+    expect(reasonsAt(70)).toContain("transition-in-mid");
+  });
+
+  it("adds no transition frames and no issues to a static scene", () => {
+    const draft = draftWithScene([
+      text({
+        id: "still",
+        text: "A",
+        frame: { x: 100, y: 400, width: 300, height: 80 },
+      }),
+    ]);
+
+    const { report } = resolveVisualPreflight(
+      withSafeZone(draft, { top: 40, right: 40, bottom: 40, left: 40 }),
+    );
+
+    expect(report.issues).toEqual([]);
+    expect(
+      report.frames.some((item) =>
+        item.reasons.some((reason) => reason.startsWith("transition-")),
+      ),
+    ).toBe(false);
+  });
+
+  const slideIn = (distance: number, x: number) => {
+    const layer = text({
+      id: "title",
+      text: "A",
+      // Inside the 40px safe zone at rest.
+      frame: { x, y: 400, width: 460, height: 100 },
+    });
+    return withSafeZone(
+      draftWithScene(
+        [layer],
+        [
+          {
+            id: "title-reveal",
+            targetId: "title",
+            action: "reveal",
+            startFrame: 0,
+            durationInFrames: 30,
+            params: { direction: "right", distance },
+          },
+        ],
+      ),
+      { top: 0, right: 40, bottom: 0, left: 40 },
+    );
+  };
+
+  it("warns once when a reveal slides readable text out of the safe zone before it settles inside", () => {
+    const issues = issuesOf(slideIn(120, 40), "TEXT_OUTSIDE_SAFE_ZONE");
+
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.severity).toBe("warning");
+    expect(issues[0]?.entityId).toBe("title");
+    expect(Number.isInteger(frameOf(issues[0]?.message ?? ""))).toBe(true);
+    // It never leaves the canvas, so there is no canvas error.
+    expect(issuesOf(slideIn(120, 40), "TEXT_OUTSIDE_CANVAS")).toEqual([]);
+  });
+
+  it("does not warn when the reveal stays inside the safe zone", () => {
+    expect(issuesOf(slideIn(20, 80), "TEXT_OUTSIDE_SAFE_ZONE")).toEqual([]);
+  });
+
+  it("judges a short left-aligned line by its glyphs, not by the wide box it sits in", () => {
+    // The box spans the safe zone exactly, as a full-width headline box does.
+    // Sliding it in from the right pushes the box, but not the glyphs, over
+    // the right safe edge; sliding it in from the left does push the glyphs.
+    const slide = (direction: "left" | "right") => {
+      const draft = slideIn(24, 40);
+      const scene = draft.scenes[0];
+      const beat = scene?.beats[0];
+      if (!scene || beat?.action !== "reveal") {
+        throw new Error("Missing reveal fixture");
+      }
+      beat.params.direction = direction;
+      return draft;
+    };
+
+    expect(issuesOf(slide("left"), "TEXT_OUTSIDE_SAFE_ZONE")).toEqual([]);
+    expect(issuesOf(slide("right"), "TEXT_OUTSIDE_SAFE_ZONE")).toHaveLength(1);
+  });
+
+  it("does not warn about camera-framed world text, whose screen position is the camera's", () => {
+    const label = {
+      ...text({
+        id: "label",
+        text: "B",
+        frame: { x: 100, y: 400, width: 80, height: 80 },
+      }),
+      space: "world" as const,
+    };
+    const draft = withSafeZone(draftWithScene([label]), {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 40,
+    });
+    const scene = draft.scenes[0];
+    if (!scene) throw new Error("Missing scene fixture");
+    scene.camera = { initial: { x: 80, y: 0, zoom: 1 }, moves: [] };
+
+    expect(resolveVisualPreflight(draft).report.issues).toEqual([]);
   });
 });

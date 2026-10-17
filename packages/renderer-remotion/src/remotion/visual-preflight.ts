@@ -10,6 +10,7 @@ import {
   pathLengthOf,
   planeTransformFor,
   sceneTransitionStateFor,
+  sceneTransitionWindowsFor,
 } from "./motion.js";
 import { recipeTextFit } from "./recipe-text-fit.js";
 import { fontFamilyForRole } from "./typography.js";
@@ -34,6 +35,8 @@ export type DraftWithVisualPreflight = CompiledDraft & {
 interface TextMetrics {
   fontSize: number;
   lines: string[];
+  /** Width of the widest line as painted, not of the box it sits in. */
+  contentWidth: number;
   contentHeight: number;
   overflow: boolean;
 }
@@ -52,9 +55,10 @@ const issueFor = (
   layerId: string,
   message: string,
   suggestion: string,
+  severity: Issue["severity"] = "error",
 ): Issue => ({
   code,
-  severity: "error",
+  severity,
   responsible: "agent",
   artifact: "scenes.json",
   path: `/scenes/${sceneIndex}/visual/layers/${layerIndex}`,
@@ -179,8 +183,9 @@ const wrapText = (
   layer: Extract<Layer, { type: "text" }>,
   fontSize: number,
   weights?: number[],
-): { lines: string[]; unbreakableOverflow: boolean } => {
+): { lines: string[]; widest: number; unbreakableOverflow: boolean } => {
   const lines: string[] = [];
+  let widest = 0;
   let unbreakableOverflow = false;
   const baseWeight = layer.fontWeight ?? 700;
   let paragraphOffset = 0;
@@ -198,7 +203,12 @@ const wrapText = (
           .split(/\s+/u)
           .map((word) => ({ text: word, weights: [] as number[] }));
     let line = "";
+    let lineWidth = 0;
     let lineWeights: number[] = [];
+    const endLine = () => {
+      if (line) lines.push(line);
+      widest = Math.max(widest, lineWidth);
+    };
     for (const word of words) {
       const candidate = line ? `${line} ${word.text}` : word.text;
       const candidateWeights = weights
@@ -206,32 +216,37 @@ const wrapText = (
           ? [...lineWeights, baseWeight, ...word.weights]
           : [...word.weights]
         : undefined;
-      if (
-        measureWidth(candidate, draft, layer, fontSize, candidateWeights) <=
-        withinWidth
-      ) {
+      const candidateWidth = measureWidth(
+        candidate,
+        draft,
+        layer,
+        fontSize,
+        candidateWeights,
+      );
+      if (candidateWidth <= withinWidth) {
         line = candidate;
+        lineWidth = candidateWidth;
         lineWeights = candidateWeights ?? [];
         continue;
       }
-      if (line) lines.push(line);
-      if (
-        measureWidth(
-          word.text,
-          draft,
-          layer,
-          fontSize,
-          weights ? word.weights : undefined,
-        ) > withinWidth
-      ) {
+      endLine();
+      const wordWidth = measureWidth(
+        word.text,
+        draft,
+        layer,
+        fontSize,
+        weights ? word.weights : undefined,
+      );
+      if (wordWidth > withinWidth) {
         unbreakableOverflow = true;
       }
       line = word.text;
+      lineWidth = wordWidth;
       lineWeights = [...word.weights];
     }
-    if (line) lines.push(line);
+    endLine();
   }
-  return { lines, unbreakableOverflow };
+  return { lines, widest, unbreakableOverflow };
 };
 
 const metricsAt = (
@@ -243,7 +258,13 @@ const metricsAt = (
   const width = layer.frame.width - style.padding.left - style.padding.right;
   const height = layer.frame.height - style.padding.top - style.padding.bottom;
   if (width <= 0 || height <= 0) {
-    return { fontSize, lines: [], contentHeight: 0, overflow: true };
+    return {
+      fontSize,
+      lines: [],
+      contentWidth: 0,
+      contentHeight: 0,
+      overflow: true,
+    };
   }
   const wrapped = wrapText(
     layer.text,
@@ -257,6 +278,7 @@ const metricsAt = (
   return {
     fontSize,
     lines: wrapped.lines,
+    contentWidth: wrapped.widest,
     contentHeight,
     overflow:
       wrapped.unbreakableOverflow ||
@@ -297,6 +319,25 @@ const textRectangle = (
     width: layer.frame.width - padding.left - padding.right,
     height: Math.min(availableHeight, metrics.contentHeight),
   };
+};
+
+/**
+ * Where the glyphs sit inside `textRectangle`: as wide as the widest line and
+ * placed by the layer's alignment. A box that spans the safe zone says little
+ * about text that is left-aligned and shorter.
+ */
+const textExtent = (
+  layer: Extract<Layer, { type: "text" }>,
+  metrics: TextMetrics,
+): Rectangle => {
+  const box = textRectangle(layer, metrics);
+  const width = Math.min(box.width, metrics.contentWidth);
+  const offset = {
+    left: 0,
+    center: (box.width - width) / 2,
+    right: box.width - width,
+  }[layer.textAlign ?? "left"];
+  return { ...box, x: box.x + offset, width };
 };
 
 /** A layer's own rotation, scale and travel applied to a rectangle's corners. */
@@ -440,7 +481,9 @@ const captionIssue = (
 });
 
 const framesForScene = (
+  draft: CompiledDraft,
   scene: CompiledDraft["scenes"][number],
+  sceneIndex: number,
 ): VisualPreflightFrame[] => {
   const local = new Map<number, string[]>();
   const add = (frame: number, reason: string) => {
@@ -471,6 +514,17 @@ const framesForScene = (
       `camera-mid:${move.id}`,
     );
     add(move.startFrame + move.durationInFrames, `camera-settled:${move.id}`);
+  });
+  // Mid-transition frames: the scene-final and entry frames sit at the ends of
+  // a window, but a zoom or push moves text furthest, or still at full
+  // opacity, somewhere inside it.
+  sceneTransitionWindowsFor(draft, sceneIndex).forEach((window) => {
+    const prefix = window.mode === "exit" ? "transition-out" : "transition-in";
+    add(window.startFrame, `${prefix}-start`);
+    add(
+      window.startFrame + Math.floor((window.endFrame - window.startFrame) / 2),
+      `${prefix}-mid`,
+    );
   });
   return [...local.entries()].map(([frame, reasons]) => ({
     frame: scene.startFrame + frame,
@@ -600,7 +654,9 @@ export const resolveVisualPreflight = (
 ): { draft: CompiledDraft; report: VisualPreflightReport } => {
   const draft = structuredClone(input);
   const issues: Issue[] = [];
-  const frames = draft.scenes.flatMap(framesForScene);
+  const frames = draft.scenes.flatMap((scene, index) =>
+    framesForScene(draft, scene, index),
+  );
   const captions = draft.captions;
 
   captions?.cues.forEach((cue) => {
@@ -937,20 +993,51 @@ export const resolveVisualPreflight = (
     }
     const checkedPairs = new Set<string>();
     const checkedClipping = new Set<string>();
-    for (const frame of frames.filter((item) => item.sceneId === scene.id)) {
+    const checkedSafeZone = new Set<string>();
+    const transitionWindows = sceneTransitionWindowsFor(draft, sceneIndex);
+    const safeZone = draft.profile.render.safeZone;
+    const safeArea = {
+      left: safeZone.left,
+      top: safeZone.top,
+      right: draft.width - safeZone.right,
+      bottom: draft.height - safeZone.bottom,
+    };
+    // Rectangle edges are compared with the same half-pixel tolerance as the
+    // canvas check; draft frames are rounded from the design pixels.
+    const leavesArea = (
+      rectangle: Rectangle,
+      area: { left: number; top: number; right: number; bottom: number },
+    ): boolean =>
+      rectangle.x < area.left - 0.5 ||
+      rectangle.y < area.top - 0.5 ||
+      rectangle.x + rectangle.width > area.right + 0.5 ||
+      rectangle.y + rectangle.height > area.bottom + 0.5;
+    const canvasArea = {
+      left: 0,
+      top: 0,
+      right: draft.width,
+      bottom: draft.height,
+    };
+    // Earliest first, so a layer's one report names the first frame it fails.
+    const sceneFrames = frames
+      .filter((item) => item.sceneId === scene.id)
+      .sort((left, right) => left.frame - right.frame);
+    for (const frame of sceneFrames) {
       const localFrame = frame.frame - scene.startFrame;
+      const inTransition = transitionWindows.some(
+        (window) =>
+          localFrame >= window.startFrame && localFrame < window.endFrame,
+      );
       textLayers.forEach((left, leftIndex) => {
         const leftMetrics = textMetrics.get(left.id);
         if (!leftMetrics || leftMetrics.overflow) return;
         const leftState = motionStateFor(draft, scene, left.id, localFrame);
-        if (
-          opacityOnScreen(
-            left.id,
-            left.opacity * leftState.opacity,
-            localFrame,
-          ) < 0.9
-        )
-          return;
+        const leftOpacity = opacityOnScreen(
+          left.id,
+          left.opacity * leftState.opacity,
+          localFrame,
+        );
+        if (leftOpacity < 0.5) return;
         const leftQuad = quadOnScreen(
           left.id,
           transformedQuad(
@@ -962,17 +1049,13 @@ export const resolveVisualPreflight = (
           localFrame,
         );
         const leftRectangle = boundsOf(leftQuad);
-        if (
-          (scene.camera ||
-            scene.beats.some(
-              (beat) => beat.action === "transform" || beat.action === "follow",
-            )) &&
-          !checkedClipping.has(left.id) &&
-          (leftRectangle.x < -0.5 ||
-            leftRectangle.y < -0.5 ||
-            leftRectangle.x + leftRectangle.width > draft.width + 0.5 ||
-            leftRectangle.y + leftRectangle.height > draft.height + 0.5)
-        ) {
+
+        // Fully shown text must be on the canvas on every sampled frame: a
+        // layer, group, plane, camera or scene transition can each carry it
+        // off even when its static frame is inside.
+        const outsideCanvas =
+          leftOpacity >= 0.9 && leavesArea(leftRectangle, canvasArea);
+        if (outsideCanvas && !checkedClipping.has(left.id)) {
           checkedClipping.add(left.id);
           issues.push(
             issueFor(
@@ -981,10 +1064,54 @@ export const resolveVisualPreflight = (
               scene.layers.indexOf(left),
               left.id,
               `Text layer ${left.id} is outside the canvas at frame ${frame.frame}.`,
-              "Adjust camera framing or object travel so required text remains visible.",
+              "Adjust camera framing, object travel or the scene transition so required text remains visible.",
             ),
           );
         }
+
+        // The static check only sees where a layer rests. Text whose resting
+        // frame is inside the safe zone but whose motion carries it out while
+        // it is already readable is a warning. Transition windows are left to
+        // the canvas check: the whole scene scales or slides there by design.
+        const world =
+          left.space === "world" ||
+          parentGroupOf.get(left.id)?.space === "world";
+        if (
+          !outsideCanvas &&
+          !inTransition &&
+          !checkedSafeZone.has(left.id) &&
+          !(world && scene.camera) &&
+          !leavesArea(left.frame, safeArea) &&
+          leavesArea(
+            boundsOf(
+              quadOnScreen(
+                left.id,
+                transformedQuad(
+                  textExtent(left, leftMetrics),
+                  leftState,
+                  left.frame,
+                  left.rotationDeg,
+                ),
+                localFrame,
+              ),
+            ),
+            safeArea,
+          )
+        ) {
+          checkedSafeZone.add(left.id);
+          issues.push(
+            issueFor(
+              "TEXT_OUTSIDE_SAFE_ZONE",
+              sceneIndex,
+              scene.layers.indexOf(left),
+              left.id,
+              `Text layer ${left.id} leaves the profile safe zone at frame ${frame.frame} while its motion plays.`,
+              "Start the reveal or travel inside the safe zone, shorten its distance, or keep the text fading until it is inside.",
+              "warning",
+            ),
+          );
+        }
+        if (leftOpacity < 0.9) return;
 
         const targets = new Set([
           ...textLayers.slice(leftIndex + 1).map((layer) => layer.id),
