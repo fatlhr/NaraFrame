@@ -2,7 +2,7 @@
 
 Revision 2.0 · 2026-10-15 · Integrated baseline `aab831cd0a30ea53ba6274556729060d8ff29ba5`
 
-**Current step:** M4.5.5 trial attempt 2 complete up to owner review on `m4-batch-3` (HEAD `eac6eea` plus the uncommitted renderer frame-corruption fix and docs). `pnpm verify` and the serial final E2E passed on that tree. Waiting for Fatih: visual acceptance of the two 1080 candidates (`NaraFrame-projects/mvp2/production/delivery/REVIEW.md`), commit approval for the fix, the sourcing decision for episode-02 and the recoverable cleanup. Main remains `aab831c`; no push/PR/merge, export or removal has happened.
+**Current step:** M4.5 closure executed 2026-10-16. Renderer fix committed `8b22c94`; both 1080 candidates owner-approved and exported (`e470d85201ba-4cbfbbf3-368` / `944926cda123-7c5f110b-bdc`, covers retaken from finals); episode-02 sourcing resolved as illustrative restatement (b); recoverable cleanup executed (archive `NaraFrame-archive/2026-10-16/`, originals in Trash); findings F1–F5 scheduled. Fatih authorized this evidence commit plus push/PR/squash-merge to main and confirmed the open publication-rights status (exported, not published). After merge, MVP 2 Batch 3 integration and M4 handoff are complete; remaining work is the F1–F5 backlog.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -522,14 +522,30 @@ Caption-none revision yields `41f7b52ecd6d-0e97320a-516`; undo restores source a
 
 **Proposed recoverable cleanup (not executed; needs Fatih's confirmation):** archive with a checksum index under `NaraFrame-archive/<date>/`, then move to Trash. Candidates are the `work/m4-batch-3/m4-5-trial/repro/` episode copies and builds (209 MB; keep the extracted frames, summaries and two representative corrupt MP4s in place), `production/engine-attempt1/` (462 MB, after the attempt-2 export is accepted) and `work/m4-packaging/candidate-3/` (archive only, attempt-1 evidence). Episode projects, first drafts, reports, freezes, gate logs and maintained repository files stay where they are.
 
-**Waiting for Fatih:**
-1. Visual acceptance or revision notes for both 1080 candidates. After acceptance, run the export commands in each delivery note and verify them.
-2. Commit approval for the renderer fix (16 source/test paths plus `docs/spec.md` and `docs/plan.md`; AGENTS excluded).
-3. A sourcing decision for episode-02 (`requireSourcing: true`).
-4. The cleanup confirmation.
-5. Whether to schedule the attempt-2 engine findings and the lingering-process finding as follow-up work.
+**Waiting for Fatih (decisions received 2026-10-16, execution below):**
+1. DONE — both 1080 candidates approved as is.
+2. DONE — renderer fix committed as `8b22c94` on `m4-batch-3` (17 paths: 15 source/test + `docs/spec.md` + `docs/plan.md`; AGENTS excluded). No push/PR/merge.
+3. DONE — episode-02 sourcing resolved as (b) illustrative restatement: the three on-screen statements restate `inputs/brief-02.md`/episode-01 narration with no new numbers/places/dates; episode stays "claims unsourced"; `contrast` profile unchanged and strict for future factual work; post copy must not add claims beyond the on-screen text.
+4. DONE — recoverable cleanup executed (evidence below).
+5. DONE — attempt-2 engine findings + lingering-process finding scheduled as backlog (section 4, new rows).
 
 Integration (push/PR/merge) remains a separate request.
+
+#### Closure execution — 2026-10-16 (fix commit `8b22c94`; this evidence follows in the same PR)
+
+**Exports (owner-approved, `naraframe-draft/13`, engineIdentity `64b5676e…`):**
+- episode-01 final build `e470d85201ba-4cbfbbf3-368` (21.467 s, 644 frames, h264 1080x1920 30fps + AAC 48kHz stereo). `final.mp4` SHA-256 `de38e1b0…d3a7e558` (1,851,730 bytes), matches manifest; `manifestSha256 1e84e545…` matches pointer; approval preview `1e6d367364da-c665da06-260`, sourceRevision `3ff723d6…`; full decode clean; `frameIntegrity` 644/0; visualPreflight issues empty (one info `CONTRAST_UNVERIFIED`, already disclosed). Cover retaken from final frame 30: `delivery/episode-01/cover-final.png` (`c6977511…`), DRAFT label gone.
+- episode-02 final build `944926cda123-7c5f110b-bdc` (15.4 s, 462 frames, single h264 stream, no audio). `final.mp4` SHA-256 `28161c0c…471a88`, matches manifest; `manifestSha256 391a89c3…` matches pointer; approval preview `1a0b9845f692-e37c055f-087`, sourceRevision `d41ecb8d…`; full decode clean; `frameIntegrity` 462/0; visualPreflight issues empty (`SINGLE_TRANSITION_TYPE`/`VIEWPOINT_STATIC` warnings deliberate, disclosed). Cover retaken from final frame 33: `delivery/episode-02/cover-final.png` (`bfe4d02b…`), DRAFT label gone.
+- Stated "exported", never "published". Rights (synthetic plate, Damayanti synthesis, agent artwork, system font) remain open per delivery notes.
+
+**Cleanup (executed, recoverable):** 15,340 entries / 727,074,976 bytes archived to `NaraFrame-archive/2026-10-16/` with `index.json` (per-file SHA-256, 0 copy mismatches on re-hash, restore instructions). Originals moved to `~/.Trash/naraframe-cleanup-2026-10-16/` (no active render during the move; Trash not emptied). Kept in place: `repro/results/` frames+summaries, repro scripts/logs, two corrupt-MP4 build dirs (`episode-installed/.../385ff2e7fbcf-e08b6a07-386`, 22 bad frames; `episode/.../385ff2e7fbcf-5968da6f-036`, 28 bad frames). `repro/` is now 9.8 MB; `engine-attempt1/` and `candidate-3/` removed from the working tree.
+
+**Follow-up backlog (scheduled, each needs its own feature model + authorization):**
+- F1 preflight mid-transition/entry-motion gap (text pushed off frame by `match-cut` zoom passes silently).
+- F2 narration removal not expressible through `edit` (manual `narration.json` deletion).
+- F3 `profile apply` report gaps (`regenerate-narration` on narration-less projects; unnamed palette/plate clashes).
+- F4 `shape.stroke.color` hex-only, undocumented `reveal`/`strong` semantics, skill missing revision-list/reuse explanation.
+- F5 node/Chrome crashpad processes lingering 7–9 min after parallel renders (undiagnosed, output unaffected).
 
 ### Handoff template for an authorized M4 batch
 
