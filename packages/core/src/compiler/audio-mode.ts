@@ -89,7 +89,7 @@ export const checkAudioModeConflicts = (
         "narration.json",
         "/",
         `Audio mode is ${resolved.mode}, but the project has narration.json; narration is never dropped silently.`,
-        'Set audioMode to "voice" to keep the narration, or remove narration.json if the video has no speech.',
+        'Set audioMode to "voice" to keep the narration, or, if the video has no speech, remove it with edit --remove narration.json (in the same edit that stages the new audioMode).',
       ),
     );
   }

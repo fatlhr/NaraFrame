@@ -166,6 +166,12 @@ export {
   checkBrandBindings,
   planBrandBindings,
 } from "./profile/brand-bindings.js";
+export type {
+  LiteralColorLayer,
+  PaletteBoundLayer,
+  ProfileReview,
+  ReviewImageLayer,
+} from "./profile/review.js";
 export {
   type BuiltProfileLock,
   buildProfileLock,
