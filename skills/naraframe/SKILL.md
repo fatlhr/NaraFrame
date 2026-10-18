@@ -9,9 +9,25 @@ Operate NaraFrame through its public CLI and authoritative project files. Keep t
 
 ## Workflow
 
-Choose the engine invocation before authoring. If this skill folder has `installation.json`, read it and use `node "<this-skill-folder>/scripts/naraframe.mjs"` from the episode's working directory. The launcher verifies the recorded engine/version before forwarding argv; engine resources such as `library/` and `starter/` live under the receipt's absolute `resourceRoot`. It does not modify PATH or host permissions. Read [installation.md](installation.md) for install/update and troubleshooting.
+Choose the engine route before authoring, in this order. Scripts live in this skill's folder: `<this-skill-folder>` below is `${CLAUDE_SKILL_DIR}` for a Claude Code plugin skill and the folder holding this SKILL.md otherwise. Never write into that folder; it may be a read-only cache.
 
-For an uninstalled source checkout, run from its root with `pnpm naraframe`. Activate its pinned Node and pnpm versions in `.node-version` and `packageManager`; installed engine use needs the pinned Node/runtime tools, not a pnpm development checkout. If the runtime is unavailable, report a system blocker; do not rewrite dependencies. In every guide below, substitute the selected invocation for `pnpm naraframe` and resolve bundled catalog/example paths from `resourceRoot` or the skill folder, not the episode's cwd.
+1. **Launcher.** Run `node "<this-skill-folder>/scripts/naraframe.mjs" doctor --json` from the episode's working directory. The launcher finds the engine without a global command: with an `installation.json` receipt next to it (an explicit installer run) it uses and verifies the recorded engine; otherwise it uses `$NARAFRAME_HOME/engine/<version>` for the version in `engine.json`, with `NARAFRAME_HOME` defaulting to `~/.naraframe`. It checks the engine's version and API before forwarding argv and does not modify PATH or host permissions. Engine resources such as `library/` and `starter/` live under `resourceRoot` from `version --json`.
+2. **Built source checkout.** Run from its root with `pnpm naraframe`, with the pinned Node and pnpm from `.node-version` and `packageManager`. Do not rewrite dependencies; if the runtime is unavailable, report a system blocker.
+3. **No engine.** The launcher fails and there is no checkout, as in a skill folder copied from GitHub or installed from a plugin. Follow *No engine* below.
+
+A route counts only if `doctor --json` through it returns a result. A launcher failure is one line, `CODE: message. Next: …`: treat it as "no engine for now" and do its `Next` step or report it; do not retry or work around it. Read [installation.md](installation.md) for install, update and troubleshooting. In every guide below, substitute the selected invocation for `pnpm naraframe` and resolve bundled catalog/example paths from `resourceRoot` or the skill folder, not the episode's cwd.
+
+### No engine
+
+Without an engine nothing can be validated or rendered. Do not write episode source until one is installed. The user should not have to read documentation first.
+
+1. Run `node "<this-skill-folder>/scripts/setup-engine.mjs" --check --json`. It only reads: prerequisites (Node 24.20.0, npm, Chrome or Chromium, FFmpeg/FFprobe, a font), the planned engine folder and size.
+2. Send **one** plain message and wait for a yes. Say what NaraFrame needs ("a local engine that checks and renders your video"), what will be installed (`naraframe@<version>` from npm into `plan.engineDir`, by default `~/.naraframe/engine/<version>`), roughly how big and how long (`plan.approximateDiskMB`, usually under a minute on a normal connection), and which tools from `missingPrerequisites` are absent with the command for each. Say that nothing else on the computer changes. Install and download nothing before the yes. That yes does not cover provider calls, recipe trust, final export or publishing.
+3. After the yes, run the listed prerequisite commands, then `node "<this-skill-folder>/scripts/setup-engine.mjs" --json`. It writes only under `NARAFRAME_HOME`, never into the skill folder.
+4. Read the result. `ready: true` means the engine is installed and `doctor` is green through the launcher: continue with the user's request. Exit 3 means installed but a tool is still missing: install it, then rerun with `--check --json`. A failure line names its own next step.
+5. If the user says no, offer a **director-only plan** only if they want to continue. Write it as a plain document, never as engine source: audience and takeaway; a shot rundown with one explanatory object per beat; on-screen text and caption choices; claims that need sources; timing intent. Mark it "not validated, not rendered" and create no `scenes.json`, `naraframe.json` or other file the engine reads, because an unvalidated source looks finished when it is not. Once an engine exists, the plan is the brief for a normal project.
+
+### With an engine
 
 1. Run `pnpm naraframe doctor --json`. Resolve every structured system issue before previewing; `doctor` performs no download or render.
 2. Run `pnpm naraframe schema --json` and use the returned schemas when creating or repairing source. Save the large result to a local file and inspect the relevant schema/capability entries rather than repeatedly loading the entire output into context. Do not reproduce schema definitions in this skill.

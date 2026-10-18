@@ -29,13 +29,19 @@ const out = resolve(flags[1]);
 const PACKAGE_VERSION = "0.1.0";
 const REPOSITORY = "https://github.com/fatlhr/NaraFrame";
 const INTERNAL = ["@naraframe/core", "@naraframe/renderer-remotion"];
+const json = async (path) => JSON.parse(await readFile(path, "utf8"));
+// The skill names the engine release it was written for; keep it in step.
+const declared = await json(join(root, "skills/naraframe/engine.json"));
+if (declared.version !== PACKAGE_VERSION)
+  throw new Error(
+    `skills/naraframe/engine.json names ${declared.version}, but this package is ${PACKAGE_VERSION}.`,
+  );
 await mkdir(out, { recursive: true });
 const stage = await mkdtemp(join(tmpdir(), "naraframe-pack-"));
 const target = join(stage, "package");
 await mkdir(target);
 const inventory = [];
 const installed = new Map();
-const json = async (path) => JSON.parse(await readFile(path, "utf8"));
 const save = async (path, value) =>
   writeFile(path, `${JSON.stringify(value, null, 2)}\n`);
 // Capture only a package's own published files; dependencies are traversed separately.
@@ -319,6 +325,74 @@ const resources = [
   "library/series/study-notes: repository-authored declarative templates and example values; no audio",
   "starter: neutral authored data, no media or fonts",
 ];
+// Pin the whole third-party tree. npm resolves it from the public registry now,
+// in a scratch directory that holds only the third-party pins: given the bundled
+// packages it would mark every dependency of theirs as bundled, and an install
+// would then skip fetching them. The bundled packages are added afterwards the
+// way npm records them (inBundle, no registry location).
+const writeShrinkwrap = async () => {
+  const directory = join(stage, "shrinkwrap");
+  await mkdir(directory);
+  const manifest = await json(join(target, "package.json"));
+  await save(join(directory, "package.json"), {
+    name: manifest.name,
+    version: manifest.version,
+    license: manifest.license,
+    dependencies: Object.fromEntries(thirdParty),
+  });
+  try {
+    execFileSync(
+      "npm",
+      [
+        "install",
+        "--package-lock-only",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "--registry",
+        "https://registry.npmjs.org/",
+        "--cache",
+        join(stage, "npm-cache"),
+      ],
+      { cwd: directory, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+    );
+  } catch (error) {
+    throw new Error(
+      `Could not resolve the dependency tree from the npm registry (network access is needed to pack the npm package): ${error.stderr ?? error.message}`,
+    );
+  }
+  const lock = await json(join(directory, "package-lock.json"));
+  const packages = { ...lock.packages };
+  for (const name of INTERNAL) {
+    const bundled = await json(
+      join(target, "node_modules", name, "package.json"),
+    );
+    packages[`node_modules/${name}`] = {
+      version: bundled.version,
+      inBundle: true,
+      license: bundled.license,
+      dependencies: bundled.dependencies,
+    };
+  }
+  packages[""] = {
+    name: manifest.name,
+    version: manifest.version,
+    bundleDependencies: manifest.bundleDependencies,
+    license: manifest.license,
+    dependencies: manifest.dependencies,
+    bin: manifest.bin,
+    engines: manifest.engines,
+  };
+  await save(join(target, "npm-shrinkwrap.json"), {
+    name: manifest.name,
+    version: manifest.version,
+    lockfileVersion: lock.lockfileVersion,
+    requires: true,
+    packages: Object.fromEntries(
+      Object.entries(packages).sort(([a], [b]) => a.localeCompare(b, "en")),
+    ),
+  });
+};
 if (registry) {
   const dependencies = {
     ...Object.fromEntries(INTERNAL.map((name) => [name, PACKAGE_VERSION])),
@@ -345,6 +419,7 @@ if (registry) {
       "LICENSE",
       "THIRD-PARTY-NOTICES.md",
       "distribution-rights.json",
+      "npm-shrinkwrap.json",
     ],
     dependencies,
     bundleDependencies: INTERNAL,
@@ -352,6 +427,7 @@ if (registry) {
     homepage: `${REPOSITORY}#readme`,
     bugs: { url: `${REPOSITORY}/issues` },
   });
+  await writeShrinkwrap();
   await save(join(target, "distribution-rights.json"), {
     status: "mit-code-third-party-separate",
     code: "MIT (LICENSE); covers NaraFrame's own code and the resources listed below",
