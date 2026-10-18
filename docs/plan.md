@@ -830,11 +830,78 @@ Their final frames replace the README placeholders.
   - The work moved from uncommitted `main` to `b7-skill-restructure`.
   - Separately, `main` failed Biome because B6e's `flow.svg` had no `<title>`. It was added after B6e's last verify, which was a supervisor mistake. The fix, with a title that matches the five-step image, ships as its own hotfix PR rather than inside PR1.
   - `pnpm verify` exit 0 on the branch (Biome 248, unit 377/377, integration 529/529).
+- **PR1 integrated:** PR #49, squash-merged as `1359b32` after the hotfix PR #48 (`298a5c3`).
+- **PR1 fresh-agent measurement (2026-10-18, supervisor):**
+  - **Setup:** fresh Sonnet subagents with read-only `git archive` copies of the old skill (`24804e8`, 44,019 B) and the new router (`1359b32`, 14,422 B), a scratch HOME and NARAFRAME_HOME, and an engine installed by `setup-engine.mjs --source` from a fresh `pnpm pack:npm` (18 s).
+    - Skill tree hashes were unchanged afterwards, and the real `~/.naraframe` stayed absent.
+    - The vendored `pack-pr1` tarball is rejected by `setup-engine` (`SETUP_ENGINE_INVALID`); only the registry pack installs.
+  - **A/B revision test:** same request as B6e on two copies of `es-mengapung`, run one after the other.
+
+    | | Old skill | New router |
+    | --- | --- | --- |
+    | Final context | 100,420 tokens | 92,856 tokens (−7.5%) |
+    | Input summed over turns | 900,526 | 724,823 (−19.5%) |
+    | Time | 108.4 s | 93.4 s |
+    | Tool calls | 10 | 10 |
+
+    - The B6e baseline was 101,777 tokens / 127.9 s / 14 tool calls.
+    - Both used `doctor`, `status`, one `edit` (3 of 4 scenes reused), `validate` and `preview --draft`. Both drafts had 600 frames and 0 integrity outliers.
+    - The new arm read `revisions.md` and `export.md` and skipped `authoring.md`.
+    - The harness's own context is 64,292 tokens before any skill read, so the skill-dependent share fell by about 21%.
+    - Evidence: `work/m4-followups/b7/runs/pr1-ab/`.
+  - **Onboarding, one-off (sky):**
+    - First reply at 26.5 s: the Start-here points, "engine already installed", and only the one-off/series question.
+    - After "one-off": `general-explainer`, then `create`, then `schema --json`, then one `SCHEMA_INVALID` fix.
+    - Draft `8f643206bb03-85089f56-f02`: 38 s, 1140 frames, 0 outliers. 113,895 tokens, 15 tool calls.
+    - The sources question was deferred until after the draft.
+  - **Onboarding, series (weekly science account):**
+    - The agent took "mingguan" as a series and asked for name, colours and language instead of asking the one-off question.
+    - It ran `profile new` (it said which hex values it picked) and filled `direction.md` before `create`.
+    - One `SCHEMA_INVALID` fix and one `edit`. Draft `0543a9866ffb-2e60f626-4e2`: 30 s, 900 frames, 0 outliers. 135,695 tokens, 24 tool calls. It ended with the one-time sources question.
+    - The supervisor viewed all three new storyboards. Evidence: `work/m4-followups/b7/runs/pr1-onboarding/`.
+  - **For PR2:** both onboarding agents dumped `schema --json` and failed their first `validate` on missing or unknown fields, which is what `create --template starter` targets.
 - **PR2 — engine aids (`b7-engine-aids`):**
   - `outline [project] [--json]`, read-only: plan load only; invalid → exit 1 with issues; valid → `data.outline` with project (including `currentRevision`), each scene's ids, duration, role, transition, camera, narration anchor, claims, note, layer ids with text and frame, and beat ids with timings and params, narration blocks with phrases (word lists excluded), captions mode and asset ids/kinds. Human output: one project line and one line per scene.
   - `create <name> --profile <p> --template starter [--json]`: one built-in template value now (`starter`); an unknown value is a usage error listing the supported names. The content is a typed core constant: three claim-free scenes (~26 s total, inside both built-in profiles' 15–30 s), palette tokens only, no bindings or narration, with notes that teach the structure.
   - Skill diff: the revision route starts from `outline`; the authoring route offers `create --template starter`.
   - Acceptance: the A/B revision test with `outline` and the onboarding scenario with `--template` (no 150 KB schema dump); gates green.
+- **PR2 implementation and review (2026-10-18):**
+  - **`outline [project] [--scene <id>] [--json]`:**
+    - It is read-only and loads only the plan. It is built by the pure `buildOutline` and `narrowOutlineToScene` in `packages/core/src/project/outline.ts`.
+    - `currentRevision` equals `status` and `validate`'s `sourceRevision`; the supervisor checked this on a scratch `es-mengapung`.
+    - `--scene` keeps one scene in full, with only the narration blocks and assets it uses. An unknown id gives `SCENE_NOT_FOUND`, as `preview --scene` does.
+    - Human output is one line per scene, plus one line per layer and per beat with `--scene`.
+  - **`create --template starter`:**
+    - It is a typed core constant (`templates.ts`): hook, explanation and payoff scenes, 25,500 ms, palette tokens only, no assets, narration or recipes, and a `cut` on the last scene.
+    - It validates with zero issues under `general-explainer`. Under `current-issues` the only issue is the info `CLAIMS_UNLABELLED`.
+    - An unknown or missing value is a usage error that lists `starter`.
+  - **Supervisor changes:**
+    - The template carries no `carriesFactualClaim` label, so agents are never shown a `false` to copy; the engine treats an absent label as no claim.
+    - `outline --scene` was added after measurement showed the full JSON outline costs more than it saves.
+    - `authoring.md` now says the starter is text only and that each scene needs its drawn object.
+  - **Skill:**
+    - The revision route is `status`, then human `outline`, then `outline --scene <id> --json`, then a targeted `jq` staged copy, then `edit`.
+    - The authoring route starts from `--template starter`.
+    - `SKILL.md` is 14,610 B with `outline [--scene <id>]` on the allowlist.
+  - **Gates:**
+    - `pnpm verify` exit 0, run by the supervisor before the `--scene` change (Biome 253, unit 380/380, integration 544/544) and by the executor after it (unit 383/383, integration 547/547).
+    - After the final wording edit: Biome clean, skill and template tests green.
+    - One earlier run had a one-off failure in `recipe-project.test.ts`, where one of three concurrent trust appends was lost. It was raised as a separate task and is not in this PR.
+  - **Measurements** (`work/m4-followups/b7/runs/pr2/`), same revision request:
+
+    | Run | Final context | Time | Tool calls |
+    | --- | --- | --- | --- |
+    | Old skill | 100,420 tokens | 108.4 s | 10 |
+    | PR1 router | 92,856 tokens | 93.4 s | 10 |
+    | PR2, full `outline --json` | 97,247 tokens | 118.0 s | 12 |
+    | PR2, `outline` + `--scene` | 90,534 tokens | 106.4 s | 10 |
+
+    - Draft `7136a9e093a8-524661c6-796`: 600 frames, 0 outliers.
+    - The token saving is the router's. `outline --scene` keeps the route explicit at no extra cost.
+  - **Onboarding with `--template`:**
+    - No schema dump, and the first `validate` had no errors. The sources question was asked once before the preview.
+    - Draft `c03a4489c365-598d43c2-b87`: 25.5 s, 765 frames, 0 outliers. About 109k tokens, 16 tool calls.
+    - The video came out as a text-only slideshow, which led to the `authoring.md` sentence above.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 

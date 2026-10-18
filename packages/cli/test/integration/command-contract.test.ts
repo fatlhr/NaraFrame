@@ -404,6 +404,18 @@ describe("public CLI command contract", () => {
     });
 
     vi.restoreAllMocks();
+    const outline = await captureJsonResult(["outline", sampleRoot, "--json"]);
+    expect(outline.exitCode).toBe(0);
+    expect(outline.events).toHaveLength(1);
+    expect(outline.events[0]).toMatchObject({
+      schemaVersion: 1,
+      type: "command-result",
+      command: "outline",
+      success: true,
+      data: { outline: { project: { id: expect.any(String) } } },
+    });
+
+    vi.restoreAllMocks();
     const validation = await captureJsonResult([
       "validate",
       sampleRoot,
@@ -480,6 +492,7 @@ describe("public CLI command contract", () => {
   it.each([
     ["doctor", "--json"],
     ["status", sampleRoot, "--json"],
+    ["outline", sampleRoot, "--json"],
     ["validate", sampleRoot, "--stage", "plan", "--json"],
   ])(
     "emits an interrupted public JSON result when SIGINT arrives during %s",

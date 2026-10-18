@@ -191,6 +191,21 @@ export {
   createProject,
 } from "./project/create-project.js";
 export {
+  buildOutline,
+  narrowOutlineToScene,
+  type Outline,
+  type OutlineBeat,
+  type OutlineLayer,
+  type OutlineNarrationBlock,
+  type OutlineScene,
+} from "./project/outline.js";
+export {
+  isProjectTemplateName,
+  PROJECT_TEMPLATE_NAMES,
+  type ProjectTemplateName,
+  projectTemplateScenes,
+} from "./project/templates.js";
+export {
   pngSize,
   RECIPE_ALLOWED_MODULES,
   recipeCodeHash,
