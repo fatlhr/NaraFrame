@@ -1,6 +1,6 @@
 ---
 name: naraframe
-description: Use when creating, validating, previewing, resuming, or revising a NaraFrame motion explainer project.
+description: Use when the user wants to make, revise, preview or export a short vertical explainer video (for example an episode of a recurring social media series), wants a consistent look across a video series, or is working on a NaraFrame project.
 ---
 
 # NaraFrame

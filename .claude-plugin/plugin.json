@@ -1,0 +1,21 @@
+{
+  "name": "naraframe",
+  "displayName": "NaraFrame",
+  "version": "0.1.0",
+  "description": "Make vertical explainer videos for a recurring series on your own computer. A profile keeps every episode's look, type and sourcing rules consistent; each episode goes from preview to your approval to an export of exactly what you approved, and unchanged work is reused.",
+  "author": {
+    "name": "Fatiha Rahmat",
+    "url": "https://github.com/fatlhr"
+  },
+  "homepage": "https://github.com/fatlhr/NaraFrame",
+  "repository": "https://github.com/fatlhr/NaraFrame",
+  "license": "MIT",
+  "keywords": [
+    "video",
+    "explainer",
+    "vertical-video",
+    "motion-graphics",
+    "series",
+    "agent-skill"
+  ]
+}
