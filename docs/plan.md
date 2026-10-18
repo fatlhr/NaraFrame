@@ -752,6 +752,30 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   - There is no minimal first-scene template for a new profile or language.
   - Colours outside the palette, such as a blue for water, need literal hex values and are not repainted on a profile switch.
 
+**B6d model — one-line skill installation on every common route.**
+- **Claude Code plugin:** `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` at the repository root, with plugin and marketplace both named `naraframe` and source `./`. The existing `skills/naraframe/SKILL.md` is discovered by the default `skills/` scan.
+  - Install: `/plugin marketplace add fatlhr/NaraFrame`, then `/plugin install naraframe@naraframe`; the skill is invoked as `/naraframe:naraframe`.
+  - The plugin version follows the engine version in `skills/naraframe/engine.json`, and a test keeps them equal.
+  - License MIT, author Fatiha Rahmat, description in NaraFrame's own words.
+- **`npx skills add` and Codex:** the repository layout (`skills/<name>/SKILL.md` with `name` and `description` frontmatter) is what these tools scan. Codex reads skills from `.agents/skills` (project) or `~/.agents/skills` (user).
+- **Other agents and plain chat:** copy `skills/naraframe` and point the agent's instructions at its `SKILL.md`. Because the skill writes nothing into its own folder, any copy works.
+- **Acceptance:**
+  1. `claude plugin validate` passes on the repository.
+  2. A marketplace added from the local checkout installs the plugin into an isolated Claude config directory (never the owner's real one), with the skill present in the plugin cache.
+  3. A test checks the manifest fields, the version match, the skill frontmatter and that no excluded material (work, fixtures with private media) is required.
+  4. Real GitHub-based installs and `npx skills add` are verified after the repository is public; they are not run before, because executing a third-party installer is outside the agent's allowed actions.
+- The user-facing installation table is written in the public README (B6e).
+
+**B6d evidence — 2026-10-18 (branch `b6d-distribution-channels`; owner-approved and integrated through its own PR):**
+- **Manifests:** `.claude-plugin/plugin.json` and `marketplace.json` both pass `claude plugin validate` (Claude Code 2.1.289). Plugin and marketplace are named `naraframe`, the source is `./`, version 0.1.0 matches `engine.json`, licence MIT, author Fatiha Rahmat, and the copy names no other products.
+- **Isolated install** (`CLAUDE_CONFIG_DIR` in the scratchpad; the owner's `~/.claude` was untouched):
+  - A marketplace added from a clean `git clone` installed `naraframe@naraframe` into a 6.6 MB cache with exactly one `SKILL.md`. `claude plugin details` reports one skill, `naraframe`, at about 31 always-on tokens.
+  - Finding: a marketplace added from a raw working directory copies untracked files too (16 GB here, deleted afterwards). Real GitHub installs clone tracked files only, and contributors testing locally should add a clean clone.
+- **Skill trigger:** the frontmatter description now matches ordinary requests ("make … a short vertical explainer video … recurring social media series … consistent look across a video series") instead of naming NaraFrame only.
+- **Tests:** `plugin-manifest.test.ts` (3) checks the marketplace entry, version equality with `engine.json`, and the skill frontmatter.
+- **Gates:** `pnpm verify` exit 0 (Biome 246, unit 373/373, integration 529/529). No render change.
+- **Not run before publication:** `/plugin marketplace add fatlhr/NaraFrame` from GitHub (the repository is private) and `npx skills add` (it executes a third-party installer, which the agent does not run). The layout matches what both document. Codex uses `.agents/skills`; the shipped installer's `--host codex` route was verified in M4.5.3.
+
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
 Each needs its own demand/evidence and authorization. None is automatically a new task just because M4 is documented.

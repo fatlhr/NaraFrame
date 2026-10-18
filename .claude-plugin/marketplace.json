@@ -1,0 +1,24 @@
+{
+  "name": "naraframe",
+  "description": "NaraFrame: vertical explainer videos for a recurring series, made on your own computer.",
+  "owner": {
+    "name": "Fatiha Rahmat",
+    "url": "https://github.com/fatlhr"
+  },
+  "plugins": [
+    {
+      "name": "naraframe",
+      "source": "./",
+      "displayName": "NaraFrame",
+      "description": "Make vertical explainer videos for a recurring series on your own computer, with a consistent look per series, a preview-approve-export flow and reuse of unchanged work.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Fatiha Rahmat",
+        "url": "https://github.com/fatlhr"
+      },
+      "homepage": "https://github.com/fatlhr/NaraFrame",
+      "license": "MIT",
+      "keywords": ["video", "explainer", "vertical-video", "series"]
+    }
+  ]
+}
