@@ -225,6 +225,7 @@ const assertPublishedBuild = async (
     "frames.json",
     "preview.mp4",
     "report.json",
+    "storyboard.png",
   ]);
   for (const record of Object.values(build.manifest.artifacts)) {
     const artifactPath = join(build.buildDirectory, record.path);

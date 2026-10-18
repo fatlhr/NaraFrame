@@ -35,6 +35,7 @@ import {
   promotePreviewBuild,
   publishPreviewBuild,
   selectCheckedFrames,
+  storyboardLayoutFor,
   withPublishedOutputPath,
 } from "../../src/preview-build.js";
 
@@ -109,6 +110,23 @@ const contactSheetProbe = async (): Promise<Record<string, unknown>> => {
   };
 };
 const contactSheetDecode = async (): Promise<void> => undefined;
+/** Answers for whichever sheet is asked about, by file name. */
+const sheetProbe = async (path: string): Promise<Record<string, unknown>> => {
+  const count = selectCheckedFrames(draft, []).length;
+  const layout = path.endsWith("storyboard.png")
+    ? storyboardLayoutFor(count)
+    : contactSheetLayoutFor(count);
+  return {
+    streams: [
+      {
+        codec_type: "video",
+        codec_name: "png",
+        width: layout.width,
+        height: layout.height,
+      },
+    ],
+  };
+};
 
 const createStagedBuild = async (
   root: string,
@@ -123,7 +141,10 @@ const createStagedBuild = async (
     | "missing-coverage"
     | "mixed-runtime"
     | "label-audio-mismatch"
-    | "mixed-timestamps" = "valid",
+    | "mixed-timestamps"
+    | "with-storyboard"
+    | "storyboard-tampered"
+    | "storyboard-wrong-size" = "valid",
   audio: {
     draft?: CompiledDraft;
     render?: { audio: "none" | "aac"; muted: boolean };
@@ -209,6 +230,17 @@ const createStagedBuild = async (
     frames: checkedFrames,
   });
   const report = json(metadata);
+  const storyboardLayout = storyboardLayoutFor(checkedFrames.length);
+  const storyboard = validPng(
+    variant === "storyboard-wrong-size" ? 10 : storyboardLayout.width,
+    variant === "storyboard-wrong-size" ? 10 : storyboardLayout.height,
+  );
+  const hasStoryboard =
+    variant === "with-storyboard" ||
+    variant === "storyboard-tampered" ||
+    variant === "storyboard-wrong-size";
+  if (hasStoryboard)
+    await writeFile(join(directory, "storyboard.png"), storyboard);
   await writeFile(join(directory, "preview.mp4"), mp4);
   await writeFile(join(directory, "contact-sheet.png"), png);
   await writeFile(join(directory, "frames.json"), frames);
@@ -238,9 +270,18 @@ const createStagedBuild = async (
         "contact-sheet.png": await artifact("contact-sheet.png", "image/png"),
         "frames.json": await artifact("frames.json", "application/json"),
         "report.json": await artifact("report.json", "application/json"),
+        ...(hasStoryboard
+          ? { "storyboard.png": await artifact("storyboard.png", "image/png") }
+          : {}),
       },
     }),
   );
+  if (variant === "storyboard-tampered") {
+    await writeFile(
+      join(directory, "storyboard.png"),
+      Buffer.concat([storyboard, Buffer.from("changed-after-manifest")]),
+    );
+  }
   if (variant === "hash-mismatch") {
     await writeFile(
       join(directory, "contact-sheet.png"),
@@ -761,6 +802,91 @@ describe("atomic preview publication", () => {
     expect(await readFile(join(previewDirectory, "current.json"), "utf8")).toBe(
       previousPointer,
     );
+  });
+
+  it("accepts a storyboard next to the contact sheet, and a build without one", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-storyboard-"));
+    temporaryRoots.push(root);
+    const outputRoots = await preparePreviewOutputRoots(root);
+    for (const [buildId, variant] of [
+      ["with-storyboard", "with-storyboard"],
+      ["older-build", "valid"],
+    ] as const) {
+      const published = await promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(root, buildId, variant),
+        previewDirectory: outputRoots.preview,
+        buildId,
+        draft,
+        probe,
+        decode,
+        contactSheetProbe: sheetProbe,
+        contactSheetDecode,
+      });
+      const manifest = JSON.parse(
+        await readFile(join(published.buildDirectory, "manifest.json"), "utf8"),
+      );
+      expect("storyboard.png" in manifest.artifacts).toBe(
+        variant === "with-storyboard",
+      );
+      // The contact sheet keeps its own layout either way.
+      expect(manifest.contactSheet.columns).toBe(3);
+      expect(manifest.contactSheet.cellWidth).toBe(164);
+    }
+  });
+
+  it("rejects a storyboard that no longer matches its record or its layout", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-preview-storyboard-"));
+    temporaryRoots.push(root);
+    const previewDirectory = join(root, "preview");
+    await mkdir(join(previewDirectory, "builds"), { recursive: true });
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(
+          root,
+          "tampered",
+          "storyboard-tampered",
+        ),
+        previewDirectory,
+        buildId: "tampered",
+        draft,
+        probe,
+        decode,
+        contactSheetProbe: sheetProbe,
+        contactSheetDecode,
+      }),
+    ).rejects.toThrow("storyboard.png failed its declared size/hash");
+    await expect(
+      promotePreviewBuild({
+        stagedBuildDirectory: await createStagedBuild(
+          root,
+          "wrong-size",
+          "storyboard-wrong-size",
+        ),
+        previewDirectory,
+        buildId: "wrong-size",
+        draft,
+        probe,
+        decode,
+        contactSheetProbe: async () => ({
+          streams: [
+            { codec_type: "video", codec_name: "png", width: 1, height: 1 },
+          ],
+        }),
+        contactSheetDecode,
+      }),
+    ).rejects.toThrow(/does not match the expected PNG layout/);
+  });
+
+  it("lays the storyboard out in four columns of half-size frames", () => {
+    expect(storyboardLayoutFor(14)).toMatchObject({
+      columns: 4,
+      rows: 4,
+      cellWidth: 270,
+      cellHeight: 504,
+      width: 4 * 270 + 3 * 12 + 24,
+      height: 4 * 504 + 3 * 12 + 24,
+    });
+    expect(storyboardLayoutFor(2)).toMatchObject({ columns: 2, rows: 1 });
   });
 
   it("rejects output symlinks before any render or external write", async () => {

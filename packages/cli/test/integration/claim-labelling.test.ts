@@ -45,11 +45,14 @@ afterEach(async () => {
 const makeProject = async (
   scene: { carriesFactualClaim?: boolean; sourceIds?: string[] },
   sources?: Array<{ id: string; title: string }>,
+  options: { requireSourcing?: boolean; sourcing?: unknown } = {},
 ): Promise<string> => {
   const root = await mkdtemp(join(tmpdir(), "naraframe-claims-"));
   roots.push(root);
   await mkdir(join(root, "assets"), { recursive: true });
-  const base = narratedSource({ requireSourcing: true });
+  const base = narratedSource({
+    requireSourcing: options.requireSourcing ?? true,
+  });
   const source: PlanSource = {
     ...base,
     profile: {
@@ -68,7 +71,11 @@ const makeProject = async (
   };
   const write = (name: string, value: unknown) =>
     writeFile(join(root, name), JSON.stringify(value, null, 2));
-  await write("naraframe.json", { ...source.project, audioMode: "silent" });
+  await write("naraframe.json", {
+    ...source.project,
+    audioMode: "silent",
+    ...(options.sourcing ? { sourcing: options.sourcing } : {}),
+  });
   await write("profile.lock.json", source.profile);
   await write("scenes.json", source.scenes);
   await write("assets/manifest.json", source.assets);
@@ -117,5 +124,50 @@ describe("validate: claim labelling under a strict profile", () => {
       ).toEqual([expect.objectContaining({ severity: "error" })]);
       expect(issueCodes(event)).not.toContain("CLAIMS_UNLABELLED");
     }
+  });
+});
+
+describe("validate: the owner's no-sources decision", () => {
+  const sourcing = {
+    ownerDecision: "no-sources",
+    decidedBy: "Rina",
+    decidedAt: "2026-10-18T09:30:00+07:00",
+    reason: "A personal explainer.",
+  };
+
+  it("turns the per-claim warning into one info note when the profile does not require sourcing", async () => {
+    const before = await run(
+      "validate",
+      await makeProject({ carriesFactualClaim: true }, undefined, {
+        requireSourcing: false,
+      }),
+      "--stage",
+      "plan",
+    );
+    expect(issueCodes(before.event)).toContain("SOURCE_MISSING");
+    const after = await run(
+      "validate",
+      await makeProject({ carriesFactualClaim: true }, undefined, {
+        requireSourcing: false,
+        sourcing,
+      }),
+      "--stage",
+      "plan",
+    );
+    expect(after.exitCode).toBe(0);
+    expect(issueCodes(after.event)).not.toContain("SOURCE_MISSING");
+    expect(issueCodes(after.event)).toContain("SOURCES_WAIVED");
+  });
+
+  it("does not relax a profile that requires sourcing", async () => {
+    const result = await run(
+      "validate",
+      await makeProject({ carriesFactualClaim: true }, undefined, { sourcing }),
+      "--stage",
+      "plan",
+    );
+    expect(result.exitCode).toBe(1);
+    expect(issueCodes(result.event)).toContain("SOURCE_MISSING");
+    expect(issueCodes(result.event)).not.toContain("SOURCES_WAIVED");
   });
 });

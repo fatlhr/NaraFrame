@@ -166,6 +166,17 @@ export {
   checkBrandBindings,
   planBrandBindings,
 } from "./profile/brand-bindings.js";
+export {
+  listProfiles,
+  type ProfileListing,
+  profileSummary,
+} from "./profile/list.js";
+export {
+  createSeriesProfile,
+  type NewProfile,
+  type NewProfileOptions,
+  seriesIdFromName,
+} from "./profile/new.js";
 export type {
   LiteralColorLayer,
   PaletteBoundLayer,

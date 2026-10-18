@@ -219,7 +219,7 @@ if (registry) {
   for (const name of INTERNAL)
     await capture(join(root, "packages", name.split("/")[1]), name);
 for (const path of [
-  "profiles/current-issues",
+  "profiles",
   "library",
   "starter/README.md",
   "starter/RIGHTS.json",
@@ -321,6 +321,7 @@ await save(join(demo, "scenes.json"), {
 });
 const resources = [
   "profiles/current-issues: repository-authored data, system font names only",
+  "profiles/general-explainer: repository-authored data, system font names only (no font, image or audio files)",
   "library/starter: repository-authored technical schematic PNGs, internal example use",
   "library/series/study-notes: repository-authored declarative templates and example values; no audio",
   "starter: neutral authored data, no media or fonts",

@@ -91,15 +91,7 @@
     "preferredMinMs": 15000,
     "preferredMaxMs": 60000
   },
-  "lockedPaths": [
-    "format.design",
-    "format.draft",
-    "render.safeZone"
-  ],
-  "overridablePaths": [
-    "render.palette",
-    "render.motion",
-    "render.captions"
-  ],
+  "lockedPaths": ["format.design", "format.draft", "render.safeZone"],
+  "overridablePaths": ["render.palette", "render.motion", "render.captions"],
   "assets": []
 }

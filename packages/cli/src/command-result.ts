@@ -68,7 +68,7 @@ export const usageIssue = (message: string): Issue => ({
   path: "/arguments",
   message,
   suggestion:
-    "Use one of the advertised M0 commands and options shown in the usage output.",
+    "Check the command name and its options against the usage list that `naraframe` prints when run without arguments.",
 });
 
 export const interruptedIssue = (): Issue => ({

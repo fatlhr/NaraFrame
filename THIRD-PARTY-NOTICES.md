@@ -1,6 +1,6 @@
 # Third-party notices
 
-NaraFrame's own code is licensed under the MIT licence in [LICENSE](LICENSE). That licence covers only NaraFrame's code and the starter resources authored in this repository (the `current-issues` profile, the library, the starter and the skill). It does not cover the packages below, and it does not change their terms. This file states facts about those terms; it is not legal advice. Read each licence yourself, or ask a lawyer, if your situation is unclear.
+NaraFrame's own code is licensed under the MIT licence in [LICENSE](LICENSE). That licence covers only NaraFrame's code and the starter resources authored in this repository (the `current-issues` and `general-explainer` profiles, the library, the starter and the skill). It does not cover the packages below, and it does not change their terms. This file states facts about those terms; it is not legal advice. Read each licence yourself, or ask a lawyer, if your situation is unclear.
 
 The published `naraframe` package does not contain any third-party package code. npm installs the packages below from the public registry when you install `naraframe`, each under its own licence.
 

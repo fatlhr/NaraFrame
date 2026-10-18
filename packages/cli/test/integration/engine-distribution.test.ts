@@ -92,6 +92,25 @@ describe("offline engine distribution", () => {
       "current-issues",
     );
   });
+  it("lists the installed built-in profiles and creates a project from the neutral one", () => {
+    const listed = invoke("profile", "list").data.profiles as Array<{
+      id: string;
+      path: string;
+    }>;
+    expect(listed.map((profile) => profile.id)).toEqual([
+      "current-issues",
+      "general-explainer",
+    ]);
+    for (const profile of listed)
+      expect(profile.path).toBe(join(engine, "profiles", profile.id));
+    expect(invoke("profile", "inspect", "general-explainer").success).toBe(
+      true,
+    );
+    const project = join(scratch, "one-off video");
+    expect(
+      invoke("create", project, "--profile", "general-explainer").success,
+    ).toBe(true);
+  });
   it("binds runtime/resources independently of version and refuses extra version arguments", async () => {
     const before = invoke("version").data.engineIdentity;
     expect(before).toMatch(/^[0-9a-f]{64}$/);
@@ -183,6 +202,11 @@ describe("offline engine distribution", () => {
     expect(rights.code).toContain("MIT");
     expect(rights.code).not.toContain("UNLICENSED");
     expect(rights.packages.length).toBeGreaterThan(0);
+    expect(rights.resources).toContainEqual(
+      expect.stringMatching(
+        /^profiles\/general-explainer: .*system font names/,
+      ),
+    );
     const entries = await readdir(engine);
     for (const excluded of [
       "work",

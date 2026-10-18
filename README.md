@@ -273,10 +273,10 @@ pnpm naraframe create ../NaraFrame-projects/new-video --profile current-issues -
 `create` makes a project skeleton for the agent to fill in. The agent then authors scenes and prepares media according to the schema and profile lock. To use a local profile, provide the directory containing its `profile.json`, `direction.md`, and referenced media/font files:
 
 ```sh
-pnpm naraframe profile inspect test-fixtures/profiles/general-explainer --json
+pnpm naraframe profile inspect profiles/general-explainer --json
 ```
 
-The `current-issues` profile is available under `profiles/`. You can also browse example profiles under `test-fixtures/profiles/`. For your own brand, prepare a profile directory with its assets. Include custom profiles and recipes when moving a project to another machine.
+The built-in profiles `current-issues` and `general-explainer` live under `profiles/`; run `naraframe profile list` to see them. For your own brand, prepare a profile directory with its assets. Include custom profiles and recipes when moving a project to another machine.
 
 The agent reads `schema.capabilities` to find the available features before authoring a scene.
 

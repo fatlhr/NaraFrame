@@ -254,6 +254,29 @@ afterEach(async () => {
 });
 
 describe("public CLI command contract", () => {
+  it("words a usage error in plain terms without internal milestone names", async () => {
+    const usage = await captureJsonResult(["--help", "--json"]);
+    expect(usage.exitCode).toBe(3);
+    const issue = (
+      usage.events[0] as { issues: Array<{ code: string; suggestion: string }> }
+    ).issues[0];
+    expect(issue.code).toBe("CLI_USAGE");
+    expect(issue.suggestion).toMatch(/usage list/);
+    expect(JSON.stringify(usage)).not.toMatch(/\bM0\b|advertised/);
+    const plain = await captureJsonResult(["profile", "list", "x", "--json"]);
+    expect(plain.exitCode).toBe(3);
+  });
+
+  it("prints nothing but the result to stderr with --json, and the issues without it", async () => {
+    const json = await captureJsonResult(["profile", "list", "x", "--json"]);
+    expect(json.exitCode).toBe(3);
+    expect(json.stderr).toEqual([]);
+    expect((json.events[0] as { issues: unknown[] }).issues).toHaveLength(1);
+    const text = await captureJsonResult(["profile", "list", "x"]);
+    expect(text.exitCode).toBe(3);
+    expect(text.stderr.join("\n")).toContain("ERROR CLI_USAGE");
+  });
+
   it("recognizes prepared audio staging and exports its passive package schema", async () => {
     const usage = await captureJsonResult(["audio", "stage", "--json"]);
     expect(usage.exitCode).toBe(3);

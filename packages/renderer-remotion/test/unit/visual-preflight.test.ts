@@ -631,6 +631,49 @@ describe("resolveVisualPreflight — panel dead space", () => {
     expect(issues).toHaveLength(1);
   });
 
+  it("leaves a drawn object alone: water with an ice cube across its surface, or a thin line", () => {
+    // A filled rectangle that is the artwork, with a shape only partly over it.
+    expect(
+      deadSpace([
+        shape({
+          id: "water",
+          frame: { x: 88, y: 900, width: 904, height: 600 },
+        }),
+        shape({
+          id: "ice-cube",
+          frame: { x: 700, y: 820, width: 120, height: 120 },
+          zIndex: 1,
+        }),
+      ]),
+    ).toEqual([]);
+    // The same with a shape wholly inside: still a drawing, not a panel.
+    expect(
+      deadSpace([
+        shape({
+          id: "water",
+          frame: { x: 0, y: 900, width: 900, height: 600 },
+        }),
+        shape({
+          id: "cube",
+          frame: { x: 700, y: 950, width: 100, height: 100 },
+          zIndex: 1,
+        }),
+      ]),
+    ).toEqual([]);
+    // A thin rule with a label that only touches it.
+    expect(
+      deadSpace([
+        shape({ id: "rule", frame: { x: 88, y: 700, width: 904, height: 6 } }),
+        text({
+          id: "label",
+          text: "Today",
+          frame: { x: 88, y: 690, width: 200, height: 60 },
+          zIndex: 1,
+        }),
+      ]),
+    ).toEqual([]);
+  });
+
   it("measures a group by the members it holds", () => {
     const issues = deadSpace([
       shape({ id: "panel", frame: { x: 0, y: 0, width: 500, height: 500 } }),

@@ -9,7 +9,7 @@ at render time, and none of it contains per-project executable code.
 | `project-current-issues/` | map, timeline, diagram composition, narration, captions, music, SFX, dated factual sources |
 | `project-general-explainer/` | full-bleed media, a single statistic, a two-panel comparison, layered composition |
 | `profiles/contrast/` | the profile the variant switches to |
-| `profiles/general-explainer/` | the second project's own profile, carrying none of the current-affairs rules |
+| `../profiles/general-explainer/` | the second project's own profile, now a built-in profile, carrying none of the current-affairs rules |
 
 The variant is not committed. It is derived in
 `packages/cli/test/e2e/reference-projects.test.ts` by applying

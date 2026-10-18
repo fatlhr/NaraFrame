@@ -15,6 +15,7 @@ import {
   computeCostReport,
   computeReuse,
   createProject,
+  createSeriesProfile,
   type DraftResolution,
   dedupeIssues,
   editProject,
@@ -22,7 +23,9 @@ import {
   type Issue,
   inspectLibrary,
   type LoadedPlanProject,
+  listProfiles,
   loadPlanProject,
+  type ProfileLock,
   type ProfileReview,
   pendingGeneration,
   planProfileApply,
@@ -71,6 +74,8 @@ import {
 import { readCurrentPreviewStatus } from "./preview-status.js";
 
 export interface RunCliOptions {
+  /** With --json the result is the only output: no summary or progress text. */
+  quiet?: boolean;
   signal?: AbortSignal;
   onPreviewRenameDispatched?: () => void;
 }
@@ -104,6 +109,8 @@ Usage:
   naraframe recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>] [--json]
   naraframe edit <project> --expect <revision> [--from <staging-dir>] [--remove narration.json|captions.json]... [--summary <text>] [--json]
   naraframe history <project> [--limit <n>] [--json]
+  naraframe profile list [--json]
+  naraframe profile new <dir> --from <id-or-path> --name <series name> --background <hex> --accent <hex> [--text <hex>] [--language <text>] [--json]
   naraframe profile inspect <id-or-path> [--json]
   naraframe library inspect <catalog.json> [--json]
   naraframe library stage <project> [--from <catalog.json> --pattern <id> --version <version> --scene <id>] --instance <id> --params <params.json> [--update] [--json]
@@ -749,6 +756,8 @@ const previewCommand = async (
       }),
     };
   }
+  // Progress stays on stderr even with --json: it is the only sign of a long
+  // render's progress, and stdout carries only the final JSON result.
   console.error(
     `Rendering ${loaded.value.source.project.title}${sceneId ? ` / ${sceneId}` : ""} (${compiled.value.totalFrames} frames)...`,
   );
@@ -797,6 +806,11 @@ const previewCommand = async (
     current: published.currentPointer,
     previewMp4: resolve(published.buildDirectory, "preview.mp4"),
     contactSheetPng: resolve(published.buildDirectory, "contact-sheet.png"),
+    ...(published.storyboard
+      ? {
+          storyboardPng: resolve(published.buildDirectory, "storyboard.png"),
+        }
+      : {}),
     framesJson: resolve(published.buildDirectory, "frames.json"),
     reportJson: resolve(published.buildDirectory, "report.json"),
     manifestJson: resolve(published.buildDirectory, "manifest.json"),
@@ -1333,11 +1347,136 @@ const reviewLines = (review: ProfileReview | undefined): string[] => {
   ];
 };
 
+const profileSummaryOf = (lock: ProfileLock) => ({
+  id: lock.id,
+  version: lock.version,
+  directionSha256: lock.direction.sha256,
+  voiceStyleSignature: lock.production.voiceStyleSignature,
+  illustrationStyleSignature: lock.production.illustrationStyleSignature,
+  duration: lock.duration,
+  audioMode: lock.production.audioMode ?? null,
+  brand: lock.brand ?? null,
+  lockedPaths: lock.lockedPaths,
+  overridablePaths: lock.overridablePaths,
+  assets: lock.assets.map((asset) => ({
+    id: asset.id,
+    kind: asset.kind,
+    ...(asset.role ? { role: asset.role } : {}),
+    sha256: asset.sha256,
+  })),
+});
+
+const profileNewCommand = async (
+  args: readonly string[],
+): Promise<Execution> => {
+  const parsed = parseArguments(
+    args,
+    [],
+    ["--from", "--name", "--background", "--accent", "--text", "--language"],
+  );
+  const get = (flag: string) => parsed.values.get(flag);
+  if (
+    parsed.error ||
+    parsed.positionals.length !== 1 ||
+    !get("--from") ||
+    !get("--name") ||
+    !get("--background") ||
+    !get("--accent")
+  ) {
+    return usageFailure(
+      "profile",
+      parsed.error ??
+        "profile new needs a folder, --from, --name, --background and --accent.",
+    );
+  }
+  const base = resolveProfileArgument(get("--from") ?? "");
+  const destination = resolve(parsed.positionals[0] ?? "");
+  const created = await createSeriesProfile({
+    baseDirectory: base.directory,
+    destination,
+    name: get("--name") ?? "",
+    background: get("--background") ?? "",
+    accent: get("--accent") ?? "",
+    ...(get("--text") ? { text: get("--text") as string } : {}),
+    ...(get("--language") ? { language: get("--language") as string } : {}),
+  });
+  if (!created.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("profile", {
+        status: "failed",
+        success: false,
+        readiness: "not-applicable",
+        issues: created.issues,
+      }),
+    };
+  }
+  const built = await buildProfileLock(created.value.directory, {
+    kind: "local",
+    identity: created.value.id,
+  });
+  if (!built.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("profile", {
+        status: "failed",
+        success: false,
+        readiness: "not-applicable",
+        issues: built.issues,
+      }),
+    };
+  }
+  const { id, palette, derived } = created.value;
+  return {
+    exitCode: 0,
+    event: commonEvent("profile", {
+      artifacts: {
+        profile: resolve(destination, "profile.json"),
+        direction: resolve(destination, "direction.md"),
+      },
+      data: {
+        action: "new",
+        path: destination,
+        palette,
+        derived,
+        profile: profileSummaryOf(built.value.lock),
+      },
+    }),
+    human: [
+      `Created profile ${id}@1.0.0 in ${destination}`,
+      `Colours: background ${palette.background}, panels ${palette.surface}, text ${palette.text}, accent ${palette.accent}`,
+      ...derived.map((line) => `Chosen for you: ${line}`),
+      `Use it with: create <project> --profile ${destination}`,
+      "Fill in direction.md (audience, language, voice) before the first episode.",
+    ],
+  };
+};
+
 const profileCommand = async (args: readonly string[]): Promise<Execution> => {
   const [subcommand, ...rest] = args;
+  if (subcommand === "new") return profileNewCommand(rest);
   const parsed = parseArguments(rest, ["--dry-run", "--reset-overrides"], []);
   const usageText =
-    "profile supports: profile inspect <id-or-path> | profile apply <id-or-path> [project] [--dry-run] [--reset-overrides].";
+    "profile supports: profile list | profile new <dir> --from <id-or-path> --name <series name> --background <hex> --accent <hex> [--text <hex>] | profile inspect <id-or-path> | profile apply <id-or-path> [project] [--dry-run] [--reset-overrides].";
+  if (subcommand === "list") {
+    if (parsed.error || parsed.positionals.length > 0 || parsed.flags.size > 0)
+      return usageFailure("profile", parsed.error ?? usageText);
+    const listed = await listProfiles(resolve(repositoryRoot, "profiles"));
+    const seconds = (ms: number): string => `${Number((ms / 1000).toFixed(1))}`;
+    return {
+      exitCode: 0,
+      event: commonEvent("profile", {
+        issues: listed.issues,
+        data: { action: "list", profiles: listed.profiles },
+      }),
+      human: listed.profiles.length
+        ? listed.profiles.map(
+            (profile) =>
+              `${profile.id}@${profile.version} | ${profile.requireSourcing ? "sources required" : "sources optional"} | ${seconds(profile.preferredDurationMs.min)}-${seconds(profile.preferredDurationMs.max)} s | voice ${profile.voiceStyleSignature} | ${profile.summary}`,
+          )
+        : ["No built-in profiles were found."],
+    };
+  }
   if (
     parsed.error ||
     (subcommand !== "inspect" && subcommand !== "apply") ||
@@ -1362,24 +1501,7 @@ const profileCommand = async (args: readonly string[]): Promise<Execution> => {
     const built = await buildProfileLock(target.directory, target.source);
     if (!built.ok) return failed(built.issues);
     const lock = built.value.lock;
-    const summary = {
-      id: lock.id,
-      version: lock.version,
-      directionSha256: lock.direction.sha256,
-      voiceStyleSignature: lock.production.voiceStyleSignature,
-      illustrationStyleSignature: lock.production.illustrationStyleSignature,
-      duration: lock.duration,
-      audioMode: lock.production.audioMode ?? null,
-      brand: lock.brand ?? null,
-      lockedPaths: lock.lockedPaths,
-      overridablePaths: lock.overridablePaths,
-      assets: lock.assets.map((asset) => ({
-        id: asset.id,
-        kind: asset.kind,
-        ...(asset.role ? { role: asset.role } : {}),
-        sha256: asset.sha256,
-      })),
-    };
+    const summary = profileSummaryOf(lock);
     return {
       exitCode: 0,
       event: commonEvent("profile", {
@@ -1796,6 +1918,7 @@ export const runCommandLine = async (
   let previewRenameDispatched = false;
   const commandOptions: RunCliOptions = {
     ...options,
+    quiet: jsonMode,
     onPreviewRenameDispatched: () => {
       previewRenameDispatched = true;
       options.onPreviewRenameDispatched?.();
@@ -1842,12 +1965,12 @@ export const runCommandLine = async (
     };
   }
 
-  if (execution.event.issues.length > 0) printIssues(execution.event.issues);
   if (jsonMode) {
     process.stdout.write(
       `${JSON.stringify(commandResult(execution.event, startedAt))}\n`,
     );
   } else {
+    if (execution.event.issues.length > 0) printIssues(execution.event.issues);
     if (execution.exitCode === 3) console.error(usage);
     if (execution.humanJson !== undefined) {
       console.log(JSON.stringify(execution.humanJson, null, 2));

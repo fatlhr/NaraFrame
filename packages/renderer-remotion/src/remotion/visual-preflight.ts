@@ -584,10 +584,18 @@ const unionOf = (rectangles: Rectangle[]): Rectangle | null => {
   return { x: left, y: top, width: right - left, height: bottom - top };
 };
 
+const insideRectangle = (inner: Rectangle, outer: Rectangle): boolean =>
+  inner.x >= outer.x - 1 &&
+  inner.y >= outer.y - 1 &&
+  inner.x + inner.width <= outer.x + outer.width + 1 &&
+  inner.y + inner.height <= outer.y + outer.height + 1;
+
 /**
  * Reports a filled panel whose content leaves one side far emptier than a
  * padding would explain. Painted-under layers do not count: an opaque panel
- * hides them.
+ * hides them. Only a backdrop that holds content is a panel: a text or image
+ * layer lying inside it. A drawn object (water, a bar, a line) with shapes
+ * drifting across it is the artwork itself, not a panel to be sized.
  */
 const panelDeadSpace = (
   scene: CompiledDraft["scenes"][number],
@@ -627,6 +635,31 @@ const panelDeadSpace = (
       const rectangle = frameOf(layer);
       return rectangle && overlaps(rectangle, panel.frame) ? [rectangle] : [];
     });
+    const holdsContent = scene.layers.some((layer, index) => {
+      if (index === panelIndex) return false;
+      const contentFrames =
+        layer.type === "group"
+          ? layer.memberIds.flatMap((memberId) => {
+              const member = scene.layers.find(
+                (candidate) => candidate.id === memberId,
+              );
+              return member &&
+                (member.type === "text" || member.type === "image")
+                ? [member.frame]
+                : [];
+            })
+          : layer.type === "text" || layer.type === "image"
+            ? [layer.frame]
+            : [];
+      const higher =
+        (layer.zIndex ?? 0) > (panel.zIndex ?? 0) ||
+        ((layer.zIndex ?? 0) === (panel.zIndex ?? 0) && index > panelIndex);
+      return (
+        higher &&
+        contentFrames.some((frame) => insideRectangle(frame, panel.frame))
+      );
+    });
+    if (!holdsContent) return;
     const content = unionOf(above);
     if (!content) return;
     const worst = panelMargins(panel.frame, content)

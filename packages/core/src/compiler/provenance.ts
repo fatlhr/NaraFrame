@@ -150,7 +150,33 @@ export const checkSourceProvenance = (source: PlanSource): Issue[] => {
     })),
   ];
 
-  issues.push(...checkClaimants(claimants, declared, requireSourcing));
+  const decision = source.project.sourcing;
+  const claimIssues = checkClaimants(claimants, declared, requireSourcing);
+  if (decision && !requireSourcing) {
+    // The owner chose to go without sources: one note replaces the per-claim
+    // warnings. Unknown sources and a profile that requires sourcing are
+    // never touched by it.
+    const waived = claimIssues.filter(
+      (entry) => entry.code === "SOURCE_MISSING",
+    );
+    issues.push(
+      ...claimIssues.filter((entry) => entry.code !== "SOURCE_MISSING"),
+    );
+    if (waived.length > 0) {
+      issues.push(
+        issue(
+          "SOURCES_WAIVED",
+          "info",
+          "naraframe.json",
+          "/sourcing",
+          `${waived.length} labelled ${waived.length === 1 ? "claim cites" : "claims cite"} no source. ${decision.decidedBy} decided on ${decision.decidedAt.slice(0, 10)} to make this project without sources: ${decision.reason}`,
+          "No action needed. Remove `sourcing` from naraframe.json to see each claim again.",
+        ),
+      );
+    }
+  } else {
+    issues.push(...claimIssues);
+  }
 
   // The engine never detects claims: it trusts the labels. A profile that
   // requires sourcing but sees no label would otherwise pass in silence.

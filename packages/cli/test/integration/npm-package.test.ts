@@ -178,11 +178,14 @@ describe("publishable npm package", () => {
       "node_modules/@naraframe/renderer-remotion/package.json",
       "node_modules/@naraframe/renderer-remotion/dist/index.js",
       "profiles/current-issues/profile.json",
+      "profiles/general-explainer/profile.json",
+      "profiles/general-explainer/direction.md",
       "library/starter/catalog.json",
       "starter/README.md",
       "starter/demo/naraframe.json",
       "skills/naraframe/SKILL.md",
       "skills/naraframe/engine.json",
+      "skills/naraframe/examples/director-plan.md",
       "skills/naraframe/scripts/setup-engine.mjs",
       "skills/naraframe/scripts/naraframe.mjs",
       "scripts/install-skill.mjs",
@@ -345,6 +348,12 @@ describe("publishable npm package", () => {
     expect(notice).toMatch(/LICENSE\.md/);
     const rights = await json(join(extracted, "distribution-rights.json"));
     expect(rights.status).toBe("mit-code-third-party-separate");
+    expect(rights.resources).toContainEqual(
+      expect.stringMatching(
+        /^profiles\/general-explainer: .*system font names/,
+      ),
+    );
+    expect(notice).toContain("`general-explainer`");
     expect(Object.keys(rights.dependencies).sort()).toEqual(
       Object.keys(metadata.dependencies)
         .filter((name) => !internal.includes(name))

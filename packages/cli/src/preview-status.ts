@@ -11,6 +11,8 @@ const artifactNames = [
   "report.json",
 ] as const;
 
+const storyboardName = "storyboard.png";
+
 export interface CurrentPreviewStatus {
   state: "absent" | "current" | "stale";
   buildId: string | null;
@@ -163,7 +165,12 @@ export const readCurrentPreviewStatus = async (
       current: safePointer,
       manifestJson: safeManifest,
     };
-    for (const name of artifactNames) {
+    // The storyboard is optional: builds made before it existed lack it.
+    const present = [
+      ...artifactNames,
+      ...(manifest.artifacts[storyboardName] ? [storyboardName] : []),
+    ];
+    for (const name of present) {
       const record = manifest.artifacts[name];
       if (
         !isObject(record) ||
