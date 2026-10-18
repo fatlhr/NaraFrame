@@ -815,17 +815,26 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 
 Their final frames replace the README placeholders.
 
-**B7 (approved direction, 2026-10-18) — skill formula from the reference study:**
-- a lean router `SKILL.md` (target ≤ 15–20 KB) with a first-match state table, where a specific edit to an existing project goes straight to the edit;
-- a cheapest-first verification ladder;
-- job-specific guides loaded on demand;
-- a description that also triggers on revision phrases.
-
-Engine aids:
-- `outline <project> --json`, so revisions stop reading the whole `scenes.json`;
-- `create --template` with a valid starter scene set, so new videos stop exploring the 150 KB schema.
-
-It ships as two PRs, skill restructure and engine aids, each re-measured with the A/B revision test and the onboarding tests.
+**B7 model — skill formula from the reference study (owner-approved 2026-10-18; PR order owner-approved: skill restructure first, engine aids second).**
+- **Reference study** (`bangtutorial/bang-motion`, `heygen-com/hyperframes`): a router skill with a capability map and "use when" tables, job guides loaded on demand, and checks an agent can verify itself. NaraFrame adopts the pattern; the content stays NaraFrame's own.
+- **PR1 — skill restructure (`b7-skill-restructure`):**
+  - `SKILL.md` becomes a router ≤ 20 KB (target 15–18): Start here, a first-match table where a specific edit to an existing project goes straight to the revision route, the engine routes and the one-message no-engine consent, choosing a profile, the cheapest-first verification ladder (validate plan → scoped draft → full draft → inspect → production validate → render), a compact claims/sources summary, the result contract and command allowlist, and the guide index.
+  - New guides loaded on demand: `authoring.md` (creation workflow, production vocabulary, space/camera/timing/poses, claims detail, visual forms and layer mechanics), `revisions.md` (edit/expect/reuse/remove, history/undo, the correction loop, profile switches), `export.md` (preview inspection, scoped previews, resolution, reuse, audio modes and soundtrack, approval and render). Existing guides stay unchanged.
+  - The frontmatter description also triggers on revision phrases.
+  - The old-section → new-home mapping is recorded and every block is verified to land somewhere.
+  - Formula test: SKILL.md ≤ 20 KB, description triggers, every relative link resolves.
+  - Acceptance: the same-day A/B revision test and both onboarding scenarios re-run with the new skill; gates green.
+- **PR1 supervisor review (2026-10-18):**
+  - Router 14.4 KB (from 44.0 KB), the first-match table with the revision route, one-message consent, the ladder, claims summary, allowlist with `history`, and revision-trigger description all match the model. 47/47 error codes of the old skill are present.
+  - One dropped sentence (trusted-recipe dry-run `plan.bindings.recipeParams` states and `recipeCoverage`) was restored in `revisions.md`, and `content-map.md` was corrected.
+  - The work moved from uncommitted `main` to `b7-skill-restructure`.
+  - Separately, `main` failed Biome because B6e's `flow.svg` had no `<title>`. It was added after B6e's last verify, which was a supervisor mistake. The fix, with a title that matches the five-step image, ships as its own hotfix PR rather than inside PR1.
+  - `pnpm verify` exit 0 on the branch (Biome 248, unit 377/377, integration 529/529).
+- **PR2 — engine aids (`b7-engine-aids`):**
+  - `outline [project] [--json]`, read-only: plan load only; invalid → exit 1 with issues; valid → `data.outline` with project (including `currentRevision`), each scene's ids, duration, role, transition, camera, narration anchor, claims, note, layer ids with text and frame, and beat ids with timings and params, narration blocks with phrases (word lists excluded), captions mode and asset ids/kinds. Human output: one project line and one line per scene.
+  - `create <name> --profile <p> --template starter [--json]`: one built-in template value now (`starter`); an unknown value is a usage error listing the supported names. The content is a typed core constant: three claim-free scenes (~26 s total, inside both built-in profiles' 15–30 s), palette tokens only, no bindings or narration, with notes that teach the structure.
+  - Skill diff: the revision route starts from `outline`; the authoring route offers `create --template starter`.
+  - Acceptance: the A/B revision test with `outline` and the onboarding scenario with `--template` (no 150 KB schema dump); gates green.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
