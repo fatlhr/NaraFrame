@@ -36,6 +36,8 @@ export interface CreateProjectOptions {
     kind: "repository" | "local";
     identity: string;
   };
+  /** The first `scenes.json`; an empty project when absent. */
+  scenes?: Scenes;
 }
 
 export interface CreatedProject {
@@ -288,7 +290,7 @@ export const createProject = async (
     safetyMaxDurationMs: 180_000,
   };
   const profileLock = built.value.lock;
-  const scenes: Scenes = { schemaVersion: 1, scenes: [] };
+  const scenes: Scenes = options.scenes ?? { schemaVersion: 1, scenes: [] };
   const manifest: AssetManifest = { schemaVersion: 1, assets: [] };
 
   try {

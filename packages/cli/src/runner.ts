@@ -5,6 +5,7 @@ import {
   type Approval,
   applyProfile,
   brandSummary,
+  buildOutline,
   buildProfileLock,
   type CompiledDraft,
   capabilityRegistry,
@@ -22,13 +23,17 @@ import {
   exportSchemas,
   type Issue,
   inspectLibrary,
+  isProjectTemplateName,
   type LoadedPlanProject,
   listProfiles,
   loadPlanProject,
+  narrowOutlineToScene,
+  PROJECT_TEMPLATE_NAMES,
   type ProfileLock,
   type ProfileReview,
   pendingGeneration,
   planProfileApply,
+  projectTemplateScenes,
   RENDER_ENGINE,
   readApprovals,
   readProductionLedger,
@@ -102,9 +107,10 @@ Usage:
   naraframe version [--json]
   naraframe doctor [--json]
   naraframe schema [--json]
-  naraframe create <name> --profile <id-or-path> [--json]
+  naraframe create <name> --profile <id-or-path> [--template starter] [--json]
   naraframe validate [project] --stage plan|production [--scene <scene-id>] [--json]
   naraframe status [project] [--json]
+  naraframe outline [project] [--scene <scene-id>] [--json]
   naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
   naraframe recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>] [--json]
   naraframe edit <project> --expect <revision> [--from <staging-dir>] [--remove narration.json|captions.json]... [--summary <text>] [--json]
@@ -326,7 +332,8 @@ const resolveProfileArgument = (
 };
 
 const createCommand = async (args: readonly string[]): Promise<Execution> => {
-  const parsed = parseArguments(args, [], ["--profile"]);
+  const parsed = parseArguments(args, [], ["--profile", "--template"]);
+  const templates = PROJECT_TEMPLATE_NAMES.join(", ");
   if (
     parsed.error ||
     parsed.positionals.length !== 1 ||
@@ -334,8 +341,18 @@ const createCommand = async (args: readonly string[]): Promise<Execution> => {
   ) {
     return usageFailure(
       "create",
-      parsed.error ??
-        "create requires exactly one project name and --profile value.",
+      parsed.error
+        ? parsed.error.includes("--template")
+          ? `${parsed.error} Supported templates: ${templates}.`
+          : parsed.error
+        : "create requires exactly one project name and --profile value.",
+    );
+  }
+  const template = parsed.values.get("--template");
+  if (template !== undefined && !isProjectTemplateName(template)) {
+    return usageFailure(
+      "create",
+      `Unknown template "${template}". Supported templates: ${templates}.`,
     );
   }
   const name = parsed.positionals[0] ?? "";
@@ -366,6 +383,9 @@ const createCommand = async (args: readonly string[]): Promise<Execution> => {
         ? (profileArgument.split(/[\\/]/).at(-1) ?? projectId)
         : `profiles/${profileArgument}`,
     },
+    ...(template !== undefined
+      ? { scenes: projectTemplateScenes(template) }
+      : {}),
   });
   if (!created.ok) {
     return {
@@ -391,10 +411,12 @@ const createCommand = async (args: readonly string[]): Promise<Execution> => {
       data: {
         projectRoot: created.value.root,
         files: created.value.files,
+        ...(template !== undefined ? { template } : {}),
       },
     }),
     human: [
       `Created project: ${created.value.root}`,
+      ...(template !== undefined ? [`Template: ${template}`] : []),
       ...created.value.files.map((file) => `  ${file}`),
     ],
   };
@@ -606,6 +628,85 @@ const statusCommand = async (args: readonly string[]): Promise<Execution> => {
               : []),
           ],
         }),
+  };
+};
+
+const outlineCommand = async (args: readonly string[]): Promise<Execution> => {
+  const parsed = parseArguments(args, [], ["--scene"]);
+  if (parsed.error || parsed.positionals.length > 1) {
+    return usageFailure(
+      "outline",
+      parsed.error ?? "outline accepts at most one project path.",
+    );
+  }
+  const loaded = await loadPlanProject(parsed.positionals[0] ?? ".");
+  if (!loaded.ok) {
+    return {
+      exitCode: 1,
+      event: commonEvent("outline", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        issues: loaded.issues,
+      }),
+    };
+  }
+  const sceneId = parsed.values.get("--scene");
+  const full = buildOutline(loaded.value.source);
+  const outline = sceneId ? narrowOutlineToScene(full, sceneId) : full;
+  if (!outline) {
+    return {
+      exitCode: 1,
+      event: commonEvent("outline", {
+        status: "failed",
+        success: false,
+        readiness: "invalid",
+        scope: { type: "scene", sceneId },
+        issues: [
+          {
+            code: "SCENE_NOT_FOUND",
+            severity: "error",
+            responsible: "agent",
+            artifact: "scenes.json",
+            path: "/scope/sceneId",
+            message: `Scene ${sceneId} does not exist.`,
+            suggestion: "Choose a scene ID declared in scenes.json.",
+          },
+        ],
+      }),
+    };
+  }
+  const { project } = outline;
+  const seconds = (ms: number): string => (ms / 1000).toFixed(1);
+  const scene = sceneId ? outline.scenes[0] : undefined;
+  return {
+    exitCode: 0,
+    event: commonEvent("outline", {
+      readiness: "draft-only",
+      sourceRevision: project.currentRevision,
+      scope: sceneId ? { type: "scene", sceneId } : null,
+      issues: loaded.issues,
+      data: { outline },
+    }),
+    human: [
+      `${project.title} (${project.id}): ${project.profile.id}@${project.profile.version}, ${project.sceneCount} scene(s), ${seconds(project.totalDurationMs)}s, revision ${project.currentRevision.slice(0, 12)}`,
+      ...outline.scenes.map(
+        (entry) =>
+          `${String(full.scenes.findIndex((candidate) => candidate.id === entry.id) + 1).padStart(2)}. ${entry.id} [${entry.role}] ${seconds(entry.durationMs)}s, ${entry.transition.type}, ${entry.layers?.length ?? 0} layer(s), ${entry.beats.length} beat(s)${entry.carriesFactualClaim ? ", claim" : ""}`,
+      ),
+      ...(scene
+        ? [
+            ...(scene.layers ?? []).map(
+              (layer) =>
+                `    layer ${layer.id} ${layer.type}${layer.text !== undefined ? ` ${JSON.stringify(layer.text)}` : ""}`,
+            ),
+            ...scene.beats.map(
+              (beat) =>
+                `    beat ${beat.id} ${beat.action} ${beat.targetId} ${beat.startMs}+${beat.durationMs}`,
+            ),
+          ]
+        : []),
+    ],
   };
 };
 
@@ -1868,6 +1969,7 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "create" ||
   value === "validate" ||
   value === "status" ||
+  value === "outline" ||
   value === "preview" ||
   value === "edit" ||
   value === "undo" ||
@@ -1892,6 +1994,7 @@ const executeCommand = async (
   if (command === "create") return createCommand(args);
   if (command === "validate") return validateCommand(args);
   if (command === "status") return statusCommand(args);
+  if (command === "outline") return outlineCommand(args);
   if (command === "preview") return previewCommand(args, options);
   if (command === "edit") return editCommand(args);
   if (command === "undo") return undoCommand(args);

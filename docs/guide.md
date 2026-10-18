@@ -197,7 +197,7 @@ node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" doctor --json
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" create my-video --profile current-issues --json
 ```
 
-`create` makes a source skeleton. Fill it using `schema --json`, a library pattern or an existing project you have permission to reuse. `scenes.json` holds the story and choreography; media and audio have their own manifests and timing. This route gives you direct control of the data rather than turning a text prompt into a video by itself.
+`create` makes a source skeleton. Add `--template starter` to start from a runnable three-scene plan (hook, explanation, payoff, about 25 s, no claims or narration) and edit its text and timing instead of writing scenes from scratch. Otherwise fill the skeleton using `schema --json`, a library pattern or an existing project you have permission to reuse. `scenes.json` holds the story and choreography; media and audio have their own manifests and timing. This route gives you direct control of the data rather than turning a text prompt into a video by itself.
 
 Keep the active Node version pinned as described above. For scripts, read the CLI's JSON result and exit code; progress belongs to stderr. The [command reference](#7-project-files-outputs-and-commands) explains those fields.
 
@@ -274,7 +274,7 @@ pnpm naraframe profile inspect current-issues --json
 pnpm naraframe create ../my-videos/new-video --profile current-issues --json
 ```
 
-`create` makes a project skeleton for the agent to fill in. The agent then authors scenes and prepares media according to the schema and profile lock. To use a local profile, provide the directory containing its `profile.json`, `direction.md`, and referenced media/font files:
+`create` makes a project skeleton for the agent to fill in. With `--template starter` the skeleton already holds three claim-free placeholder scenes (hook, explanation, payoff; about 25 s, palette colours only, no narration) that pass `validate --stage plan` under both built-in profiles; the agent edits them instead of writing scenes from the full schema. `starter` is the only template, and any other value is a usage error that lists the supported names. The agent then authors scenes and prepares media according to the schema and profile lock. To use a local profile, provide the directory containing its `profile.json`, `direction.md`, and referenced media/font files:
 
 ```sh
 pnpm naraframe profile inspect profiles/general-explainer --json
@@ -346,10 +346,14 @@ Ask for changes such as "shorten the headline," "slow down the camera," or "repl
 
 ```sh
 pnpm naraframe status ../my-videos/new-video --json
+pnpm naraframe outline ../my-videos/new-video
+pnpm naraframe outline ../my-videos/new-video --scene SCENE_ID --json
 pnpm naraframe edit ../my-videos/new-video --from ../my-videos/new-video-edit --expect SOURCE_REVISION --summary "Shorten the headline" --json
 pnpm naraframe validate ../my-videos/new-video --stage plan --json
 pnpm naraframe preview ../my-videos/new-video --draft --json
 ```
+
+`outline` is a read-only map of the project: its current revision, and each scene's id, role, timing, transition, camera, claims, note, layer ids with text and frames, beats with timings and params, plus narration blocks with their phrases (no word lists), the captions mode and asset ids. Use it to find the scene, layer and beat ids to change without reading whole files; an invalid project exits 1 with the same issues as `validate --stage plan`. Without `--json` it prints one line for the project and one per scene. Add `--scene <scene-id>` to narrow it to one scene in full detail, with only the narration blocks and assets that scene uses; the human form then lists that scene's layers and beats, and an unknown id is `SCENE_NOT_FOUND` (exit 1).
 
 Put only changed source files in `../my-videos/new-video-edit`. Preserve the project's relative file structure, such as `scenes.json` or `assets/manifest.json` alongside new media. Replace `SOURCE_REVISION` with the `sourceRevision` returned by `status`.
 
@@ -433,11 +437,12 @@ When moving a project, include its source, profile lock, media, recipes, and req
 | `doctor` | Check the local runtime and tools |
 | `version` | Read engine version, skill API, resource root and installation fingerprint |
 | `schema` | Read public schemas and capabilities |
-| `create … --profile …` | Create a project skeleton |
+| `create … --profile … [--template starter]` | Create a project skeleton, optionally with a runnable three-scene starter plan |
 | `validate … --stage plan` | Check source/compilation without rendering |
 | `validate … --stage production` | Check production readiness; does not review frames |
 | `preview … [--draft] [--scene …] [--resolution 540\|1080]` | Run preflight and create a review video |
 | `preview … --rerender` | Render fresh frames instead of reusing a preview |
+| `outline … [--scene …]` | Read-only map of scene, layer, beat and narration ids with timings and the current revision; one scene in full with `--scene` |
 | `status …` | Read source, freshness, pointers, artifacts, and production needs |
 | `edit … --from … --expect …` / `undo …` | Record revisions and restore the previous revision |
 | `profile inspect …` / `profile apply … --dry-run` | Read a profile / plan a profile switch |

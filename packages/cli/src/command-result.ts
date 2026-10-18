@@ -7,6 +7,7 @@ export type CommandName =
   | "create"
   | "validate"
   | "status"
+  | "outline"
   | "preview"
   | "edit"
   | "undo"
