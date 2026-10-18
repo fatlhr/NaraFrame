@@ -12,7 +12,7 @@ When a user is new to NaraFrame, tell them this briefly in plain words before as
 - NaraFrame makes vertical (9:16) explainer videos for a recurring series, on your own computer, from source files you can edit.
 - A **profile** keeps the look, type, voice style and sourcing rules the same from episode to episode.
 - Each episode goes preview, then your approval, then export of exactly the version you approved.
-- Work is reused: unchanged scenes are not re-rendered, prepared audio is imported once, library patterns are pinned, and a series can switch profile after a dry-run report.
+- Work is reused: an unchanged video is never rendered twice, one changed scene can be previewed on its own, prepared audio is imported once, library patterns are pinned, and a series can switch profile after a dry-run report.
 - Before anything is exported it checks text fit, safe areas, transitions and corrupted frames.
 - Verified on macOS Apple Silicon only.
 
