@@ -43,7 +43,13 @@ const artifactNames = [
   "report.json",
 ] as const;
 
-type ArtifactName = (typeof artifactNames)[number];
+/**
+ * A grid of the checked frames for reading at a glance. Builds made before it
+ * existed simply have no record of it, so it is never required.
+ */
+const storyboardName = "storyboard.png" as const;
+
+type ArtifactName = (typeof artifactNames)[number] | typeof storyboardName;
 
 export interface CheckedFrame {
   frame: number;
@@ -122,7 +128,8 @@ interface PreviewMetadata {
 }
 
 interface PreviewManifest extends PreviewMetadata {
-  artifacts: Record<ArtifactName, ArtifactRecord>;
+  artifacts: Record<(typeof artifactNames)[number], ArtifactRecord> &
+    Partial<Record<typeof storyboardName, ArtifactRecord>>;
 }
 
 export interface PublishedPreviewBuild {
@@ -130,6 +137,8 @@ export interface PublishedPreviewBuild {
   buildDirectory: string;
   currentPointer: string;
   manifestSha256: string;
+  /** Whether the build carries a storyboard.png next to the contact sheet. */
+  storyboard: boolean;
   rendered: RenderedDraft;
   issues: Issue[];
 }
@@ -208,7 +217,8 @@ export const withPublishedOutputPath = (
 
 interface ContactSheetValidationOptions {
   path: string;
-  layout: ContactSheetLayout;
+  layout: { width: number; height: number };
+  name?: string;
   ffmpegExecutable?: string;
   ffprobeExecutable?: string;
   probe?: (path: string) => Promise<Record<string, unknown>>;
@@ -524,6 +534,122 @@ const createContactSheet = async (
     "-y",
     outputPath,
   ]);
+};
+
+export interface StoryboardLayout {
+  columns: number;
+  rows: number;
+  cellWidth: number;
+  cellHeight: number;
+  padding: number;
+  margin: number;
+  width: number;
+  height: number;
+}
+
+/** Height of the frame inside a storyboard cell; the strip below holds the label. */
+const STORYBOARD_FRAME_HEIGHT = 480;
+const STORYBOARD_LABEL_STRIP = 24;
+
+/**
+ * Four columns of half-size draft frames, so a frame is read at 270 px wide.
+ * Each cell has a strip under the frame for its time label, so the label never
+ * covers the headline or the caption area of the frame itself.
+ */
+export const storyboardLayoutFor = (frameCount: number): StoryboardLayout => {
+  const columns = Math.min(4, Math.max(1, frameCount));
+  const rows = Math.ceil(frameCount / columns);
+  const cellWidth = 270;
+  const cellHeight = STORYBOARD_FRAME_HEIGHT + STORYBOARD_LABEL_STRIP;
+  const padding = 12;
+  const margin = 12;
+  return {
+    columns,
+    rows,
+    cellWidth,
+    cellHeight,
+    padding,
+    margin,
+    width: columns * cellWidth + (columns - 1) * padding + 2 * margin,
+    height: rows * cellHeight + (rows - 1) * padding + 2 * margin,
+  };
+};
+
+const labelFont = async (): Promise<string | null> => {
+  for (const candidate of [
+    process.env.NARAFRAME_FONT_FILE,
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+    "/Library/Fonts/Arial.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+  ]) {
+    if (!candidate) continue;
+    try {
+      await access(candidate);
+      return candidate;
+    } catch {
+      // Try the next candidate.
+    }
+  }
+  return null;
+};
+
+/**
+ * Tiles the checked frames into storyboard.png, each cell labelled with its
+ * time in the video when a font is at hand. The storyboard is a convenience:
+ * if it cannot be made, the build is published without it.
+ */
+const createStoryboard = async (
+  videoPath: string,
+  outputPath: string,
+  frames: readonly CheckedFrame[],
+  executable: string,
+): Promise<StoryboardLayout | null> => {
+  const layout = storyboardLayoutFor(frames.length);
+  const selection = frames.map(({ frame }) => `eq(n\\,${frame})`).join("+");
+  const base = [
+    `select='${selection}'`,
+    `scale=${layout.cellWidth}:${STORYBOARD_FRAME_HEIGHT}:force_original_aspect_ratio=decrease`,
+    `pad=${layout.cellWidth}:${STORYBOARD_FRAME_HEIGHT}:(ow-iw)/2:(oh-ih)/2:color=black`,
+    `pad=${layout.cellWidth}:${layout.cellHeight}:0:0:color=0x111111`,
+  ];
+  const tile = `tile=${layout.columns}x${layout.rows}:padding=${layout.padding}:margin=${layout.margin}:color=0x111111`;
+  const font = await labelFont();
+  const attempts = [
+    ...(font
+      ? [
+          [
+            ...base,
+            `drawtext=fontfile='${font.replaceAll("'", "")}':text='%{pts\\:hms}':x=8:y=${STORYBOARD_FRAME_HEIGHT + 4}:fontsize=16:fontcolor=white`,
+            tile,
+          ],
+        ]
+      : []),
+    [...base, tile],
+  ];
+  for (const chain of attempts) {
+    try {
+      await execute(executable, [
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-i",
+        videoPath,
+        "-vf",
+        chain.join(","),
+        "-fps_mode",
+        "vfr",
+        "-frames:v",
+        "1",
+        "-y",
+        outputPath,
+      ]);
+      return layout;
+    } catch {
+      await rm(outputPath, { force: true });
+    }
+  }
+  return null;
 };
 
 const artifactRecord = async (
@@ -888,6 +1014,7 @@ export const validatePreviewMedia = async ({
 const validateContactSheet = async ({
   path,
   layout,
+  name = "contact-sheet.png",
   ffmpegExecutable: requestedFfmpeg = ffmpegExecutable(),
   ffprobeExecutable: requestedFfprobe = ffprobeExecutable(),
   probe,
@@ -895,7 +1022,7 @@ const validateContactSheet = async ({
 }: ContactSheetValidationOptions): Promise<void> => {
   const png = await readFile(path);
   if (!hasPngSignature(png)) {
-    throw new Error("contact-sheet.png has an invalid PNG signature.");
+    throw new Error(`${name} has an invalid PNG signature.`);
   }
   const result = probe
     ? await probe(path)
@@ -912,7 +1039,7 @@ const validateContactSheet = async ({
     stream.height !== layout.height
   ) {
     throw new Error(
-      "contact-sheet.png does not match the expected PNG layout dimensions.",
+      `${name} does not match the expected PNG layout dimensions.`,
     );
   }
   if (decode) {
@@ -1083,6 +1210,22 @@ export const validatePreviewBuildIntegrity = async ({
     }
   }
 
+  // Optional: builds made before the storyboard existed have no record of it.
+  const storyboardRecord = artifacts?.[storyboardName];
+  if (storyboardRecord) {
+    const artifactPath = join(buildDirectory, storyboardName);
+    const details = await stat(artifactPath);
+    if (
+      storyboardRecord.path !== storyboardName ||
+      details.size !== storyboardRecord.bytes ||
+      (await sha256File(artifactPath)) !== storyboardRecord.sha256
+    ) {
+      throw new Error(
+        `${storyboardName} failed its declared size/hash integrity check.`,
+      );
+    }
+  }
+
   const frames = await parseJsonObject(join(buildDirectory, "frames.json"));
   const checkedFrames = Array.isArray(frames.frames) ? frames.frames : [];
   const report = await parseJsonObject(join(buildDirectory, "report.json"));
@@ -1153,6 +1296,21 @@ export const validatePreviewBuildIntegrity = async ({
       ? { decode: requestedContactSheetDecode }
       : {}),
   });
+  if (storyboardRecord) {
+    await validateContactSheet({
+      path: join(buildDirectory, storyboardName),
+      layout: storyboardLayoutFor(checkedFrames.length),
+      name: storyboardName,
+      ffmpegExecutable: requestedFfmpeg,
+      ffprobeExecutable: requestedFfprobe,
+      ...(requestedContactSheetProbe
+        ? { probe: requestedContactSheetProbe }
+        : {}),
+      ...(requestedContactSheetDecode
+        ? { decode: requestedContactSheetDecode }
+        : {}),
+    });
+  }
   await validatePreviewMedia({
     path: join(buildDirectory, "preview.mp4"),
     draft: expectedDraft,
@@ -1358,6 +1516,13 @@ export const publishPreviewBuild = async ({
       ffmpegExecutable: ffmpeg,
       ffprobeExecutable: ffprobe,
     });
+    const storyboard = await createStoryboard(
+      outputPath,
+      join(stagedBuildDirectory, storyboardName),
+      frames,
+      ffmpeg,
+    );
+    throwIfAborted(signal);
     const runtime: RuntimeMetadata = {
       node: process.version,
       os: { platform: platform(), release: release(), architecture: arch() },
@@ -1391,6 +1556,9 @@ export const publishPreviewBuild = async ({
       artifactRecord(stagedBuildDirectory, "preview.mp4", "video/mp4"),
       artifactRecord(stagedBuildDirectory, "contact-sheet.png", "image/png"),
       artifactRecord(stagedBuildDirectory, "frames.json", "application/json"),
+      ...(storyboard
+        ? [artifactRecord(stagedBuildDirectory, storyboardName, "image/png")]
+        : []),
     ]);
     const completedAt = new Date().toISOString();
     const metadata: PreviewMetadata = {
@@ -1440,7 +1608,7 @@ export const publishPreviewBuild = async ({
     ];
     const artifacts = Object.fromEntries(
       records.map((record) => [record.path, record]),
-    ) as Record<ArtifactName, ArtifactRecord>;
+    ) as PreviewManifest["artifacts"];
     const manifest: PreviewManifest = { ...metadata, artifacts };
     await writeFile(
       join(stagedBuildDirectory, "manifest.json"),
@@ -1465,6 +1633,7 @@ export const publishPreviewBuild = async ({
     return {
       buildId,
       ...promoted,
+      storyboard: storyboard !== null,
       rendered: withPublishedOutputPath(rendered, promoted.buildDirectory),
       issues: allIssues,
     };
@@ -1598,6 +1767,31 @@ export const publishReusedPreviewBuild = async ({
         await copyFile(from, to);
       }
     }
+    // Older builds have no storyboard: make one from their video, or go without.
+    let storyboard = false;
+    try {
+      await link(
+        join(source.buildDirectory, storyboardName),
+        join(staged, storyboardName),
+      );
+      storyboard = true;
+    } catch {
+      try {
+        await copyFile(
+          join(source.buildDirectory, storyboardName),
+          join(staged, storyboardName),
+        );
+        storyboard = true;
+      } catch {
+        storyboard =
+          (await createStoryboard(
+            join(staged, "preview.mp4"),
+            join(staged, storyboardName),
+            source.report.checkedFrames,
+            ffmpegExecutable(),
+          )) !== null;
+      }
+    }
     const frames = source.report.checkedFrames;
     await writeFile(
       join(staged, "frames.json"),
@@ -1632,12 +1826,15 @@ export const publishReusedPreviewBuild = async ({
       artifactRecord(staged, "contact-sheet.png", "image/png"),
       artifactRecord(staged, "frames.json", "application/json"),
       artifactRecord(staged, "report.json", "application/json"),
+      ...(storyboard
+        ? [artifactRecord(staged, storyboardName, "image/png")]
+        : []),
     ]);
     const manifest: PreviewManifest = {
       ...metadata,
       artifacts: Object.fromEntries(
         records.map((record) => [record.path, record]),
-      ) as Record<ArtifactName, ArtifactRecord>,
+      ) as PreviewManifest["artifacts"],
     };
     await writeFile(join(staged, "manifest.json"), json(manifest), {
       flag: "wx",
@@ -1670,6 +1867,7 @@ export const publishReusedPreviewBuild = async ({
     return {
       buildId,
       ...promoted,
+      storyboard,
       rendered,
       issues: [...issues, ...source.report.visualPreflight.issues],
     };

@@ -108,6 +108,38 @@ describe("canonical skill installation", () => {
       readFile(join(r.destination, "SKILL.md")),
     ).rejects.toMatchObject({ code: "ENOENT" });
   });
+  it("installs the repository skill with its director-plan template and a resolvable Start here", async () => {
+    const f = await fixture();
+    await rm(join(f.engine, "skills/naraframe"), { recursive: true });
+    await cp(resolve("skills/naraframe"), join(f.engine, "skills/naraframe"), {
+      recursive: true,
+    });
+    const r = await installSkill(options(f));
+    const receipt = JSON.parse(
+      await readFile(join(r.destination, "installation.json"), "utf8"),
+    );
+    expect(Object.keys(receipt.files)).toContain("examples/director-plan.md");
+    const plan = await readFile(
+      join(r.destination, "examples/director-plan.md"),
+      "utf8",
+    );
+    expect(plan).toContain("Not validated, not rendered");
+    expect(plan.trimEnd().split("\n").at(-1)).toContain("install the engine");
+    const skill = await readFile(join(r.destination, "SKILL.md"), "utf8");
+    const lines = skill.split("\n");
+    const start = lines.indexOf("## Start here");
+    expect(start).toBeGreaterThan(0);
+    // The orientation comes before any workflow and stays short.
+    expect(start).toBeLessThan(lines.indexOf("## Workflow"));
+    expect(lines.indexOf("## Workflow") - start).toBeLessThanOrEqual(15);
+    expect(skill).toContain("profile list");
+    expect(skill).toContain("profile new");
+    expect(skill).toContain("SOURCES_WAIVED");
+    // One first message carries the explanation, the question and the install options.
+    expect(skill).toContain("as one message");
+    expect(skill).toContain("one-off video or a series?");
+    expect(skill).toContain("examples/director-plan.md");
+  });
   it.each(["codex", "claude"])(
     "installs complete resources for %s and forwards argv outside checkout",
     async (host) => {

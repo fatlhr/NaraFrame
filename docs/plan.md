@@ -650,6 +650,108 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   - SKILL.md is 38 KB, so first-time agents read it in pieces.
   - An unverified source URL was cited to satisfy `requireSourcing`, which needs the owner's check in real use.
 
+**B6 order revised (owner, 2026-10-18):** B6c = first-run onboarding and profiles, B6d = distribution channels (Claude plugin marketplace, `npx skills add`, Codex and other agents), B6e = public README (C1). Public copy names no other engines or skills; it states NaraFrame's own strengths.
+
+**B6c model — a new user understands NaraFrame and picks the right profile in the first minutes.**
+- **What NaraFrame is, told early:** the skill opens with a short "Start here" section that the agent can relay in plain words. The points are:
+  - NaraFrame makes vertical explainer videos for a recurring series;
+  - a profile keeps the look, type, voice style and sourcing rules consistent across episodes;
+  - each episode goes preview → owner approval → export of exactly the approved version;
+  - work is reused (unchanged scenes are not re-rendered, prepared audio is imported once, library patterns are pinned, and a series can switch profile with a dry-run report);
+  - the engine checks text fit, safe areas, transitions and corrupted frames before anything is exported.
+- **Choosing a profile:** the agent asks one question, whether this is a one-off video or a series.
+  - One-off or unspecified → the neutral built-in explainer profile.
+  - News or current affairs → `current-issues`, which requires sources.
+  - A series or brand → a local profile copied from a built-in into the user's workspace, with palette, type and direction edited, then `create --profile <path>`.
+  - The agent never invents sources to satisfy a profile; it asks.
+- **Engine support:**
+  - `profile list [--json]` lists the built-in profiles with id, version, a one-line purpose, whether sourcing is required, preferred duration and voice style.
+  - The neutral explainer profile (today a test fixture, `general-explainer`) becomes a built-in after a rights check of everything it references.
+  - CLI usage errors drop internal wording such as "advertised M0 commands".
+- **Consent and director-only plan:**
+  - The no-engine consent becomes one plain-language message that offers both options at once: install now, or a plan only.
+  - The skill ships a short director-plan template whose last line tells the user how to continue later.
+  - The skill states that a scene's transition plays as it exits.
+- **Acceptance:**
+  1. `profile list` and its tests.
+  2. The new built-in profile validates, creates a project and previews.
+  3. A fresh agent asked for a one-off science explainer explains the flow briefly, picks the neutral profile and does not cite unverified sources.
+  4. A fresh agent asked for "a weekly series for my channel" sets up a local series profile before the first episode.
+  5. Gates stay green.
+
+**B6c evidence — 2026-10-18 (branch `b6c-onboarding-profiles`; owner-approved with correction pass 1 and integrated through its own PR):**
+- **Implementation:**
+  - `profile list [--json]` reports id, version, a summary (the first sentence of `direction.md`, so the strict lock schema stays unchanged), whether sourcing is required, preferred duration and voice style.
+  - `general-explainer` moved from test fixtures to `profiles/` byte-identical. The rights check found no font, image or audio files, only system font names and repo-authored text. It is recorded in the distribution rights and notices, and both pack modes ship it.
+  - CLI usage errors no longer mention internal milestones.
+  - The skill gains "Start here" (12 lines, no other products named), "Choosing a profile", a single consent message with two numbered options, `examples/director-plan.md` with a resume line, and the rule that a scene's transition plays as it exits.
+  - The supervisor fixed two README lines that still pointed at the old fixture path.
+- **Gates:** `pnpm verify` exit 0, re-run by the supervisor (Biome 241, unit 364/364, integration 518/518).
+- **Fresh agents** (read-only copied skill, scratch HOME, local tarball; both skill folders were byte-identical to the repo skill afterwards; the real `~/.naraframe` stayed absent):
+  - **One-off ("kenapa es mengapung", 20 s, silent):**
+    - The agent explained the flow in plain Indonesian and asked the one-off/series question, then sent the two-option install message.
+    - It chose `general-explainer` and invented no source: claims were labelled and the scene notes record that the owner has none.
+    - Engine ready at about 46 s; draft `7eb2348120f1-672a2676-7de` about 3.7 min after start.
+  - **Weekly series ("Sains Santai", dark green and yellow, silent):**
+    - The agent combined the explanation and install offer into one message, then asked for the series details.
+    - It copied `general-explainer` to `<workspace>/profiles/sains-santai`, recoloured it and rewrote `direction.md`. `profile inspect` passed.
+    - The episode was created with `--profile ./profiles/sains-santai` (locked `sains-santai@1.0.0`, local source) and revised once through `edit`.
+    - Draft `c6406df24de9-ca25b419-1b5`: 915 frames, 0 integrity outliers, series look confirmed by the supervisor.
+    - Engine ready at 42 s, series profile at 72 s, draft at 252 s.
+- **Remaining friction (for B6e docs or a later batch):**
+  - The skill does not say that the first `scenes.json` is written directly and only later changes go through `edit`.
+  - It does not say which profile fields are safe to change for a series; the stroke colour follows the surface colour.
+  - Variety warnings pull against deliberate repeated structures.
+  - There is no field to record an owner's "no source" decision, so `SOURCE_MISSING` warnings persist.
+  - `PANEL_DEAD_SPACE` fires on drawn objects such as water.
+  - The tall single-column contact sheet needs ffmpeg to review.
+  - Human-readable text on stderr sits alongside the JSON on stdout.
+  - The order of series questions versus the install offer is a judgement call.
+
+**B6c correction pass 1 — remove onboarding friction the simplest way (owner, 2026-10-18).** Principle: the user answers ordinary questions; the agent and engine do the technical work. Fixes:
+1. **One first message.** A short explanation, the one-off-or-series question and the install options (when no engine) go together in one message. Series details are asked after the engine is ready.
+2. **`profile new`:** a command creates a series profile in the user's workspace from a built-in profile, a series name and up to three colours (background, accent, optionally text).
+   - The engine derives dependent values, such as the stroke and surface contrast, so the colours stay consistent.
+   - It writes a short `direction.md` template in plain language.
+   - It runs the same checks as `profile inspect`.
+3. **First source:** one sentence in the skill. A new project's first `scenes.json` is written directly; later changes go through `edit`.
+4. **Owner "no sources" decision:** a project-level record of the owner's choice to go without sources (who, when, a short reason), set after asking once.
+   - It replaces per-scene `SOURCE_MISSING` warnings with one info issue.
+   - It never relaxes a profile that requires sourcing.
+   - Claims stay labelled.
+5. **Variety warnings:** the skill says they are suggestions, not to be chased for a deliberately repeated structure.
+6. **`PANEL_DEAD_SPACE`:** it applies only to backdrop panels that actually hold content, not to drawn objects such as water or a line. Narrowest engine change, with a regression for the trial case.
+7. **Storyboard image:** a grid image of the checked frames is added next to each build for at-a-glance review. The existing contact sheet stays unchanged, so earlier builds and reuse stay valid.
+8. **JSON output:** with `--json`, the human-readable summary is no longer printed to stderr. Errors still exit non-zero with structured issues.
+
+**Acceptance:** each fix has focused tests and gates stay green. Two fresh agents (one-off and weekly series, read-only skill) repeat the B6c scenarios: one first message, the series created with `profile new` from a name and colours, and no repeated `SOURCE_MISSING` noise after the owner's decision.
+
+**B6c correction 1 evidence — 2026-10-18:**
+- **Fixes:**
+  - One combined first message.
+  - `profile new <dir> --from <id> --name … --background … --accent … [--text] [--language]`, which derives text, panel and stroke colours with contrast checks (text ≥ 4.5, accent ≥ 3), writes a plain `direction.md` and refuses unsafe inputs without leaving files.
+  - Optional `naraframe.json` `sourcing.ownerDecision: "no-sources"`: with `requireSourcing` false, per-claim `SOURCE_MISSING` collapses into one `SOURCES_WAIVED` info; with it true, nothing changes.
+  - A skill note that variety warnings are suggestions.
+  - `PANEL_DEAD_SPACE` applies only to panels wholly containing a text or image layer; the Krakatau case is unchanged.
+  - An optional `storyboard.png` grid in new preview builds. It is hashed and validated when present, older builds and reuse stay valid, and `contact-sheet.png` is unchanged.
+  - With `--json`, issue text is no longer printed to stderr as well. Render and export progress lines stay on stderr; the first E2E run showed that removing them broke interruption timing and hid progress from agents.
+- **Supervisor fixes:**
+  - Storyboard time labels sit in a strip under each frame (cell 270x504) instead of over the frame, so headlines and captions stay visible. Checked on a real render.
+  - Skill sentences on the storyboard as the first review image, turning colour words into hex values and saying which were picked, the `--language` form, running from the workspace folder, `decidedBy` defaulting to "owner", and what each transition looks like (checked against `motion.ts`).
+- **Render keys:** no pixel or render-key change. A scene reused from an older build keeps its old `PANEL_DEAD_SPACE` warning in its report until re-rendered.
+- **Gates:** `pnpm verify` exit 0 (Biome 243, unit 370/370, integration 529/529). Skill tests 54/54 after the supervisor's doc edits.
+- **First full E2E failed (2/24, retained, log SHA-256 prefix `d5fe1e98`):**
+  - `interruption-recovery` waits for progress on stderr, which the `--json` quiet change had removed. Progress was restored, which is a real regression fix.
+  - `owner-flow` asserts the exact build artifact list and now expects `storyboard.png`, a deliberate change.
+  - Verify and full E2E were then re-run: `pnpm verify` exit 0 (Biome 243, unit 370/370, integration 529/529), and full serial E2E 14 files / 24 tests passed in 983 s, ending 14:30:09 WIB (log SHA-256 prefix `1bb26321`).
+- **Fresh-agent retest (read-only skill, scratch HOME, local tarball):**
+  - **One-off:** one message before any work, `general-explainer`, the owner's no-sources decision asked once and recorded (only `SOURCES_WAIVED` remains), draft `0ea9aa49eafd-6428d532-22a` in about 4 min.
+  - **Weekly series:** one message before any work. `profile new` built `sains-santai` from a name and two colours, needing only `direction.md` wording by hand. The episode was pinned to it, preflight passed first time, decision recorded, draft `fcd690978a8e-afc5ed60-6ed` in about 4 min 20 s.
+- **Follow-ups (not in B6c):**
+  - The storyboard tiles every checked frame (about 6,200 px tall for 28 s); it should show key frames per scene.
+  - There is no minimal first-scene template for a new profile or language.
+  - Colours outside the palette, such as a blue for water, need literal hex values and are not repainted on a profile switch.
+
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
 Each needs its own demand/evidence and authorization. None is automatically a new task just because M4 is documented.

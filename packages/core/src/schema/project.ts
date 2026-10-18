@@ -33,6 +33,21 @@ const DraftFormatSchema = z
   })
   .strict();
 
+/**
+ * The owner's recorded choice to make this project without sources. It only
+ * quiets the per-claim `SOURCE_MISSING` warnings of a profile that does not
+ * require sourcing; claims stay labelled and a profile that requires sourcing
+ * is never relaxed by it.
+ */
+export const SourcingDecisionSchema = z
+  .object({
+    ownerDecision: z.literal("no-sources"),
+    decidedBy: z.string().trim().min(1),
+    decidedAt: z.string().datetime({ offset: true }),
+    reason: z.string().trim().min(1).max(280),
+  })
+  .strict();
+
 export const ProjectConfigSchema = z
   .object({
     schemaVersion: SchemaVersionSchema,
@@ -54,6 +69,8 @@ export const ProjectConfigSchema = z
     audioMode: AudioModeSchema.optional(),
     /** One optional music bed plus scene-anchored effects; never changes the timeline. */
     soundtrack: SoundtrackSchema.optional(),
+    /** The owner's "no sources" decision, set after asking once. */
+    sourcing: SourcingDecisionSchema.optional(),
     /** Passive pinned authoring receipts; never reads a catalog during render. */
     libraryImports: z.array(LibraryImportSchema).optional(),
   })
