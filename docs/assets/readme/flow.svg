@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="290" viewBox="0 0 1200 290" font-family="-apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748B"/>
+    </marker>
+    <style>
+      .card { fill: #1E293B; }
+      .n { fill: #F5C518; font-size: 30px; font-weight: 800; text-anchor: middle; }
+      .t { fill: #F8FAFC; font-size: 24px; font-weight: 700; text-anchor: middle; }
+      .s { fill: #94A3B8; font-size: 17px; text-anchor: middle; }
+      .e { stroke: #64748B; stroke-width: 2; fill: none; marker-end: url(#a); }
+      .l { stroke: #64748B; stroke-width: 1.8; fill: none; stroke-dasharray: 6 6; marker-end: url(#a); }
+      .lt { fill: #94A3B8; font-size: 16px; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="290" rx="24" fill="#0F172A"/>
+
+  <rect class="card" x="30" y="40" width="196" height="160" rx="16"/>
+  <text class="n" x="128" y="90">1</text>
+  <text class="t" x="128" y="134">Ask</text>
+  <text class="s" x="128" y="166">the topic</text>
+
+  <path class="e" d="M232 120 L258 120"/>
+
+  <rect class="card" x="264" y="40" width="196" height="160" rx="16"/>
+  <text class="n" x="362" y="90">2</text>
+  <text class="t" x="362" y="134">Pick a look</text>
+  <text class="s" x="362" y="166">one-off or series</text>
+
+  <path class="e" d="M466 120 L492 120"/>
+
+  <rect class="card" x="498" y="40" width="196" height="160" rx="16"/>
+  <text class="n" x="596" y="90">3</text>
+  <text class="t" x="596" y="134">Build</text>
+  <text class="s" x="596" y="166">every scene checked</text>
+
+  <path class="e" d="M700 120 L726 120"/>
+
+  <rect class="card" x="732" y="40" width="196" height="160" rx="16"/>
+  <text class="n" x="830" y="90">4</text>
+  <text class="t" x="830" y="134">Preview</text>
+  <text class="s" x="830" y="166">with a storyboard</text>
+
+  <path class="e" d="M934 120 L960 120"/>
+
+  <rect class="card" x="966" y="40" width="204" height="160" rx="16"/>
+  <text class="n" x="1068" y="90">5</text>
+  <text class="t" x="1068" y="134">Approve</text>
+  <text class="s" x="1068" y="166">get the MP4</text>
+
+  <path class="l" d="M830 206 L830 228 Q830 238 820 238 L606 238 Q596 238 596 228 L596 210"/>
+  <text class="lt" x="713" y="266">revise</text>
+</svg>

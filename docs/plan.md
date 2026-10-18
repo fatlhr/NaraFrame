@@ -776,6 +776,57 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 - **Gates:** `pnpm verify` exit 0 (Biome 246, unit 373/373, integration 529/529). No render change.
 - **Not run before publication:** `/plugin marketplace add fatlhr/NaraFrame` from GitHub (the repository is private) and `npx skills add` (it executes a third-party installer, which the agent does not run). The layout matches what both document. Codex uses `.agents/skills`; the shipped installer's `--host codex` route was verified in M4.5.3.
 
+**B6e / C1 evidence — 2026-10-18 (branch `b6e-public-readme`; owner-reviewed and integrated through its own PR):**
+- **Process:** `marketing:draft-content` (landing-page shape, owner's voice: direct, friendly, honest, no other products named), then `marketing:brand-review`.
+- **The review caught two false claims before publication, fixed in the README and in the skill's "Start here":**
+  - "unchanged scenes are not re-rendered": scene keys only feed the reuse report. Only an unchanged build is reused, or a single scene previewed.
+  - "content outside the safe area stops the export": safe-area findings are warnings.
+  - It also added an early-release (0.1.0) line.
+- **README:** outcome-first, covering why, how it works in four steps, one look per series, example requests, install (Claude Code plugin; Codex and other agents by folder copy; without an agent → technical guide), requirements, limits, licence (MIT plus Remotion's terms) and links. No personal paths or projects.
+- **Technical guide:** the former 510-line README moved to `docs/guide.md`, with relative links adjusted, `../NaraFrame-projects` example paths renamed to `../my-videos`, and a pointer to the plugin route.
+- **Images** (`docs/assets/readme/`, 104–185 KB each):
+  - `hero.png`: four frames of the owner-approved 1080 export of the demo "Kenapa es mengapung di air?".
+  - `two-looks.png`: the same two scenes from that export and from an owner-approved export after `profile apply` to the "Sains Santai" series profile.
+  - `storyboard.png`: the first two rows of the series demo's preview storyboard, keeping its DRAFT label because it is a preview artifact.
+  - The demos were authored by fresh agents from the repository's own profiles, with drawn shapes and system font names only, and no third-party media.
+- **Demo exports** (owner approval 2026-10-18 for README images): `es-mengapung` `6ffc820f6beb-ae936181-9d7`, `kucing-kotak` `b8c87fb722fb-4aebd58e-50a`, `es-mengapung-sains` `07b276808be0-32f7eb2b-b44`. All are 1080x1920, full decode clean, 0 integrity outliers, with no DRAFT label in the finals. Sources live in `work/m4-followups/b6e/demo/`.
+- **Release order (owner action):**
+  1. `npm publish` the `naraframe` package.
+  2. Then make the repository public. Before that, the agent-led setup default (`naraframe@0.1.0` from npm) and the GitHub plugin install cannot work for others.
+  3. After publication, verify `/plugin marketplace add fatlhr/NaraFrame`, `npx skills add` and a fresh setup without `--source`.
+
+**Revision cost measurement — 2026-10-18 (for the README claim):** two fresh Sonnet agents with the same read-only skill and installed engine, same target. The request changed the density scene's title to "Es 8% lebih ringan dari air" and made the bars rise twice as slowly; both stopped at the draft preview.
+- **A, revising the existing `es-mengapung` project through `edit`:** 101,777 tokens, 127.9 s, 14 tool calls. It read only the density scene's part of `scenes.json`, and the engine reported 3 of 4 scenes unchanged (draft `7136a9e093a8-1530e3d2-580`).
+- **B, rebuilding the same video from a full brief:** 125,252 tokens, 226.7 s, 19 tool calls, including one `TEXT_OVERFLOW` fix (draft `a8398ccf4e17-16a49b02-e0e`).
+- **Result:** the revision used about 19% fewer tokens and finished about 1.8x faster.
+- **Most of the remaining cost is fixed per session.** Both agents loaded the 43 KB `SKILL.md`, and every tool turn carries that context.
+- **Follow-up F8 candidate:** slim `SKILL.md` by moving rarely used detail into guides loaded on demand, then re-measure with the same test.
+- Avoided renders save machine time, not tokens. Revisions inside the same session as the first draft were not measured.
+
+**B6e README presentation (owner review, 2026-10-18):** badges, one emoji per section heading, tables, collapsible details (FAQ, other agents, example session), explicit HTML anchors for navigation (verified with GitHub's Markdown renderer), and a simple five-step flowchart image (`docs/assets/readme/flow.png`, drawn as `flow.svg` and rasterised with local Chrome; no third-party diagram tool was run).
+
+**B6e README additions (owner review, 2026-10-18):** new sections "What you can make", "What you save" (measured first-draft time and revision savings), "Style gallery", "The menus behind the looks" (profiles, shot patterns, moves, transitions, captions, sound, series extras) and "Questions", plus a Mermaid flowchart and an example session. Every claim was checked against shipped behaviour. The gallery has two real cards from approved exports (science explainer, weekly series) and four labelled placeholders.
+
+**G1 (scheduled, separate task) — real gallery cards:** fresh agents make four demos from repository resources only, then the supervisor reviews frames and the owner approves the exports:
+- a news explainer in `current-issues`, with sources;
+- a paper-and-ink explainer in the contrast profile;
+- a route or process with the `path-note` pattern;
+- a picture with pointers with the `anchored-note` pattern and a repository synthetic plate.
+
+Their final frames replace the README placeholders.
+
+**B7 (approved direction, 2026-10-18) — skill formula from the reference study:**
+- a lean router `SKILL.md` (target ≤ 15–20 KB) with a first-match state table, where a specific edit to an existing project goes straight to the edit;
+- a cheapest-first verification ladder;
+- job-specific guides loaded on demand;
+- a description that also triggers on revision phrases.
+
+Engine aids:
+- `outline <project> --json`, so revisions stop reading the whole `scenes.json`;
+- `create --template` with a valid starter scene set, so new videos stop exploring the 150 KB schema.
+
+It ships as two PRs, skill restructure and engine aids, each re-measured with the A/B revision test and the onboarding tests.
+
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
 Each needs its own demand/evidence and authorization. None is automatically a new task just because M4 is documented.
