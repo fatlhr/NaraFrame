@@ -334,7 +334,7 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 | F4 (DONE, B4) | `shape.stroke.color` accepts only hex while path strokes accept palette tokens; `reveal` direction and `strong` emphasis are undocumented or indistinct under some profiles; the skill lacks a revision list and an explanation of why a reused preview gets a new build id. | Consistent colour tokens and documented motion/emphasis semantics in the skill. |
 | F5 (DONE, B5; Chrome helpers may still outlive Chrome) | `node` and Chrome crashpad processes sometimes stay alive 7–9 minutes after parallel renders (output unaffected). | Diagnosed; commands exit promptly or the cause is documented. |
 | F6 (DONE, B2) | Claim labelling is trust-based. `requireSourcing` only raises `SOURCE_MISSING` from warning to error for blocks or scenes labelled `carriesFactualClaim: true`; the engine does not detect claims. The skill never mentions `carriesFactualClaim`, `sourceIds` or `requireSourcing`, and every art-direction example scene sets `carriesFactualClaim: false`, which authors copy. Both trial episodes therefore labelled causal statements as non-claims, and a strict profile could not catch it. | The skill explains when to label a claim and how to cite sources; examples stop defaulting to `false` without explanation; validation adds an info note when a profile requires sourcing but no scene or block is labelled as a claim. No automatic claim detection is promised. |
-| F7 | A skill without a working engine fails poorly. The launcher prints a Node stack trace before `SKILL_ENGINE_MISSING` (its `version` probe inherits stderr) and gives no next step. A skill folder copied without an engine (for example from GitHub) has no install receipt; it is sent to `pnpm naraframe`, fails, and reports a "system blocker" with no concrete install route. | Missing-engine paths end in one clean message. The skill opens with an engine check; when no engine is available the agent offers to install it and, after one yes from the user, performs the setup itself (manual steps stay documented). A clearly labelled director-only plan is available only if the user prefers to wait (see the B6 model). |
+| F7 (DONE, B6b) | A skill without a working engine fails poorly. The launcher prints a Node stack trace before `SKILL_ENGINE_MISSING` (its `version` probe inherits stderr) and gives no next step. A skill folder copied without an engine (for example from GitHub) has no install receipt; it is sent to `pnpm naraframe`, fails, and reports a "system blocker" with no concrete install route. | Missing-engine paths end in one clean message. The skill opens with an engine check; when no engine is available the agent offers to install it and, after one yes from the user, performs the setup itself (manual steps stay documented). A clearly labelled director-only plan is available only if the user prefers to wait (see the B6 model). |
 
 **Delivery order (owner, 2026-10-17):** one batch per relevance, each confirmed by Fatih before commit, push and squash-merge: B1 = F1, B2 = F6, B3 = F2 + F3, B4 = F4, B5 = F5, then B6 = F7 together with C1, because the public README and the skill must give the same install route.
 
@@ -571,6 +571,84 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
   - Only macOS arm64 is verified.
   - `doctor` expects a writable package root, so a root-owned global install reports a filesystem issue.
 - **Owner decisions (2026-10-18):** add an `npm-shrinkwrap.json` so an agent-led install gets the whole dependency tree pinned (done in B6b); keep `engines.node 24.20.x`, which only warns on other Node 24 releases.
+
+**B6b implementation model — F7 on top of the npm package (2026-10-18).**
+- **Pinned dependency tree:** `pnpm pack:npm` also writes an `npm-shrinkwrap.json` into the package, generated with registry access at pack time, so an install resolves the whole tree to fixed versions. Tests check that it exists, matches the declared direct pins and contains no `@naraframe/*` registry entries.
+- **Engine setup script:** `skills/naraframe/scripts/setup-engine.mjs` ships inside the skill. It needs only Node and npm.
+  - It checks prerequisites (Node 24 line, npm, Chrome or Chromium, FFmpeg/FFprobe) and reports each missing one with the usual platform command, without running it.
+  - It installs the engine with `npm install --prefix <dir> naraframe@<version>`. The default `<dir>` is `~/.naraframe/engine/<version>`, and the default version is the one the skill folder declares.
+  - For tests and pre-publication use, the source can be overridden with an explicit local tarball.
+  - It then binds the skill through the engine's installer and runs `doctor`.
+  - Every step is idempotent: an existing healthy engine is reused, and a failure leaves an existing install untouched and prints one next step. It writes nothing outside the chosen engine folder and the skill folder.
+  - It never runs before the user has agreed.
+- **Copied skill folder:** the installer gains an explicit adopt path for a skill folder without a receipt whose files are byte-identical to the canonical skill of that engine version. Edited or unknown folders are still refused.
+- **Skill flow:**
+  - Before authoring, the skill picks its route: install receipt, built source checkout, or none.
+  - With no engine, the agent sends one plain message saying what will be installed, where, roughly how big it is and which system tools are missing, then waits for one yes. After that it runs the setup script and any listed prerequisite installs, then continues the user's request.
+  - On a no, it offers the director-only plan described in the B6 model, labelled not validated and not rendered, and writes no engine source.
+  - Docs use `npx -y naraframe@<version>` for one-off commands.
+- **Launcher:** the `version` probe pipes the engine's stderr. Every bootstrap failure prints one line, `CODE: message. Next: …`, pointing to `installation.md`, and keeps exit 2.
+- **Acceptance:**
+  1. In a fresh temporary project containing only a copied skill folder and no engine, a fresh-context agent told only "make a short explainer about X" asks once. After a scripted yes, it installs from the local package tarball, adopts and binds the skill, runs `doctor` green and reaches a validated project. Pre-publication runs use the tarball override, and the npm default is exercised after publish.
+  2. The same setup with a no yields a director-only plan and no engine source.
+  3. An installed skill with its engine removed prints one clean line and no stack trace.
+  4. Setup is idempotent on a second run.
+  5. Installer, launcher, packaging and existing gates stay green.
+
+**B6b evidence — 2026-10-18 (branch `b6b-skill-without-engine`; owner-approved with correction pass 1 and integrated through its own PR):**
+- **Implementation:**
+  - `pnpm pack:npm` writes an `npm-shrinkwrap.json`: 299 entries, 296 registry packages with `resolved` and `integrity`, and the two bundled `@naraframe/*` marked `inBundle`. A consumer install matched it on every version. The tarball is 274 KB with 132 files, and the pack is reproducible (SHA-256 `3eb15f85…` from both the executor and the supervisor).
+  - `skills/naraframe/scripts/setup-engine.mjs` adds `--check`, install into `~/.naraframe/engine/<version>` (staged and swapped, restoring on failure), adopt-and-bind, then `doctor`. It reuses a healthy engine and reports missing tools without installing them. It requires Node 24.20.0 to match `doctor`.
+  - `skills/naraframe/engine.json` pins the engine version, and the pack fails if it drifts.
+  - The installer gains `--adopt`, accepted only for a receipt-less folder byte-identical to the engine's canonical skill.
+  - The launcher prints exactly one `CODE: message. Next: …` line and exits 2, with no stack traces.
+  - The skill gains a route choice, a no-engine flow (one plain consent message, then setup) and a director-only plan.
+- **Executor acceptance:** a copied skill folder plus the local tarball gave `--check` with no writes; setup in 23 s (237 MB) adopted the skill and turned `doctor` green; a second run reused everything in 1 s; with the engine removed, one clean launcher line appeared.
+- **Fresh-agent onboarding (supervisor):** two new Sonnet agents with only a copied skill folder, a scratch HOME and the request "Buatkan video explainer pendek … kenapa langit berwarna biru". The real `~/.naraframe` stayed untouched.
+  - **Yes path:** one plain consent message about 13 s in, then setup from the local tarball (about 42 s), the skill adopted, and `doctor` green. A validated project followed, then draft preview `167d6118b5b3-550e24b2-165` (540x960, 465 frames, frame integrity clean; supervisor viewed key frames).
+    - Engine ready about 65 s after start; draft about 3.5 min after start.
+  - **No path:** the same consent message; after "no", an offer of a director-only plan. With "boleh", the agent wrote `rencana-video-langit-biru.md`, labelled "Belum divalidasi, belum dirender", and no engine source files.
+- **Friction they reported (not fixed in B6b; candidates for B6c or a later batch):**
+  - Jargon in the consent message.
+  - The install question comes before any word about the video itself.
+  - No guidance on a default profile when the user names none; `current-issues` is the only built-in and requires sourcing.
+  - No guidance on where to place the project folder or how to populate the first source before any revision exists.
+  - The CLI has no `--help`.
+  - The single-column contact sheet is hard to read.
+  - Warnings print twice (stderr and JSON).
+  - The npm default source is untested until publish.
+- **Gates:** `pnpm verify` exit 0, re-run by the supervisor (Biome 236, unit 360/360, integration 497/497, including 27 new setup, installer and package tests). No render change, so no E2E.
+
+**B6b correction pass 1 — nothing written into the skill folder (owner-approved 2026-10-18).** Claude Code installs plugin skills into a versioned cache (`~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`) and documents "Don't write state there"; the folder is replaced on update. Skill installs through `npx skills add`, Codex `.agents/skills` or a plain copy should behave the same. Correction:
+- **Static launcher:** the skill ships `scripts/naraframe.mjs` as an ordinary file rather than a generated one.
+  - With no receipt, it reads the engine version from `engine.json` and locates the engine at `$NARAFRAME_HOME/engine/<version>`, with `NARAFRAME_HOME` defaulting to `~/.naraframe`.
+  - It checks `version --json` against the pinned version and forwards argv.
+  - When an `installation.json` receipt is present (explicit installer route), it keeps today's receipt binding and identity checks.
+- **`setup-engine.mjs`:** by default it writes only under `NARAFRAME_HOME`, never into the skill folder. Adopting or binding through the installer becomes an explicit opt-in for manual project installs.
+- **Skill text:** no instruction depends on writing to the skill folder. Scripts are referenced through the skill folder, as `${CLAUDE_SKILL_DIR}` for Claude plugin skills, so they resolve from a plugin cache.
+- **Acceptance:**
+  1. A copied skill folder made read-only (simulating a plugin cache) goes through `--check`, setup, launcher `version` and `doctor` green, with no file in the skill folder changed (tree hash before and after).
+  2. The receipt route still works.
+  3. Earlier B6b tests and gates stay green or are updated deliberately.
+
+**B6b correction 1 evidence — 2026-10-18:**
+- **Implementation:**
+  - The static launcher `skills/naraframe/scripts/naraframe.mjs` follows the receipt binding when an `installation.json` is present. Otherwise it resolves `$NARAFRAME_HOME/engine/<engine.json version>` and checks version and APIs.
+  - `setup-engine.mjs` writes only under `NARAFRAME_HOME` by default, with `--bind-skill` as an explicit opt-in.
+  - The installer copies the canonical launcher instead of generating one.
+- **Executor acceptance:** a `chmod -R a-w` copy went through check, setup (19.5 s), launcher `version` and `doctor` 8/8 with the skill tree hash unchanged. The receipt route and `--bind-skill` adopt still work.
+- **Fresh-agent retest (supervisor):** both runs used a read-only skill folder, a scratch HOME and the same request. The supervisor's tree hashes of both skill folders were unchanged afterwards, and the real `~/.naraframe` stayed absent.
+  - **Yes path:** one consent message; setup (33 s); engine ready at about 65 s; a validated project at about 176 s; first draft `fa0d966570d9-7f7a1e37-74c` at about 222 s. One ordinary `edit` revision followed (clearing `TEXT_OUTSIDE_SAFE_ZONE`), then draft `c00ad34f29cc-e1f3dcf6-de4`: 450 frames, 0 integrity outliers, key frames viewed by the supervisor.
+  - **No path:** one consent message, then the director-only offer. With "boleh", the agent wrote a plain-text plan and no engine source. The read-only folder caused no errors.
+- **Gates:** `pnpm verify` exit 0, re-run by the supervisor (Biome 237, unit 360/360, integration 508/508).
+- **Onboarding friction from both runs (for B6c, B6d or a later batch; not fixed here):**
+  - There is no command that lists built-in profiles, and no guidance on a default profile. `current-issues` is news-styled and requires sourcing. `profiles/series` and `profiles/starter` look like profiles but fail `profile inspect`.
+  - Consent wording still leans on jargon, and a "no" leads to a second question; one message could offer both options.
+  - The director-only plan has no template and no resume hint.
+  - The skill does not state that transitions play on scene exit.
+  - `--help` says "advertised M0 commands".
+  - SKILL.md is 38 KB, so first-time agents read it in pieces.
+  - An unverified source URL was cited to satisfy `requireSourcing`, which needs the owner's check in real use.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 

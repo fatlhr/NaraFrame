@@ -105,7 +105,8 @@ beforeAll(async () => {
       encoding: "utf8",
     }),
   );
-}, 120_000);
+  // Packing resolves the dependency tree from the public registry.
+}, 240_000);
 
 afterAll(async () => {
   if (scratch) await rm(scratch, { recursive: true, force: true });
@@ -126,6 +127,7 @@ describe("publishable npm package", () => {
     expect(metadata.cpu).toBeUndefined();
     expect(metadata.files).toContain("LICENSE");
     expect(metadata.files).toContain("THIRD-PARTY-NOTICES.md");
+    expect(metadata.files).toContain("npm-shrinkwrap.json");
     expect(metadata.files).not.toContain("node_modules");
     expect(metadata.repository.url).toContain("github.com/fatlhr/NaraFrame");
   });
@@ -169,6 +171,7 @@ describe("publishable npm package", () => {
       "THIRD-PARTY-NOTICES.md",
       "distribution-rights.json",
       "package.json",
+      "npm-shrinkwrap.json",
       "packages/cli/dist/index.js",
       "node_modules/@naraframe/core/package.json",
       "node_modules/@naraframe/core/dist/index.js",
@@ -179,6 +182,9 @@ describe("publishable npm package", () => {
       "starter/README.md",
       "starter/demo/naraframe.json",
       "skills/naraframe/SKILL.md",
+      "skills/naraframe/engine.json",
+      "skills/naraframe/scripts/setup-engine.mjs",
+      "skills/naraframe/scripts/naraframe.mjs",
       "scripts/install-skill.mjs",
     ])
       expect(files).toContain(path);
@@ -218,6 +224,111 @@ describe("publishable npm package", () => {
         /\/Users\/|NaraFrame-projects|NaraFrame-archive/,
       );
     }
+  });
+
+  it("ships the skill's engine declaration for this exact version", async () => {
+    const extracted = await extract("declaration");
+    const declared = await json(
+      join(extracted, "skills/naraframe/engine.json"),
+    );
+    expect(declared).toMatchObject({
+      engine: "naraframe",
+      version: metadata.version,
+    });
+  });
+
+  it("pins the whole third-party tree in npm-shrinkwrap.json", async () => {
+    const lock = JSON.parse(
+      execFileSync("tar", ["-xzOf", tarball, "package/npm-shrinkwrap.json"], {
+        encoding: "utf8",
+        maxBuffer: 16 * 1024 * 1024,
+      }),
+    );
+    expect(lock).toMatchObject({
+      name: "naraframe",
+      version: metadata.version,
+      lockfileVersion: 3,
+    });
+    const packages: Record<
+      string,
+      {
+        version: string;
+        resolved?: string;
+        integrity?: string;
+        inBundle?: boolean;
+        dependencies?: Record<string, string>;
+        bundleDependencies?: string[];
+      }
+    > = lock.packages;
+
+    // The root entry mirrors the published manifest.
+    expect(packages[""]).toMatchObject({
+      name: "naraframe",
+      version: metadata.version,
+      dependencies: metadata.dependencies,
+      bundleDependencies: internal,
+    });
+    // Every direct pin resolves to exactly the declared version.
+    for (const [name, pin] of Object.entries(metadata.dependencies))
+      expect(packages[`node_modules/${name}`]?.version, name).toBe(pin);
+
+    // NaraFrame's own packages travel in the tarball: recorded as bundled, with
+    // no registry location, so npm never asks the registry for them.
+    for (const name of internal) {
+      const entry = packages[`node_modules/${name}`];
+      expect(entry.inBundle).toBe(true);
+      expect(entry.resolved).toBeUndefined();
+      expect(entry.integrity).toBeUndefined();
+    }
+    const bundled = Object.entries(packages).filter(
+      ([, entry]) => entry.inBundle,
+    );
+    expect(bundled.map(([path]) => path).sort()).toEqual(
+      internal.map((name) => `node_modules/${name}`).sort(),
+    );
+    expect(
+      Object.keys(packages).filter(
+        (path) =>
+          path.includes("@naraframe/") &&
+          !path.startsWith("node_modules/@naraframe/"),
+      ),
+    ).toEqual([]);
+
+    // Everything else is a registry package with a fixed location and checksum.
+    const thirdParty = Object.entries(packages).filter(
+      ([path]) => path !== "" && !path.startsWith("node_modules/@naraframe/"),
+    );
+    expect(thirdParty.length).toBeGreaterThan(100);
+    for (const [path, entry] of thirdParty) {
+      expect(entry.version, path).toMatch(/^\d+\.\d+\.\d+/);
+      expect(entry.resolved, path).toMatch(/^https:\/\/registry\.npmjs\.org\//);
+      expect(entry.integrity, path).toMatch(/^sha\d+-/);
+    }
+
+    // The tree is closed: each runtime dependency of each entry is present at
+    // or above it, including the bundled packages' own dependencies.
+    for (const [path, entry] of Object.entries(packages)) {
+      for (const dependency of Object.keys(entry.dependencies ?? {})) {
+        let owner = path;
+        let found = false;
+        for (;;) {
+          if (
+            packages[`${owner ? `${owner}/` : ""}node_modules/${dependency}`]
+          ) {
+            found = true;
+            break;
+          }
+          if (!owner) break;
+          const cut = owner.lastIndexOf("/node_modules/");
+          owner = cut < 0 ? "" : owner.slice(0, cut);
+        }
+        expect(found, `${path} -> ${dependency}`).toBe(true);
+      }
+    }
+
+    // No local paths or private names leaked into the lock.
+    const text = JSON.stringify(lock);
+    expect(text).not.toMatch(/\/Users\/|NaraFrame-projects|file:|\.\.\//);
   });
 
   it("states the MIT licence, the Remotion terms and every direct dependency", async () => {

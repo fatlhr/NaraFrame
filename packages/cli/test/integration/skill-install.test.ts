@@ -1,11 +1,13 @@
 import { execFile } from "node:child_process";
 import {
+  cp,
   mkdir,
   mkdtemp,
   readFile,
   realpath,
   rm,
   symlink,
+  unlink,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -64,6 +66,12 @@ const fixture = async () => {
   await writeFile(
     join(engine, "skills/naraframe/guide.md"),
     "Public engine instructions.\n",
+  );
+  // The launcher is a maintained file of the canonical skill, not generated.
+  await mkdir(join(engine, "skills/naraframe/scripts"), { recursive: true });
+  await cp(
+    resolve("skills/naraframe/scripts/naraframe.mjs"),
+    join(engine, "skills/naraframe/scripts/naraframe.mjs"),
   );
   const data = {
     version: "0.1.0",
@@ -338,6 +346,37 @@ describe("canonical skill installation", () => {
     );
     await expectCode(installSkill(options(f)), "SKILL_SOURCE_INVALID");
   });
+  it("installs the engine's own launcher file unchanged and records its hash", async () => {
+    const f = await fixture();
+    const r = await installSkill(options(f));
+    const canonical = await readFile(
+      join(f.engine, "skills/naraframe/scripts/naraframe.mjs"),
+    );
+    expect(
+      await readFile(join(r.destination, "scripts/naraframe.mjs")),
+    ).toEqual(canonical);
+    const receipt = JSON.parse(
+      await readFile(join(r.destination, "installation.json"), "utf8"),
+    );
+    expect(Object.keys(receipt.files)).toContain("scripts/naraframe.mjs");
+    // An update with a changed launcher in the engine replaces it like any other file.
+    await writeFile(
+      join(f.engine, "skills/naraframe/scripts/naraframe.mjs"),
+      "// changed launcher\n",
+    );
+    await installSkill({ ...options(f), update: true });
+    expect(
+      await readFile(join(r.destination, "scripts/naraframe.mjs"), "utf8"),
+    ).toBe("// changed launcher\n");
+  });
+  it("refuses a canonical skill that ships no launcher", async () => {
+    const f = await fixture();
+    await rm(join(f.engine, "skills/naraframe/scripts"), { recursive: true });
+    await expectCode(installSkill(options(f)), "SKILL_SOURCE_MISSING");
+    await expect(
+      readFile(join(f.project, ".agents/skills/naraframe/SKILL.md")),
+    ).rejects.toMatchObject({ code: "ENOENT" });
+  });
   it("refuses a missing/incompatible engine without creating an installation", async () => {
     const f = await fixture();
     await expectCode(
@@ -387,6 +426,222 @@ describe("canonical skill installation", () => {
       installSkill({ ...options(f), update: true, remove: true }),
       "SKILL_INSTALL_USAGE",
     );
+  });
+  describe("adopting a copied skill folder", () => {
+    // A folder copied from the repository: canonical files, no receipt, no launcher.
+    const copied = async (f: Awaited<ReturnType<typeof fixture>>) => {
+      const destination = join(f.project, ".agents/skills/naraframe");
+      await mkdir(join(f.project, ".agents/skills"), { recursive: true });
+      await cp(join(f.engine, "skills/naraframe"), destination, {
+        recursive: true,
+      });
+      return destination;
+    };
+    it("is refused without the flag, as before", async () => {
+      const f = await fixture();
+      await copied(f);
+      await expectCode(installSkill(options(f)), "SKILL_INSTALL_CONFLICT");
+    });
+    it("binds a byte-identical copy: receipt, launcher, same files", async () => {
+      const f = await fixture();
+      const destination = await copied(f);
+      const result = await installSkill({ ...options(f), adopt: true });
+      expect(result).toMatchObject({
+        action: "adopt",
+        destination,
+        writesPerformed: true,
+      });
+      const receipt = JSON.parse(
+        await readFile(join(destination, "installation.json"), "utf8"),
+      );
+      expect(receipt.adopted).toBe(true);
+      expect(receipt.engineVersion).toBe("0.1.0");
+      expect(Object.keys(receipt.files).sort()).toEqual([
+        "SKILL.md",
+        "guide.md",
+        "scripts/naraframe.mjs",
+      ]);
+      expect(await readFile(join(destination, "guide.md"), "utf8")).toBe(
+        "Public engine instructions.\n",
+      );
+      const { stdout } = await run(
+        process.execPath,
+        [join(destination, "scripts/naraframe.mjs"), "schema", "--json"],
+        { cwd: f.project },
+      );
+      expect(JSON.parse(stdout).command).toBe("schema");
+      // Now an ordinary owned install: it needs --update, and --adopt does not bypass that.
+      await expectCode(
+        installSkill({ ...options(f), adopt: true }),
+        "SKILL_INSTALL_EXISTS",
+      );
+      await installSkill({ ...options(f), update: true });
+    });
+    it("installs normally when nothing is there", async () => {
+      const f = await fixture();
+      const result = await installSkill({ ...options(f), adopt: true });
+      expect(result.action).toBe("install");
+    });
+    it("refuses an edited file, leaving the folder untouched", async () => {
+      const f = await fixture();
+      const destination = await copied(f);
+      await writeFile(join(destination, "guide.md"), "Local edit.\n");
+      await expect(
+        installSkill({ ...options(f), adopt: true }),
+      ).rejects.toMatchObject({
+        code: "SKILL_INSTALL_CONFLICT",
+        message: expect.stringContaining("edited guide.md"),
+      });
+      expect(await readFile(join(destination, "guide.md"), "utf8")).toBe(
+        "Local edit.\n",
+      );
+      await expect(
+        readFile(join(destination, "installation.json")),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+    });
+    it("refuses an extra file or a missing file", async () => {
+      const f = await fixture();
+      const destination = await copied(f);
+      await writeFile(join(destination, "notes.txt"), "Mine.\n");
+      await expect(
+        installSkill({ ...options(f), adopt: true }),
+      ).rejects.toMatchObject({
+        code: "SKILL_INSTALL_CONFLICT",
+        message: expect.stringContaining("extra notes.txt"),
+      });
+      expect(await readFile(join(destination, "notes.txt"), "utf8")).toBe(
+        "Mine.\n",
+      );
+      await unlink(join(destination, "notes.txt"));
+      await unlink(join(destination, "guide.md"));
+      await expect(
+        installSkill({ ...options(f), adopt: true }),
+      ).rejects.toMatchObject({
+        code: "SKILL_INSTALL_CONFLICT",
+        message: expect.stringContaining("missing guide.md"),
+      });
+    });
+    it("refuses symlinks, an unreadable receipt and a symlinked destination", async () => {
+      const f = await fixture();
+      const destination = await copied(f);
+      await unlink(join(destination, "guide.md"));
+      await symlink(f.entry, join(destination, "guide.md"));
+      await expectCode(
+        installSkill({ ...options(f), adopt: true }),
+        "SKILL_INSTALL_UNSAFE",
+      );
+      await unlink(join(destination, "guide.md"));
+      await cp(
+        join(f.engine, "skills/naraframe/guide.md"),
+        join(destination, "guide.md"),
+      );
+      await writeFile(join(destination, "installation.json"), "{not json");
+      await expectCode(
+        installSkill({ ...options(f), adopt: true }),
+        "SKILL_INSTALL_CONFLICT",
+      );
+      expect(
+        await readFile(join(destination, "installation.json"), "utf8"),
+      ).toBe("{not json");
+      const second = await fixture();
+      await mkdir(join(second.project, ".agents/skills"), { recursive: true });
+      await symlink(
+        join(second.engine, "skills/naraframe"),
+        join(second.project, ".agents/skills/naraframe"),
+      );
+      await expectCode(
+        installSkill({ ...options(second), adopt: true }),
+        "SKILL_INSTALL_CONFLICT",
+      );
+    });
+    it("dry-run reports the adoption, or the refusal, and writes nothing", async () => {
+      const f = await fixture();
+      const destination = await copied(f);
+      const result = await installSkill({
+        ...options(f),
+        adopt: true,
+        dryRun: true,
+      });
+      expect(result).toMatchObject({ action: "adopt", writesPerformed: false });
+      await expect(
+        readFile(join(destination, "installation.json")),
+      ).rejects.toMatchObject({ code: "ENOENT" });
+      await writeFile(join(destination, "SKILL.md"), "Changed.\n");
+      await expectCode(
+        installSkill({ ...options(f), adopt: true, dryRun: true }),
+        "SKILL_INSTALL_CONFLICT",
+      );
+    });
+    it("cannot be combined with update or remove", async () => {
+      const f = await fixture();
+      await expectCode(
+        installSkill({ ...options(f), adopt: true, update: true }),
+        "SKILL_INSTALL_USAGE",
+      );
+      await expectCode(
+        installSkill({ ...options(f), adopt: true, remove: true }),
+        "SKILL_INSTALL_USAGE",
+      );
+    });
+  });
+  describe("launcher bootstrap failures", () => {
+    const launch = async (destination: string) => {
+      try {
+        await run(process.execPath, [
+          join(destination, "scripts/naraframe.mjs"),
+          "version",
+          "--json",
+        ]);
+      } catch (error) {
+        return error as { code: number; stderr: string; stdout: string };
+      }
+      throw new Error("The launcher unexpectedly succeeded.");
+    };
+    const expectOneLine = (stderr: string, code: string) => {
+      expect(stderr.endsWith("\n")).toBe(true);
+      expect(stderr.trimEnd().split("\n")).toHaveLength(1);
+      expect(stderr).toMatch(
+        new RegExp(`^${code}: .+\\. Next: .+ \\(see installation\\.md\\)\\n$`),
+      );
+      expect(stderr).not.toMatch(/Node\.js v|\n\s+at |node:internal|Error:/);
+    };
+    it("prints one line, no stack trace, when the engine entry is gone", async () => {
+      const f = await fixture();
+      const r = await installSkill(options(f));
+      await rm(f.entry);
+      const failed = await launch(r.destination);
+      expect(failed.code).toBe(2);
+      expect(failed.stdout).toBe("");
+      expectOneLine(failed.stderr, "SKILL_ENGINE_MISSING");
+      expect(failed.stderr).toContain("setup-engine.mjs");
+    });
+    it("hides the stack trace of an engine that crashes", async () => {
+      const f = await fixture();
+      const r = await installSkill(options(f));
+      await writeFile(
+        f.entry,
+        "function broken(){throw new Error('internal failure');}\nbroken();\n",
+      );
+      const failed = await launch(r.destination);
+      expect(failed.code).toBe(2);
+      expectOneLine(failed.stderr, "SKILL_ENGINE_MISSING");
+    });
+    it("prints one line for an unreadable receipt and for a changed engine", async () => {
+      const f = await fixture();
+      const r = await installSkill(options(f));
+      await writeFile(
+        f.entry,
+        `console.log(JSON.stringify({success:true,command:'version',data:${JSON.stringify({ ...f.data, version: "0.2.0" })}}));\n`,
+      );
+      expectOneLine(
+        (await launch(r.destination)).stderr,
+        "SKILL_ENGINE_CHANGED",
+      );
+      await writeFile(join(r.destination, "installation.json"), "nope");
+      const failed = await launch(r.destination);
+      expect(failed.code).toBe(2);
+      expectOneLine(failed.stderr, "SKILL_INSTALL_INVALID");
+    });
   });
   it("the public helper emits one JSON result for incorrect usage", async () => {
     const script = resolve("scripts/install-skill.mjs");

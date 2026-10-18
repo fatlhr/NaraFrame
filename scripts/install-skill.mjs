@@ -58,7 +58,10 @@ export const inventorySkill = async (directory, prefix = "") => {
   return files;
 };
 
-const checkExisting = async (destination) => {
+// A folder with no receipt at all is refused, unless the caller asked to adopt
+// it. Adoption returns the folder's own inventory so that it can be compared with
+// the canonical skill; a present but unreadable receipt is never adopted.
+const checkExisting = async (destination, adopt = false) => {
   const stat = await present(destination);
   if (!stat) return null;
   if (!stat.isDirectory() || stat.isSymbolicLink())
@@ -66,6 +69,8 @@ const checkExisting = async (destination) => {
       "SKILL_INSTALL_CONFLICT",
       "The destination is not an owned regular skill directory.",
     );
+  if (adopt && !(await present(join(destination, receiptFile))))
+    return { unreceipted: true, files: await inventorySkill(destination) };
   let receipt;
   try {
     const receiptStat = await lstat(join(destination, receiptFile));
@@ -191,28 +196,6 @@ export const inspectEngine = async (entry) => {
   };
 };
 
-const launcher = `#!/usr/bin/env node
-import {readFile,realpath} from 'node:fs/promises';
-import {execFileSync,spawn} from 'node:child_process';
-const args=process.argv.slice(2);
-const fail=(code,message)=>{console.error(code+': '+message);process.exit(2);};
-let receipt;
-try{receipt=JSON.parse(await readFile(new URL('../installation.json',import.meta.url),'utf8'));}
-catch{fail('SKILL_INSTALL_INVALID','Read the install receipt or reinstall the skill.');}
-let version;
-try{version=JSON.parse(execFileSync(process.execPath,[receipt.engineEntry,'version','--json'],{encoding:'utf8',timeout:10000,maxBuffer:1048576}));}
-catch{fail('SKILL_ENGINE_MISSING','The pinned engine cannot be inspected. Reinstall with an available engine entry.');}
-const d=version?.data;
-let resourceRoot;try{resourceRoot=await realpath(d?.resourceRoot);}catch{fail('SKILL_ENGINE_MISSING','The pinned engine resources are missing.');}
-if(!version.success||version.command!=='version'||d?.skillApiVersion!==1||d.sourceSchemaVersion!==1||
-   d.version!==receipt.engineVersion||d.renderEngine!==receipt.renderEngine||d.engineIdentity!==receipt.engineIdentity||resourceRoot!==receipt.resourceRoot)
-  fail('SKILL_ENGINE_CHANGED','The pinned engine/version changed. Inspect the new engine and explicitly update this skill installation.');
-const child=spawn(process.execPath,[receipt.engineEntry,...args],{stdio:'inherit'});
-for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>child.kill(signal));
-child.on('error',()=>fail('SKILL_ENGINE_MISSING','The pinned engine could not be started.'));
-child.on('exit',(code,signal)=>{process.exitCode=code??(signal==='SIGINT'?130:2);});
-`;
-
 export const installSkill = async (options) => {
   if (
     !["claude", "codex"].includes(options.host) ||
@@ -224,6 +207,11 @@ export const installSkill = async (options) => {
     );
   if (options.update && options.remove)
     throw failure("SKILL_INSTALL_USAGE", "Choose update or remove, not both.");
+  if (options.adopt && (options.update || options.remove))
+    throw failure(
+      "SKILL_INSTALL_USAGE",
+      "--adopt applies to a first install only; it cannot be combined with update or remove.",
+    );
   if (options.scope === "project" && (!options.project || options.userRoot))
     throw failure(
       "SKILL_INSTALL_USAGE",
@@ -267,8 +255,9 @@ export const installSkill = async (options) => {
     }
   };
   const destination = join(parent, "naraframe");
-  const old = await checkExisting(destination);
-  if (old && !options.update && !options.remove)
+  const old = await checkExisting(destination, options.adopt);
+  const adopting = Boolean(old?.unreceipted);
+  if (old && !adopting && !options.update && !options.remove)
     throw failure(
       "SKILL_INSTALL_EXISTS",
       "NaraFrame is already installed here. Inspect it, then use --update explicitly.",
@@ -278,7 +267,13 @@ export const installSkill = async (options) => {
       "SKILL_INSTALL_MISSING",
       "There is no owned NaraFrame installation to update or remove.",
     );
-  const action = options.remove ? "remove" : old ? "update" : "install";
+  const action = options.remove
+    ? "remove"
+    : adopting
+      ? "adopt"
+      : old
+        ? "update"
+        : "install";
   const engine = options.remove
     ? null
     : await inspectEngine(
@@ -293,7 +288,35 @@ export const installSkill = async (options) => {
         "SKILL_SOURCE_MISSING",
         "The engine artifact does not include its canonical skill.",
       );
-    await checkReferences(source, await inventorySkill(source));
+    const canonical = await inventorySkill(source);
+    // The launcher is part of the canonical skill, not generated per install.
+    if (!("scripts/naraframe.mjs" in canonical))
+      throw failure(
+        "SKILL_SOURCE_MISSING",
+        "The engine's canonical skill has no scripts/naraframe.mjs launcher.",
+      );
+    await checkReferences(source, canonical);
+    if (adopting) {
+      // Adoption is for a copied, untouched skill folder only.
+      const differences = [
+        ...Object.keys(old.files)
+          .filter((path) => !(path in canonical))
+          .map((path) => `extra ${path}`),
+        ...Object.keys(canonical)
+          .filter((path) => !(path in old.files))
+          .map((path) => `missing ${path}`),
+        ...Object.keys(canonical)
+          .filter(
+            (path) => path in old.files && old.files[path] !== canonical[path],
+          )
+          .map((path) => `edited ${path}`),
+      ];
+      if (differences.length)
+        throw failure(
+          "SKILL_INSTALL_CONFLICT",
+          `The existing skill without a receipt differs from the engine's canonical skill (${differences.slice(0, 3).join(", ")}${differences.length > 3 ? `, and ${differences.length - 3} more` : ""}). Leave it intact and select another scope.`,
+        );
+    }
   }
   const result = {
     schemaVersion: 1,
@@ -330,10 +353,6 @@ export const installSkill = async (options) => {
   try {
     if (!options.remove) {
       await cp(source, candidate, { recursive: true, dereference: false });
-      await mkdir(join(candidate, "scripts"), { recursive: true });
-      await writeFile(join(candidate, "scripts/naraframe.mjs"), launcher, {
-        mode: 0o755,
-      });
       const files = await inventorySkill(candidate);
       await checkReferences(candidate, files);
       const receipt = {
@@ -341,6 +360,7 @@ export const installSkill = async (options) => {
         ...engine,
         host: options.host,
         scope: options.scope,
+        ...(adopting ? { adopted: true } : {}),
         installedAt: new Date().toISOString(),
         files,
       };
@@ -351,7 +371,7 @@ export const installSkill = async (options) => {
     }
     // Recheck after staging; no overwrite of edits made during preparation.
     await checkParents(stableParents);
-    const now = await checkExisting(destination);
+    const now = await checkExisting(destination, options.adopt);
     if (JSON.stringify(now) !== JSON.stringify(old))
       throw failure(
         "SKILL_INSTALL_CONFLICT",
@@ -361,7 +381,7 @@ export const installSkill = async (options) => {
       await rename(destination, backup);
       saved = true;
       // Catch edits made between the last check and the move before deleting a backup.
-      const moved = await checkExisting(backup);
+      const moved = await checkExisting(backup, options.adopt);
       if (JSON.stringify(moved) !== JSON.stringify(old))
         throw failure(
           "SKILL_INSTALL_CONFLICT",
@@ -400,7 +420,7 @@ export const installSkill = async (options) => {
 
 const parse = (args) => {
   const options = {},
-    booleans = new Set(["dry-run", "update", "remove", "json"]);
+    booleans = new Set(["dry-run", "update", "remove", "adopt", "json"]);
   const values = new Set([
     "host",
     "scope",
