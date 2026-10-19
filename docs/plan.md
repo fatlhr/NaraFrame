@@ -815,6 +815,51 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 
 Their final frames replace the README placeholders.
 
+**G1 run (2026-10-19, supervisor takes over after an earlier attempt by another agent was dropped; restarted from main `0c34de9` on `g1-gallery`):**
+- **Quality bar:** a gallery tile has to look like a real episode, not an engine test.
+  - Every scene has a drawn object, diagram or picture, and there is no text-only slide.
+  - Motion is varied, with at least one camera move and one non-cut transition.
+  - The video runs 20–30 s and is silent.
+  - Every factual claim is labelled and cites a source the agent actually opened. There is no `no-sources` waiver, because only the owner can give one.
+- **Demos, all in Indonesian like the existing gallery:**
+  - **News:** `current-issues`, the 2023 El Niño and Indonesia's long dry season, sourced from official pages.
+  - **Paper and ink:** a light profile from `profile new --from general-explainer` (warm paper background, ink-red accent), why bread dough rises.
+  - **Route or process:** `general-explainer`, starting from the `path-note` pattern and extended into a drawn route, how river water becomes tap water.
+  - **Picture with pointers:** `general-explainer` with a synthetic plate. The agent draws a bicycle as SVG, rasterises it with local Chrome, and pins notes to it using the `anchored-note` technique of an image with attached notes. The starter's schematic poses are too crude for a gallery tile.
+- **Flow:**
+  1. Fresh Sonnet agents work from a read-only skill copy with a scratch HOME, two at a time to keep render load low.
+  2. The supervisor reviews storyboards and frames, with at most two correction rounds per demo.
+  3. The owner approves the drafts, then the 1080 finals are exported.
+  4. One frame of each final becomes a 360x640 README tile, then a PR.
+- **G1 result (2026-10-19):** four fresh Sonnet agents worked from a read-only skill copy of `0c34de9` with a scratch HOME. The supervisor reviewed frames of every draft. Sources and project files are in `work/m4-followups/g1/demo/`; review frames are in `work/m4-followups/g1/review/`.
+
+  | Demo | Look | Final | Sources |
+  | --- | --- | --- | --- |
+  | News: El Niño 2023 and the dry season | `current-issues` | `69a5d97b6c16-c4db8cfd-fc1`, 894 frames | NOAA Climate.gov ×2, NOAA CPC, BMKG ×2 |
+  | Paper and ink: why bread dough rises | "Kertas & Tinta", `#F3ECDD` / `#B23A2B` | `a161cf234117-b53eda3a-bbe`, 870 frames | Wikipedia (Bread, Baker's yeast, Gluten) |
+  | Route: river water to the tap | "Jernih", `#0B3C49` / `#FF7F50` | `bac7ea0a6653-4f8876e2-313`, 882 frames | CDC, US EPA |
+  | Picture with pointers: parts of a bicycle | "Ungu Malam", `#2A1F3D` / `#F5B83D` | `15cb543ed860-b5038f94-28e`, 885 frames | Wikipedia (Bicycle, chain, gearing, brake) |
+
+  - **Every final:** 1080x1920, silent, a full decode with no errors and no DRAFT label, 0 integrity outliers in the drafts, and `validate --stage production` ready with info notes only (`CONTRAST_UNVERIFIED`).
+  - **Export route:** each went through `preview --resolution 1080`, then `render --approve-preview`.
+  - **News:**
+    - The agent did not claim a *longer* dry season, because no 2023 source it opened says so.
+    - The supervisor re-read the NOAA CPC page (+0.8 °C weekly Niño-3.4) and the BMKG page (63% of zones in dry season, drier than the previous three years, peak in August–September).
+  - **Paper and ink:** the oven rise is attributed to steam from water in the bubbles, as the Bread page says, not to the CO₂ expanding.
+  - **Route:**
+    - It starts from a staged `path-note@1.0.0` scene, extended to six stations.
+    - After the owner asked for a different palette, it was switched with `profile new` and `profile apply`. The dry run reported 92 palette-bound properties and 187 literal colours; the literal colours were then retokenised or recoloured through `edit`.
+  - **Bicycle:**
+    - The picture is the agent's own SVG, rasterised to a 4140x2220 PNG with local Chrome, using the anchored-note technique of world pins with leaders.
+    - The owner asked to change the palette without touching the picture. `profile apply` repainted 108 palette-bound properties and found 0 literal colours. The PNG's own ground line is hidden with an image `crop`, and the PNG sha256 is unchanged (`ae00a098…`).
+    - "A bigger rear cog means easier pedalling" is an inference from the gearing page, and it is recorded in the scene note.
+  - **Engine findings, checked by the supervisor; neither became a task:**
+    - `library stage` writes its staging copy to the system temp folder (`mkdtemp(tmpdir())`), not the project's folder. `audio stage` does the same; it is the documented staging route, and `edit --from` reads the returned path.
+      - It only matters for an agent told never to write to `/tmp`. If it matters later, the fix is a small `--staging-dir` option.
+    - "A stale `naraframe.json` in `edit` staging silently reverts a profile switch" was the route agent's concern, not something it observed.
+      - The supervisor tested it on a copy of the route project: `edit` with the old `profile` was refused with `STAGED_SOURCE_INVALID` and `PROFILE_MISMATCH`, and nothing changed. The engine already guards this.
+  - **README:** the four placeholders are replaced by tiles taken from the finals (`gallery-news|paper|route|pointers.png`, 360x640), and the gallery intro now matches how the demos were made.
+
 **B7 model — skill formula from the reference study (owner-approved 2026-10-18; PR order owner-approved: skill restructure first, engine aids second).**
 - **Reference study** (`bangtutorial/bang-motion`, `heygen-com/hyperframes`): a router skill with a capability map and "use when" tables, job guides loaded on demand, and checks an agent can verify itself. NaraFrame adopts the pattern; the content stays NaraFrame's own.
 - **PR1 — skill restructure (`b7-skill-restructure`):**

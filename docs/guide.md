@@ -493,6 +493,18 @@ Run only recipes whose code you trust. Bindings check declared params, and stati
 
 If your workflow requires identical pixels or hashes across renders, verify the outputs. Bit-for-bit equality across renders is not guaranteed. Technical details and feature status are recorded in the [plan](plan.md).
 
+## 9. Uninstall
+
+Remove what you installed, in any order:
+
+- **Claude Code plugin:** run `/plugin uninstall naraframe@naraframe`, then `/plugin marketplace remove naraframe` (removing the marketplace also uninstalls any plugin still installed from it).
+- **A skill installed with the installer:** run `node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host <codex|claude> --scope <project|user> [--project <dir>] --remove --json`. It removes only a receipt-owned installation and refuses a folder with local edits.
+- **A skill folder you copied by hand:** delete the `naraframe` folder from the agent's skills folder.
+- **The engine installed by your agent:** delete `~/.naraframe`, or the folder `NARAFRAME_HOME` points to.
+- **An engine you built or unpacked yourself:** delete that folder (`$NARAFRAME_ENGINE`).
+
+Projects, revisions, previews and exports live in your own project folders and are never removed by these steps. Node.js, Chrome and FFmpeg stay installed.
+
 ## Development and documentation
 
 ```sh
@@ -516,4 +528,4 @@ pnpm test:e2e
 
 Keep production projects outside this checkout, for example in `../my-videos/`. The local `work/` directory is reserved for development scratch. Further MVP 2 work is tracked in M4; the capability registry lists only implemented forms with test evidence.
 
-The repository does not include a LICENSE file. Confirm permission before distributing code or media; their presence in the repository does not automatically grant redistribution rights.
+NaraFrame's code is released under the [MIT License](../LICENSE); third-party terms, including Remotion's, are in [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md). Media you add to your own projects keeps its own rights.
