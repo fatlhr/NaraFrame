@@ -6,6 +6,7 @@ import {
   readFile,
   rm,
   stat,
+  utimes,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -417,5 +418,47 @@ describe("project lock", () => {
     await expect(stat(join(root, ".naraframe", "lock"))).rejects.toMatchObject({
       code: "ENOENT",
     });
+  });
+
+  // Regression: a holder creates the lock file before it writes its pid, so a
+  // second writer can see an empty lock. Treating that as stale let two
+  // writers in at once and lost one of several concurrent trust appends.
+  it("waits for a lock whose owner is still writing it", async () => {
+    const root = await makeProject();
+    await sync(root);
+    const lock = join(root, ".naraframe", "lock");
+    await writeFile(lock, "");
+    let ran = false;
+    const result = await withProjectLock(
+      root,
+      async () => {
+        ran = true;
+        return { ok: true as const, value: "ran", issues: [] };
+      },
+      { waitMs: 100 },
+    );
+    expect(ran).toBe(false);
+    expect(result.ok).toBe(false);
+    if (!result.ok)
+      expect(result.issues.map((issue) => issue.code)).toEqual([
+        "PROJECT_LOCKED",
+      ]);
+    expect(await readFile(lock, "utf8")).toBe("");
+  });
+
+  it("takes over an unreadable lock once it is too old to be mid-write", async () => {
+    const root = await makeProject();
+    await sync(root);
+    const lock = join(root, ".naraframe", "lock");
+    await writeFile(lock, "");
+    const past = new Date(Date.now() - 60_000);
+    await utimes(lock, past, past);
+    const result = await withProjectLock(root, async () => ({
+      ok: true as const,
+      value: "ran",
+      issues: [],
+    }));
+    expect(result.ok).toBe(true);
+    await expect(stat(lock)).rejects.toMatchObject({ code: "ENOENT" });
   });
 });
