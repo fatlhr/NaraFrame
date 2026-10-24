@@ -11,7 +11,7 @@
       "source": "./",
       "displayName": "NaraFrame",
       "description": "Make vertical explainer videos for a recurring series on your own computer, with a consistent look per series, a preview-approve-export flow and reuse of unchanged work.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Fatiha Rahmat",
         "url": "https://github.com/fatlhr"
