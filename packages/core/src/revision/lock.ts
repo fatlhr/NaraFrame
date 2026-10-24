@@ -1,4 +1,4 @@
-import { mkdir, open, readFile, unlink } from "node:fs/promises";
+import { mkdir, open, readFile, stat, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import type { Result } from "../model/issue.js";
 import { issueFor } from "./store.js";
@@ -9,6 +9,18 @@ const isProcessAlive = (pid: number): boolean => {
     return true;
   } catch (error) {
     return (error as NodeJS.ErrnoException).code === "EPERM";
+  }
+};
+
+/** How long a lock without a readable owner may still be mid-write. */
+const UNREADABLE_LOCK_GRACE_MS = 5_000;
+
+const isFresh = async (lockPath: string): Promise<boolean> => {
+  try {
+    const { mtimeMs } = await stat(lockPath);
+    return Date.now() - mtimeMs < UNREADABLE_LOCK_GRACE_MS;
+  } catch {
+    return false;
   }
 };
 
@@ -63,7 +75,11 @@ const withProjectLockOnce = async <T>(
       };
       ownerAlive = typeof owner.pid === "number" && isProcessAlive(owner.pid);
     } catch {
-      ownerAlive = false;
+      // The holder creates the file before it writes its pid, so an
+      // unreadable lock is usually one being written right now. Treat it as
+      // held until it is too old for that, which still frees a lock left by a
+      // crash between those two steps.
+      ownerAlive = await isFresh(lockPath);
     }
     if (ownerAlive) {
       return {

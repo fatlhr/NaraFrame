@@ -957,6 +957,17 @@ Their final frames replace the README placeholders.
   - **Draft:** `6821d58b71eb-6adfa253-ae6`, 42.5 s, 1275 frames, 0 outliers. The supervisor viewed frames of all five scenes. The skill tree hash was unchanged. 142,909 tokens, 21 tool calls.
   - **Still open:** the agent used `--template starter` but also dumped `schema --json`. The earlier template run did not, so the starter does not reliably replace the schema read. One preview was rejected with `TEXT_OUTSIDE_CANVAS` from a `match-cut` zoom and fixed through `edit`.
   - **Evidence:** `work/m4-followups/b7/runs/visual-retest/`.
+- **Fix: lost recipe-trust appends (2026-10-24):**
+  - **Cause:** `withProjectLock` creates the lock file before it writes the holder's pid. A second writer that read the still-empty file treated it as stale, deleted it and ran its own read-modify-write. It could then overwrite another append.
+  - **Fix:** an unreadable lock is treated as held while it is newer than 5 s. An older one is still taken over, so a crash between the two steps cannot wedge a project. Every `withProjectLock` user benefits: `edit`, `undo`, `profile apply` and trust appends.
+  - **Regression tests in `revisions.test.ts`:**
+    - A fresh empty lock gives `PROJECT_LOCKED` and the work does not run.
+    - An old empty lock is taken over.
+  - **Stress** (concurrent appends to a fresh project):
+    - Before the fix: 1 trial with a lost append in 300 at width 8, and 1 in 1000.
+    - After the fix: 0 in 1000 at width 3, 0 in 1000 at width 8, and 0 in 3000 at width 8.
+  - **Gates:** `pnpm verify` exit 0 (Biome 253, unit 383/383, integration 549/549).
+  - **Not covered:** two writers that both find the *same dead* owner can still both take over. That needs a crash first, and no failure has been seen from it.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
