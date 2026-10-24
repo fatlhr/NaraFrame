@@ -947,6 +947,16 @@ Their final frames replace the README placeholders.
     - No schema dump, and the first `validate` had no errors. The sources question was asked once before the preview.
     - Draft `c03a4489c365-598d43c2-b87`: 25.5 s, 765 frames, 0 outliers. About 109k tokens, 16 tool calls.
     - The video came out as a text-only slideshow, which led to the `authoring.md` sentence above.
+- **Visual re-test (2026-10-23, supervisor):** the same one-off request ("kenapa langit berwarna biru", one-off, no sources by the simulated owner), run by a fresh Sonnet agent with a read-only skill from main `f6fb866`. The prompt said nothing about visuals.
+  - **Result:** every scene had a drawn diagram.
+    - A sky panel with the sun.
+    - A prism splitting a beam into six rays.
+    - Molecules with a straight red ray against a zigzag blue ray, each followed by a dot.
+    - Short noon and long dusk light paths.
+    - Day and dusk sky panels in the payoff.
+  - **Draft:** `6821d58b71eb-6adfa253-ae6`, 42.5 s, 1275 frames, 0 outliers. The supervisor viewed frames of all five scenes. The skill tree hash was unchanged. 142,909 tokens, 21 tool calls.
+  - **Still open:** the agent used `--template starter` but also dumped `schema --json`. The earlier template run did not, so the starter does not reliably replace the schema read. One preview was rejected with `TEXT_OUTSIDE_CANVAS` from a `match-cut` zoom and fixed through `edit`.
+  - **Evidence:** `work/m4-followups/b7/runs/visual-retest/`.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
