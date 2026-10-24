@@ -989,6 +989,20 @@ Their final frames replace the README placeholders.
     2. `npm deprecate naraframe@0.1.0 "Broken install, use 0.1.1"`.
     3. Make the repository public.
     4. The supervisor verifies a clean `setup-engine` from npm and the plugin route.
+- **Release verified (2026-10-24, supervisor):**
+  - **Done by the owner:**
+    - `naraframe@0.1.1` published, shasum `e2bb29c6…`, the same as the tarball packed from main `59f8db6` that passed `check:registry-install`.
+    - 0.1.0 deprecated ("Broken install, use 0.1.1").
+    - The repository made public.
+  - **Repository:** visibility `PUBLIC`. The GitHub page and the raw README return 200 without login.
+  - **npm, from a clean scratch HOME with a read-only skill from main, without `--source`:**
+    - 0.1.1 was available about 2 minutes after publishing. `setup-engine --json` was ready in 64 s, and `version` reports 0.1.1. `doctor` is ready (node, packages, browser, ffmpeg, ffprobe, font, filesystem, renderer).
+    - `create --template starter`, then `validate`, then `preview --draft` rendered `f1e23f479ed2-5d500def-1cc` (765 frames, 0 integrity outliers) in 57 s.
+  - **Claude Code plugin, with a scratch `CLAUDE_CONFIG_DIR`:**
+    - `claude plugin marketplace add fatlhr/NaraFrame` and `claude plugin install naraframe@naraframe` installed plugin 0.1.1, whose skill `engine.json` names 0.1.1.
+    - The README uninstall commands removed the plugin and the marketplace.
+  - **Other agents:** an anonymous `git clone --depth 1` of the public repository and the README's copy into `~/.agents/skills/` work.
+  - **Not verified:** `npx skills add`, a third-party CLI, was not run.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 
