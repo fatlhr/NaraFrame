@@ -134,7 +134,7 @@ External providers remain outside the engine. Existing local import/generation w
 ## 6. Runtime, integrity, and reuse
 
 - Core is independent of Remotion. Dependency direction is CLI → core/renderer and renderer → core.
-- Runtime is pinned: Node `24.20.0`, pnpm `12.3.4`, Remotion `4.0.521`. Integrated main uses `naraframe-draft/13`: frames are captured one browser tab at a time, because parallel capture under CPU load produced silent single-frame corruption.
+- Development is pinned: Node `24.20.0`, pnpm `12.3.4`, Remotion `4.0.521`. The published engine runs on Node 22 or newer; the Node version is recorded with each build but is not part of its render key. Integrated main uses `naraframe-draft/13`: frames are captured one browser tab at a time, because parallel capture under CPU load produced silent single-frame corruption.
 - Preview supports 540 and native 1080 resolution with distinct render keys. Final export is vertical H.264 MP4; audio streams follow the declared mode.
 - Render identity, profile/font/vector/camera/recipe dependencies, and scope participate in relevant cache keys. Runtime changes that invalidate old results require deliberate identity/key treatment.
 - Publication verifies complete artifacts, media streams, hashes, and metadata before advancing pointers. Failure must not publish a partial build.

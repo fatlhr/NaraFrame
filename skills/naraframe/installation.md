@@ -28,7 +28,7 @@ Every launcher failure is one line, `CODE: message. Next: step (see installation
 
 ## Install the engine from npm
 
-A skill folder copied from GitHub, installed with `npx skills add`, or delivered as a plugin has no engine. `scripts/setup-engine.mjs` in it installs one. It needs only Node 24.20.0 and npm, runs only after the user agrees, and writes only under `NARAFRAME_HOME` (default `~/.naraframe`): never into the skill folder, which can be read-only.
+A skill folder copied from GitHub, installed with `npx skills add`, or delivered as a plugin has no engine. `scripts/setup-engine.mjs` in it installs one. It needs only Node 22 or newer and npm, runs only after the user agrees, and writes only under `NARAFRAME_HOME` (default `~/.naraframe`): never into the skill folder, which can be read-only.
 
 ```sh
 # Read-only: prerequisites, planned folder, existing engine. Writes nothing.
@@ -64,7 +64,7 @@ Add `--update` to replace a receipt-owned, unchanged install. Add `--remove` to 
 
 - `SKILL_ENGINE_MISSING` or `SKILL_ENGINE_INCOMPATIBLE`: the pinned engine is gone, moved or cannot start. Run `setup-engine.mjs --check --json`, tell the user, and with their agreement run it again without `--check` (see above). A receipt-bound skill whose engine is gone stays bound to it: rebind with `--bind-skill`, or use a skill folder without a receipt. For an incompatible engine, install/build one supporting skill API 1; do not infer compatibility from a folder name.
 - `SKILL_INSTALL_INVALID`: `engine.json` or the receipt next to the launcher is unreadable. Restore the skill folder, or reinstall it through the installer.
-- `SETUP_PREREQUISITE_MISSING`: Node 24.20.0 or npm is not the one running the script. Install it as the line says and run the script with it first on PATH.
+- `SETUP_PREREQUISITE_MISSING`: the Node running the script is older than 22, or npm is missing. Install it as the line says and run the script with it first on PATH.
 - `SETUP_NPM_UNREACHABLE` or `SETUP_INSTALL_FAILED`: npm could not fetch the package. Check the connection and registry, then run the same command; the existing engine is untouched.
 - `SETUP_ENGINE_NOT_PUBLISHED`: that version is not on the registry. Use `--source` with a local package, or a published version.
 - `SETUP_ENGINE_INVALID`: the installed package is not the version this skill declares. Pass a matching `--source` or update the skill.

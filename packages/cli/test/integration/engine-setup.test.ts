@@ -168,7 +168,7 @@ const project = async () => {
     directory,
     skill,
     naraframeHome,
-    engineDir: join(naraframeHome, "engine", "0.1.1"),
+    engineDir: join(naraframeHome, "engine", "0.1.2"),
   };
 };
 type Project = Awaited<ReturnType<typeof project>>;
@@ -267,9 +267,13 @@ describe("engine declaration", () => {
     );
     expect(pack).toContain(`const PACKAGE_VERSION = "${declared.version}"`);
     expect(declared.engine).toBe("naraframe");
-    expect(declared.node).toBe(
-      (await readFile(join(repository, ".node-version"), "utf8")).trim(),
+    // The skill's minimum matches the engine doctor's.
+    const doctor = await readFile(
+      join(repository, "packages/cli/src/doctor.ts"),
+      "utf8",
     );
+    const minimum = /MINIMUM_NODE = "(\d+)\.\d+\.\d+"/.exec(doctor)?.[1];
+    expect(declared.node).toBe(`>=${minimum}`);
     expect(declared.approximateInstallMB).toBeGreaterThan(0);
   });
 });
@@ -292,7 +296,7 @@ describe("setup-engine --check", () => {
       doctor: null,
       missingPrerequisites: [],
     });
-    expect(report.plan.spec).toBe("naraframe@0.1.1");
+    expect(report.plan.spec).toBe("naraframe@0.1.2");
     expect(report.prerequisites.map((c: { id: string }) => c.id)).toEqual([
       "node",
       "npm",
@@ -373,7 +377,7 @@ describe("setup-engine (default: nothing is written into the skill folder)", () 
     const version = JSON.parse(
       (await launcher(p, ["version", "--json"])).stdout,
     );
-    expect(version.data.version).toBe("0.1.1");
+    expect(version.data.version).toBe("0.1.2");
     const forwarded = JSON.parse(
       (await launcher(p, ["status", "an episode", "--json"])).stdout,
     );
@@ -407,7 +411,7 @@ describe("setup-engine (default: nothing is written into the skill folder)", () 
     await mkdir(alone);
     const env = { NARAFRAME_HOME: undefined, HOME: alone };
     const report = JSON.parse((await setup(p, defaults(), env)).stdout);
-    expect(report.plan.engineDir).toBe(join(alone, ".naraframe/engine/0.1.1"));
+    expect(report.plan.engineDir).toBe(join(alone, ".naraframe/engine/0.1.2"));
     expect(report.ready).toBe(true);
     expect(
       JSON.parse((await launcher(p, ["version", "--json"], env)).stdout)
@@ -421,7 +425,7 @@ describe("setup-engine (default: nothing is written into the skill folder)", () 
 
   it("with an engine folder off the standard layout, says how the launcher finds it", async () => {
     const p = await project();
-    const elsewhere = join(scratch, `elsewhere-${counter}`, "engine", "0.1.1");
+    const elsewhere = join(scratch, `elsewhere-${counter}`, "engine", "0.1.2");
     const standard = JSON.parse(
       (await setup(p, defaults("--engine-dir", elsewhere))).stdout,
     );
@@ -484,7 +488,7 @@ describe("setup-engine (default: nothing is written into the skill folder)", () 
     expect(await readFile(join(nested, "marker.txt"), "utf8")).toBe(
       "owner data",
     );
-    expect(await readdir(join(p.naraframeHome, "engine"))).toEqual(["0.1.1"]);
+    expect(await readdir(join(p.naraframeHome, "engine"))).toEqual(["0.1.2"]);
     const repaired = JSON.parse((await setup(p, defaults())).stdout);
     expect(repaired).toMatchObject({
       ready: true,
@@ -573,14 +577,14 @@ describe("static launcher (scripts/naraframe.mjs)", () => {
     );
     await writeFile(
       entry,
-      (await readFile(entry, "utf8")).replace('"0.1.1"', '"0.2.0"'),
+      (await readFile(entry, "utf8")).replace('"0.1.2"', '"0.2.0"'),
     );
     const failed = await launcher(p, ["version", "--json"]);
     expect(failed.code).toBe(2);
     expect(failed.stdout).toBe("");
     oneLine(failed.stderr, "SKILL_ENGINE_CHANGED");
     expect(failed.stderr).toContain("0.2.0");
-    expect(failed.stderr).toContain("0.1.1");
+    expect(failed.stderr).toContain("0.1.2");
   });
 
   it("prints one line when engine.json is unreadable", async () => {
@@ -636,7 +640,7 @@ describe("setup-engine --bind-skill (explicit, for a manual project install)", (
         })
       ).stdout,
     );
-    expect(version.data.version).toBe("0.1.1");
+    expect(version.data.version).toBe("0.1.2");
     expect(
       await check(p, "--host", "claude", "--project", p.directory),
     ).toMatchObject({

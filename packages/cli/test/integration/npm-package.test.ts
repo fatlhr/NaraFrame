@@ -119,10 +119,10 @@ describe("publishable npm package", () => {
     expect(metadata.license).toBe("MIT");
     expect(metadata.private).toBeUndefined();
     expect(metadata.bin).toEqual({ naraframe: "packages/cli/dist/index.js" });
-    const pinned = (
-      await readFile(join(repository, ".node-version"), "utf8")
-    ).trim();
-    expect(metadata.engines).toEqual({ node: pinned.replace(/\.\d+$/, ".x") });
+    const declared = JSON.parse(
+      await readFile(join(repository, "skills/naraframe/engine.json"), "utf8"),
+    );
+    expect(metadata.engines).toEqual({ node: declared.node });
     expect(metadata.os).toBeUndefined();
     expect(metadata.cpu).toBeUndefined();
     expect(metadata.files).toContain("LICENSE");

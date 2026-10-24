@@ -74,7 +74,7 @@ const fixture = async () => {
     join(engine, "skills/naraframe/scripts/naraframe.mjs"),
   );
   const data = {
-    version: "0.1.1",
+    version: "0.1.2",
     skillApiVersion: 1,
     sourceSchemaVersion: 1,
     renderEngine: "naraframe-draft/13",
@@ -151,7 +151,7 @@ describe("canonical skill installation", () => {
       const receipt = JSON.parse(
         await readFile(join(r.destination, "installation.json"), "utf8"),
       );
-      expect(receipt.engineVersion).toBe("0.1.1");
+      expect(receipt.engineVersion).toBe("0.1.2");
       expect(receipt.resourceRoot).toBe(f.engine);
       const { stdout } = await run(
         process.execPath,
@@ -487,7 +487,7 @@ describe("canonical skill installation", () => {
         await readFile(join(destination, "installation.json"), "utf8"),
       );
       expect(receipt.adopted).toBe(true);
-      expect(receipt.engineVersion).toBe("0.1.1");
+      expect(receipt.engineVersion).toBe("0.1.2");
       expect(Object.keys(receipt.files).sort()).toEqual([
         "SKILL.md",
         "guide.md",

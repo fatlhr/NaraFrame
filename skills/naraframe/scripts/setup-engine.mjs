@@ -162,15 +162,16 @@ const platform = process.platform;
 const hints = {
   node: {
     darwin:
-      "install Node 24.20.0 (for example nvm install 24.20.0 or fnm install 24.20.0) and run this script with it first on PATH",
+      "install the current Node LTS (for example brew install node@24, nvm install --lts or fnm install --lts) and run this script with it first on PATH",
     linux:
-      "install Node 24.20.0 (for example nvm install 24.20.0) and run this script with it first on PATH",
-    win32: "install Node 24.20.0 (for example nvm-windows) and rerun",
+      "install the current Node LTS (for example nvm install --lts) and run this script with it first on PATH",
+    win32:
+      "install the current Node LTS (for example winget install OpenJS.NodeJS.LTS) and rerun",
   },
   npm: {
-    darwin: "install Node 24.20.0, which includes npm",
-    linux: "install Node 24.20.0, which includes npm",
-    win32: "install Node 24.20.0, which includes npm",
+    darwin: "install the current Node LTS, which includes npm",
+    linux: "install the current Node LTS, which includes npm",
+    win32: "install the current Node LTS, which includes npm",
   },
   browser: {
     darwin: "brew install --cask google-chrome",
@@ -189,6 +190,16 @@ const hints = {
   },
 };
 const hint = (id) => hints[id][platform] ?? hints[id].linux;
+
+const nodeSatisfies = (version, minimum) => {
+  const parts = (value) => value.replace(/^v/, "").split(".").map(Number);
+  const [have, need] = [parts(version), parts(minimum)];
+  for (let index = 0; index < 3; index += 1) {
+    const difference = (have[index] ?? 0) - (need[index] ?? 0);
+    if (difference !== 0) return difference > 0;
+  }
+  return true;
+};
 
 const onPath = async (names) => {
   for (const directory of (process.env.PATH ?? "").split(delimiter))
@@ -222,14 +233,15 @@ const toolCheck = async (id, label, configured, envName, names) => {
 
 export const checkPrerequisites = async () => {
   const checks = [];
-  const wanted = declared.node ?? "24.20.0";
+  // engine.json names the oldest Node the engine runs on, as ">=<major>".
+  const minimum = String(declared.node ?? ">=22").replace(/^>=\s*/, "");
   checks.push(
-    process.versions.node === wanted
-      ? { id: "node", status: "ready", detail: `Node ${wanted}` }
+    nodeSatisfies(process.versions.node, minimum)
+      ? { id: "node", status: "ready", detail: `Node ${process.versions.node}` }
       : {
           id: "node",
           status: "incompatible",
-          detail: `Node ${process.versions.node} is active; NaraFrame needs ${wanted}`,
+          detail: `Node ${process.versions.node} is active; NaraFrame needs Node ${minimum} or newer`,
           install: hint("node"),
         },
   );
