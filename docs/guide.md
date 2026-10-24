@@ -47,7 +47,7 @@ Choose a source checkout or a supplied engine archive. Both run locally on macOS
 | Component | Requirement |
 | --- | --- |
 | Git | Needed for the source route; private repositories require authentication |
-| Node.js | `24.20.0`, as pinned in [.node-version](../.node-version) |
+| Node.js | 22 or newer to run the engine; `24.20.0`, as pinned in [.node-version](../.node-version), to build from source |
 | pnpm | `12.3.4` for source development; not needed for an installed archive |
 | Browser | An installed Chrome/Chromium executable; the engine does not download one |
 | Media tools | Installed `ffmpeg` and `ffprobe` executables |
@@ -57,18 +57,18 @@ You need internet access to fetch the repository and dependencies for source set
 
 ### Install a supplied engine archive
 
-Use this route if you have `naraframe-engine-0.1.1.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 24.20.0 first, and install it in a dedicated directory:
+Use this route if you have `naraframe-engine-0.1.2.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 22 or newer first, and install it in a dedicated directory:
 
 ```sh
 mkdir naraframe-runtime
 cd naraframe-runtime
-npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.1.1.tgz
+npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.1.2.tgz
 NARAFRAME_ENGINE="$PWD/node_modules/naraframe-engine"
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" version --json
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" doctor --json
 ```
 
-`version` reports engine version `0.1.1`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
+`version` reports engine version `0.1.2`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
 
 The archive includes a neutral silent starter, profiles, reusable library data, the complete skill, and its installer. It excludes private production projects and development fixtures. Check the companion `engine-manifest.json` checksum and the archive's `distribution-rights.json` before use. Public redistribution still requires the owner's license decision.
 

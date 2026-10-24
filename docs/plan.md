@@ -1003,6 +1003,25 @@ Their final frames replace the README placeholders.
     - The README uninstall commands removed the plugin and the marketplace.
   - **Other agents:** an anonymous `git clone --depth 1` of the public repository and the README's copy into `~/.agents/skills/` work.
   - **Not verified:** `npx skills add`, a third-party CLI, was not run.
+- **Node requirement relaxed (2026-10-24, owner request, 0.1.2):**
+  - **Why:** the engine accepted only Node 24.20.0 exactly. Most people run another Node, the owner included (23.10), and the agent would have to install and keep a second Node active for every command.
+  - **Evidence that the pin was not needed:**
+    - The Node version is recorded with each build but is not part of its render key.
+    - Remotion and zod declare no `engines` range.
+    - Under Node 23.10 the npm-installed engine created, validated and rendered the starter. Its `preview.mp4` was byte-identical to the Node 24.20 render (`66c9e49c…`).
+  - **Change:**
+    - `doctor` and `setup-engine` accept Node 22 or newer (`MINIMUM_NODE`, and `"node": ">=22"` in `engine.json`). The npm `engines` field is derived from `engine.json`. The install hints suggest the current LTS.
+    - Development stays pinned by `.node-version` (24.20.0), and packing still requires it.
+    - Version 0.1.2 across the pack, `engine.json`, the plugin manifests, the README, the guide and the tests.
+  - **Tests:**
+    - A new `node-requirement.test.ts` checks the comparison: 22, 23, 24 and 26 pass; 21, 20 and 18 are refused.
+    - `engine-setup.test.ts` ties the skill minimum to the doctor's.
+    - `npm-package.test.ts` ties `engines` to `engine.json`.
+  - **End-to-end under Node 23.10 with a clean HOME:**
+    - `check:registry-install` ok.
+    - `setup-engine` ready in 66 s, and `doctor` ready ("Node 23.10.0").
+    - The starter draft rendered with an identical hash.
+  - **Not yet run:** Node 22 itself, because it is not installed on this machine.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 

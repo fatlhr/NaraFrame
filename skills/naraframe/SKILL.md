@@ -48,7 +48,7 @@ A route counts only if `doctor --json` through it returns a result. A launcher f
 
 Without an engine nothing can be validated or rendered. Do not write episode source until one is installed. The user should not have to read documentation first.
 
-1. Run `node "<this-skill-folder>/scripts/setup-engine.mjs" --check --json`. It only reads: prerequisites (Node 24.20.0, npm, Chrome or Chromium, FFmpeg/FFprobe, a font), the planned engine folder and size.
+1. Run `node "<this-skill-folder>/scripts/setup-engine.mjs" --check --json`. It only reads: prerequisites (Node 22 or newer, npm, Chrome or Chromium, FFmpeg/FFprobe, a font), the planned engine folder and size.
 2. Send **one** plain message that is also your first reply (*Start here*): the points there, the one-off-or-series question and both install options. "Engine" is the part that checks and renders the video; say it that way and avoid other jargon. Fill the brackets from the check (`plan.approximateDiskMB`, `plan.engineDir`, `missingPrerequisites`):
 
    > [The *Start here* points, in a few plain sentences.] First question: is this a one-off video or a series?

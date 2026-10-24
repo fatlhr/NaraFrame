@@ -125,17 +125,38 @@ const executableCheck = async (
   }
 };
 
+/**
+ * The oldest Node release the engine runs on, kept equal to the `node` minimum
+ * in skills/naraframe/engine.json. Development stays pinned by .node-version;
+ * the Node version is recorded with a build but is not part of its render key.
+ */
+export const MINIMUM_NODE = "22.0.0";
+
+export const nodeSatisfies = (
+  version: string,
+  minimum: string = MINIMUM_NODE,
+): boolean => {
+  const parts = (value: string) =>
+    value.replace(/^v/, "").split(".").map(Number);
+  const [have, need] = [parts(version), parts(minimum)];
+  for (let index = 0; index < 3; index += 1) {
+    const difference = (have[index] ?? 0) - (need[index] ?? 0);
+    if (difference !== 0) return difference > 0;
+  }
+  return true;
+};
+
 export const runDoctorChecks = async (
   repositoryRoot: string,
 ): Promise<{ checks: DoctorCheck[]; issues: Issue[] }> => {
   const checks: DoctorCheck[] = [];
+  const nodeReady = nodeSatisfies(process.versions.node);
   checks.push({
     id: "node",
-    status: process.versions.node === "24.20.0" ? "ready" : "incompatible",
-    detail:
-      process.versions.node === "24.20.0"
-        ? `Node ${process.versions.node}`
-        : `Node ${process.versions.node} is active; NaraFrame is pinned to 24.20.0.`,
+    status: nodeReady ? "ready" : "incompatible",
+    detail: nodeReady
+      ? `Node ${process.versions.node}`
+      : `Node ${process.versions.node} is active; NaraFrame needs Node ${MINIMUM_NODE.split(".")[0]} or newer.`,
   });
   checks.push({
     id: "packages",
