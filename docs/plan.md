@@ -968,6 +968,27 @@ Their final frames replace the README placeholders.
     - After the fix: 0 in 1000 at width 3, 0 in 1000 at width 8, and 0 in 3000 at width 8.
   - **Gates:** `pnpm verify` exit 0 (Biome 253, unit 383/383, integration 549/549).
   - **Not covered:** two writers that both find the *same dead* owner can still both take over. That needs a crash first, and no failure has been seen from it.
+- **Release: `naraframe@0.1.0` published, then fixed as 0.1.1 (2026-10-24):**
+  - **Published:** the owner published 0.1.0 with 2FA; shasum `13cefd9c…`, the same as the local tarball.
+  - **Supervisor check:** a clean install of 0.1.0 from npm fails. `npm install naraframe@0.1.0` adds one package, the engine stops with `Cannot find package 'zod'`, and `setup-engine` reports `SETUP_ENGINE_INVALID`.
+  - **Cause:**
+    - The B6b `npm-shrinkwrap.json` listed the bundled `@naraframe/*` packages together with their dependencies.
+    - For a registry package npm reads that shrinkwrap and treats every dependency of a bundled package as bundled too. That marked 301 entries `inBundle`, so nothing was fetched.
+    - File and URL installs ignore a shipped shrinkwrap, which is why every earlier local test passed.
+  - **Fix (owner chose the best-practice option):**
+    - The package ships no shrinkwrap. Direct dependencies stay exact pins; transitive versions resolve normally, as for most npm CLIs.
+    - The version goes to 0.1.1 in the pack, `engine.json`, the plugin manifests, the README, the guide and the tests.
+    - `installation.md` drops the shrinkwrap claim.
+  - **New release check:** `pnpm check:registry-install <tgz>` (`scripts/check-registry-install.mjs`).
+    - It installs the tarball through a local registry that passes other packages through to npmjs, then runs `version --json`.
+    - Result: 0.1.0 fails with `REGISTRY_INSTALL_FAILED … Cannot find package 'zod'`, and 0.1.1 is ok. The release steps are in `docs/guide.md`.
+  - **Tests:** `npm-package.test.ts` now asserts that no shrinkwrap or lockfile is shipped, replacing the shrinkwrap-shape test that had passed without catching this.
+  - **Gates:** `pnpm verify` exit 0 (Biome 254, unit 383/383, integration 549/549).
+  - **Owner next:**
+    1. Publish 0.1.1.
+    2. `npm deprecate naraframe@0.1.0 "Broken install, use 0.1.1"`.
+    3. Make the repository public.
+    4. The supervisor verifies a clean `setup-engine` from npm and the plugin route.
 
 **Closing task C1 — public README (after F1–F6, owner request 2026-10-17):** rewrite the repository README for a public audience before the repository is opened. Remove references to the owner's personal paths, projects and accounts; lead with what NaraFrame does for a creator in plain language, then installation and use of the engine and skill; add relevant images (stills/contact sheets or short loops from rights-cleared or synthetic examples only, never the trial's uncleared media or private LBC/TutorLog material). Keep claims tied to current behaviour, note the macOS arm64 limit and that no registry release exists. Publishing the repository, a code licence and asset redistribution rights stay separate owner decisions.
 

@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 [![Tested on macOS Apple Silicon](https://img.shields.io/badge/tested%20on-macOS%20Apple%20Silicon-555?style=flat-square)](#what-you-need)
-[![Version 0.1.0](https://img.shields.io/badge/version-0.1.0%20early%20release-f5a623?style=flat-square)](#good-to-know)
+[![Version 0.1.1](https://img.shields.io/badge/version-0.1.1%20early%20release-f5a623?style=flat-square)](#good-to-know)
 [![Works with Claude Code and Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex-7a5af5?style=flat-square)](#install)
 
 Tell your agent what the next episode is about. NaraFrame turns that into a 9:16 video with the same look as every episode before it, shows you a preview, and exports exactly the version you approved.
@@ -245,7 +245,7 @@ Your video projects and exported MP4s live in your own folders and are not touch
 
 ## 📌 Good to know
 
-- 🌱 NaraFrame is an early release (0.1.0). Expect rough edges, and please report them in the issues.
+- 🌱 NaraFrame is an early release (0.1.1). Expect rough edges, and please report them in the issues.
 - 🎞️ It animates with a fixed set of moves: reveals, camera moves, transitions, counters and drawn paths. It suits clear explainers; it is not a free-form animation tool.
 - 🔎 Facts on screen are your responsibility. NaraFrame helps you label claims and cite sources, and a profile can require sources before export, but it cannot check facts for you.
 - 📤 An export is a video file on your computer. Where you post it is up to you.

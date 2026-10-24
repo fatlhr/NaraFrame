@@ -57,18 +57,18 @@ You need internet access to fetch the repository and dependencies for source set
 
 ### Install a supplied engine archive
 
-Use this route if you have `naraframe-engine-0.1.0.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 24.20.0 first, and install it in a dedicated directory:
+Use this route if you have `naraframe-engine-0.1.1.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 24.20.0 first, and install it in a dedicated directory:
 
 ```sh
 mkdir naraframe-runtime
 cd naraframe-runtime
-npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.1.0.tgz
+npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.1.1.tgz
 NARAFRAME_ENGINE="$PWD/node_modules/naraframe-engine"
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" version --json
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" doctor --json
 ```
 
-`version` reports engine version `0.1.0`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
+`version` reports engine version `0.1.1`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
 
 The archive includes a neutral silent starter, profiles, reusable library data, the complete skill, and its installer. It excludes private production projects and development fixtures. Check the companion `engine-manifest.json` checksum and the archive's `distribution-rights.json` before use. Public redistribution still requires the owner's license decision.
 
@@ -517,6 +517,18 @@ pnpm test:e2e
 ```
 
 `verify` runs formatting/lint checks, typecheck, build, and unit/integration tests. E2E runs separately and renders real videos, so allow roughly 15 minutes or more. Run it serially as configured when the machine is not busy, and save complete logs. You do not need the full suite for everyday engine use or project copy revisions.
+
+### Releasing the npm package
+
+1. Bump the version in `scripts/pack-engine.mjs` (`PACKAGE_VERSION`), `skills/naraframe/engine.json` and both `.claude-plugin` manifests. The pack refuses a mismatched `engine.json`, and the tests refuse mismatched manifests.
+2. Run `pnpm verify`.
+3. Pack it with `pnpm pack:npm --out <dir>`.
+4. Check the tarball the way users get it: `pnpm check:registry-install <dir>/naraframe-<version>.tgz`.
+   - It installs the tarball through a local registry that passes every other package through to registry.npmjs.org, then runs `version --json`. It needs network access.
+   - A file or URL install skips steps npm takes for registry packages, so only this check catches a package that works locally and breaks once published.
+5. Publish with `npm publish <dir>/naraframe-<version>.tgz`. npm asks for two-factor confirmation.
+
+The package ships no `npm-shrinkwrap.json`. Next to the bundled `@naraframe/*` packages, a shrinkwrap made npm treat every dependency as bundled, so a registry install fetched nothing; that is what broke `0.1.0`. The direct dependencies stay pinned to exact versions.
 
 - [Spec](spec.md): product contract and acceptance criteria.
 - [Refine spec](refine-spec.md): decisions, gaps, and evidence boundaries.
