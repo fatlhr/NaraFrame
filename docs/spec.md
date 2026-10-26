@@ -1,6 +1,6 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 1.1 · 2026-10-17 · Integrated baseline `a701c39` (MVP 2 Batch 3, PR #34)
+Revision 1.2 · 2026-10-26 · MVP 2 integrated at `a701c39`; M5.1 is a planned follow-up
 
 MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. All three MVP 2 batches (M4.1–M4.5) are integrated in main as of `a701c39`: art direction and captions, library imports, prepared audio and series identity, the installable engine and skill, and a frozen production trial that ended in two owner-approved exports. Exported is not published: public rights for the trial media stay open. Follow-up findings F1–F6 are recorded in the plan backlog and need their own authorization.
 
@@ -105,7 +105,26 @@ The engine cannot prove that arbitrary trusted recipe code uses the supplied slo
 
 `validate --stage plan` checks schema, references, resolved timing windows, static bounds, masks, counts, and phrase anchors. Production validation additionally checks production/media/trust/brand requirements. Browser-backed preview preflight loads fonts and checks render-dependent text fit, collisions, and moving text bounds. Validate does not measure recipe glyphs in Node. A text box that overflows can prevent its later collision checks; fixing fit can expose more issues.
 
-Contrast diagnostics reason about supported declarative backgrounds and motion bounds. Unknown artwork can remain unverified. They do not promise complete occlusion or arbitrary recipe analysis. Aesthetic advice is advisory; file safety, data integrity, and production constraints remain technical checks.
+Contrast diagnostics reason about supported declarative backgrounds and motion bounds. Unknown artwork can remain unverified. They do not promise complete occlusion or arbitrary recipe analysis. Existing aesthetic advice retains its current policy; file safety, data integrity, and production constraints remain technical checks.
+
+### Planned profile composition policy — M5.1
+
+Production feedback on 2026-10-26 is accepted for planning as **M5.1**, a candidate for the next MVP. It does not reopen MVP 2 or authorize implementation. The policy complements authoring in the skill and reusable library patterns: the skill chooses the explanatory object, framing, useful movement and reading holds; the engine checks the profile's measurable requirements.
+
+An optional profile policy will enable rules individually, with thresholds and `off`, `warning` or `error` at each of `plan`, `preview` and `production`. New rules default to disabled. Existing source-v1 projects, profiles, typography roles, asset roles and legacy diagnostic policies keep their behavior when the new policy is absent. Profile pinning, explicit application and existing override/lock authority apply. The proposed field names and reports are specified in [M5.1 in the plan](plan.md#m51--profile-composition-quality); none is currently available in the public schema.
+
+| Rule | Planned measurable contract |
+|---|---|
+| Opening cover | At global video frame 0, a designated title text and main object are visibly present. A title or hero waiting for a reveal, including one starting at 0 with zero opacity, does not qualify. This concerns the video itself, independently of an exported cover image. |
+| Maximum visual inactivity | Measure the longest interval without effective visible change over the resolved full timeline, including its head, tail and scene boundaries. Use actual motion windows and visible text/count changes; ignore no-op or hidden animation. Explicit, bounded reading holds may exempt only their own intervals. |
+| Camera and cut runs | Each scene has effective camera movement or an allowed explicit static-scene reason. A camera declaration, zero-intensity focus or unchanged pose alone is insufficient. An optional consecutive-cut limit counts actual scene boundaries, excluding the last scene's unused transition. |
+| Hero footprint | At reproducible settled-beat checkpoints, compare the union of safe-area-clipped painted bounds of designated hero parts with the profile's safe area. Transparent padding, empty layout frames and gaps between separate bounds must not inflate the numerator. Report the metric and its coverage; it is not painted-pixel density or automatic identification of a photo's subject. |
+
+`3000 ms` and `25%` are example settings for Bang Nalar, not global defaults. Semantic title/hero references are optional additions separate from typography/brand roles. Title fallback may use eligible `display`/`heading` text; hero identity must be declared rather than guessed from an ID or the largest rectangle. Reading holds and intentional-static exceptions are structured, bounded and reasoned; free-form notes alone do not exempt checks.
+
+Node validation checks structure, references, resolved timing and supported analytic findings. Browser preflight supplies font/paint/visibility evidence. Reports distinguish checked, exempt, pending and unverified coverage. An error blocks the invoking command at its selected stage; browser-only findings remain pending during Node validation. Sparse existing preflight samples cannot prove the absence of long static intervals. Arbitrary trusted recipes cannot receive an automatic pass from empty declarative layers or author-supplied bounds; unsupported checks remain explicit, and an enabled blocking rule must be resolved at enforcement.
+
+Integrate corresponding `VIEWPOINT_STATIC` and all-cut `SINGLE_TRANSITION_TYPE` findings only where their replacement rule is active at the calling stage; enabling a different composition rule must not suppress them. Keep repetition, panel dead space, text safety and contrast distinct where they measure different problems. Diagnostics use the existing issue contract, identifying the scene, beat or boundary, local/global milliseconds, frame, affected layers, observed value, threshold and corrective action. Technical conformance does not establish visual acceptance. The acceptance/gate checklist is [NF-AC-28 in M5.1](plan.md#m51--profile-composition-quality).
 
 ## 5. Audio, timing, and captions
 
