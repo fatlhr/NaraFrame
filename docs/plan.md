@@ -1,8 +1,8 @@
 # NaraFrame — Development Plan
 
-Revision 2.1 · 2026-10-17 · Integrated baseline `a701c399211ba2584f439b59814e8a2d41614e0f` (MVP 2 Batch 3, PR #34)
+Revision 2.2 · 2026-10-26 · MVP 2 integrated at `a701c39`; latest inspected main `23ca490` (engine 0.1.2)
 
-**Current step:** MVP 2 is integrated; follow-up batches B1–B5 (F1, F6, F2+F3, F4, F5) are integrated through their own PRs. Next is B6 (F7 with the public README C1), which needs Fatih's decisions on engine publication and the code licence.
+**Current step:** MVP 2 remains integrated; follow-up and release evidence through engine 0.1.2 is recorded below. Production feedback received on 2026-10-26 is adopted for planning as [M5.1 — Profile composition quality](#m51--profile-composition-quality), a next-MVP candidate. Only documentation is authorized by this request; implementation has not started.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -318,6 +318,7 @@ MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-1
 
 ## 4. Later backlog (not MVP 2 requirements)
 
+- Profile composition quality: [M5.1](#m51--profile-composition-quality), PLANNED from 2026-10-26 production feedback; skill, library and opt-in profile checks in one proposed batch.
 - Spring, repeater, cross-scene continuity primitives, animated masks, video layer and word-level motion.
 - Generic recipe collision/contrast, unbound identity/claim inference, non-space line-breaking coverage.
 - Reliability: pixel repeatability, SIGKILL orphan handling, issue #16 diagnostics/cancellation, harness timeouts and full raw gate logs.
@@ -1269,3 +1270,81 @@ Corrections recorded here rather than rewriting earlier evidence:
 - Focused tests, regression bite evidence where useful, integration gates with raw logs and runtime versions.
 - Known limits/blockers and bounded recommendations, collected in one review packet.
 - Git/trust/provider authority received and still required; no silent expansion into later tasks.
+
+## 6. M5 — Next MVP candidates (planning only)
+
+MVP 2/M4 keeps its recorded closure. M5 reserves numbering for the next MVP; this proposal does not settle that MVP's entire scope. The owner authorized evaluating production feedback and recording suitable work, not implementing it. Do not reopen accepted tasks or add capabilities to the registry from this section.
+
+| Task | Status | Dependencies | Acceptance | Review batch |
+|---|---|---|---|---|
+| M5.1 Profile composition quality | PLANNED | Integrated M4, profile/variety policy, shared motion/preflight geometry and skill routing | NF-AC-28: configurable rules, truthful coverage and fresh-context authoring/revision | One consolidated skill/library/engine batch after authorization |
+
+### M5.1 — Profile composition quality
+
+**Reason:** production can pass technical checks while opening empty, pausing unintentionally, using ineffective reframing or making its main object too small. An explicit profile contract can keep different authors within a series' requirements. Skill guidance remains responsible for the explanatory purpose and visual decisions.
+
+**Evidence baseline:** source inspection at `23ca490` on 2026-10-26, not a new playback or gate run. Findings and adopted/rejected approaches are in [refine-spec section 9](refine-spec.md#9-profile-composition-quality--production-feedback-2026-10-26). No engine, skill, library, profile or tests change in this planning package.
+
+#### Policy, authority and compatibility
+
+- Proposed profile home: optional `render.compositionQuality`, with named rule settings, `enabled`, rule-specific thresholds and `stages` mapping `plan`, `preview`, `production` to `off|warning|error`. Exact source syntax is settled before implementation; these names are not public capabilities yet. An omitted new rule is disabled. Legacy warnings and their configured severity retain their behavior when this policy is absent.
+- `plan` means plan validation; `preview` applies to all previews, including `--draft`, full/scoped and 540/1080; `production` applies to production validation and final export. Quality severity follows the calling stage, so an internal production-readiness pass must not accidentally impose export quality severity on a warning-only preview. Existing media, trust and safety blockers remain authoritative.
+- Reuse profile pins, explicit profile application, dry-run and existing allow/lock semantics. Agent edits may not disable a locked rule or invent an exemption to make a failing project pass. Profile changes and exceptions are ordinary source revisions with approval-staleness/undo behavior.
+- Node can check references, annotations, timing and supported analytic findings. Browser-dependent results stay pending until preflight; Node readiness must not be presented as measured visual conformance. At browser enforcement, unsupported/unmeasurable coverage is reported as unverified at the rule's severity. An error blocks the invoking command at its selected stage, including preview; production-stage errors block final export.
+- Reuse the existing `Issue` fields, corresponding issue codes and readiness/exit behavior; add a code only for a genuinely new finding that has no equivalent. Report `sceneId`, applicable `beatId` or boundary, local/global milliseconds, frame, layer IDs, observed measurement/threshold and correction in messages and `details`. Use explicit scene/interval scope when there is no beat/layer; do not invent IDs.
+- Use one effective classification/result for corresponding `VIEWPOINT_STATIC` and all-cut `SINGLE_TRANSITION_TYPE` findings only when their camera/cut replacement rule is active at the calling stage. Suppress redundant legacy advice only for that same finding; an unrelated enabled rule or an `off` replacement cannot silence legacy enforcement. The existing deduper cannot merge differently worded diagnostics by itself. Repetition, duration, panel dead space and text safety remain distinct measurements; this task does not make every old advisory mandatory.
+
+#### Skill, library and semantic targets
+
+- Extend the existing routed art-direction/authoring/revision guides; keep the router short. Teach opening composition, explanatory changes, framing endpoints, settled reading time, hero selection, error repair and profile-specific exceptions. Do not add a new workflow outside the public CLI.
+- Add optional semantic composition roles or scene references for title/hero parts, independently of text typography `role`, asset brand role and `narrativeRole`. Prefer explicit targets. Title fallback can use eligible `display`/`heading` text when no explicit title is supplied; ignore captions, watermarks and empty/hidden text. Missing or ambiguous hero identity yields a directed issue when required, rather than guessing from names or frame size.
+- Define a deterministic activity-target set from designated title/hero and explicitly named supporting content. Only effective visible changes to that set or its scene framing/boundaries count as story activity. Decorations/captions are excluded unless deliberately classified as story content under the profile's permitted contract. The engine validates declarations and movement; it does not infer explanatory relevance or prevent dishonest semantic labels. Skill and owner review assess that purpose.
+- Holds use a structured, scene-local beat/timing annotation with bounded start/end or duration and a reason; resolve phrase anchors through the existing timeline. Static exceptions identify the scene and purpose. Notes explain them for review but do not create machine exceptions. Profile policy determines whether each exception is allowed; exemptions apply only to the named rule/window and stay visible in reports.
+- Supply editable patterns for an immediate cover, an active explanation, a quiet reading/comparison shot and a padded-asset hero. Preserve existing general examples/profiles unless explicitly versioned to opt in. Do not create jitter, tiny camera moves or decorative loops to satisfy numeric checks.
+
+#### Four checks
+
+| Rule | Required measurement and boundary cases |
+|---|---|
+| First-frame cover | Inspect **global video frame 0** after resolved layer/group/plane/camera/transition state. Require designated title text and at least one designated main object with meaningful visible paint. Reveal at 0 is not a pass if its first frame is hidden. Off-screen, zero-opacity, clipped-away or fully covered targets do not qualify. A separate cover PNG and the first frame of a non-opening scoped scene are not the video's opening. Specify/document the visibility threshold and unsupported occlusion cases before implementation. |
+| Maximum visual inactivity | On the resolved **full video** timeline, union effective visible-change intervals from reveal/exit, transform/focus/emphasize, camera, draw/follow, actual text/count changes and actual scene-boundary changes. Continuous visible movement is an interval, not just its start/end. Include initial and trailing gaps and gaps crossing boundaries. Hidden/no-op targets, unchanged rounded count values, narration alone, caption churn, watermarks and irrelevant decorative motion do not reset the clock. Report raw gaps, declared reading-hold exemptions and the longest remaining contiguous gap; do not concatenate time across exempt holds. Fail only when that gap is **greater than** the profile limit (example 3000 ms). Use rendered-frame rounding and effective states, not sparse preflight sample spacing. |
+| Camera and optional cut run | Each scene has a non-zero projected camera/reframe effect on relevant visible content, or a permitted reasoned static exception. Share the renderer's world/overlay/parallax semantics: a camera moving over overlay-only or depth-zero content, unchanged endpoints and zero-intensity focus fail. Specify which scene-wide focus treatments count as reframing; moving one object does not automatically become a camera move. Report projected displacement/scale and the profile tolerance. The optional cut limit counts actual consecutive outgoing cut boundaries, excluding the unused final transition; exceptions to camera motion do not automatically exempt the cut limit. Purposeful movement still needs manual review. |
+| Hero footprint | At each beat's reproducible settled checkpoint, use the union of designated hero parts' **painted bounding rectangles intersected with the safe rectangle**, divided by safe-rectangle area. Overlap counts once; empty gaps between separate rectangles are not filled by one enclosing box. Exclude transparent padding, container frames, background panels and shadow inflation; apply crop/fit/focal, transforms, nested groups, masks/clipping, camera/parallax and visibility. This is bounding-footprint area, not painted-pixel density or automatic photo-subject detection. Example minimum: **25%**, per profile only. |
+
+Settled checkpoints use the first eligible rendered frame at/after the beat's completion, respecting other active motion, camera and transitions. Sample only inside the scene; never accidentally check the next scene when an endpoint equals scene end. Scenes with no beats use an explicit settled checkpoint. If no stable eligible state exists, report that coverage; do not silently pass or call the quarter-scene sample settled. Include actual sample frames and reasons in the report. Hero changes/removal must identify the intended hero state per beat instead of measuring an exited hero or declaring arbitrary frames exempt.
+
+For painted bounds, implement measured support for the agreed declarative cases, including a transparent padded PNG and supported SVG/path paint. An image frame, SVG viewBox or authored ROI is not enough. Fix/document alpha thresholds and design-space normalization so 540/1080 checks use the same intended metric. A photo's measured footprint includes its opaque background; subject-specific coverage requires prepared mask/crop geometry isolating the subject, otherwise remains unverified. Known complete occlusion must not count as visibility. Any remaining transparency/mask/occlusion limitation is explicit unverified coverage. Recipe scenes with empty declarative layers receive no automatic pass: until an evidenced recipe measurement contract exists, report unsupported checks and enforce the configured severity. Introducing generic recipe introspection is outside this batch.
+
+#### Acceptance — NF-AC-28 (PLANNED)
+
+The acceptance project will live outside the repository at `../NaraFrame-projects/mvp-next/composition-quality`. It uses one opted-in profile with example thresholds and a second neutral profile with the new policy omitted. Use ordinary source revisions for negative/control variants; preserve the first draft and failures.
+
+```bash
+pnpm naraframe validate ../NaraFrame-projects/mvp-next/composition-quality --stage plan --json
+pnpm naraframe preview ../NaraFrame-projects/mvp-next/composition-quality --draft --scene opening --json
+pnpm naraframe preview ../NaraFrame-projects/mvp-next/composition-quality --resolution 1080 --json
+pnpm naraframe validate ../NaraFrame-projects/mvp-next/composition-quality --stage production --json
+pnpm naraframe status ../NaraFrame-projects/mvp-next/composition-quality --json
+```
+
+These are existing commands; the policy and resulting measurements are future work. Expected: actionable quality issues before frame rendering where measurable, one finding per cause, and a report distinguishing checked/exempt/pending/unverified coverage. A scoped preview reports only what its source/timeline proves; cross-scene cut runs and full-video inactivity require whole-project context or an explicit not-checked result. It must not reinterpret the selected scene as global time 0.
+
+- [ ] **M5.1.1 — Model:** finalize profile fields/stages/locks, semantic targets/fallback, visibility/tolerance/painted-bounds definition, hold/static permissions, settled-frame selection and diagnostic ownership before behavior changes.
+- [ ] **M5.1.2 — Real path:** integrate core validation and browser preflight with shared frame/transform logic; report coverage and relevant timing/layers; leave disabled legacy projects unchanged.
+- [ ] **M5.1.3 — Skill/library proof:** a fresh author uses skill/public schema/patterns only to make the opening, active sequence, justified reading/static hold and deliberate hero framing. Save the first source and native preview; inspect frame 0, motion and settled samples. Repair one issue through a normal revision, then undo. Record help, corrections, time and provider use factually.
+- [ ] **M5.1.4 — Negative/control matrix:** delayed title/hero and reveal-at-zero; raw inactivity below/equal/above N, long continuous motion, head/tail/cross-scene gaps and bounded hold; no-op/hidden camera, valid world move and allowed static shot; cut runs excluding the final declaration; padded PNG, thin SVG/path, nested/transformed/clipped hero, overlapping/disjoint hero parts, hero change/exit and absent settled frame. Include unsupported recipe/paint coverage without a false pass.
+- [ ] **M5.1.5 — Compatibility and stage controls:** missing policy, each disabled rule, warning/error/off per stage, preview production-check interactions, allowed/locked overrides, profile switch/dry-run, phrase retiming, scoped/full consistency at 540/1080 and normal quiet-shot examples. Confirm existing safety errors cannot be waived by the new policy.
+- [ ] **M5.1.6 — Reuse and approval:** changing a rule/threshold/exemption or evaluator version cannot reuse a report checked under weaker rules without revalidation; choose report identity/key treatment deliberately. Prove stale approval, edit/undo and matching build reuse; unchanged masters/voice keys remain intact. Policy-free legacy keys stay stable unless a documented runtime change requires otherwise.
+- [ ] **M5.1.7 — Gate and handoff:** after the public path/output review, add focused regressions, run `pnpm verify`, then one confirmed serial full E2E at this batch's closure because preflight/stage enforcement changes. Preserve raw failures and versions; consolidate technical, skill-authoring and owner visual dispositions in one review packet.
+
+**Execution:** one proposed batch with internal steps, not separate owner relays for every rule. Prioritize immediate cover and honest hero measurement, then temporal/camera controls using the same model. Expensive trial/E2E and implementation still need the owner's work-package authorization under section 1. No render or suite is needed merely to record this proposal.
+
+**Out of scope:** automatic art direction/quality scoring, auto-layout/shrink/rewrite, photo-subject segmentation, generic arbitrary-recipe inspection, new motion primitives, provider calls, publishing or retrospective visual-parity claims. Runtime checks enforce the selected profile's measurable policy; Fatih still accepts the output.
+
+#### Planning handoff — 2026-10-26
+
+**Status: PLANNED / documentation prepared.** Evaluated the four owner suggestions against source and routed skill guidance; recorded the `render.variety.severity` correction, actual camera/focus distinction, painted-bounds limitations, default-off compatibility and one combined skill/library/engine task. Read-only parallel audits supplied code/skill cross-checks, not runtime or visual evidence. Current documentation branch is `profile-composition-quality-plan`, based on `23ca490`. Implementation, capability registration, tests, renders and Git integration are not part of this request.
+
+Documentation checks: the three modified documents' 19 relative file/heading links resolve, and `git diff --check` passes. Existing owner changes in `AGENTS.md` are preserved and excluded from this package. No test suite, build or render was run for this documentation-only change.
+
+**Documentation integration authorization — 2026-10-26:** Fatih requested “COMMIT PUSH SYNC”. Commit these three documents, push the documentation branch, integrate through a squash-merged PR and sync main while preserving unrelated work. M5.1 implementation remains PLANNED.

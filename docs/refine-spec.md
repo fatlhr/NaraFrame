@@ -1,6 +1,6 @@
 # NaraFrame — Production Findings and Decisions
 
-Updated 2026-10-15 · Integrated baseline `aab831c` · M4.4 committed on Batch 3; M4.5 adds distribution/onboarding/cleanup
+Updated 2026-10-26 · Earlier M4 findings are historical; new composition-policy feedback is recorded in section 9
 
 This document explains the next development priorities. [spec.md](spec.md) defines the contract; [plan.md](plan.md) owns numbered tasks. The prior discovery, decision history, and local Batch F closure are preserved in [history](history/README.md).
 
@@ -142,3 +142,38 @@ Official references inspected on 2026-10-15:
 - [npm package contents and executable mapping](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/): explicit `files` and `bin` contracts. Declaring a bin alone does not resolve private workspace dependencies or include runtime resources.
 
 **Cleanup order:** preserve MVP 2 drafts, failures, receipts, snapshots and gate logs until final acceptance. Then archive regenerated scratch/cache with a checksum/location index and a restore path before moving the original to recoverable Trash. Keep maintained library/skill examples and test fixtures in source. Package only approved runtime/demo resources; exclude owner media, internal production studies, personal config, secrets and generated output. No public code/media license is selected on Fatih's behalf. npm publication, public release and marketplace submission require separate authorization.
+
+## 9. Profile composition quality — production feedback, 2026-10-26
+
+**Disposition: adopt for planning as M5.1, a next-MVP candidate.** The owner wants different agents to respect a series' composition requirements. All four requested rules belong in NaraFrame when they are opt-in profile policies supported by skill guidance and reusable examples. MVP 2 stays integrated; this entry authorizes documentation only.
+
+The baseline inspected here is main `23ca490` (engine 0.1.2). Evidence is source inspection of profile/scene schemas, variety checks, issue handling, frame-derived motion, image placement, preflight and the canonical skill. No reproduction render, test suite or visual benchmark was run for this assessment.
+
+### Corrections to the starting assumptions
+
+- Some current warnings already can block: `render.variety.severity` accepts `warning` or `error`, but it applies to that policy as a whole rather than independently per rule/stage (`packages/core/src/schema/profile.ts`, `packages/core/src/compiler/variety.ts`). The gap is finer policy control and the four measurements, not the complete absence of enforcement.
+- `VIEWPOINT_STATIC` currently treats a `focus` beat as a viewpoint change and ignores explicit `scene.camera.moves`. A focus transforms its target; a real camera only affects applicable world content. Neither the field's presence nor a scheduled no-op proves visible movement. Reconcile the old heuristic when the new policy is enabled.
+- `SINGLE_TRANSITION_TYPE` looks at declared scene transitions, including the final unused one. Consecutive-cut checks must count actual boundaries. `MOTION_REPETITION` measures repeated entrances, which is different from inactivity.
+- `PANEL_DEAD_SPACE` measures unused space in content-holding panels. Image ROI/padding and crop/fit frames are authoring geometry, not measured painted bounds or subject detection. None can substitute for the proposed hero-size check.
+- Preflight's `scene-settled` sample is a quarter of the scene duration. It need not be settled. New checkpoints must account for concurrent beats, camera movement and transition windows, using the renderer's actual frame rounding.
+
+### Adopted work and why
+
+| Feedback | Decision and reason | Skill/library work | Engine/profile work |
+|---|---|---|---|
+| Title and hero visible at t=0 | Adopt. An empty opening can be technically valid while failing the intended cover. | Compose the first frame before staging entrances; provide an editable opening pattern. | Optional semantic targets and first-frame visibility checks, with explicit coverage limits. |
+| Maximum inactive interval | Adopt with bounded reading holds. A long unintended pause is measurable; continuous motion is not always useful. | Map explanatory changes to beats, plan reading time and document each exception. | Union effective visible-change windows over the full timeline; subtract only declared holds and report raw/exempt/remaining gaps. |
+| Camera movement and optional cut limit | Adopt per profile. Series may prefer reframing, while comparison/reading shots can deliberately stay still. | Explain what the camera reveals; author a valid static alternative without adding decorative movement to clear a check. | Check effective projected movement, explicit static exceptions and real cut boundaries; consolidate overlapping old issues. |
+| Minimum hero size | Adopt with a defined painted-bounds metric. A large frame around a tiny padded asset does not give the main object enough presence. | Identify hero parts, crop intentionally and choose settled states; preserve the choice in library parameters. | Measure safe-area-clipped painted bounds after transforms, mask/crop, camera and visibility; expose uncertainty instead of a false pass. |
+
+### Refinements and limits
+
+The proposed hero ratio is the area of the geometric union of each hero part's painted bounding rectangle clipped to the safe rectangle, divided by safe area. Overlaps count once; a single enclosing box around widely separated parts is insufficient. This is a footprint metric, not filled-pixel area: a thin ring can still have a large bounding rectangle. Exclude background/panel layers and shadows from designated hero parts. A photo's alpha/crop footprint includes its opaque background; it does not measure the person or object inside it. A subject-specific check needs prepared mask/crop geometry that isolates that subject, otherwise its coverage is unverified. Actual pixel-density analysis and automatic photo-subject segmentation are outside this proposal.
+
+Unknown transparency, complete occlusion and arbitrary recipe internals need honest coverage. A raw PNG frame, SVG viewBox, ROI receipt or recipe-provided rectangle is not measured paint. Establish supported measurement cases in the feature model; label the rest unverified. An error-level rule cannot be satisfied by unverified content at the enforcement stage. Metadata and manual review do not prove arbitrary trusted code uses the declared geometry.
+
+The skill is part of acceptance: a fresh author must produce an opening, explanatory motion, an explicitly justified quiet hold and deliberate hero framing from public interfaces, then repair a reported issue and undo the revision. Activity targets must be explicitly designated from title/hero and named supporting content, so the engine need not infer which decorative motion is meaningful. Those semantic declarations remain author statements whose purpose is reviewed with the output. A valid quality report alone is insufficient evidence that authoring improved.
+
+**Not adopted:** global Bang Nalar thresholds; compulsory decorative camera motion; counting narration or automatic captions as story activity; treating invisible/no-op beats as change; inferring a hero from layer IDs or size; blanket exceptions from notes; claiming sparse samples check the whole timeline; automatic shrink, layout or copy rewrites; universal quality scores or automatic approval; arbitrary recipe introspection presented as complete. The optional rules do not replace existing safety checks or owner visual judgement.
+
+Concrete task, acceptance artifacts, compatibility and gates are in [M5.1](plan.md#m51--profile-composition-quality). Implementation remains PLANNED pending its own work authorization.
