@@ -14,6 +14,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type CliProcessHost, runCli, runCliProcess } from "@naraframe/cli";
 import { compileDraft, loadPlanProject } from "@naraframe/core";
+import { RenderFailure } from "@naraframe/renderer-remotion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   FrameIntegrityError,
@@ -320,6 +321,58 @@ describe("public CLI command contract", () => {
         }),
       }),
     ]);
+  });
+
+  it.each(["bundle", "browser-launch", "preflight", "render"] as const)(
+    "reports the %s stage without exposing its raw failure",
+    async (stage) => {
+      const secret = "nf-secret-token-value";
+      const original = new Error(`Failure ${secret} at /private/owner/path`);
+      vi.spyOn(previewBuild, "publishPreviewBuild").mockRejectedValue(
+        new RenderFailure(stage, original),
+      );
+      const result = await captureJsonResult([
+        "preview",
+        await copySourceOnly(),
+        "--draft",
+        "--json",
+      ]);
+      expect(result.exitCode).toBe(2);
+      expect(result.events).toEqual([
+        expect.objectContaining({
+          status: "failed",
+          issues: [
+            expect.objectContaining({
+              code: "SYSTEM_ERROR",
+              details: { errorName: "RenderFailure", stage },
+              suggestion: expect.any(String),
+            }),
+          ],
+        }),
+      ]);
+      const output = JSON.stringify({
+        events: result.events,
+        stderr: result.stderr,
+      });
+      expect(output).not.toContain(secret);
+      expect(output).not.toContain("/private/owner/path");
+    },
+  );
+
+  it("keeps a known FFmpeg failure code when stage context is attached", async () => {
+    vi.spyOn(previewBuild, "publishPreviewBuild").mockRejectedValue(
+      new RenderFailure("render", new Error("ffmpeg executable not available")),
+    );
+    const result = await captureJsonResult([
+      "preview",
+      await copySourceOnly(),
+      "--draft",
+      "--json",
+    ]);
+    expect(result.exitCode).toBe(2);
+    expect(result.events[0]).toMatchObject({
+      issues: [expect.objectContaining({ code: "FFMPEG_NOT_AVAILABLE" })],
+    });
   });
 
   it("redacts unexpected renderer details from JSON and stderr failures", async () => {

@@ -1,4 +1,5 @@
 import type { Issue } from "@naraframe/core";
+import { RenderFailure } from "@naraframe/renderer-remotion";
 
 export type CommandName =
   | "version"
@@ -120,6 +121,37 @@ export const systemIssue = (error: unknown): Issue => {
         "Preview output metadata or directories failed the project containment check.",
       suggestion:
         "Remove unsafe generated symlinks and retry without changing project source files.",
+    };
+  }
+  if (error instanceof RenderFailure) {
+    const hints = {
+      bundle: [
+        "Video source bundling failed.",
+        "Check local recipe imports and the installed engine dependencies, then retry the scoped preview.",
+      ],
+      "browser-launch": [
+        "Chrome or Chromium could not start.",
+        "Check that NARAFRAME_BROWSER_EXECUTABLE points to a runnable compatible browser and that this session permits it to launch.",
+      ],
+      preflight: [
+        "The browser could not prepare the video composition.",
+        "Check local fonts, assets and recipe setup, then retry the scoped preview.",
+      ],
+      render: [
+        "Video frame rendering or encoding failed.",
+        "Check the provisioned browser and FFmpeg, available disk space and the affected scene, then retry a scoped preview.",
+      ],
+    } as const;
+    const [message, suggestion] = hints[error.stage];
+    return {
+      code: "SYSTEM_ERROR",
+      severity: "error",
+      responsible: "system",
+      artifact: "runtime",
+      path: `/${error.stage}`,
+      message,
+      suggestion,
+      details: { errorName: "RenderFailure", stage: error.stage },
     };
   }
   return {

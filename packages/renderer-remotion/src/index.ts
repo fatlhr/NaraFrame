@@ -15,3 +15,5 @@ export {
   resolveBrowserExecutable,
   VisualPreflightError,
 } from "./render-draft.js";
+
+export { RenderFailure, type RenderStage } from "./render-failure.js";

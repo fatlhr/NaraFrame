@@ -6,6 +6,16 @@
 - Execute numbered tasks in `docs/plan.md` in order. Update its checklist and evidence only after the stated manual or automated checks pass.
 - Keep implementation details inside the existing project documents. Do not create parallel plans unless the user asks for one.
 
+## Hard gate: finish earlier milestones first
+
+- Fatih's explicit instruction on 2026-11-05: never start or continue a later milestone while any task, finding, acceptance criterion, required review, or closure evidence belonging to an earlier milestone remains unresolved.
+- Before work begins, audit the milestone closure register in `docs/plan.md` against the current spec, findings and recorded evidence. Start with the earliest unresolved milestone and follow its numbered task order.
+- `INTEGRATED`, `CLOSED technically`, passing tests, historical deferral and partial acceptance do not establish complete milestone closure. Reconcile unchecked checklists and missing or contradictory evidence first. Deferred earlier work remains open until its acceptance is satisfied or Fatih explicitly authorizes a documented scope closure.
+- Do not move unresolved work to a later milestone, rename it, silently narrow its acceptance, or mark it complete to bypass this gate. Preserve the original milestone and evidence. Only an explicit owner scope decision may use `CLOSED_NOT_PLANNED`, `CLOSED_ACCEPTED_LIMIT` or `CLOSED_ARCHIVED`; record its date, reason and retained restrictions. Never label these dispositions as tests passed or visual/publication approval.
+- Fatih explicitly authorized the final 2026-11-05 product-relevance filter in `docs/plan.md`. The active queue is M2.R1, M3.R1, M3.R2, M4.R1 and M4.R2. This supersedes W1-W10. Historical OPEN labels and retired packages do not reopen work or expand the current product scope.
+- M5 is paused. Preserve its existing checkpoint and worktree. Resume it only after these five tasks and any later explicitly adopted earlier-milestone blocker have evidenced closure, and Fatih authorizes resumption.
+- A request to start or continue a later task does not implicitly waive this rule. Only an explicit change to this milestone-order rule from Fatih changes the gate.
+
 ## Feature-driven delivery
 
 - Organize implementation around small user-visible features, not technical layers. Schema, compiler, renderer, and CLI changes are supporting work inside a feature.

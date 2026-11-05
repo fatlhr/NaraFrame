@@ -473,7 +473,7 @@ For automation, use `pnpm --silent naraframe … --json` to keep pnpm's banner o
 | `RECIPE_NOT_TRUSTED` | Ask the owner to review code/hash; do not grant trust automatically |
 | `RECIPE_BINDING_*` / `BRAND_*` | Read the dry run/coverage and update params, assets, or copy through `edit` |
 | `REVISION_CONFLICT` | Read the current revision and reapply the change |
-| `SYSTEM_ERROR` | Save the command, result, stderr, and runtime context; some causes still produce generic messages |
+| `SYSTEM_ERROR` | Renderer failures identify bundle, browser-launch, preflight or render in details.stage with a safe next action. Save the result and runtime context; unexpected failures remain redacted. |
 | `SKILL_ENGINE_CHANGED` | Inspect the intended engine/resources, then explicitly update the copied skill |
 | `SKILL_INSTALL_EDITED` / `SKILL_INSTALL_CONFLICT` | Preserve local files and inspect the conflict; the installer will not overwrite them |
 

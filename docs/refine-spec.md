@@ -86,25 +86,21 @@ The lesson is not that Markdown renders video by itself. Hyperframe Pro relies o
 
 Batch F's final implementation record reports verify 297 unit / 335 integration and serial E2E 23/23. These are historical implementation results, not tests rerun for this cleanup. The exact old records and supervisor evidence are retained in the [snapshot plan](history/2026-10-13/plan.md).
 
-## 5. Open register carried forward
+## 5. Prioritized closure register
 
-| Item | Disposition |
-|---|---|
-| D-VIS / NF-AC-16/17; Bang Motion equivalence NF-AC-19 | OPEN/deferred owner output decisions, not retroactively passed. Medan's spoken “ke-4” blocks publication until explicitly resolved. |
-| LBC photo/publication rights | Internal acceptance does not clear public use. |
-| Voice binding/reuse on branded episodes | Not proven by music/silent trials; exercise prepared voice in M4.4–M4.5 without claiming prior completion. |
-| Cost and owner/agent active time | Unknown historical measurements remain unknown; collect factual evidence going forward. |
-| Pixel repeatability NF-AC-06 | Historical output variants remain unexplained despite later green runs. No retry-until-green or guaranteed identical MP4 claim. |
-| F-A2 and issue #16 | SIGKILL browser descendants; E2E diagnostics/cancellation coverage remain separate reliability work. |
-| Unit harness/interruption timeout under load | Resource contention is a hypothesis, not a proven cause. Isolated passes do not erase observed failures. |
-| Batch A/B gate logs | Some retained records are RTK summaries, not complete raw diagnostics. |
-| Recipe coverage | Undeclared text, noisy id/enum listing, trusted-code limits, and fit/collision/contrast gaps remain explicit. Text slots do not prove custom code uses their props. |
-| Focus/occlusion and text overflow collision | Diagnostics have coverage limits; not universal scene analysis. Count width samples endpoints, not every in-between value. |
-| F3/F4 and leftover assets after undo | Targeted revision undo and fuller reuse reporting remain backlog; restored source does not imply physical deletion of unused media. |
-| Older tutorlog-recipe final assembly mismatch | Predates newer binding/text-fit work; keep historical evidence instead of silently relabeling it. |
-| Word-level timing; M2.4.4 test checkbox without evidence | Unproven items remain open. Prepared timing does not equal native word-motion enforcement. |
+The [milestone closure audit and required queue](plan.md#milestone-closure-audit--2026-11-05) is the canonical current disposition. Fatih first authorized priority triage on 2026-11-05, then narrowed it to the NaraFrame product being carried forward. Twenty of the 27 audited rows are administratively closed. Seven retained rows are consolidated into these five task IDs.
 
-M4 can encounter a listed defect, but does not silently absorb every backlog item. Reproduction, effect on the scoped acceptance, and the owner's decision determine whether it becomes a separate correction.
+- M2.R1 makes a real CLI failure diagnosable.
+- M3.R1 proves branded visual revisions preserve accepted voice media and reuse identity.
+- M3.R2 proves current source, preview, approval, dependencies and final output agree.
+- M4.R1 proves the documented engine/skill installation can reach a first preview under the supported minimum runtime and one explicitly invoked installed host route.
+- M4.R2 reconciles the existing M4 closure checklist with receipts and the authorized scope decisions.
+
+Dedicated SIGKILL descendant forensics, historical harness/timeout reconstruction, native word-level enforcement, standalone repeat-render benchmarking and automatic/cross-host skill activation are closed from the initial W queue. Existing supported graceful interruption, feature regressions, raw failure logs, frame integrity and source/approval checks retain their normal duties.
+
+Historical comparison/publication tasks and optional primitive/QA expansion remain retired or archived. Accepted recipe/contrast/revision limits stay documented. Historical missing evidence and measurements remain missing or unknown. Administrative closure grants no new visual verdict, corrected claim, media rights or publication permission.
+
+This is a planning update. M5 remains paused until the five active tasks have evidenced closure and Fatih authorizes resumption.
 
 ## 6. Delivery and review policy
 
@@ -176,4 +172,10 @@ The skill is part of acceptance: a fresh author must produce an opening, explana
 
 **Not adopted:** global Bang Nalar thresholds; compulsory decorative camera motion; counting narration or automatic captions as story activity; treating invisible/no-op beats as change; inferring a hero from layer IDs or size; blanket exceptions from notes; claiming sparse samples check the whole timeline; automatic shrink, layout or copy rewrites; universal quality scores or automatic approval; arbitrary recipe introspection presented as complete. The optional rules do not replace existing safety checks or owner visual judgement.
 
-Concrete task, acceptance artifacts, compatibility and gates are in [M5.1](plan.md#m51--profile-composition-quality). Implementation remains PLANNED pending its own work authorization.
+Concrete task, acceptance artifacts, compatibility and gates are in [M5.1](plan.md#m51--profile-composition-quality).
+
+### Adaptation from motion-film and Nouride — 2026-11-05
+
+- Use [motion-film's motion language](https://github.com/arhen/motion-film/blob/67b570001231dfcdfe3a5be7cb8c2b1e4f3349fb/skills/motion-film-brief/MOTION-LANGUAGES.md) to make a shot's purpose and timing concrete in the existing art-direction examples. Episode notes record intent. Pinned profile settings are the authority for measurable requirements.
+- Apply [Nouride's arriving and settled review](https://github.com/nouverse/nouride-builtin-contents/blob/447d90cfceaa85c867e7cf437b2d5376d32cdaa8/skills/motion-graphics/SKILL.md) using NaraFrame's own resolved timeline and preview artifacts. Fixed time offsets can land during another move or outside a short shot.
+- Adapt [motion-film's evidence review](https://github.com/arhen/motion-film/blob/67b570001231dfcdfe3a5be7cb8c2b1e4f3349fb/skills/motion-film-qa/SKILL.md) by extracting a short strip around a risky seam from the actual preview. Keep playback review and owner approval in the existing export route. Overlay tooling, a second clock, and automatic pixel QA are outside this batch.

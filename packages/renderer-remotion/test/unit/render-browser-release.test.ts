@@ -119,12 +119,27 @@ describe("browser release", () => {
     expect(events).toEqual(["close", "forget", "close", "forget"]);
   });
 
+  it("identifies browser startup failure without opening a render browser", async () => {
+    const cause = new Error("Failed to launch the browser process!");
+    openBrowser.mockRejectedValueOnce(cause);
+    await expect(render()).rejects.toMatchObject({
+      name: "RenderFailure",
+      stage: "browser-launch",
+      cause,
+    });
+    expect(openBrowser).toHaveBeenCalledTimes(1);
+    expect(renderMedia).not.toHaveBeenCalled();
+  });
+
   it("releases the selection browser when composition selection fails", async () => {
     const selectBrowser = makeBrowser();
     openBrowser.mockResolvedValueOnce(selectBrowser);
     selectComposition.mockRejectedValue(new Error("select failed"));
 
-    await expect(render()).rejects.toThrow("select failed");
+    await expect(render()).rejects.toMatchObject({
+      stage: "preflight",
+      message: "select failed",
+    });
 
     expect(openBrowser).toHaveBeenCalledTimes(1);
     expect(selectBrowser.close).toHaveBeenCalledTimes(1);
@@ -139,7 +154,10 @@ describe("browser release", () => {
       .mockResolvedValueOnce(renderBrowser);
     renderMedia.mockRejectedValue(new Error("render failed"));
 
-    await expect(render()).rejects.toThrow("render failed");
+    await expect(render()).rejects.toMatchObject({
+      stage: "render",
+      message: "render failed",
+    });
 
     expect(renderBrowser.close).toHaveBeenCalledTimes(1);
     expect(renderBrowser.runner.forgetEventLoop).toHaveBeenCalledTimes(1);
@@ -171,6 +189,20 @@ describe("browser release", () => {
     expect(renderMedia).not.toHaveBeenCalled();
     expect(selectBrowser.close).toHaveBeenCalledTimes(1);
     expect(selectBrowser.runner.forgetEventLoop).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves a renderer AbortError without an external aborted signal", async () => {
+    const selectBrowser = makeBrowser();
+    const renderBrowser = makeBrowser();
+    openBrowser
+      .mockResolvedValueOnce(selectBrowser)
+      .mockResolvedValueOnce(renderBrowser);
+    const error = new Error("cancelled");
+    error.name = "AbortError";
+    renderMedia.mockRejectedValueOnce(error);
+    await expect(render()).rejects.toBe(error);
+    expect(renderBrowser.close).toHaveBeenCalledTimes(1);
+    expect(selectBrowser.close).toHaveBeenCalledTimes(1);
   });
 
   it("releases the render browser when the render is interrupted", async () => {
