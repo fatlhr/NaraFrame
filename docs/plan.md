@@ -2,7 +2,7 @@
 
 Revision 2.2 · 2026-10-26 · MVP 2 integrated at `a701c39`; latest inspected main `23ca490` (engine 0.1.2)
 
-**Current step:** MVP 2 remains integrated; follow-up and release evidence through engine 0.1.2 is recorded below. Production feedback received on 2026-10-26 is adopted for planning as [M5.1 — Profile composition quality](#m51--profile-composition-quality), a next-MVP candidate. Only documentation is authorized by this request; implementation has not started.
+**Current step:** M2.R1 is in implementation on the released 0.1.2 baseline. Complete M2.R1, M3.R1, M3.R2 and M4.R1 in order before a new release. M5 remains paused.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -317,6 +317,101 @@ Use Fatih's 2026-10-14 MVP 2 exception: each next batch branch starts from uncha
 MVP 2 closure requires recorded acceptance for NF-AC-21–27 under the 2026-10-15 scope addition, compatible legacy behavior, current capability documentation, consumer onboarding and the operating handoff. Public registry/marketplace publication is not a closure requirement. Any narrowed acceptance needs an explicit owner decision recorded as such. Deferred visual/publication/backlog items remain deferred unless separately accepted.
 
 ## 4. Later backlog (not MVP 2 requirements)
+
+### Milestone closure audit — 2026-11-05
+
+Fatih requires earlier milestone closure before later milestone work. M5 remains paused at commit 23b5777. The original audit found 27 rows, including missing evidence, accepted technical limits, obsolete content benchmarks and actual product risks.
+
+**Owner-authorized relevance filter.** On 2026-11-05 Fatih first requested priority triage, then explicitly narrowed the selection to the NaraFrame product being carried forward: brief/profile/local media, reusable skill/library, editable episodes and reliable CLI output. Twenty of the 27 audit rows are administratively closed. Seven retained rows are consolidated into four product tasks and one documentation-closure task under their original milestones. This supersedes the initial W1-W10 queue. Existing outputs, failed evidence and media restrictions are preserved; no closed acceptance is labelled passed.
+
+CLOSED_NOT_PLANNED retires a task. CLOSED_ACCEPTED_LIMIT records a documented operating limitation. CLOSED_ARCHIVED ends work on a historical asset while retaining its usage restrictions. These closures are authorized scope decisions for this dated register. They are distinct from passing a test or accepting a visual output.
+
+| Original milestone / finding | Current scope | Priority / disposition | Reason and boundary |
+|---|---|---|---|
+| M2.4.4 / NF-AC-16 | Retire the original Medan reference-opening and full-video competitor benchmark. | CLOSED_NOT_PLANNED | An old content benchmark has low value for recurring profile production. No visual verdict is granted. |
+| M2.4.4 / D-VIS | Archive the Medan claim correction and final export/publication task. | CLOSED_ARCHIVED | The old video stays unpublished. Reuse requires fresh sourcing and rights decisions. |
+| M2.4.5 / NF-AC-17 | Retire the original LBC publication-candidate benchmark. | CLOSED_NOT_PLANNED | Use episode-specific briefs and owner review on future production. |
+| M2.4.4 | Retire the missing historical test-checkbox reconstruction. | CLOSED_NOT_PLANNED | Preserve the evidence gap. Current feature regressions own current behavior. |
+| M2.4.5 F3 | Drop named-revision undo expansion. | CLOSED_NOT_PLANNED | Existing history and sequential undo cover the demonstrated workflow. |
+| M2.4.2 / M3.P4 | Accept manual media/style compatibility review. | CLOSED_ACCEPTED_LIMIT | Keep explicit bindings and owner review. Automatic aesthetic compatibility is outside the contract. |
+| M2.4.5 F4 / M3.E | Drop expanded reuse counts and automatic removal of leftover media. | CLOSED_ACCEPTED_LIMIT | Retained media is recoverable. Existing dry-run cleanup and reported build reuse remain the operating path. |
+| M2.4.5a / M2 closure | Expose useful SYSTEM_ERROR causes without leaking secrets. | HIGH / M2.R1 | Repeated local render/setup failures are hard to diagnose today. |
+| M2.4.5-F1 | Accept unsupported focus/backdrop/occlusion contrast coverage. | CLOSED_ACCEPTED_LIMIT | Retain unverified diagnostics and preview inspection. Any demonstrated false pass is a concrete new defect. |
+| M2.4.5-F2 | Accept overflow repair before later collision measurement. | CLOSED_ACCEPTED_LIMIT | The initial error blocks rendering and directs an ordinary repair. |
+| M3.1 / F-A2 | Close dedicated SIGKILL descendant investigation for current scope. | CLOSED_ACCEPTED_LIMIT | The retained recovery limitation remains documented. Normal supported interruption/recovery and owned-process cleanup retain their existing contracts. |
+| M3.1 / issue #16 | Close dedicated legacy E2E-harness expansion. | CLOSED_NOT_PLANNED | Keep normal feature diagnostics and required regression/integration gates. A new reproducible product failure receives its own scoped defect. |
+| M3.1 / M3.P5 | Close historical timeout and missing-log reconstruction. | CLOSED_ACCEPTED_LIMIT | Historical evidence remains incomplete. New required checks still preserve raw failures. |
+| M3.1 / word-level timing | Close native word-level enforcement expansion for current production. | CLOSED_ACCEPTED_LIMIT | Built-in profiles use wordLevelRequired=false and verified phrase timing. Enforcing a true setting is unsupported and cannot be claimed. |
+| M3.P1a / NF-AC-18 | Archive the old audio-balance/music-rights review. | CLOSED_ARCHIVED | The benchmark media has no new publication permission. Future delivery includes its own listening and rights review. |
+| M3.P2a-P2b / NF-AC-19 | Retire the TutorLog versus Bang Motion parity verdict. | CLOSED_NOT_PLANNED | The technical authoring route remains accepted; no comparative quality claim is granted. |
+| M3.P4 / NF-AC-20 | Archive the historical LBC photo publication clearance task. | CLOSED_ARCHIVED | Keep the media limited to its recorded internal approval. Public use still needs explicit rights clearance. |
+| M3.P4 / M4.4-M4.5 | Prove narrated branded revision and unchanged voice reuse. | HIGH / M3.R1 | Profile-led repeated production depends on preserving accepted takes and correct voice identity. |
+| M3.P5 / NF-AC-06 | Include current source/key consistency and output integrity in the normal preview/revision/approval path. | HIGH / M3.R2; MERGED | Existing integrity checks and one current source/build proof are acceptance inside M3.R2. Retire standalone repeat-render benchmarking. |
+| M3.P5 / NF-CO-02 | Close historical active-time and comparative-cost backfilling. | CLOSED_ACCEPTED_LIMIT | Unknown measurements stay unknown. Existing receipts and available run metrics remain required for future work. |
+| M3.E | Verify current source, preview, approval and final-build identity through the supported CLI. | HIGH / M3.R2 | Protect real revision/reuse safety. The historical tutorlog artifact is evidence to retain, with no obligation to recreate its obsolete environment. |
+| M3.E-M3.F | Close generalized recipe analysis and noisy-report expansion. | CLOSED_ACCEPTED_LIMIT | Declared bindings and text slots retain their protections. Trusted-code, undeclared-content and line-breaking limits stay documented. |
+| M4.5.3 | Close automatic host discovery and cross-host activation as a separate gate. | CLOSED_ACCEPTED_LIMIT | The skill is explicitly invoked and remains optional over an independent CLI. M4.R1 verifies one actual installed first-run route. |
+| M4.5.5-M4.5.6 | Reconcile the 14 unchecked closure entries against existing evidence. | MEDIUM / M4.R2 | Use the actual exports, acceptance, gates and archive. Rerun only a required check whose evidence is genuinely missing. |
+| M4 follow-up B6d | Smoke-test the documented npx skills add route. | MEDIUM / M4.R1 | The public installation instruction should work in a clean consumer context. |
+| M4 follow-up B7 | Close the full-schema-read optimization. | CLOSED_NOT_PLANNED | The public route works and produces illustrated output. A stricter reading budget needs measured production demand. |
+| M4 follow-up / 0.1.2 | Smoke-test the actual minimum Node 22 runtime. | MEDIUM / M4.R1 | Minimum supported runtime is a concrete distribution promise. |
+
+### Required closure queue before M5
+
+The following are new follow-up task IDs inside the original M2-M4 milestones. They replace W1-W10 as the active queue. Keep their original finding references for traceability. Implement one task at a time in this order and use the existing CLI, guides and feature-delivery gates.
+
+| Task | Product outcome | Original finding | Priority |
+|---|---|---|---|
+| M2.R1 | A failed local command gives a useful diagnosis and next action. | W1 / M2.4.5a | HIGH |
+| M3.R1 | A visual revision preserves an accepted branded voice take and its reuse identity. | W5 / M3.P4, carried into M4.4 | HIGH |
+| M3.R2 | Preview, source, approval and final output consistently refer to the same revision and dependencies. | W7 plus relevant W6 acceptance / M3.E and NF-AC-06 | HIGH |
+| M4.R1 | A new user can install the engine/skill and produce a first preview through the documented route. | W10 plus the explicit installed invocation from W9 / M4 distribution | MEDIUM |
+| M4.R2 | The M4 closure checklist accurately reflects the evidence and current accepted scope. | W8 / M4.5.5-M4.5.6 | MEDIUM |
+
+#### M2.R1 — Actionable CLI failure
+
+- [x] Model the safe diagnostic boundary using an actual local failure. Keep the existing issue/exit-code contract and secret redaction.
+- [x] Exercise the real CLI, then fix the concrete failing component report. A useful starting command is NARAFRAME_BROWSER_EXECUTABLE=/missing/naraframe-browser naraframe preview "$PROJECT" --draft --scene "$SCENE_ID" --json on an otherwise valid short project.
+- [x] Verify that the nonzero result identifies the browser/render/setup stage and a useful next action. Add the focused regression after the manual path and run applicable integration checks.
+
+#### M3.R1 — Branded voice revision and reuse
+
+- [ ] Use one profile and a short rights-cleared prepared-voice episode. Record source revision and voice byte/key identity before changing visuals.
+- [ ] Run naraframe edit "$PROJECT" --from "$STAGING" --expect "$SOURCE_REVISION" --json, then naraframe preview "$PROJECT" --draft --json and naraframe undo "$PROJECT" --json.
+- [ ] Inspect the changed visual and retained voice/timing. Prove the accepted audio is reused, undo restores the prior source and an intentional voice-style change produces the existing stale-binding/invalidation behavior. No new provider, narration model or word animation is part of this task.
+- [ ] Protect the demonstrated behavior with focused coverage and the applicable gates.
+
+#### M3.R2 — Current build, approval and reuse consistency
+
+- [ ] Use a short current project to record sourceRevision, assemblyKey, build ID and reported artifacts. Reuse the existing source/key and frame-integrity logic.
+- [ ] Run naraframe preview "$PROJECT" --resolution 1080 --json, make one ordinary source edit, then exercise naraframe render "$PROJECT" --approve-preview "$OLD_BUILD_ID" --json in the controlled acceptance fixture. Expected result is a stale-approval refusal before final output is published.
+- [ ] Prove the matching current preview can follow the normal approved-output path, changed render dependencies invalidate reuse, and unchanged media keys remain reusable. Verify manifests/pointers and actual output integrity.
+- [ ] Preserve the older tutorlog mismatch evidence with its limitations. Acceptance is on the supported current path. Add regression coverage for any concrete defect and run the required checks.
+
+#### M4.R1 — Installed first-run workflow
+
+- [ ] In a clean consumer directory, install the complete engine and canonical skill through the documented route, including npx skills add. Record exact versions and resource resolution.
+- [ ] Under the actual minimum supported Node 22 runtime, run naraframe doctor --json, naraframe create "$PROJECT" --profile general-explainer --template starter --json, naraframe validate "$PROJECT" --stage plan --json and naraframe preview "$PROJECT" --draft --json.
+- [ ] Explicitly invoke the installed skill in the selected supported host and inspect its reported preview artifact. Installation success requires a complete resource set and a working CLI invocation. Automatic host discovery and a separate cross-host matrix are outside this task.
+- [ ] Correct a reproduced first-run failure through its existing owner guide or runtime component, then protect it with focused checks. Record the host/runtime route actually exercised.
+
+#### M4.R2 — Close the M4 status record
+
+- [ ] Map all 14 retained closure checkboxes to the recorded trial exports, acceptance, gates, archive and handoff or to the explicit owner-authorized scope closure.
+- [ ] Correct substantiated status errors and retain exact evidence links/limits. An administrative closure is never labelled a test pass or publication approval.
+- [ ] Confirm M2.R1, M3.R1, M3.R2 and M4.R1 have reviewable receipts before recording earlier-milestone closure. Bring the technical and owner-review dispositions into this existing plan.
+
+M0 and M1 have no separately numbered active task open in the current plan. M2.R1, M3.R1, M3.R2 and M4.R1 are the product work retained for the next NaraFrame iteration. M4.R2 is the bounded documentation step needed to close the old milestones honestly. Raw gate preservation and supported graceful interruption remain ordinary feature-verification duties.
+
+**Closed from the former queue.** Dedicated W2 SIGKILL forensics, W3 historical harness investigations, W4 native word-level enforcement, W6 standalone repeat-render benchmarking and W9 automatic/cross-host activation are closed for current scope. Only the specific source/build-integrity acceptance from W6 and explicit installed invocation from W9 are incorporated above.
+
+**Future candidates closed for current planning.** Spring, repeater/stagger, cross-scene continuity primitives, animated masks, video layers, native word-level animation, shadow colour tokens, generalized recipe QA and extra data-format primitives remain CLOSED_NOT_PLANNED. Reopen only for a demonstrated production need and an explicit bounded scope decision.
+
+**Paused M5.1 remainder.** M5.1.4 negative/control matrix, M5.1.5 compatibility/stage controls, M5.1.6 reuse/approval and M5.1.7 gate/handoff remain paused. M5.1.1-M5.1.3 have local checkpoint evidence. Resume only after M2.R1, M3.R1, M3.R2, M4.R1 and M4.R2 have evidenced closure and Fatih authorizes M5 resumption.
+
+### Retained backlog and historical follow-ups
+
+The dated records below preserve history. The current relevance filter and active task queue above govern execution.
 
 - Profile composition quality: [M5.1](#m51--profile-composition-quality), PLANNED from 2026-10-26 production feedback; skill, library and opt-in profile checks in one proposed batch.
 - Spring, repeater, cross-scene continuity primitives, animated masks, video layer and word-level motion.
@@ -1277,7 +1372,7 @@ MVP 2/M4 keeps its recorded closure. M5 reserves numbering for the next MVP; thi
 
 | Task | Status | Dependencies | Acceptance | Review batch |
 |---|---|---|---|---|
-| M5.1 Profile composition quality | PLANNED | Integrated M4, profile/variety policy, shared motion/preflight geometry and skill routing | NF-AC-28: configurable rules, truthful coverage and fresh-context authoring/revision | One consolidated skill/library/engine batch after authorization |
+| M5.1 Profile composition quality | PAUSED | Integrated M4, profile/variety policy, shared motion/preflight geometry and skill routing | NF-AC-28: configurable rules, truthful coverage and fresh-context authoring/revision | One consolidated skill/library/engine batch after authorization |
 
 ### M5.1 — Profile composition quality
 
@@ -1348,3 +1443,19 @@ These are existing commands; the policy and resulting measurements are future wo
 Documentation checks: the three modified documents' 19 relative file/heading links resolve, and `git diff --check` passes. Existing owner changes in `AGENTS.md` are preserved and excluded from this package. No test suite, build or render was run for this documentation-only change.
 
 **Documentation integration authorization — 2026-10-26:** Fatih requested “COMMIT PUSH SYNC”. Commit these three documents, push the documentation branch, integrate through a squash-merged PR and sync main while preserving unrelated work. M5.1 implementation remains PLANNED.
+
+#### M2.R1 model and reproduction — 2026-11-05
+
+Implementation starts from origin/main at 9c36eee. The separate M5 checkpoint stays paused. The real starter project in /private/tmp/naraframe-m2r1.HTMlpb is plan-valid. A missing browser already reports BROWSER_NOT_PROVISIONED. Setting NARAFRAME_BROWSER_EXECUTABLE=/usr/bin/false instead passes file access, fails during browser startup, and currently produces only SYSTEM_ERROR with errorName Error.
+
+Expected acceptance is the same exit code 2 and structured command result, with safe renderer-stage and bounded cause classification plus an actionable suggestion. Arbitrary exception messages, paths and secrets remain private. Preserve existing visual-preflight, font, integrity and interruption diagnostics. Wrap only the actual bundling/browser/preflight/render boundaries and keep their cleanup behavior. The before.json result is retained next to the temporary project.
+
+#### M2.R1 closure — 2026-11-05
+
+M2.R1 is READY_FOR_INTEGRATION. The before/after/recovery evidence lives in /private/tmp/naraframe-m2r1.HTMlpb. The /usr/bin/false browser repro previously returned only SYSTEM_ERROR; it now reports browser-launch with a safe specific next action and retains exit 2. A normal browser then produced the 180-frame scoped draft 9214a50cc13f-6aa5fe1e-742 without issues.
+
+Renderer stage context covers bundle, browser launch, composition preflight and frame rendering. Unexpected raw messages and cause chains remain redacted in the CLI. Legacy browser/FFmpeg/output codes, visual-preflight/font errors and interruption behavior remain authoritative. A read-only review exposed an AbortError-wrapping regression; it and wrapped FFmpeg misclassification were reproduced red, fixed and protected by focused tests.
+
+Final verification passed Biome, typecheck/build, 387 unit tests and 554 integration tests. The focused browser-release file passed 10 tests and CLI contract file passed 22. The pinned pnpm wrapper attempts an unrelated dependency reinstall in this isolated copy, so the unchanged verify script stages ran through their installed executables with Node 24.20.0. Logs include verify-final.log. The previous full E2E is not claimed as fresh; this error-context change adds no pixel/timing behavior, and one real successful control preview plus focused cleanup/interruption/contract regressions exercise the affected boundaries.
+
+The read-only final review found no remaining actionable issue. New release publication remains after the four requested product tasks.

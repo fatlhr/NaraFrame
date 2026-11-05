@@ -35,6 +35,7 @@ import {
   type VisualPreflightReport,
   visualPreflightProperty,
 } from "./remotion/visual-preflight.js";
+import { duringRenderStage, RenderFailure } from "./render-failure.js";
 
 /**
  * Frames are captured one browser tab at a time. With Remotion's default of
@@ -302,35 +303,37 @@ export const renderDraft = async ({
   );
   let serveUrl: string;
   try {
-    serveUrl = await bundle({
-      entryPoint: recipeEntry?.entry ?? baseEntry,
-      // The wrapper registers recipes, then imports the entry that calls
-      // registerRoot; Remotion only scans the wrapper's own text for it.
-      ...(recipeEntry ? { ignoreRegisterRootWarning: true } : {}),
-      publicDir: resolve(projectRoot),
-      rootDir: packageRoot,
-      webpackOverride: (configuration) => ({
-        ...configuration,
-        resolve: {
-          ...configuration.resolve,
-          extensionAlias: {
-            ...configuration.resolve?.extensionAlias,
-            ".js": [".tsx", ".ts", ".js"],
+    serveUrl = await duringRenderStage("bundle", () =>
+      bundle({
+        entryPoint: recipeEntry?.entry ?? baseEntry,
+        // The wrapper registers recipes, then imports the entry that calls
+        // registerRoot; Remotion only scans the wrapper's own text for it.
+        ...(recipeEntry ? { ignoreRegisterRootWarning: true } : {}),
+        publicDir: resolve(projectRoot),
+        rootDir: packageRoot,
+        webpackOverride: (configuration) => ({
+          ...configuration,
+          resolve: {
+            ...configuration.resolve,
+            extensionAlias: {
+              ...configuration.resolve?.extensionAlias,
+              ".js": [".tsx", ".ts", ".js"],
+            },
+            // Recipe code lives in the project, outside this package: give it
+            // the renderer's single copies of react and remotion.
+            ...(recipeEntry
+              ? {
+                  modules: [join(packageRoot, "node_modules"), "node_modules"],
+                  alias: {
+                    ...(configuration.resolve?.alias as Record<string, string>),
+                    ...runtimeModules,
+                  },
+                }
+              : {}),
           },
-          // Recipe code lives in the project, outside this package: give it
-          // the renderer's single copies of react and remotion.
-          ...(recipeEntry
-            ? {
-                modules: [join(packageRoot, "node_modules"), "node_modules"],
-                alias: {
-                  ...(configuration.resolve?.alias as Record<string, string>),
-                  ...runtimeModules,
-                },
-              }
-            : {}),
-        },
+        }),
       }),
-    });
+    );
   } finally {
     if (recipeEntry) {
       await rm(recipeEntry.directory, { recursive: true, force: true });
@@ -341,24 +344,30 @@ export const renderDraft = async ({
   }
   // Each browser is opened here and closed here whether its step finishes,
   // fails or is interrupted, so no handle on it outlives the command.
-  const selectBrowser = await openBrowser("chrome", {
-    browserExecutable,
-    logLevel: "warn",
-  });
-  let composition: Awaited<ReturnType<typeof selectComposition>>;
-  try {
-    composition = await selectComposition({
-      serveUrl,
-      id: "NaraFrameDraft",
-      inputProps: draft,
-      puppeteerInstance: selectBrowser,
+  const selectBrowser = await duringRenderStage("browser-launch", () =>
+    openBrowser("chrome", {
       browserExecutable,
       logLevel: "warn",
-    });
+    }),
+  );
+  let composition: Awaited<ReturnType<typeof selectComposition>>;
+  try {
+    composition = await duringRenderStage("preflight", () =>
+      selectComposition({
+        serveUrl,
+        id: "NaraFrameDraft",
+        inputProps: draft,
+        puppeteerInstance: selectBrowser,
+        browserExecutable,
+        logLevel: "warn",
+      }),
+    );
   } finally {
     await releaseBrowser(selectBrowser);
   }
-  const preflight = preflightFromComposition(composition);
+  const preflight = await duringRenderStage("preflight", async () =>
+    preflightFromComposition(composition),
+  );
   const blockingIssues = preflight.report.issues.filter(
     (issue) => issue.severity === "error",
   );
@@ -369,11 +378,13 @@ export const renderDraft = async ({
   if (signal?.aborted) {
     throw interrupted();
   }
-  const browser = await openBrowser("chrome", {
-    browserExecutable,
-    forceDeviceScaleFactor: 1,
-    logLevel: "warn",
-  });
+  const browser = await duringRenderStage("browser-launch", () =>
+    openBrowser("chrome", {
+      browserExecutable,
+      forceDeviceScaleFactor: 1,
+      logLevel: "warn",
+    }),
+  );
   try {
     const cancellation = makeCancelSignal();
     const onAbort = () => cancellation.cancel();
@@ -440,7 +451,8 @@ export const renderDraft = async ({
           },
         ]);
       }
-      throw error;
+      if (error instanceof Error && error.name === "AbortError") throw error;
+      throw new RenderFailure("render", error);
     } finally {
       signal?.removeEventListener("abort", onAbort);
       if (audioRenderDirectory) {

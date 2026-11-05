@@ -1,8 +1,8 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 1.2 · 2026-10-26 · MVP 2 integrated at `a701c39`; M5.1 is a planned follow-up
+Revision 1.3 · 2026-11-05 · MVP 2 integrated at `a701c39`; M5.1 paused pending earlier milestone closure
 
-MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. All three MVP 2 batches (M4.1–M4.5) are integrated in main as of `a701c39`: art direction and captions, library imports, prepared audio and series identity, the installable engine and skill, and a frozen production trial that ended in two owner-approved exports. Exported is not published: public rights for the trial media stay open. Follow-up findings F1–F6 are recorded in the plan backlog and need their own authorization.
+MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. All three MVP 2 batches (M4.1–M4.5) are integrated in main as of `a701c39`: art direction and captions, library imports, prepared audio and series identity, the installable engine and skill, and a frozen production trial that ended in two owner-approved exports. Exported is not published: public rights for the trial media stay open. Follow-up findings F1–F7 have integrated fixes. The dated priority triage and remaining closure queue are recorded in the plan.
 
 ## 1. Product
 
@@ -37,7 +37,7 @@ Current source installation remains supported. A packed artifact is not an npm p
 - Output and manual acceptance precede focused tests; integration gates protect the accepted path.
 - Measure effort and provider use. Unknown is not zero, and cost or speed advantages need measurements.
 - Technical readiness, visual acceptance, export integrity, and publication permission are separate statuses.
-- Competitive visual quality remains an objective, not a claim that every output matches Bang Motion.
+- Owner visual acceptance follows the episode brief and profile. Historical competitor-parity benchmarks were retired by the 2026-11-05 scope decision.
 
 ## 2. Current authoring workflow
 
@@ -130,7 +130,7 @@ Integrate corresponding `VIEWPOINT_STATIC` and all-cut `SINGLE_TRANSITION_TYPE` 
 
 Projects support `voice`, `music`, and `silent` modes. Explicit project mode takes precedence over an unlocked profile default; locks and incompatible media are checked on every preview. Legacy narrated projects retain the voice path. Legacy non-voice projects need explicit intent for final production. Voice requires narration; music requires a soundtrack; silent finals have no audio stream. Scoped scene previews intentionally omit the full project's soundtrack.
 
-Imported narration can be retained as a master or as block media. Phrase anchors refer to verified timing and text bindings. Silence detection alone is not proof of the words spoken. Scene/local offsets are not word-level synchronization. Optional word data does not establish enforced native word-level motion.
+Imported narration can be retained as a master or as block media. Phrase anchors refer to verified timing and text bindings. Silence detection alone is not proof of the words spoken. Scene/local offsets are not word-level synchronization. Optional word data does not establish enforced native word-level motion. Built-in profiles use wordLevelRequired=false and verified phrase timing. Enforcement of a true setting is unsupported in the current scope.
 
 ### Prepared import — Batch 3 candidate
 
@@ -160,7 +160,7 @@ External providers remain outside the engine. Existing local import/generation w
 - Every newly rendered preview and final MP4 passes a frame-integrity scan (`neighbour-outlier/1`): a frame that differs sharply from both neighbours while they match each other fails the build with `RENDER_FRAME_INTEGRITY` before publication. The passing record is stored as `frameIntegrity` in the build report. A deliberate one-frame flash is refused the same way. Reused builds inherit their source report.
 - SIGINT evidence shows graceful interruption and recovery during rendering. SIGKILL can leave browser descendants; cache cleanup handles files, not arbitrary process cleanup.
 - Paths, hashes, and symlinks are checked at file boundaries. User source and unrelated work must not be discarded to repair state.
-- Pixel/MP4 repeatability is not guaranteed by green tests: historical variants remain an open reliability item.
+- Source/key determinism and recorded rendered-content integrity are acceptance within M3.R2. Historical variants are retained; universal identical MP4 bytes are outside the revised acceptance scope.
 
 ## 7. MVP 2 — Skill-led recurring production (INTEGRATED)
 
@@ -186,11 +186,11 @@ M0–M3 acceptance and chronological evidence are retained in [history](history/
 
 | Register | Current disposition |
 |---|---|
-| NF-AC-01–15 | Consult historical per-task dispositions; no blanket pass is inferred. NF-AC-06 repeatability remains OPEN. |
-| NF-AC-16/17 | D-VIS: Medan/LBC competitive visual, publication, and associated export gates remain deferred; not retrospectively passed. |
+| NF-AC-01–15 | Consult historical per-task dispositions. NF-AC-06 is re-scoped to the current source/build consistency acceptance in M3.R2. |
+| NF-AC-16/17 | CLOSED_NOT_PLANNED / CLOSED_ARCHIVED by the 2026-11-05 scope decision. Historical videos have no new visual or publication approval. |
 | NF-AC-18 | Technical audio/resolution/export paths met in recorded fixtures. |
-| NF-AC-19 | Parameterized Remotion route accepted; Bang Motion equivalence OPEN. |
-| NF-AC-20 | Repeated LBC production ACCEPTED_INTERNAL, not cleared for public use of photos. |
+| NF-AC-19 | Parameterized Remotion route accepted; competitor-parity verdict CLOSED_NOT_PLANNED. |
+| NF-AC-20 | Repeated LBC production ACCEPTED_INTERNAL. Old photo-publication task CLOSED_ARCHIVED; public use remains restricted. |
 | M3.E/F | Integrated explicit recipe identity bindings and opt-in text fit, with their stated coverage limits. |
 | NF-AC-21 | Owner accepted the representative authoring evidence on 2026-10-14; repeated with the installed skill in the M4.5 trial. Integrated (`a701c39`). |
 | NF-AC-22 | Owner confirmed caption behavior on 2026-10-14; manual/audio/reuse and feature E2E evidence recorded; final serial E2E passed at M4.5 closure. Partial-phrase captions need word timing and are not guessed. Integrated (`a701c39`). |
@@ -198,9 +198,9 @@ M0–M3 acceptance and chronological evidence are retained in [history](history/
 | NF-AC-24 | M4.4 committed `4b49ebe`: listening confirmation, captured import, two identity episodes, short output/revision/undo and verify evidence recorded in plan; prepared voice reused in the M4.5 trial export. Integrated (`a701c39`). No blanket visual/publication acceptance. |
 | NF-AC-25 | Met for the recorded trial: fresh-context authoring through the installed skill on a frozen engine, headline/tempo/object revisions, undo, reuse, a second profile on a silent episode, then owner visual acceptance and two verified exports (`e470d85201ba-4cbfbbf3-368`, `944926cda123-7c5f110b-bdc`) with covers from the finals. Exported, not published; rights stay open and episode-02 claims are an unsourced illustrative restatement by owner decision. Integrated (`a701c39`). |
 | NF-AC-26 | Met on macOS arm64: versioned local archive installed offline outside the checkout, byte-identical to the build, used for the whole trial including both exports; final verify and serial E2E passed. Not a registry release. Integrated (`a701c39`). |
-| NF-AC-27 | Install/update/launcher checks evidenced for isolated Codex/Claude directories; the shipped installer updated the production project skill. Fresh-context agents onboarded from the installed skill folder and launcher alone, but they were pointed at the folder: automatic host discovery/activation is still not observed. No personal installation or marketplace publication. Integrated (`a701c39`). |
+| NF-AC-27 | Install/update/launcher checks evidenced for isolated Codex/Claude directories; the shipped installer updated the production project skill. Fresh-context agents onboarded from the installed skill folder and launcher alone, but they were pointed at the folder: automatic host discovery/activation is unverified and retired as a separate gate by the 2026-11-05 relevance filter. M4.R1 checks explicit installed invocation. No personal installation or marketplace publication. Integrated (`a701c39`). |
 
-Not in MVP 2's closure requirements: spring, repeater, cross-scene continuity primitives, animated masks, native video layers, and word-level motion. These remain demand-led backlog. No GUI, hosted renderer, provider marketplace, publishing automation, universal cinematic style, or arbitrary untrusted project-code execution is promised.
+Not in MVP 2's closure requirements: spring, repeater, cross-scene continuity primitives, animated masks, native video layers, and word-level motion. These are CLOSED_NOT_PLANNED under the 2026-11-05 triage and require a new production case and scope decision to reopen. No GUI, hosted renderer, provider marketplace, publishing automation, universal cinematic style, or arbitrary untrusted project-code execution is promised.
 
 ## 9. Repository and documentation
 
