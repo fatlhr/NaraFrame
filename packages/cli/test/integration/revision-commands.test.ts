@@ -1,8 +1,14 @@
+import { createHash } from "node:crypto";
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runCli } from "@naraframe/cli";
+import {
+  compileDraft,
+  generationKeyForBlock,
+  loadPlanProject,
+} from "@naraframe/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const sampleRoot = fileURLToPath(
@@ -424,5 +430,147 @@ describe("edit and undo commands", () => {
     expect(
       (await run("edit", root, "--remove", "captions.json")).exitCode,
     ).toBe(3);
+  });
+});
+
+// The matching MP4/audio inspection is recorded in M3.R1; this protects the
+// ordinary CLI transaction that must preserve a retained take and its timing.
+describe("branded visual revision with retained voice", () => {
+  it("keeps bytes, generation identity and cue timing through edit/undo, but invalidates a changed voice style", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naraframe-branded-voice-"));
+    roots.push(root);
+    const fixture = fileURLToPath(
+      new URL(
+        "../../../../test-fixtures/project-general-explainer",
+        import.meta.url,
+      ),
+    );
+    for (const entry of [
+      "naraframe.json",
+      "profile.lock.json",
+      "scenes.json",
+      "narration.json",
+      "assets",
+      "audio",
+    ]) {
+      await cp(join(fixture, entry), join(root, entry), { recursive: true });
+    }
+    const scenes = JSON.parse(
+      await readFile(join(root, "scenes.json"), "utf8"),
+    );
+    scenes.scenes = scenes.scenes.slice(0, 1);
+    await writeFile(join(root, "scenes.json"), JSON.stringify(scenes));
+    const narration = JSON.parse(
+      await readFile(join(root, "narration.json"), "utf8"),
+    );
+    narration.order = ["question"];
+    narration.blocks = narration.blocks.slice(0, 1);
+    await writeFile(join(root, "narration.json"), JSON.stringify(narration));
+    const assets = JSON.parse(
+      await readFile(join(root, "assets", "manifest.json"), "utf8"),
+    );
+    assets.assets = assets.assets.filter(
+      (asset: { id: string }) => asset.id === "voice-question",
+    );
+    await writeFile(
+      join(root, "assets", "manifest.json"),
+      JSON.stringify(assets),
+    );
+    const profilePath = join(root, "profile.lock.json");
+    const profile = JSON.parse(await readFile(profilePath, "utf8"));
+    profile.brand = { name: "Studio Uji" };
+    await writeFile(profilePath, JSON.stringify(profile));
+
+    const snapshot = async () => {
+      const loaded = await loadPlanProject(root);
+      if (!loaded.ok) throw new Error(JSON.stringify(loaded.issues));
+      const source = loaded.value.source;
+      const draft = compileDraft(source);
+      if (!draft.ok) throw new Error(JSON.stringify(draft.issues));
+      const voices = await Promise.all(
+        (source.narration?.blocks ?? []).map(async (block) => {
+          if (!("audioAssetId" in block)) throw new Error("Missing take");
+          const asset = source.assets.assets.find(
+            (asset) => asset.id === block.audioAssetId,
+          );
+          if (asset?.status !== "ready") throw new Error("Missing audio");
+          return {
+            id: block.id,
+            key: generationKeyForBlock(source, block),
+            sha: createHash("sha256")
+              .update(await readFile(join(root, asset.path)))
+              .digest("hex"),
+          };
+        }),
+      );
+      return {
+        voices,
+        narration: source.narration,
+        timing: draft.value.narration,
+        assemblyKey: draft.value.assemblyKey,
+      };
+    };
+
+    const before = (await run("status", root)).event.sourceRevision as string;
+    const retained = await snapshot();
+    expect(retained.voices.length).toBeGreaterThan(0);
+    const edited = await run(
+      "edit",
+      root,
+      "--from",
+      await stageText(root, "Judul revisi Studio Uji"),
+      "--expect",
+      before,
+    );
+    expect(edited.exitCode).toBe(0);
+    expect(edited.event.data.reuse).toMatchObject({
+      voice: {
+        total: retained.voices.length,
+        unchanged: retained.voices.length,
+        changed: 0,
+      },
+    });
+    const changed = await snapshot();
+    expect(changed.voices).toEqual(retained.voices);
+    expect(changed.narration).toEqual(retained.narration);
+    expect(changed.timing).toEqual(retained.timing);
+    expect(changed.assemblyKey).not.toBe(retained.assemblyKey);
+    expect((await run("undo", root)).event.sourceRevision).toBe(before);
+    expect(await snapshot()).toEqual(retained);
+
+    const candidate = await mkdtemp(join(tmpdir(), "naraframe-voice-style-"));
+    roots.push(candidate);
+    delete profile.source;
+    delete profile.direction;
+    profile.version = "1.0.1";
+    profile.production.voiceStyleSignature = "intentional-different-voice";
+    await writeFile(join(candidate, "profile.json"), JSON.stringify(profile));
+    await writeFile(
+      join(candidate, "direction.md"),
+      "Technical voice-style control.",
+    );
+    const planned = await run("profile", "apply", candidate, root, "--dry-run");
+    expect(planned.exitCode).toBe(0);
+    expect(planned.event.data.plan).toMatchObject({
+      effects: expect.arrayContaining(["regenerate-narration"]),
+    });
+    expect((await run("profile", "apply", candidate, root)).exitCode).toBe(0);
+    const stale = await snapshot();
+    expect(stale.voices.map((v) => v.sha)).toEqual(
+      retained.voices.map((v) => v.sha),
+    );
+    expect(stale.voices.map((v) => v.key)).not.toEqual(
+      retained.voices.map((v) => v.key),
+    );
+    expect(stale.timing).toEqual(retained.timing);
+    expect((await run("validate", root, "--stage", "plan")).exitCode).toBe(0);
+    const production = await run("validate", root, "--stage", "production");
+    expect(production.exitCode).toBe(1);
+    expect(production.event.issues).toContainEqual(
+      expect.objectContaining({
+        code: "VOICE_STYLE_MISMATCH",
+        severity: "error",
+      }),
+    );
   });
 });
