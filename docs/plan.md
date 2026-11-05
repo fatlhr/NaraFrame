@@ -2,7 +2,7 @@
 
 Revision 2.2 · 2026-10-26 · MVP 2 integrated at `a701c39`; latest inspected main `23ca490` (engine 0.1.2)
 
-**Current step:** M2.R1 is integrated through #58 (`e49fd23`); M3.R1 is in acceptance on that baseline. Complete M2.R1, M3.R1, M3.R2 and M4.R1 in order before a new release. M5 remains paused.
+**Current step:** M2.R1 is integrated through #58 (`e49fd23`); M3.R1 is integrated through #59 (`b5d5d8b`); M3.R2 is in acceptance on that baseline. Complete M2.R1, M3.R1, M3.R2 and M4.R1 in order before a new release. M5 remains paused.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -383,10 +383,10 @@ The following are new follow-up task IDs inside the original M2-M4 milestones. T
 
 #### M3.R2 — Current build, approval and reuse consistency
 
-- [ ] Use a short current project to record sourceRevision, assemblyKey, build ID and reported artifacts. Reuse the existing source/key and frame-integrity logic.
-- [ ] Run naraframe preview "$PROJECT" --resolution 1080 --json, make one ordinary source edit, then exercise naraframe render "$PROJECT" --approve-preview "$OLD_BUILD_ID" --json in the controlled acceptance fixture. Expected result is a stale-approval refusal before final output is published.
-- [ ] Prove the matching current preview can follow the normal approved-output path, changed render dependencies invalidate reuse, and unchanged media keys remain reusable. Verify manifests/pointers and actual output integrity.
-- [ ] Preserve the older tutorlog mismatch evidence with its limitations. Acceptance is on the supported current path. Add regression coverage for any concrete defect and run the required checks.
+- [x] Use a short current project to record sourceRevision, assemblyKey, build ID and reported artifacts. Reuse the existing source/key and frame-integrity logic.
+- [x] Run naraframe preview "$PROJECT" --resolution 1080 --json, make one ordinary source edit, then exercise naraframe render "$PROJECT" --approve-preview "$OLD_BUILD_ID" --json in the controlled acceptance fixture. Expected result is a stale-approval refusal before final output is published.
+- [x] Prove the matching current preview can follow the normal approved-output path, changed render dependencies invalidate reuse, and unchanged media keys remain reusable. Verify manifests/pointers and actual output integrity.
+- [x] Preserve the older tutorlog mismatch evidence with its limitations. Acceptance is on the supported current path. Add regression coverage for any concrete defect and run the required checks.
 
 #### M4.R1 — Installed first-run workflow
 
@@ -1475,3 +1475,19 @@ Undo restores the exact original source and MP4 bytes. Repeated acceptance runs 
 Focused protection in `revision-commands.test.ts` passed 12/12 after the real output path. It verifies ordinary CLI edit/undo, bytes, voice keys, compiled cue timing and intentional profile invalidation using bound local fixture audio. Existing prepared-import receipt behavior is unchanged. This is internal technical acceptance of retained audio and visible revision, not new listening, aesthetic or publication approval.
 
 M3.R1 integration gate: the unchanged `verify` script stages ran with pinned Node 24.20.0 and the installed Biome/TypeScript/Vitest executables: lint (256 files), typecheck/build, 387 unit and 555 integration tests passed; final build and diff whitespace checks passed. Log: `/private/tmp/naraframe-m3r1.mcoqr39m/verify.log`. The pnpm wrapper's copied-worktree dependency reinstall is avoided by invoking the same script stages directly. Read-only review found no actionable issue. No runtime change or new independent E2E requirement is introduced; the release batch's serial E2E remains due after installed workflow acceptance.
+
+#### M3.R2 acceptance model — 2026-11-05
+
+Use the isolated internal voiced episode in `/private/tmp/naraframe-m3r2.hzrbzel4/episode` on main after #59. Commands use the built CLI: `preview ... --resolution 1080 --json`; `edit ... --from .../note-stage --expect <sourceRevision> --json`; `render ... --approve-preview <oldBuildId> --json` must refuse stale approval without an output/current pointer or approval receipt. A new native preview may reuse unchanged pixels but must identify the new source/build. Approving that exact current build exercises the controlled fixture export path, not production publication authority. Verify pointer/manifest/report hashes, source/approval/build identity and decode/frame integrity.
+
+Then guarded `edit` of a permitted accent override must invalidate visual assembly reuse while voice bytes, generation key and cue timing remain unchanged. A subsequent native preview must render the changed dependency and leave the prior final marked stale. Preview and final assembly keys are compared to their respective compiled modes: final has a different output label and therefore need not equal the draft assembly key. Historical tutorlog evidence stays unchanged in the archive.
+
+#### M3.R2 manual receipt — 2026-11-05
+
+`/private/tmp/naraframe-m3r2.hzrbzel4/identity-summary.json` records source, keys, command results, manifests, reports and probe data. Native first preview `9df95ce50a78-f67d1e80-1b9` names source `b8e8182ecf85`; the ordinary editorial edit produces source `00d3088a5328` while keeping native assembly `9df95ce50a78…`. Approving the old build fails with APPROVAL_PREVIEW_STALE before creating an approval or output pointer. The new preview `9df95ce50a78-9c9ab145-587` names the new source and reuses byte-identical prior MP4.
+
+The controlled current-preview export `acdf94db0e2f-58791f13-92a` selects that same source and preview approval. Output pointer/manifest/artifact hashes agree; final report and final manifest match the compiled final assembly `acdf94db0e2f…`. FFprobe finds 206 native 1080 frames plus AAC, full decode passes and neighbour-outlier/1 scans all 206 frames with no outlier. Preview (1080), canonical approval key (540 draft) and final carry format-specific keys by design, rather than one identical key across modes. Source revision and previewBuildId identify the reviewed build. This is a controlled fixture approval, not Fatih's approval of a production episode.
+
+A permitted accent override produces source `3c1361d65d23` and native assembly `eb1a44c95357…`, renders with `reusedFromBuildId: null`, and leaves the previous final `stale` in status. Inspected MP4 frames show the accent changing from yellow to turquoise. Voice SHA, generation key and compiled timing remain unchanged. Original historical tutorlog mismatch evidence is preserved in [the archived plan](history/2026-10-13/plan.md): its final predates the Batch B correction, and a clean baseline reproduced the discrepancy before Batch E. This current-route acceptance does not rewrite that history or claim historical pixel repeatability. No runtime defect was reproduced.
+
+M3.R2 gates: the existing native-preview E2E now additionally proves guarded editorial edit → stale-approval refusal without approval/output side effects → current byte-identical reuse → matching final report/manifest. Focused E2E 1/1 passed (43.91 s). `pnpm --config.verify-deps-before-run=false verify` passed on Node 24.20.0 / pnpm 12.3.4: Biome 256, typecheck/build, 387 unit and 555 integration tests; final build and diff whitespace check passed. The command-local setting prevents reinstalling copied worktree dependencies and changes no test. Logs: `focused-e2e.log` and `verify.log` beside the manual receipt. Read-only review found no actionable issue. M3.R2 is ready for integration; full serial release E2E remains due after M4.R1.
