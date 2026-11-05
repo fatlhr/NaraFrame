@@ -22,6 +22,8 @@ afterEach(async () => {
 
 interface Event {
   success: boolean;
+  sourceRevision: string | null;
+  fingerprint: string | null;
   buildId: string | null;
   artifacts: Record<string, string>;
   data: Record<string, unknown>;
@@ -177,17 +179,96 @@ describe("native-resolution preview", () => {
       expect(manifest.label).toBe("DRAFT • NO AUDIO");
     }
 
-    const final = await cli(
+    // Editorial changes keep pixels reusable, but cannot carry an old review
+    // onto a different source revision, even at the same native assembly key.
+    const staging = join(project, "..", "note-stage");
+    await mkdir(staging);
+    const scenes = JSON.parse(
+      await readFile(join(project, "scenes.json"), "utf8"),
+    );
+    scenes.scenes[0].note = "Reviewed editorial note";
+    await writeFile(join(staging, "scenes.json"), JSON.stringify(scenes));
+    const edited = await cli(
+      "edit",
+      project,
+      "--from",
+      staging,
+      "--expect",
+      native.sourceRevision ?? "",
+    );
+    expect(edited.success).toBe(true);
+    const stale = await cli(
       "render",
       project,
       "--approve-preview",
       native.buildId ?? "",
+    );
+    expect(stale.success).toBe(false);
+    expect(stale.issues).toContainEqual(
+      expect.objectContaining({ code: "APPROVAL_PREVIEW_STALE" }),
+    );
+    await expect(
+      readFile(join(project, "output", "current.json")),
+    ).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(
+      readFile(
+        join(
+          project,
+          "revisions",
+          "approvals",
+          `${edited.sourceRevision}.json`,
+        ),
+      ),
+    ).rejects.toMatchObject({ code: "ENOENT" });
+
+    const current = await cli("preview", project, "--resolution", "1080");
+    expect(current.success).toBe(true);
+    expect(current.sourceRevision).toBe(edited.sourceRevision);
+    expect(current.sourceRevision).not.toBe(native.sourceRevision);
+    expect(current.fingerprint).toBe(native.fingerprint);
+    expect(current.buildId).not.toBe(native.buildId);
+    expect(current.data.reusedFromBuildId).toBe(native.buildId);
+    expect(
+      createHash("sha256")
+        .update(await readFile(current.artifacts.previewMp4 ?? ""))
+        .digest("hex"),
+    ).toBe(
+      createHash("sha256")
+        .update(await readFile(native.artifacts.previewMp4 ?? ""))
+        .digest("hex"),
+    );
+
+    const final = await cli(
+      "render",
+      project,
+      "--approve-preview",
+      current.buildId ?? "",
     );
     expect(final.success).toBe(true);
     expect(final.data).toMatchObject({
       width: 1080,
       height: 1920,
       audio: "none",
+    });
+    expect(final.sourceRevision).toBe(current.sourceRevision);
+    const report = JSON.parse(
+      await readFile(final.artifacts.reportJson ?? "", "utf8"),
+    );
+    const manifest = JSON.parse(
+      await readFile(final.artifacts.manifestJson ?? "", "utf8"),
+    );
+    expect(report).toMatchObject({
+      sourceRevision: current.sourceRevision,
+      assemblyKey: final.fingerprint,
+      approval: {
+        sourceRevision: current.sourceRevision,
+        previewBuildId: current.buildId,
+      },
+    });
+    expect(manifest).toMatchObject({
+      sourceRevision: current.sourceRevision,
+      assemblyKey: final.fingerprint,
+      approval: report.approval,
     });
     await decodes(final.artifacts.finalMp4 ?? "");
   }, 900_000);
