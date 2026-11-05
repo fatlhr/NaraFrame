@@ -2,7 +2,7 @@
 
 Revision 2.2 · 2026-10-26 · MVP 2 integrated at `a701c39`; latest inspected main `23ca490` (engine 0.1.2)
 
-**Current step:** M2.R1 is in implementation on the released 0.1.2 baseline. Complete M2.R1, M3.R1, M3.R2 and M4.R1 in order before a new release. M5 remains paused.
+**Current step:** M2.R1 is integrated through #58 (`e49fd23`); M3.R1 is in acceptance on that baseline. Complete M2.R1, M3.R1, M3.R2 and M4.R1 in order before a new release. M5 remains paused.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -376,10 +376,10 @@ The following are new follow-up task IDs inside the original M2-M4 milestones. T
 
 #### M3.R1 — Branded voice revision and reuse
 
-- [ ] Use one profile and a short rights-cleared prepared-voice episode. Record source revision and voice byte/key identity before changing visuals.
-- [ ] Run naraframe edit "$PROJECT" --from "$STAGING" --expect "$SOURCE_REVISION" --json, then naraframe preview "$PROJECT" --draft --json and naraframe undo "$PROJECT" --json.
-- [ ] Inspect the changed visual and retained voice/timing. Prove the accepted audio is reused, undo restores the prior source and an intentional voice-style change produces the existing stale-binding/invalidation behavior. No new provider, narration model or word animation is part of this task.
-- [ ] Protect the demonstrated behavior with focused coverage and the applicable gates.
+- [x] Use one profile and a short rights-cleared prepared-voice episode. Record source revision and voice byte/key identity before changing visuals.
+- [x] Run naraframe edit "$PROJECT" --from "$STAGING" --expect "$SOURCE_REVISION" --json, then naraframe preview "$PROJECT" --draft --json and naraframe undo "$PROJECT" --json.
+- [x] Inspect the changed visual and retained voice/timing. Prove the accepted audio is reused, undo restores the prior source and an intentional voice-style change produces the existing stale-binding/invalidation behavior. No new provider, narration model or word animation is part of this task.
+- [x] Protect the demonstrated behavior with focused coverage and the applicable gates.
 
 #### M3.R2 — Current build, approval and reuse consistency
 
@@ -1452,10 +1452,26 @@ Expected acceptance is the same exit code 2 and structured command result, with 
 
 #### M2.R1 closure — 2026-11-05
 
-M2.R1 is READY_FOR_INTEGRATION. The before/after/recovery evidence lives in /private/tmp/naraframe-m2r1.HTMlpb. The /usr/bin/false browser repro previously returned only SYSTEM_ERROR; it now reports browser-launch with a safe specific next action and retains exit 2. A normal browser then produced the 180-frame scoped draft 9214a50cc13f-6aa5fe1e-742 without issues.
+M2.R1 is INTEGRATED through [#58](https://github.com/fatlhr/NaraFrame/pull/58), squash `e49fd23`. The before/after/recovery evidence lives in /private/tmp/naraframe-m2r1.HTMlpb. The /usr/bin/false browser repro previously returned only SYSTEM_ERROR; it now reports browser-launch with a safe specific next action and retains exit 2. A normal browser then produced the 180-frame scoped draft 9214a50cc13f-6aa5fe1e-742 without issues.
 
 Renderer stage context covers bundle, browser launch, composition preflight and frame rendering. Unexpected raw messages and cause chains remain redacted in the CLI. Legacy browser/FFmpeg/output codes, visual-preflight/font errors and interruption behavior remain authoritative. A read-only review exposed an AbortError-wrapping regression; it and wrapped FFmpeg misclassification were reproduced red, fixed and protected by focused tests.
 
 Final verification passed Biome, typecheck/build, 387 unit tests and 554 integration tests. The focused browser-release file passed 10 tests and CLI contract file passed 22. The pinned pnpm wrapper attempts an unrelated dependency reinstall in this isolated copy, so the unchanged verify script stages ran through their installed executables with Node 24.20.0. Logs include verify-final.log. The previous full E2E is not claimed as fresh; this error-context change adds no pixel/timing behavior, and one real successful control preview plus focused cleanup/interruption/contract regressions exercise the affected boundaries.
 
 The read-only final review found no remaining actionable issue. New release publication remains after the four requested product tasks.
+
+#### M3.R1 acceptance model — 2026-11-05
+
+Use `/private/tmp/naraframe-m3r1.mcoqr39m/episode`, a 6.851-second, single-block internal fixture with the retained macOS-say voice `6aadd6f0e65d02ba53f8f986854c05f07323f255b92c8eb9d5b69688dd3ebc4a`. Its cue sheet and generation binding are inherited from `test-fixtures/project-general-explainer`; no new listening attestation, provider call, public rights claim or owner visual approval is created. A local pinned profile adds the test brand Studio Uji and a declaratively bound signature.
+
+Run the built CLI (`node packages/cli/dist/index.js`) with `validate ... --stage plan --json`, `preview ... --draft --json`, guarded `edit ... --from .../visual-stage --expect <before.sourceRevision> --json`, another full draft and `undo ... --json`. Expected: headline changes, voice bytes/generation key/cue timing remain identical, edit reports one unchanged voice, undo restores the source and its earlier preview is reusable. Then `profile apply .../changed-profile ... --dry-run --json` and apply: the deliberate voice-style change must name regeneration and block production with VOICE_STYLE_MISMATCH, while draft remains available. Inspect MP4 frames and decoded audio; preserve all command results alongside source.
+
+#### M3.R1 closure — 2026-11-05
+
+Manual receipt: `/private/tmp/naraframe-m3r1.mcoqr39m/identity-summary.json`, source, command results and `before.png` / `after.png`. First source `b8e8182ecf85`, edited source `c6fe1381e96d`; initial preview `192e9fb13e69-74f62fb0-82a`, edited preview `9a95af48ad88-783c3382-afe`. The headline change is visible with the brand signature retained. Voice SHA remains `6aadd6f0e65d02ba53f8f986854c05f07323f255b92c8eb9d5b69688dd3ebc4a`, generation key remains `010e0b6bbdf50b3819b80d803a6672aee1028b30962a7369b82355dc9355d719`, source/compiled cue timing is identical and the decoded MP4 PCM SHA is identical (`13a16f32df27deae25a4ce030b963c3f1cc894f1d6d1b71a903d716d23e923cc`). CLI reuse reports 1/1 retained voice and one changed scene. No audio regeneration occurs.
+
+Undo restores the exact original source and MP4 bytes. Repeated acceptance runs correctly reuse the latest compatible earlier build, rather than promising the first build ID. The deliberate local profile version/style change reports regenerate-narration, keeps draft plan validation available and fails production with VOICE_STYLE_MISMATCH. Unknown spend stays untracked; no cost saving is inferred. Two initial fixture-authoring mistakes (missing layer presentation fields and using lock-only fields in a profile source) were corrected before acceptance. A repeat-run assertion was corrected to follow compatible-build reuse. These were fixture corrections, not runtime fixes.
+
+Focused protection in `revision-commands.test.ts` passed 12/12 after the real output path. It verifies ordinary CLI edit/undo, bytes, voice keys, compiled cue timing and intentional profile invalidation using bound local fixture audio. Existing prepared-import receipt behavior is unchanged. This is internal technical acceptance of retained audio and visible revision, not new listening, aesthetic or publication approval.
+
+M3.R1 integration gate: the unchanged `verify` script stages ran with pinned Node 24.20.0 and the installed Biome/TypeScript/Vitest executables: lint (256 files), typecheck/build, 387 unit and 555 integration tests passed; final build and diff whitespace checks passed. Log: `/private/tmp/naraframe-m3r1.mcoqr39m/verify.log`. The pnpm wrapper's copied-worktree dependency reinstall is avoided by invoking the same script stages directly. Read-only review found no actionable issue. No runtime change or new independent E2E requirement is introduced; the release batch's serial E2E remains due after installed workflow acceptance.
