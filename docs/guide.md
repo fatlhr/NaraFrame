@@ -1,6 +1,6 @@
 # NaraFrame technical guide
 
-This guide covers installation from source or an archive, the command line, project files, revisions, recipes and troubleshooting. For an overview, start with the [README](../README.md).
+This guide covers installation from npm, source or an archive, the command line, project files, revisions, recipes and troubleshooting. For an overview, start with the [README](../README.md).
 
 The quickest route for most people is the Claude Code plugin: install it, ask for a video, and let the agent offer to install the engine (see the README). This guide is for installing the engine yourself, using the command line directly, or working on NaraFrame.
 
@@ -42,7 +42,7 @@ Choose a profile and prepare the story and media. The skill can handle project a
 
 ### Requirements
 
-Choose a source checkout or a supplied engine archive. Both run locally on macOS with Chrome and FFmpeg. The current archive captures macOS Apple Silicon dependencies; Windows, Linux and Intel archive builds have not been verified. Neither route requires Claude or Codex.
+Install the published npm package, build from a source checkout, or use a supplied engine archive. Rendering runs locally on macOS with Chrome and FFmpeg. The current archive captures macOS Apple Silicon dependencies; Windows, Linux and Intel archive builds have not been verified. The CLI also works without an agent.
 
 | Component | Requirement |
 | --- | --- |
@@ -54,6 +54,21 @@ Choose a source checkout or a supplied engine archive. Both run locally on macOS
 | Fonts | A readable local font; profiles with custom fonts also need their font assets |
 
 You need internet access to fetch the repository and dependencies for source setup. A supplied archive includes the engine's runtime dependencies and can be installed offline. Prepare your images and audio separately; installation does not generate them.
+
+### Install from npm
+
+The published engine is `naraframe@0.1.2` and supports Node.js 22 or newer. From a workspace folder:
+
+```sh
+npm install --save-exact naraframe@0.1.2
+NARAFRAME_ENGINE="$PWD/node_modules/naraframe"
+npx naraframe version --json
+npx naraframe doctor --json
+```
+
+This installs the CLI and bundled resources locally; it does not install a browser, FFmpeg or a skill into your agent. Fix any prerequisites reported by `doctor` before rendering. For a single command, use `npx -y naraframe@0.1.2 <command>`.
+
+Keep `NARAFRAME_ENGINE` as an absolute path for the skill and starter commands below. The examples also show `pnpm naraframe` from a source checkout; from the npm workspace, use `npx naraframe` instead. When working elsewhere, use `node "$NARAFRAME_ENGINE/packages/cli/dist/index.js"`. Keep video projects outside the engine's installation folder.
 
 ### Install a supplied engine archive
 
@@ -70,7 +85,7 @@ node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" doctor --json
 
 `version` reports engine version `0.1.2`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
 
-The archive includes a neutral silent starter, profiles, reusable library data, the complete skill, and its installer. It excludes private production projects and development fixtures. Check the companion `engine-manifest.json` checksum and the archive's `distribution-rights.json` before use. Public redistribution still requires the owner's license decision.
+The archive includes a neutral silent starter, profiles, reusable library data, the complete skill, and its installer. It excludes private production projects and development fixtures. Check the companion `engine-manifest.json` checksum and the archive's `distribution-rights.json` before use. NaraFrame code uses the MIT License; runtime dependencies retain their own licensing terms.
 
 To upgrade, install the intended archive explicitly and inspect `version` again. Update each installed skill after confirming the engine change; its launcher refuses an unexpected version instead of silently switching engines. Retain the previous installation and project source until the upgrade is accepted.
 
@@ -203,13 +218,13 @@ Keep the active Node version pinned as described above. For scripts, read the CL
 
 ## 3. Quickstart to a final MP4
 
-Choose the archive's neutral silent starter or the source checkout's narrated coral example. Keep `NARAFRAME_ENGINE` set to the engine root. If a command fails, resolve the problem before continuing.
+Choose the installed engine's neutral silent starter or the source checkout's narrated coral example. Keep `NARAFRAME_ENGINE` set to the engine root. If a command fails, resolve the problem before continuing.
 
 ### Copy the example source into a new project
 
 Use a new directory outside the installation. Replace the destination below with your own absolute path; `mkdir` stops if it already exists.
 
-For an installed archive:
+For an npm or archive installation:
 
 ```sh
 NARAFRAME_PROJECT="/absolute/path/quickstart-neutral"

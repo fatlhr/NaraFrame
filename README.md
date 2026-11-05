@@ -11,9 +11,7 @@ Tell your agent what the next episode is about. NaraFrame turns that into a 9:16
 
 ![Four moments from a NaraFrame explainer about why ice floats: the question, the molecules spreading out, a density comparison and the answer](docs/assets/readme/hero.png)
 
-<sub>🤖 Made with NaraFrame by Claude Sonnet 5.5.</sub>
-
-[Quick start](#quick-start) · [What you can make](#style-gallery) · [How it works](#how-it-works) · [Your series look](#series-look) · [What you save](#what-you-save) · [Install](#install) · [Uninstall](#uninstall) · [Questions](#questions) · [Technical guide](docs/guide.md)
+[Quick start](#quick-start) · [What you can make](#style-gallery) · [How it works](#how-it-works) · [Your series look](#series-look) · [Revisions and reuse](#what-you-save) · [Install](#install) · [Uninstall](#uninstall) · [Questions](#questions) · [Technical guide](docs/guide.md)
 
 <a id="quick-start"></a>
 
@@ -32,7 +30,7 @@ Tell your agent what the next episode is about. NaraFrame turns that into a 9:16
    Make a 20-second vertical explainer about why ice floats.
    ```
 
-3. Say **yes** when your agent offers to install NaraFrame's engine (about 240 MB, usually under a minute). It checks Node.js, Chrome and FFmpeg first and tells you if anything is missing.
+3. Say **yes** when your agent offers to install NaraFrame's engine (about 240 MB). It checks Node.js, Chrome and FFmpeg first and tells you if anything is missing.
 4. Look at the preview, ask for changes in plain words, and approve. You get the MP4.
 
 Using Codex or another agent? See [Install](#install). Want it gone later? [Uninstall](#uninstall) takes two commands.
@@ -41,22 +39,22 @@ Using Codex or another agent? See [Install](#install). Want it gone later? [Unin
 
 - 🎨 **Every episode looks like your series.** A profile holds your colours, type, voice style and sourcing rules. Name your series and pick two colours, and NaraFrame builds the profile. Episode 12 then looks like episode 1 without anyone redoing the design.
 - ✅ **You approve before anything is final.** Each episode goes preview → your approval → export, and the export is exactly the version you approved. Change one word afterwards and it asks you to look again.
-- ⚡ **Revisions are fast and cheap.** NaraFrame keeps every episode as a project, so a change edits only what you asked for, and every change is saved in a history you can undo. In our tests a revision was nearly twice as fast as starting over ([what you save](#what-you-save)).
-- 🛡️ **Mistakes are caught before your audience sees them.** Text that doesn't fit, text that slides off screen during a transition and corrupted frames stop the export. Text that drifts outside the part of the screen a phone app keeps clear gets a warning.
+- 🔁 **Revise an existing project.** Keep the source and recorded audio, change the episode, and undo revisions from its history. Compatible previews can be reused when their rendered content is unchanged.
+- 🛡️ **Check before export.** The engine checks supported text layouts, motion bounds and rendered-frame integrity. Preview warnings identify content that needs your review.
 - 📁 **Your files stay yours.** Rendering runs on your computer, and every video is a set of plain, editable source files.
 
 <a id="style-gallery"></a>
 
 ## 🖼️ What you can make
 
-Short vertical videos (9:16, 1080×1920) that explain one idea clearly, especially when you make them every week. Each video below was made by Claude Sonnet 5.5 running the NaraFrame skill in Claude Code, from a built-in look or one made with `profile new`. The shapes and drawings are the agent's own; we asked for a few fixes along the way, the way you would.
+Short vertical videos (9:16, 1080×1920) that explain one idea clearly, especially when you make them every week. The examples below use the NaraFrame skill with built-in profiles or a custom look made with `profile new`. They show authored compositions you can revise for another episode.
 
 | | | |
 |:---:|:---:|:---:|
 | ![A science explainer about why ice floats, in the neutral explainer look](docs/assets/readme/gallery-science.png) | ![An episode of a weekly science series in its own dark green and yellow look](docs/assets/readme/gallery-series.png) | ![A news explainer about the 2023 El Niño and Indonesia's dry season, in the editorial look, with a thermometer gauge](docs/assets/readme/gallery-news.png) |
-| **🔬 How something works**<br>Neutral explainer look<br><sub>🤖 Claude Sonnet 5.5</sub> | **📺 A weekly series**<br>A look from a name and two colours<br><sub>🤖 Claude Sonnet 5.5</sub> | **📰 News and current affairs**<br>Editorial look that requires sources<br><sub>🤖 Claude Sonnet 5.5</sub> |
+| **🔬 How something works**<br>Neutral explainer look | **📺 A weekly series**<br>A look from a name and two colours | **📰 News and current affairs**<br>Editorial look that requires sources |
 | ![Why bread dough rises, drawn in ink on warm paper](docs/assets/readme/gallery-paper.png) | ![How river water becomes tap water: a route that draws itself through six stations, in teal and coral](docs/assets/readme/gallery-route.png) | ![Parts of a bicycle, with notes pinned to a drawn bike on deep violet](docs/assets/readme/gallery-pointers.png) |
-| **📄 Paper and ink**<br>Light, quiet editorial look<br><sub>🤖 Claude Sonnet 5.5</sub> | **🗺️ A route or process**<br>A path that draws itself<br><sub>🤖 Claude Sonnet 5.5</sub> | **🖼️ A picture with pointers**<br>Notes pinned to an image<br><sub>🤖 Claude Sonnet 5.5</sub> |
+| **📄 Paper and ink**<br>Light, quiet editorial look | **🗺️ A route or process**<br>A path that draws itself | **🖼️ A picture with pointers**<br>Notes pinned to an image |
 
 Also possible:
 
@@ -83,8 +81,6 @@ Every preview comes with a storyboard, so you can judge the whole video at a gla
 
 ![Storyboard image of a preview, with the time of each frame underneath](docs/assets/readme/storyboard.png)
 
-<sub>🤖 Storyboard from a video made by Claude Sonnet 5.5.</sub>
-
 ### 💬 What you can ask for
 
 | You say | NaraFrame does |
@@ -99,7 +95,7 @@ Every preview comes with a storyboard, so you can judge the whole video at a gla
 <details>
 <summary><b>👀 Walk through an example session</b></summary>
 
-Here is how a session goes, starting on a Mac without the engine. The setup, the first draft in about four minutes and the export come straight from our tests.
+Here is an example of the supported workflow, starting on a Mac without the engine.
 
 > **You:** Start a weekly series for my science channel. First episode: why cats sleep in boxes, about 30 seconds, no voice for now.
 
@@ -131,8 +127,6 @@ The same scenes in two series looks. The content stays; colours, type and the ti
 
 ![The same two scenes in two series profiles: a neutral navy explainer look on the left and a dark green and yellow series look on the right](docs/assets/readme/two-looks.png)
 
-<sub>🤖 Scenes made by Claude Sonnet 5.5.</sub>
-
 When you move a series to a new look, NaraFrame first shows what will change before anything is applied. Two of the videos above were moved to a new look this way, without redrawing anything.
 
 ### 🍱 The menus behind the looks
@@ -151,18 +145,16 @@ Your agent doesn't invent a style from scratch each time. It picks from a fixed 
 
 <a id="what-you-save"></a>
 
-## 💰 What you save
+## 🔁 Revisions and reuse
 
-| You save | How | Measured |
-|---|---|---|
-| ⏱️ **Time on the first draft** | Your agent installs NaraFrame, picks the look and writes the scenes for you. | From "make me a video" to a preview in about **4 minutes**, including the install |
-| 🔁 **Time and tokens on every revision** | A change edits only what you asked for. | Nearly **2× faster** and about **20% fewer AI tokens** than making it again from scratch |
-| 🎨 **Setting up a series** | A series look comes from a name and two colours. | Done in **seconds** |
-| 🎙️ **Re-recording** | A recorded voice-over is imported once; changes to words on screen, colours or timing keep the audio as it is. | **No re-record** for visual changes |
-| 🧪 **Renders that were never going to work** | NaraFrame checks a project before anything is rendered. | Checks take **seconds**, a render about a minute |
-| ♻️ **Rendering twice** | If nothing changed, the earlier video is reused. | **Instant** |
+| When you change | What is kept |
+|---|---|
+| A headline, colour or layout | Existing voice recordings stay in the project. |
+| The next episode in a series | The profile supplies its fonts, palette and production preferences. |
+| An editorial note that does not affect the render | A compatible preview can be reused. |
+| Your mind about the last revision | `undo` restores the previous source revision. |
 
-Measurements come from our own tests with first-time agents on an Apple Silicon Mac.
+Source changes require a matching preview review before export. Render time depends on the video's length, composition and your computer.
 
 <a id="install"></a>
 
@@ -178,7 +170,7 @@ Measurements come from our own tests with first-time agents on an Apple Silicon 
    ```
 
 2. Ask for a video in your own words.
-3. The first time, your agent explains what NaraFrame does and offers to install its engine: one small program, about 240 MB, usually under a minute, placed in `~/.naraframe`. Nothing is installed until you say yes.
+3. The first time, your agent explains what NaraFrame does and offers to install its engine: one small program, about 240 MB, placed in `~/.naraframe`. Nothing is installed until you say yes.
 
 Not ready to install the engine? Say no, and you can ask for a written shot-by-shot plan instead.
 
@@ -206,7 +198,13 @@ Then start a new session and ask for a video; the engine install works the same 
 <details>
 <summary><b>⌨️ Without an agent</b></summary>
 
-The engine is a command-line tool. Installing it yourself, building from source and every command are covered in the [technical guide](docs/guide.md).
+The published engine also works directly from your terminal:
+
+```bash
+npx -y naraframe@0.1.2 doctor --json
+```
+
+The [technical guide](docs/guide.md#install-from-npm) covers installation, project files, previews, revisions and export.
 
 </details>
 
@@ -216,7 +214,7 @@ The engine is a command-line tool. Installing it yourself, building from source 
 
 | | What | Note |
 |:---:|---|---|
-| 🤖 | An AI coding agent that supports skills | For example Claude Code or Codex |
+| 🤖 | A skill-capable coding agent for the guided workflow | Claude Code or Codex; optional for direct CLI use |
 | 🧩 | Node.js 22 or newer, Google Chrome, FFmpeg | Your agent checks these and tells you if anything is missing |
 | 🧪 | Tested on Macs with Apple Silicon | Other systems are not verified yet |
 
@@ -257,14 +255,14 @@ Your video projects and exported MP4s live in your own folders and are not touch
 <details>
 <summary><b>Is it free?</b></summary>
 
-NaraFrame is free and open source under the MIT License. It renders with Remotion, which is free for individuals, non-profits and companies with up to three employees; larger companies need a Remotion company licence. Your AI agent's own usage is billed by its provider as usual.
+NaraFrame's own code is free and open source under the MIT License. Rendering uses Remotion under its [separate licensing terms](https://www.remotion.dev/license). Agent subscriptions and any media-generation services you choose have their own costs.
 
 </details>
 
 <details>
 <summary><b>Does it need the internet?</b></summary>
 
-Only to install it. Rendering runs on your computer. Your AI agent works the way it always does.
+Installing the engine and skill requires internet access. Rendering prepared local media runs on your computer; your agent or any generation service may need its own connection.
 
 </details>
 
@@ -307,10 +305,9 @@ Claude Sonnet 5.5, running the NaraFrame skill in Claude Code. NaraFrame itself 
 
 NaraFrame's own code is released under the [MIT License](LICENSE).
 
-NaraFrame renders video with [Remotion](https://www.remotion.dev), which has its own licence: it is free for individuals, non-profits and companies with up to three employees, and larger companies need a Remotion company licence. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for every dependency and its terms.
+Rendering uses [Remotion](https://www.remotion.dev/license) under its own licensing terms. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for dependency notices.
 
 ## 📚 Learn more
 
-- 📘 [Technical guide](docs/guide.md): installing from source, the command line, project files, revisions and troubleshooting.
+- 📘 [Technical guide](docs/guide.md): engine installation, the command line, project files, revisions and troubleshooting.
 - 🧠 [The skill](skills/naraframe/SKILL.md): what your agent reads.
-- 🗂️ [Product specification](docs/spec.md) and [development plan](docs/plan.md).
