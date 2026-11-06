@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 passed its acceptance. The other eight tasks are **PLANNED**. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 and A1 passed acceptance. The remaining seven tasks are **PLANNED**. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1627,6 +1627,12 @@ Use the canonical skill and current CLI on three short plain briefs covering a p
 The independent reviewer described each opening before seeing its payoff. Four opening frames within three seconds and three payoff frames per draft were inspected at phone size. The full silent 540×960 MP4s decoded successfully. This evidence covers visible comprehension and payoff in sampled frames. An ordinary title edit in the fourth trial left the `current-issues@0.3.0` profile lock byte-identical.
 
 `pnpm verify` passed on Node 24.20.0 and pnpm 12.3.4 with 399 unit and 559 integration tests. The initial run caught an installer assertion that required the old one-off-or-series question. The updated test verifies the installed guide's bytes and the focused installer suite passed 31/31. The checksummed archive `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-06-a0-default-hook/index.json` records 74 files including the source, previews, review strips, initial failure and final gate logs.
+
+### A1 acceptance model (2026-11-06)
+
+Use one three-beat story for both direction boards. A ball stops at a gate, the gate lifts, and the ball passes. Present two silent grayscale strips of 9:16 panels with editable originals. The Stickman Ink strip uses a visible body lean, hand contact and recoil to explain the change. The Meja Mekanik strip reveals a linkage and shows how the connected parts move. Keep the cause and result comparable. Expected: Fatih can distinguish the profiles without their names or colors and point to the acting or staging that makes each recognizable. Record profile rules, assets and versioned shot patterns for A2 after the design review.
+
+**A1 accepted (2026-11-06).** Fatih reviewed the same-story grayscale board and confirmed that both directions look distinct and the difference is clear. [The direction sheets](refine-spec.md#a1-direction-sheets-2026-11-06) pin the pose/contact staging, guided linkage, asset inventory, and six pilot patterns at `0.1.0`. The two editable SVG strips, review board and checksums are retained in `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-06-a1-character-directions/`. This is approval of the visual direction for the pilot. `pnpm verify` passed with 399 unit and 559 integration tests.
 
 The following existing CLI paths are the basis for pilot acceptance. Set `PROJECT` and `SCENE` from the authored project and use the recorded build IDs and source revisions in later review and revision steps.
 
