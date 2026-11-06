@@ -17,6 +17,20 @@ In the opening, make the subject legible and give it a visible action or contras
 
 Review the actual draft's first three seconds at phone size with sound muted. Check what is happening and what question it raises. Then check where the full draft answers it. Three seconds is a review window. Set the cuts, motion and holds to fit the story and pinned profile.
 
+## Choose the look and movement for this episode
+
+For a plain brief on a new `general-explainer` project, pick a look that fits the subject and its media. These palettes are starting points. Follow a supplied direction or palette when present. For a continuation or revision, keep the pinned series look and the episode's existing choices unless the user asks to change them.
+
+| Starting point | Background | Surface | Text | Accent |
+|---|---|---|---|---|
+| Warm paper for a tactile demonstration | `#FFF3D8` | `#FFD9C7` | `#41253B` | `#9E294B` |
+| Mint workbench for a route or connected parts | `#EAF7ED` | `#BFE9D3` | `#153B33` | `#155E50` |
+| Berry spotlight for a reveal or strong contrast | `#2F1636` | `#50324F` | `#FFF1F7` | `#FFAC79` |
+
+Record the four slots as an episode-local `overrides["render.palette"]` value in the new project's `naraframe.json` before the first preview. Follow the profile's allowed paths. Check the actual foreground against its backing layer, especially labels inside shapes and any literal asset colors. Use the normal validation and preview checks before showing the result.
+
+Give the main object a way to respond to what happens. A queue can compress and shift when a slot opens. A mechanism can hinge and settle. A comparison can snap two states onto one baseline, then hold. Start with a readable subject, let the action carry the explanation, and hold once the result is clear. Use the camera when a closer view reveals something, and reuse a shape or position across a cut when it helps the viewer track the object. In a muted grayscale check, the action should still tell the story.
+
 ## The brief: write each scene's note first
 
 Write a short rundown in each scene's `note` before choosing effects: **takeaway → explanatory object and parts → framing → type hierarchy → beat jobs and pace → incoming/outgoing focus**. Map the narration's cause, change or relation to something the viewer can point at (a note, route, quantity or place). Use independent parts for independent movement. Keep one dominant statement, then supporting labels; emphasize the turning phrase with role/spans so the profile owns its appearance. Specify what each motion explains and where it settles. Give the viewer time to read after the change. Read [art-direction.md](art-direction.md) for six editable patterns and their public paths, knobs, dependencies and limits; runnable source is [examples/art-direction/scenes.json](examples/art-direction/scenes.json). For an opted-in series, see the [composition quality example](art-direction.md#profile-composition-example) for semantic targets and holds.
