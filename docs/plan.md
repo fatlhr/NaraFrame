@@ -2,7 +2,7 @@
 
 Revision 2.2 · Updated 2026-11-06 · MVP 2 integrated at `a701c39`
 
-**Current step:** M4 is closed through #64. Fatih authorized resuming M5.1 on 2026-11-06. M5.1 passed its technical gates and awaits Fatih's visual review.
+**Current step:** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers the approved scope.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -1376,7 +1376,7 @@ MVP 2/M4 keeps its recorded closure. M5 reserves numbering for the next MVP; thi
 
 | Task | Status | Dependencies | Acceptance | Review batch |
 |---|---|---|---|---|
-| M5.1 Profile composition quality | IN REVIEW | Integrated M4, profile/variety policy, shared motion/preflight geometry and skill routing | NF-AC-28: configurable rules, truthful coverage and fresh-context authoring/revision | One consolidated skill/library/engine batch after authorization |
+| M5.1 Profile composition quality | CLOSED | Integrated M4, profile/variety policy, shared motion/preflight geometry and skill routing | NF-AC-28: configurable rules, truthful coverage and fresh-context authoring/revision | One consolidated skill/library/engine batch after authorization |
 
 ### M5.1 — Profile composition quality
 
@@ -1426,7 +1426,7 @@ The compiled timeline supplies both preflight and storyboard checkpoints. A beat
 
 The renderer measures fitted text bounds, shape geometry, and image/path alpha bounds with a 50% cutoff at design resolution. It applies layer and group transforms, plane and transition state, a 50% effective opacity floor and the canvas/safe-area intersection. Footprint unions rectangles. Rectangle transition clips are measurable; partial circular clips and uncertain full occlusion can report unverified. Camera displacement measures explicit camera moves over consecutive frames of visible world content. Layer-local focus stays in story activity. The inactivity check compares frame-derived story state, using rounded count text, draw progress, opacity, projected geometry and content. Cover and painted measurements remain pending in Node. Preview keys include active policy, resolved annotations, stage and evaluator version.
 
-#### Acceptance — NF-AC-28 (IN REVIEW)
+#### Acceptance — NF-AC-28 (MET for the recorded scope)
 
 The acceptance project will live outside the repository at `../NaraFrame-projects/mvp-next/composition-quality`. It uses one opted-in profile with example thresholds and a second neutral profile with the new policy omitted. Use ordinary source revisions for negative/control variants; preserve the first draft and failures.
 
@@ -1446,7 +1446,7 @@ Use these existing commands with the optional profile policy. Expected: actionab
 - [x] **M5.1.4 — Negative/control matrix:** delayed title/hero and reveal-at-zero; raw inactivity below/equal/above N, long continuous motion, head/tail/cross-scene gaps and bounded hold; no-op/hidden camera, valid world move and allowed static shot; cut runs excluding the final declaration; padded PNG, thin SVG/path, schema refusal for nested groups and supported transformed/clipped hero, overlapping/disjoint hero parts, hero change/exit and absent settled frame. Include unsupported recipe/paint coverage without a false pass.
 - [x] **M5.1.5 — Compatibility and stage controls:** missing policy, each disabled rule, warning/error/off per stage, preview production-check interactions, allowed/locked overrides, profile switch/dry-run, phrase retiming, scoped/full consistency at 540/1080 and normal quiet-shot examples. Confirm existing safety errors cannot be waived by the new policy.
 - [x] **M5.1.6 — Reuse and approval:** changing a rule/threshold/exemption or evaluator version cannot reuse a report checked under weaker rules without revalidation; choose report identity/key treatment deliberately. Prove stale approval, edit/undo and matching build reuse; unchanged masters/voice keys remain intact. Policy-free legacy keys stay stable unless a documented runtime change requires otherwise.
-- [ ] **M5.1.7 — Gate and handoff:** after the public path/output review, add focused regressions, run `pnpm verify`, then one confirmed serial full E2E at this batch's closure because preflight/stage enforcement changes. Preserve raw failures and versions; consolidate technical, skill-authoring and owner visual dispositions in one review packet.
+- [x] **M5.1.7 — Gate and handoff:** after the public path/output review, add focused regressions, run `pnpm verify`, then one confirmed serial full E2E at this batch's closure because preflight/stage enforcement changes. Preserve raw failures and versions; consolidate technical, skill-authoring and owner visual dispositions in one review packet.
 
 **Execution:** one batch with internal steps. The owner authorized implementation, trial and a serial E2E on 2026-11-05. Visual acceptance and integration follow the existing gates.
 
@@ -1481,7 +1481,7 @@ Fatih authorized resuming M5.1 after M4 closure. The 24 implementation, test and
 
 **Final serial E2E passed.** The candidate on `c4f07fe` passed 24/24 tests across 14 files in 1245.55s. The candidate diff SHA-256 is `2f664e4a1a702622a9ce347c9ff180b2727eab7e69e0f991ec3ce4792160eb3b`. The checksummed archive `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-06-m5-1-composition-quality/index.json` records 39 files, including the manual CLI receipts, `verify`, the initial focused fixture failure and corrected result, and the E2E log (SHA-256 `f7ca973b987ec7f580c6a1c715b5df29b2ce4e9937d89842c3e54c64a223ee67`).
 
-**Visual review pending.** The archive contains the native pattern preview `visual/preview.mp4` (build `56d57ee477b0-02ec5bbe-5f9`), storyboard, frames and seam strip. M5.1.7 remains open for Fatih's visual disposition and integration. Future visual authoring and character tasks remain planned.
+**Visual approval (2026-11-06).** Fatih approved the archived native pattern preview `visual/preview.mp4` (build `56d57ee477b0-02ec5bbe-5f9`) as the M5.1 example. The storyboard, frames and seam strip support that review. M5.1.7 records this approval alongside the technical and skill authoring evidence. Future visual authoring and character tasks remain planned.
 
 #### M2.R1 model and reproduction — 2026-11-05
 

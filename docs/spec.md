@@ -1,6 +1,6 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 1.3 · 2026-11-05 · MVP 2 integrated at `a701c39` · earlier closure queue reconciled on 2026-11-06 · M5.1 in final review
+Revision 1.3 · 2026-11-05 · MVP 2 integrated at `a701c39` · earlier closure queue reconciled on 2026-11-06 · M5.1 acceptance recorded on 2026-11-06
 
 MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. All three MVP 2 batches (M4.1–M4.5) are integrated in main as of `a701c39`: art direction and captions, library imports, prepared audio and series identity, the installable engine and skill, and a frozen production trial that ended in two owner-approved exports. Exported is not published: public rights for the trial media stay open. Follow-up findings F1–F7 have integrated fixes. The dated priority triage and completed closure queue are recorded in the plan.
 

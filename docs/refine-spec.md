@@ -100,7 +100,7 @@ Dedicated SIGKILL descendant forensics, historical harness/timeout reconstructio
 
 Historical comparison/publication tasks and optional primitive/QA expansion remain retired or archived. Accepted recipe/contrast/revision limits stay documented. Historical missing evidence and measurements remain missing or unknown. Administrative closure grants no new visual verdict, corrected claim, media rights or publication permission.
 
-The [M4.R2 reconciliation](plan.md#m4r2-closure-reconciliation-2026-11-06) records evidenced closure of the five retained tasks. Fatih authorized resuming M5.1 on 2026-11-06. Its [closure verification](plan.md#closure-verification-2026-11-06) records the current gates.
+The [M4.R2 reconciliation](plan.md#m4r2-closure-reconciliation-2026-11-06) records evidenced closure of the five retained tasks. Fatih authorized resuming M5.1 on 2026-11-06. Its [closure verification](plan.md#closure-verification-2026-11-06) records the passed gates and owner approval for the M5.1 example.
 
 ## 6. Delivery and review policy
 
