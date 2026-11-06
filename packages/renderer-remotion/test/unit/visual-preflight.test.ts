@@ -1,5 +1,9 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  inspectInactivity,
+  rectangleUnionArea,
+} from "../../src/remotion/composition-quality.js";
 import { resolveVisualPreflight } from "../../src/remotion/visual-preflight.js";
 
 // Heavier type is wider. Weights at or below 700 measure exactly as before,
@@ -1148,5 +1152,419 @@ describe("resolveVisualPreflight — motion-aware text checks (F1)", () => {
     scene.camera = { initial: { x: 80, y: 0, zoom: 1 }, moves: [] };
 
     expect(resolveVisualPreflight(draft).report.issues).toEqual([]);
+  });
+});
+
+describe("profile composition quality", () => {
+  const stages = {
+    plan: "off",
+    preview: "warning",
+    production: "error",
+  } as const;
+  const setup = () => {
+    const draft = draftWithScene([
+      text({
+        id: "title",
+        text: "Route",
+        frame: { x: 80, y: 80, width: 220, height: 70 },
+      }),
+      {
+        id: "hero",
+        type: "shape",
+        shape: "rectangle",
+        fill: "#ffffff",
+        frame: { x: 80, y: 300, width: 360, height: 440 },
+        opacity: 1,
+        rotationDeg: 0,
+        zIndex: 0,
+        cornerRadius: 0,
+      },
+    ]);
+    const scene = draft.scenes[0];
+    if (!scene) throw new Error("Missing scene fixture");
+    scene.compositionQuality = {
+      titleId: "title",
+      heroIds: ["hero"],
+      settledFrame: 0,
+    };
+    draft.compositionQualityStage = "preview";
+    draft.profile.render = {
+      ...baseRender,
+      compositionQuality: {
+        opening: { enabled: true, stages },
+        hero: { enabled: true, stages, minRatio: 0.25 },
+      },
+    };
+    return { draft, scene };
+  };
+
+  it("keeps the sampled quarter distinct from the first stable frame", () => {
+    const { draft, scene } = setup();
+    scene.beats = [
+      {
+        id: "emphasis",
+        targetId: "hero",
+        startFrame: 15,
+        durationInFrames: 24,
+        action: "emphasize",
+        params: { scale: 1.06 },
+      },
+    ];
+    const report = resolveVisualPreflight(draft).report;
+    expect(report.frames).toContainEqual({
+      frame: 22,
+      sceneId: "probe",
+      reasons: ["scene-quarter"],
+    });
+    expect(
+      report.frames.find((entry) =>
+        entry.reasons.includes("composition-settled:emphasis"),
+      )?.frame,
+    ).toBe(39);
+    expect(report.issues).toContainEqual(
+      expect.objectContaining({
+        code: "COMPOSITION_HERO",
+        severity: "info",
+        details: expect.objectContaining({ frame: 39, coverage: "checked" }),
+      }),
+    );
+  });
+
+  it("keeps an endpoint at scene end unverified and scoped opening pending", () => {
+    const { draft, scene } = setup();
+    draft.scope = {
+      type: "scene",
+      sceneId: "probe",
+      sourceStartFrame: 90,
+      sourceEndFrame: 180,
+    };
+    scene.beats = [
+      {
+        id: "emphasis",
+        targetId: "hero",
+        startFrame: 70,
+        durationInFrames: 20,
+        action: "emphasize",
+        params: { scale: 1.06 },
+      },
+    ];
+    const report = resolveVisualPreflight(draft).report;
+    expect(
+      report.frames.some((entry) =>
+        entry.reasons.includes("composition-settled:emphasis"),
+      ),
+    ).toBe(false);
+    expect(report.issues).toContainEqual(
+      expect.objectContaining({
+        code: "COMPOSITION_HERO",
+        severity: "warning",
+        details: expect.objectContaining({ coverage: "unverified" }),
+      }),
+    );
+    expect(report.issues).toContainEqual(
+      expect.objectContaining({
+        code: "COMPOSITION_OPENING",
+        severity: "info",
+        details: expect.objectContaining({
+          coverage: "pending",
+          sourceFrame: 90,
+        }),
+      }),
+    );
+  });
+
+  it("rejects a reveal-at-zero opening only at its configured severity", () => {
+    const { draft, scene } = setup();
+    scene.beats = [
+      {
+        id: "reveal-title",
+        targetId: "title",
+        startFrame: 0,
+        durationInFrames: 15,
+        action: "reveal",
+        params: { direction: "up", distance: 10 },
+      },
+    ];
+    draft.compositionQualityStage = "production";
+    expect(resolveVisualPreflight(draft).report.issues).toContainEqual(
+      expect.objectContaining({
+        code: "COMPOSITION_OPENING",
+        severity: "error",
+        details: expect.objectContaining({ visible: false, frame: 0 }),
+      }),
+    );
+    delete draft.compositionQualityStage;
+    expect(
+      resolveVisualPreflight(draft).report.issues.some(
+        (entry) => entry.code === "COMPOSITION_OPENING",
+      ),
+    ).toBe(false);
+  });
+  it("requires a separate visible hero in the opening", () => {
+    const { draft, scene } = setup();
+    scene.compositionQuality = { titleId: "title", heroIds: ["title"] };
+    expect(resolveVisualPreflight(draft).report.issues).toContainEqual(
+      expect.objectContaining({
+        code: "COMPOSITION_OPENING",
+        severity: "warning",
+        details: expect.objectContaining({ visible: false }),
+      }),
+    );
+  });
+
+  it("subtracts only the named reading hold and tests the longest continuous gap", () => {
+    const { draft } = setup();
+    draft.profile.render.compositionQuality = {
+      inactivity: {
+        enabled: true,
+        stages,
+        maxMs: 1000,
+        allowReadingHolds: true,
+      },
+    };
+    const states = Array<string>(90).fill("held");
+    expect(inspectInactivity(draft, [{ states, holds: [] }])[0]).toMatchObject({
+      severity: "warning",
+      details: { longestMs: 3000 },
+    });
+    const holds = [
+      { startFrame: 30, endFrame: 60, reason: "Read both labels." },
+    ];
+    expect(inspectInactivity(draft, [{ states, holds }])[0]).toMatchObject({
+      severity: "info",
+      details: { longestMs: 1000, exemptions: holds },
+    });
+  });
+
+  it("does not count a delayed or completely covered hero at frame zero", () => {
+    const { draft, scene } = setup();
+    scene.beats = [
+      {
+        id: "late-hero",
+        targetId: "hero",
+        startFrame: 12,
+        durationInFrames: 15,
+        action: "reveal",
+        params: { direction: "up", distance: 10 },
+      },
+    ];
+    const opening = () =>
+      resolveVisualPreflight(draft).report.issues.find(
+        (issue) => issue.code === "COMPOSITION_OPENING",
+      );
+    expect(opening()).toMatchObject({
+      severity: "warning",
+      details: { coverage: "checked", visible: false },
+    });
+    scene.beats = [];
+    const hero = scene.layers.find((layer) => layer.id === "hero");
+    if (hero?.type !== "shape") throw new Error("Missing hero fixture");
+    scene.layers.push({ ...hero, id: "cover", zIndex: 1 });
+    expect(opening()).toMatchObject({
+      severity: "warning",
+      details: { coverage: "checked", visible: false },
+    });
+  });
+
+  it("counts continuous change and measures head, tail and uninterrupted seam gaps", () => {
+    const { draft, scene } = setup();
+    const policy = {
+      enabled: true,
+      stages,
+      maxMs: 500,
+      allowReadingHolds: true,
+    };
+    draft.profile.render.compositionQuality = { inactivity: policy };
+    scene.endFrame = 45;
+    draft.scenes.push({ ...scene, id: "tail", startFrame: 45, endFrame: 90 });
+    const states = Array.from({ length: 90 }, (_, i) =>
+      String(Math.max(14, Math.min(i, 74))),
+    );
+    const measure = (sequence: string[]) =>
+      inspectInactivity(draft, [
+        { states: sequence.slice(0, 45), holds: [] },
+        { states: sequence.slice(45), holds: [] },
+      ])[0];
+    expect(measure(states)).toMatchObject({
+      severity: "info",
+      details: {
+        rawGaps: [
+          { startFrame: 0, endFrame: 15 },
+          { startFrame: 75, endFrame: 90 },
+        ],
+        longestMs: 500,
+      },
+    });
+    policy.maxMs = 499;
+    expect(measure(states)).toMatchObject({ severity: "warning" });
+    policy.maxMs = 501;
+    expect(measure(states)).toMatchObject({ severity: "info" });
+    expect(measure(Array(90).fill("held"))).toMatchObject({
+      severity: "warning",
+      details: { rawGaps: [{ startFrame: 0, endFrame: 90 }], longestMs: 3000 },
+    });
+  });
+
+  it("requires a camera move on visible world paint or an explicit static reason", () => {
+    const { draft, scene } = setup();
+    draft.profile.render.compositionQuality = {
+      camera: {
+        enabled: true,
+        stages,
+        minDisplacementPx: 6,
+        allowStatic: true,
+      },
+    };
+    const hero = scene.layers.find((layer) => layer.id === "hero");
+    if (hero?.type !== "shape") throw new Error("Missing hero fixture");
+    const move = {
+      id: "pan",
+      startFrame: 0,
+      durationInFrames: 30,
+      to: { x: 30, y: 0, zoom: 1 },
+      easingPreset: "linear",
+    } as const;
+    scene.camera = { initial: { x: 0, y: 0, zoom: 1 }, moves: [move] };
+    const camera = () =>
+      resolveVisualPreflight(draft).report.issues.find(
+        (issue) => issue.code === "VIEWPOINT_STATIC",
+      );
+    expect(camera()).toMatchObject({
+      severity: "warning",
+      details: { observed: 0 },
+    });
+    hero.space = "world";
+    hero.parallax = 0;
+    expect(camera()).toMatchObject({
+      severity: "warning",
+      details: { observed: 0 },
+    });
+    hero.parallax = 1;
+    expect(camera()).toMatchObject({
+      severity: "info",
+      details: { coverage: "checked" },
+    });
+    hero.opacity = 0;
+    expect(camera()).toMatchObject({
+      severity: "warning",
+      details: { observed: 0 },
+    });
+    hero.opacity = 1;
+    scene.camera.moves = [{ ...move, to: { x: 0, y: 0, zoom: 1 } }];
+    expect(camera()).toMatchObject({
+      severity: "warning",
+      details: { observed: 0 },
+    });
+    scene.compositionQuality = {
+      ...scene.compositionQuality,
+      staticReason: "Read the two labels side by side.",
+    };
+    expect(camera()).toMatchObject({
+      severity: "info",
+      details: { coverage: "exempt" },
+    });
+  });
+
+  it("uses clipped and transformed measured paint rather than the whole image frame", () => {
+    const { draft, scene } = setup();
+    const frame = { x: 0, y: 300, width: 360, height: 440 };
+    scene.layers = [
+      ...scene.layers.filter((layer) => layer.id !== "hero"),
+      {
+        id: "hero",
+        type: "image",
+        assetId: "padded",
+        frame,
+        fit: "contain",
+        opacity: 1,
+        rotationDeg: 0,
+        zIndex: 0,
+      },
+      {
+        id: "pan",
+        type: "group",
+        memberIds: ["hero"],
+        transform: { x: -20, y: 0, scale: 1, rotationDeg: 0, opacity: 1 },
+        zIndex: 0,
+      },
+    ];
+    scene.compositionQuality = { heroIds: ["pan"], settledFrame: 0 };
+    const paint = { x: 10, y: 320, width: 40, height: 60 };
+    const issue = resolveVisualPreflight(
+      draft,
+      new Set(),
+      new Map([[scene.id, new Map([["hero", paint]])]]),
+    ).report.issues.find((entry) => entry.code === "COMPOSITION_HERO");
+    expect(issue).toMatchObject({
+      severity: "warning",
+      details: { coverage: "checked", ratio: (30 * 60) / (540 * 960) },
+    });
+  });
+
+  it("measures the replacement hero after the first hero exits", () => {
+    const { draft, scene } = setup();
+    const hero = scene.layers.find((layer) => layer.id === "hero");
+    if (hero?.type !== "shape") throw new Error("Missing hero fixture");
+    scene.layers.push({
+      ...hero,
+      id: "replacement",
+      frame: { x: 250, y: 780, width: 180, height: 120 },
+    });
+    scene.beats = [
+      {
+        id: "exit",
+        targetId: "hero",
+        startFrame: 15,
+        durationInFrames: 15,
+        action: "exit",
+        params: { direction: "up", distance: 20 },
+      },
+    ];
+    scene.compositionQuality = {
+      heroIds: ["hero"],
+      heroByBeat: { exit: ["replacement"] },
+    };
+    const footprint = () =>
+      resolveVisualPreflight(draft).report.issues.find(
+        (issue) => issue.code === "COMPOSITION_HERO",
+      );
+    expect(footprint()).toMatchObject({
+      details: {
+        heroIds: ["replacement"],
+        frame: 30,
+        ratio: (180 * 120) / (540 * 960),
+      },
+    });
+    delete scene.compositionQuality.heroByBeat;
+    expect(footprint()).toMatchObject({
+      details: { heroIds: ["hero"], ratio: 0 },
+    });
+  });
+
+  it("leaves recipe composition measurements unverified at enforcement", () => {
+    const { draft, scene } = setup();
+    scene.visual = { type: "recipe", recipe: "local-card", params: {} };
+    scene.layers = [];
+    draft.compositionQualityStage = "production";
+    const report = resolveVisualPreflight(draft).report;
+    for (const code of ["COMPOSITION_OPENING", "COMPOSITION_HERO"]) {
+      expect(report.issues).toContainEqual(
+        expect.objectContaining({
+          code,
+          severity: "error",
+          details: expect.objectContaining({ coverage: "unverified" }),
+        }),
+      );
+    }
+  });
+
+  it("counts intersecting hero parts once and leaves empty gaps out", () => {
+    expect(
+      rectangleUnionArea([
+        { x: 0, y: 0, width: 20, height: 10 },
+        { x: 10, y: 0, width: 20, height: 10 },
+        { x: 40, y: 0, width: 20, height: 10 },
+      ]),
+    ).toBe(500);
   });
 });

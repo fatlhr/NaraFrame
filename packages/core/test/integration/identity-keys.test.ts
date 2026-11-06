@@ -202,3 +202,129 @@ describe("assemblyKey", () => {
     expect(compile(renamed).assemblyKey).not.toBe(compile(base).assemblyKey);
   });
 });
+
+describe("composition policy identity", () => {
+  const cuts = {
+    enabled: true,
+    maxConsecutive: 1,
+    stages: { plan: "off", preview: "warning", production: "error" },
+  } as const;
+
+  it("applies cut severity by stage and excludes the final declaration", () => {
+    const source = structuredClone(narratedSource());
+    source.profile.render.compositionQuality = { cuts };
+    const plan = compileDraft(source);
+    const preview = compileDraft(source, undefined, {
+      qualityStage: "preview",
+    });
+    const production = compileDraft(source, undefined, { mode: "final" });
+    expect(
+      plan.issues.some((issue) => issue.code === "COMPOSITION_CUT_RUN"),
+    ).toBe(false);
+    expect(preview.ok).toBe(true);
+    expect(preview.issues).toContainEqual(
+      expect.objectContaining({
+        code: "COMPOSITION_CUT_RUN",
+        severity: "warning",
+        details: expect.objectContaining({ longest: 2, threshold: 1 }),
+      }),
+    );
+    expect(production.ok).toBe(false);
+    expect(production.issues).toContainEqual(
+      expect.objectContaining({
+        code: "COMPOSITION_CUT_RUN",
+        severity: "error",
+      }),
+    );
+  });
+
+  it("keeps legacy keys and findings when every new rule is disabled", () => {
+    const source = structuredClone(narratedSource());
+    const options = { qualityStage: "preview" } as const;
+    const before = compileDraft(source, undefined, options);
+    const inactive = { enabled: false, stages: cuts.stages };
+    const policy = {
+      opening: inactive,
+      cuts: { ...cuts, ...inactive },
+      hero: { ...inactive, minRatio: 0.25 },
+      camera: { ...inactive, minDisplacementPx: 6, allowStatic: true },
+      inactivity: { ...inactive, maxMs: 1000, allowReadingHolds: true },
+    };
+    const disabled = {
+      ...source,
+      profile: {
+        ...source.profile,
+        render: { ...source.profile.render, compositionQuality: policy },
+      },
+    };
+    const after = compileDraft(disabled, undefined, options);
+    if (!before.ok || !after.ok) throw new Error("Expected legacy compiles");
+    expect(after.issues).toEqual(before.issues);
+    expect(after.value.compositionQualityStage).toBeUndefined();
+    expect(after.value.assemblyKey).toBe(before.value.assemblyKey);
+  });
+
+  it("resolves a reading hold against the updated phrase timing", () => {
+    const source = structuredClone(narratedSource());
+    const scene = source.scenes.scenes[0];
+    const block = source.narration?.blocks[0];
+    const phrase = block && "phrases" in block ? block.phrases[0] : undefined;
+    if (!scene || !phrase) throw new Error("Missing narration fixture");
+    source.profile.render.compositionQuality = {
+      inactivity: {
+        enabled: true,
+        stages: cuts.stages,
+        maxMs: 1000,
+        allowReadingHolds: true,
+      },
+    };
+    scene.compositionQuality = {
+      readingHolds: [
+        {
+          startMs: 0,
+          durationMs: 100,
+          at: { phraseId: phrase.id },
+          reason: "Read the label.",
+        },
+      ],
+    };
+    const start = () => {
+      const compiled = compileDraft(source, undefined, {
+        qualityStage: "preview",
+      });
+      if (!compiled.ok) throw new Error("Expected a bounded reading hold");
+      return compiled.value.scenes[0]?.compositionQuality?.readingHolds?.[0];
+    };
+    expect(start()).toMatchObject({ startFrame: 3, endFrame: 6 });
+    phrase.startMs += 100;
+    expect(start()).toMatchObject({ startFrame: 6, endFrame: 9 });
+  });
+
+  it("requires preview revalidation on policy changes while keeping scene and voice keys", () => {
+    const source = structuredClone(narratedSource());
+    const firstBlock = source.narration?.blocks[0];
+    if (!firstBlock) throw new Error("Missing narration fixture");
+    const legacy = compile(source);
+    const voice = generationKeyForBlock(source, firstBlock);
+    source.profile.render.compositionQuality = { cuts };
+    expect(compile(source).assemblyKey).toBe(legacy.assemblyKey);
+    const preview = compileDraft(source, undefined, {
+      qualityStage: "preview",
+    });
+    if (!preview.ok) throw new Error("Expected a warning-only preview");
+    expect(preview.value.assemblyKey).not.toBe(legacy.assemblyKey);
+    expect(computeSceneRenderKeys(preview.value)).toEqual(
+      computeSceneRenderKeys(legacy),
+    );
+    expect(generationKeyForBlock(source, firstBlock)).toBe(voice);
+    source.profile.render.compositionQuality.cuts = {
+      ...cuts,
+      maxConsecutive: 2,
+    };
+    const relaxed = compileDraft(source, undefined, {
+      qualityStage: "preview",
+    });
+    if (!relaxed.ok) throw new Error("Expected a preview within threshold");
+    expect(relaxed.value.assemblyKey).not.toBe(preview.value.assemblyKey);
+  });
+});

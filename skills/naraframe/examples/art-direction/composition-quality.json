@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "scenes": [
+    {
+      "id": "opening",
+      "narrativeRole": "hook",
+      "durationMs": 2400,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "title",
+            "type": "text",
+            "frame": {
+              "x": 165,
+              "y": 290,
+              "width": 750,
+              "height": 260
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "text": "Dua titik, satu rute",
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error"
+          },
+          {
+            "id": "map",
+            "type": "shape",
+            "frame": {
+              "x": 160,
+              "y": 630,
+              "width": 760,
+              "height": 810
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 0,
+            "shape": "circle",
+            "fill": "palette.surface",
+            "space": "world"
+          },
+          {
+            "id": "start",
+            "type": "shape",
+            "frame": {
+              "x": 275,
+              "y": 845,
+              "width": 110,
+              "height": 110
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "shape": "circle",
+            "fill": "palette.background",
+            "space": "world"
+          },
+          {
+            "id": "end",
+            "type": "shape",
+            "frame": {
+              "x": 687,
+              "y": 1070,
+              "width": 130,
+              "height": 130
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "shape": "circle",
+            "fill": "palette.accent",
+            "space": "world"
+          }
+        ]
+      },
+      "beats": [],
+      "transition": {
+        "type": "match-cut",
+        "durationMs": 300
+      },
+      "note": "Show the map and title at frame zero. At 500 ms push toward the destination for 900 ms, then stop so the two points can be read.",
+      "camera": {
+        "initial": {
+          "x": 0,
+          "y": 0,
+          "zoom": 1
+        },
+        "moves": [
+          {
+            "id": "reframe",
+            "startMs": 500,
+            "durationMs": 900,
+            "to": {
+              "x": 36,
+              "y": 22,
+              "zoom": 1.12
+            },
+            "easingPreset": "smooth"
+          }
+        ]
+      },
+      "compositionQuality": {
+        "titleId": "title",
+        "heroIds": ["map", "start", "end"],
+        "settledAtMs": 1400
+      }
+    },
+    {
+      "id": "trace",
+      "narrativeRole": "explanation",
+      "durationMs": 2400,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "title",
+            "type": "text",
+            "frame": {
+              "x": 165,
+              "y": 290,
+              "width": 750,
+              "height": 260
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "text": "Ikuti jalurnya",
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error"
+          },
+          {
+            "id": "map",
+            "type": "shape",
+            "frame": {
+              "x": 160,
+              "y": 630,
+              "width": 760,
+              "height": 810
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 0,
+            "shape": "circle",
+            "fill": "palette.surface"
+          },
+          {
+            "id": "start",
+            "type": "shape",
+            "frame": {
+              "x": 275,
+              "y": 845,
+              "width": 110,
+              "height": 110
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 2,
+            "shape": "circle",
+            "fill": "palette.background"
+          },
+          {
+            "id": "end",
+            "type": "shape",
+            "frame": {
+              "x": 687,
+              "y": 1070,
+              "width": 130,
+              "height": 130
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 2,
+            "shape": "circle",
+            "fill": "palette.accent"
+          },
+          {
+            "id": "route",
+            "type": "path",
+            "frame": {
+              "x": 160,
+              "y": 630,
+              "width": 760,
+              "height": 810
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 1,
+            "d": "M 40 40 Q 100 740 710 770",
+            "viewBox": {
+              "minX": 0,
+              "minY": 0,
+              "width": 760,
+              "height": 810
+            },
+            "stroke": {
+              "color": "palette.background",
+              "width": 22
+            }
+          }
+        ]
+      },
+      "beats": [
+        {
+          "id": "draw-route",
+          "targetId": "route",
+          "startMs": 150,
+          "durationMs": 1150,
+          "action": "draw",
+          "params": {}
+        }
+      ],
+      "transition": {
+        "type": "cut"
+      },
+      "note": "Keep the landmarks across the cut. Trace the route on the same map and hold the completed line.",
+      "compositionQuality": {
+        "titleId": "title",
+        "heroIds": ["route"],
+        "staticReason": "A fixed camera makes the traced route easier to follow.",
+        "activityIds": ["start", "end"]
+      }
+    },
+    {
+      "id": "compare",
+      "narrativeRole": "comparison",
+      "durationMs": 2400,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "title",
+            "type": "text",
+            "frame": {
+              "x": 165,
+              "y": 290,
+              "width": 750,
+              "height": 260
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "text": "Bandingkan jaraknya",
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error"
+          },
+          {
+            "id": "near",
+            "type": "shape",
+            "frame": {
+              "x": 170,
+              "y": 800,
+              "width": 240,
+              "height": 250
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 0,
+            "shape": "circle",
+            "fill": "palette.surface"
+          },
+          {
+            "id": "far",
+            "type": "shape",
+            "frame": {
+              "x": 520,
+              "y": 730,
+              "width": 390,
+              "height": 390
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 0,
+            "shape": "circle",
+            "fill": "palette.accent"
+          }
+        ]
+      },
+      "beats": [],
+      "transition": {
+        "type": "cut"
+      },
+      "note": "Let the viewer compare the two discs. Keep both fixed for the reading hold.",
+      "compositionQuality": {
+        "titleId": "title",
+        "heroIds": ["near", "far"],
+        "settledAtMs": 0,
+        "readingHolds": [
+          {
+            "startMs": 0,
+            "durationMs": 2400,
+            "reason": "Compare the two illustrated distances."
+          }
+        ],
+        "staticReason": "Keep both positions fixed during the comparison."
+      }
+    },
+    {
+      "id": "detail",
+      "narrativeRole": "payoff",
+      "durationMs": 2400,
+      "visual": {
+        "type": "composition",
+        "layers": [
+          {
+            "id": "title",
+            "type": "text",
+            "frame": {
+              "x": 165,
+              "y": 290,
+              "width": 750,
+              "height": 260
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 3,
+            "text": "Titik tujuan",
+            "role": "heading",
+            "maxLines": 2,
+            "overflowPolicy": "error"
+          },
+          {
+            "id": "plate",
+            "type": "image",
+            "frame": {
+              "x": 100,
+              "y": 590,
+              "width": 880,
+              "height": 1020
+            },
+            "opacity": 1,
+            "rotationDeg": 0,
+            "zIndex": 0,
+            "fit": "contain",
+            "assetId": "padded-hero"
+          }
+        ]
+      },
+      "beats": [],
+      "transition": {
+        "type": "cut"
+      },
+      "note": "Keep the destination alone in the frame. The transparent edge belongs to the source image and does not add to the footprint.",
+      "compositionQuality": {
+        "titleId": "title",
+        "heroIds": ["plate"],
+        "settledAtMs": 0,
+        "staticReason": "The last shot lets the viewer read the destination."
+      }
+    }
+  ]
+}

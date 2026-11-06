@@ -579,6 +579,34 @@ export const SceneNarrationSchema = z
   })
   .strict();
 
+const HeroIdsSchema = z
+  .array(IdSchema)
+  .min(1)
+  .refine((ids) => new Set(ids).size === ids.length, "Hero IDs must be unique");
+
+const SceneQualitySchema = z
+  .object({
+    titleId: IdSchema.optional(),
+    heroIds: HeroIdsSchema.optional(),
+    heroByBeat: z.record(IdSchema, HeroIdsSchema).optional(),
+    activityIds: z.array(IdSchema).optional(),
+    readingHolds: z
+      .array(
+        z
+          .object({
+            startMs: NonNegativeIntegerSchema,
+            durationMs: PositiveIntegerSchema,
+            at: PhraseAnchorSchema.optional(),
+            reason: z.string().trim().min(1),
+          })
+          .strict(),
+      )
+      .optional(),
+    staticReason: z.string().trim().min(1).optional(),
+    settledAtMs: NonNegativeIntegerSchema.optional(),
+  })
+  .strict();
+
 export const SceneSchema = z
   .object({
     id: IdSchema,
@@ -587,6 +615,7 @@ export const SceneSchema = z
     visual: SceneVisualSchema,
     beats: z.array(BeatSchema),
     camera: CameraSchema.optional(),
+    compositionQuality: SceneQualitySchema.optional(),
     transition: TransitionSchema,
     narration: SceneNarrationSchema.optional(),
     carriesFactualClaim: z.boolean().optional(),

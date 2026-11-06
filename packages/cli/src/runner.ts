@@ -456,7 +456,12 @@ const validateCommand = async (args: readonly string[]): Promise<Execution> => {
   if (stage === "production") {
     const sceneId = parsed.values.get("--scene");
     const checks = sceneId
-      ? await runPreviewProductionChecks(loaded.value, sceneId)
+      ? await runPreviewProductionChecks(
+          loaded.value,
+          sceneId,
+          540,
+          "production",
+        )
       : await runProductionChecks(loaded.value);
     return {
       exitCode: checks.ok ? 0 : 1,
@@ -477,7 +482,13 @@ const validateCommand = async (args: readonly string[]): Promise<Execution> => {
         },
       }),
       ...(checks.ok
-        ? { human: ["Production checks passed: ready for a reviewed export."] }
+        ? {
+            human: [
+              checks.issues.some(isPendingBrowserQuality)
+                ? "Production source checks passed. Composition measurements still need browser preflight."
+                : "Production checks passed: ready for a reviewed export.",
+            ],
+          }
         : {}),
     };
   }
@@ -794,15 +805,18 @@ const previewCommand = async (
   const compiled = compileDraft(
     loaded.value.source,
     sceneId ? { type: "scene", sceneId } : { type: "project" },
-    { resolution },
+    { resolution, qualityStage: "preview" },
   );
   // The production checks compile the same source again, so their info
   // issues can repeat the draft compile's; report each finding once.
   const issues = dedupeIssues([
     ...loaded.issues,
-    ...compiled.issues,
+    ...compiled.issues.filter((issue) => !isPendingBrowserQuality(issue)),
     ...(productionChecks
-      ? productionChecks.issues.filter((issue) => issue.severity === "info")
+      ? productionChecks.issues.filter(
+          (issue) =>
+            issue.severity === "info" && !isPendingBrowserQuality(issue),
+        )
       : []),
   ]);
   if (!compiled.ok) {
@@ -1115,6 +1129,18 @@ const historyCommand = async (args: readonly string[]): Promise<Execution> => {
   };
 };
 
+const isPendingBrowserQuality = (issue: Issue): boolean => {
+  const details = issue.details;
+  return (
+    typeof details === "object" &&
+    details !== null &&
+    "coverage" in details &&
+    details.coverage === "pending" &&
+    "rule" in details &&
+    details.rule !== "cuts"
+  );
+};
+
 interface ProductionChecks {
   ok: boolean;
   issues: Issue[];
@@ -1126,7 +1152,11 @@ interface ProductionChecks {
 const runProductionChecks = async (
   loaded: LoadedPlanProject,
 ): Promise<ProductionChecks> => {
-  const draft = compileDraft(loaded.source);
+  const draft = compileDraft(
+    loaded.source,
+    { type: "project" },
+    { qualityStage: "production" },
+  );
   const final = compileDraft(
     loaded.source,
     { type: "project" },
@@ -1155,11 +1185,12 @@ const runPreviewProductionChecks = async (
   loaded: LoadedPlanProject,
   sceneId: string | undefined,
   resolution: DraftResolution = 540,
+  qualityStage: "preview" | "production" = "preview",
 ): Promise<ProductionChecks> => {
   const draft = compileDraft(
     loaded.source,
     sceneId ? { type: "scene", sceneId } : { type: "project" },
-    { resolution },
+    { resolution, qualityStage },
   );
   const issues: Issue[] = [...draft.issues];
   if (!draft.ok) return { ok: false, issues };
@@ -1259,6 +1290,7 @@ const renderCommand = async (
       suggestion,
     });
   };
+  let reviewedAssemblyKey = checks.draft.assemblyKey;
   if (reviewed !== undefined) {
     const manifestPath = resolve(
       loaded.value.root,
@@ -1279,19 +1311,15 @@ const renderCommand = async (
     const render = (manifest?.render ?? {}) as Record<string, unknown>;
     const scope = (manifest?.scope ?? {}) as Record<string, unknown>;
     // A native 1080 preview reviews the same source at final size.
-    const reviewedDraft =
-      render.width === 1080
-        ? compileDraft(
-            loaded.value.source,
-            { type: "project" },
-            { resolution: 1080 },
-          )
-        : null;
-    const reviewedAssemblyKey = reviewedDraft
-      ? reviewedDraft.ok
-        ? reviewedDraft.value.assemblyKey
-        : null
-      : checks.draft.assemblyKey;
+    const reviewedDraft = compileDraft(
+      loaded.value.source,
+      { type: "project" },
+      {
+        resolution: render.width === 1080 ? 1080 : 540,
+        qualityStage: "preview",
+      },
+    );
+    if (reviewedDraft.ok) reviewedAssemblyKey = reviewedDraft.value.assemblyKey;
     if (!manifest) {
       fail(
         "APPROVAL_PREVIEW_UNKNOWN",
@@ -1300,6 +1328,7 @@ const renderCommand = async (
       );
     } else if (
       manifest.sourceRevision !== checks.draft.sourceRevision ||
+      !reviewedDraft.ok ||
       manifest.assemblyKey !== reviewedAssemblyKey ||
       scope.type !== "project"
     ) {
@@ -1338,7 +1367,7 @@ const renderCommand = async (
 
   const approval: Approval = await recordApproval(loaded.value.root, {
     sourceRevision: checks.draft.sourceRevision,
-    assemblyKey: checks.draft.assemblyKey,
+    assemblyKey: reviewedAssemblyKey,
     scope: { type: "project" },
     previewBuildId: reviewed ?? null,
     autonomy: autonomous
@@ -1364,7 +1393,7 @@ const renderCommand = async (
     draft: checks.final,
     approval,
     audioMode,
-    issues: checks.issues,
+    issues: checks.issues.filter((issue) => !isPendingBrowserQuality(issue)),
     cost: ledger.ok && ledger.value ? computeCostReport(ledger.value) : null,
     ...(signal ? { signal } : {}),
     onProgress: (progress) => {

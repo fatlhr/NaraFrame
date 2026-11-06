@@ -2,6 +2,12 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 const alias = {
+  "@naraframe/core/composition-quality": fileURLToPath(
+    new URL(
+      "./packages/core/src/compiler/composition-quality.ts",
+      import.meta.url,
+    ),
+  ),
   "@naraframe/core/image-placement": fileURLToPath(
     new URL("./packages/core/src/asset/image-placement.ts", import.meta.url),
   ),

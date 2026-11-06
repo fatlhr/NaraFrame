@@ -22,7 +22,7 @@ A new project's first `scenes.json` is written straight into the project folder.
 
 For revisions, reread the pinned profile and use ordinary `edit` revisions, then repeat validation, preview inspection, and `status` verification ([authoring.md](authoring.md) has the build loop; [export.md](export.md) has inspection).
 
-- "Make the point clearer" changes headline/hierarchy/object; "give it breathing room" changes beat/camera start and duration plus the settled hold.
+- For a composition finding, use the report to locate the affected scene and layer. Stage the relevant copy, framing or timing change, then run `edit --from STAGING --expect REVISION`. Compare the same moment in the replacement preview. Use `undo` to restore the previous revision if the change misses the intended effect.
 - Shorten/reflow copy or change layout bounds before reducing text below the profile minimum.
 - Plan at most two internal correction passes per checkpoint, retain failed attempts and report remaining issues.
 

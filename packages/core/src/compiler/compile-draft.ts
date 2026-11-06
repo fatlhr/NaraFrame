@@ -7,7 +7,10 @@ import { compileTextSlots, textFitCoverage } from "../recipe/text-slots.js";
 import type { CompiledAsset, CompiledDraft } from "../schema/compiled.js";
 import { CompiledDraftSchema } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
-import type { RenderTokens } from "../schema/profile.js";
+import type {
+  CompositionQualityStage,
+  RenderTokens,
+} from "../schema/profile.js";
 import type {
   Beat,
   Frame,
@@ -22,6 +25,10 @@ import {
   deriveCaptionCues,
   resolveCaptionMode,
 } from "./captions.js";
+import {
+  checkCompositionPlan,
+  qualitySeverity,
+} from "./composition-quality.js";
 import { checkContrast } from "./contrast.js";
 import { computeAssemblyKey } from "./keys.js";
 import { resolveNarrationTimeline } from "./narration-timeline.js";
@@ -892,6 +899,7 @@ const beatProperties = (beat: Beat): MotionProperty[] => {
 interface ResolvedStarts {
   beats: number[];
   moves: number[];
+  holds: number[];
 }
 
 /**
@@ -908,9 +916,12 @@ const resolveAnchoredStarts = (
   const authored: ResolvedStarts = {
     beats: scene.beats.map((beat) => beat.startMs),
     moves: scene.camera?.moves.map((move) => move.startMs) ?? [],
+    holds:
+      scene.compositionQuality?.readingHolds?.map((hold) => hold.startMs) ?? [],
   };
   const anchored =
     scene.beats.some((beat) => beat.at) ||
+    scene.compositionQuality?.readingHolds?.some((hold) => hold.at) ||
     (scene.camera?.moves.some((move) => move.at) ?? false);
   if (!anchored || !source.narration || !scene.narration) {
     return { ...authored, issues };
@@ -990,6 +1001,15 @@ const resolveAnchoredStarts = (
           move.startMs,
           `/scenes/${sceneIndex}/camera/moves/${moveIndex}`,
           `Camera move ${move.id}`,
+        ),
+      ) ?? [],
+    holds:
+      scene.compositionQuality?.readingHolds?.map((hold, index) =>
+        resolve(
+          hold.at,
+          hold.startMs,
+          `/scenes/${sceneIndex}/compositionQuality/readingHolds/${index}`,
+          "Reading hold",
         ),
       ) ?? [],
     issues,
@@ -1293,6 +1313,7 @@ export interface CompileOptions {
    * and type can be reviewed at final size. The default stays 540.
    */
   resolution?: DraftResolution;
+  qualityStage?: CompositionQualityStage;
 }
 
 export type DraftResolution = 540 | 1080;
@@ -1303,6 +1324,13 @@ export const compileDraft = (
   options: CompileOptions = {},
 ): Result<CompiledDraft> => {
   const mode = options.mode ?? "draft";
+  const qualityStage =
+    options.qualityStage ?? (mode === "final" ? "production" : "plan");
+  const renderTokens = source.profile.render;
+  const qualityActive = (
+    ["opening", "inactivity", "camera", "cuts", "hero"] as const
+  ).some((rule) => qualitySeverity(renderTokens, qualityStage, rule) !== "off");
+
   const format =
     mode === "final" || options.resolution === 1080
       ? source.project.format.design
@@ -1797,6 +1825,65 @@ export const compileDraft = (
       );
     });
 
+    const quality = scene.compositionQuality;
+    const qualityPath = `/scenes/${sceneIndex}/compositionQuality`;
+    const readingHolds = quality?.readingHolds?.map((hold, index) => {
+      const startFrame = msToFrameOffset(
+        starts.holds[index] ?? hold.startMs,
+        fps,
+      );
+      const endFrame = startFrame + msToDurationFrames(hold.durationMs, fps);
+      if (
+        endFrame > durationInFrames ||
+        (hold.at && (!scene.narration || !source.narration))
+      ) {
+        issues.push(
+          compileIssue(
+            "COMPOSITION_HOLD_INVALID",
+            `${qualityPath}/readingHolds/${index}`,
+            "A reading hold must resolve to a bounded interval within its scene.",
+            "error",
+            "Adjust the hold's anchor, start or duration.",
+          ),
+        );
+      }
+      return { startFrame, endFrame, reason: hold.reason };
+    });
+    const settledFrame =
+      quality?.settledAtMs === undefined
+        ? undefined
+        : msToFrameOffset(quality.settledAtMs, fps);
+    if (quality) {
+      const layers =
+        scene.visual.type === "composition" ? scene.visual.layers : [];
+      const layerIds = new Set(layers.map((layer) => layer.id));
+      const ids = [
+        ...(quality.heroIds ?? []),
+        ...(quality.activityIds ?? []),
+        ...Object.values(quality.heroByBeat ?? {}).flat(),
+      ];
+      if (
+        ids.some((id) => !layerIds.has(id)) ||
+        (quality.titleId !== undefined &&
+          !layers.some(
+            (layer) => layer.id === quality.titleId && layer.type === "text",
+          )) ||
+        Object.keys(quality.heroByBeat ?? {}).some(
+          (id) => !beats.some((beat) => beat.id === id),
+        ) ||
+        (settledFrame !== undefined && settledFrame >= durationInFrames)
+      ) {
+        issues.push(
+          compileIssue(
+            "COMPOSITION_TARGET_INVALID",
+            qualityPath,
+            "Composition quality references an unknown layer or beat, a non-text title, or a checkpoint outside the scene.",
+            "error",
+            "Use the scene's layer and beat IDs and a checkpoint inside the scene.",
+          ),
+        );
+      }
+    }
     return {
       id: scene.id,
       startFrame,
@@ -1812,6 +1899,25 @@ export const compileDraft = (
           ? layout.layers.map((layer) => scaleLayer(layer, scaleX, scaleY))
           : [],
       beats,
+      ...(qualityActive && quality
+        ? {
+            compositionQuality: {
+              ...(quality.titleId !== undefined
+                ? { titleId: quality.titleId }
+                : {}),
+              ...(quality.heroIds ? { heroIds: quality.heroIds } : {}),
+              ...(quality.heroByBeat ? { heroByBeat: quality.heroByBeat } : {}),
+              ...(quality.activityIds
+                ? { activityIds: quality.activityIds }
+                : {}),
+              ...(readingHolds ? { readingHolds } : {}),
+              ...(quality.staticReason
+                ? { staticReason: quality.staticReason }
+                : {}),
+              ...(settledFrame !== undefined ? { settledFrame } : {}),
+            },
+          }
+        : {}),
       ...(scene.camera
         ? {
             camera: {
@@ -1847,7 +1953,22 @@ export const compileDraft = (
   });
 
   if (requestedScope.type === "project") {
-    issues.push(...checkVariety(varietyEntries, source.profile.render));
+    issues.push(
+      ...checkVariety(varietyEntries, renderTokens).filter(
+        (issue) =>
+          !(
+            issue.code === "VIEWPOINT_STATIC" &&
+            qualitySeverity(renderTokens, qualityStage, "camera") !== "off"
+          ) &&
+          !(
+            issue.code === "SINGLE_TRANSITION_TYPE" &&
+            varietyEntries.every(
+              (entry) => entry.scene.transition.type === "cut",
+            ) &&
+            qualitySeverity(renderTokens, qualityStage, "cuts") !== "off"
+          ),
+      ),
+    );
   }
   issues.push(
     ...checkContrast(
@@ -1904,6 +2025,7 @@ export const compileDraft = (
     height: format.height,
     fps,
     totalFrames,
+    ...(qualityActive ? { compositionQualityStage: qualityStage } : {}),
     scope: compiledScope,
     timelineScope:
       requestedScope.type === "project"
@@ -1952,5 +2074,9 @@ export const compileDraft = (
     };
   }
 
+  issues.push(...checkCompositionPlan(parsed.data));
+  if (issues.some((issue) => issue.severity === "error")) {
+    return { ok: false, issues: sortIssues(issues) };
+  }
   return { ok: true, value: parsed.data, issues: sortIssues(issues) };
 };
