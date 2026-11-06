@@ -177,15 +177,9 @@ Not ready to install the engine? Say no, and you can ask for a written shot-by-s
 <details>
 <summary><b>🤖 Codex and other agents</b></summary>
 
-Copy the skill folder into your agent's skills folder. In a terminal:
+Use the [project-local install instructions](skills/naraframe/installation.md#install-the-skill-from-github) for `npx skills add`, or copy the complete `skills/naraframe` folder into your host's location below.
 
-```bash
-git clone --depth 1 https://github.com/fatlhr/NaraFrame.git
-mkdir -p ~/.agents/skills
-cp -R NaraFrame/skills/naraframe ~/.agents/skills/
-```
-
-Then start a new session and ask for a video; the engine install works the same way as in Claude Code. The skill works from any copy and never writes into its own folder.
+Then start a new session in that project and explicitly invoke `$naraframe` in Codex (or reference the installed `SKILL.md` in another agent). The engine install works the same way as in Claude Code. The skill works from any complete copy and never writes into its own folder.
 
 | Agent | Where the skill goes |
 |---|---|

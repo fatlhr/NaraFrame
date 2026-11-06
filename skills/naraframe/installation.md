@@ -26,6 +26,16 @@ Every launcher failure is one line, `CODE: message. Next: step (see installation
 
 `engineIdentity` fingerprints NaraFrame's built modules, maintained profiles/library/skill/installer, and dependency pins. A rebuilt checkout or changed catalog at the same version/path requires an explicit skill update too. It is an installation binding, not a sandbox or a certificate for third-party code. Changes to episode source do not change this identity.
 
+## Install the skill from GitHub
+
+From the folder where you will keep projects, install the complete canonical skill locally for Codex:
+
+```sh
+npx -y skills add https://github.com/fatlhr/NaraFrame --skill naraframe --agent codex --yes --copy
+```
+
+This creates `.agents/skills/naraframe` in that folder, including its routed guides, examples and scripts. It installs the skill only. Start a new Codex session there and explicitly invoke `$naraframe`, or reference that installed `SKILL.md`. Automatic host discovery is not required for the CLI. Follow the engine setup below; use the installed launcher's reported route for commands outside a source checkout. For another host, use its documented project location in the installer section.
+
 ## Install the engine from npm
 
 A skill folder copied from GitHub, installed with `npx skills add`, or delivered as a plugin has no engine. `scripts/setup-engine.mjs` in it installs one. It needs only Node 22 or newer and npm, runs only after the user agrees, and writes only under `NARAFRAME_HOME` (default `~/.naraframe`): never into the skill folder, which can be read-only.

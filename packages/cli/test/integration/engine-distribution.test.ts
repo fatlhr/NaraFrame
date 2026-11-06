@@ -14,12 +14,15 @@ import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const repository = fileURLToPath(new URL("../../../../", import.meta.url));
+// Keep packing on the pinned development runtime; exercise installed consumer
+// commands on an explicitly supplied minimum-runtime binary when requested.
+const consumerNode = process.env.NARAFRAME_TEST_NODE22 ?? process.execPath;
 let scratch: string;
 let engine: string;
 let executable: string;
 const invoke = (...args: string[]) =>
   JSON.parse(
-    execFileSync(process.execPath, [executable, ...args, "--json"], {
+    execFileSync(consumerNode, [executable, ...args, "--json"], {
       cwd: scratch,
       encoding: "utf8",
       maxBuffer: 4 * 1024 * 1024,
@@ -27,6 +30,11 @@ const invoke = (...args: string[]) =>
   );
 
 beforeAll(async () => {
+  if (process.env.NARAFRAME_TEST_NODE22) {
+    expect(
+      execFileSync(consumerNode, ["--version"], { encoding: "utf8" }).trim(),
+    ).toMatch(/^v22\./);
+  }
   scratch = await mkdtemp(join(tmpdir(), "naraframe-consumer test-"));
   let artifact = process.env.NARAFRAME_PACK_TEST_ARTIFACT;
   if (!artifact) {
@@ -92,7 +100,7 @@ describe("offline engine distribution", () => {
       "current-issues",
     );
   });
-  it("lists the installed built-in profiles and creates a project from the neutral one", () => {
+  it("lists the installed built-in profiles and validates a neutral starter", async () => {
     const listed = invoke("profile", "list").data.profiles as Array<{
       id: string;
       path: string;
@@ -108,8 +116,20 @@ describe("offline engine distribution", () => {
     );
     const project = join(scratch, "one-off video");
     expect(
-      invoke("create", project, "--profile", "general-explainer").success,
+      invoke(
+        "create",
+        project,
+        "--profile",
+        "general-explainer",
+        "--template",
+        "starter",
+      ).success,
     ).toBe(true);
+    expect(invoke("validate", project, "--stage", "plan").success).toBe(true);
+    const scenes = JSON.parse(
+      await readFile(join(project, "scenes.json"), "utf8"),
+    );
+    expect(scenes.scenes).toHaveLength(3);
   });
   it("binds runtime/resources independently of version and refuses extra version arguments", async () => {
     const before = invoke("version").data.engineIdentity;
