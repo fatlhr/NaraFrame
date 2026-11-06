@@ -1634,6 +1634,19 @@ Use one three-beat story for both direction boards. A ball stops at a gate, the 
 
 **A1 accepted (2026-11-06).** Fatih reviewed the same-story grayscale board and confirmed that both directions look distinct and the difference is clear. [The direction sheets](refine-spec.md#a1-direction-sheets-2026-11-06) pin the pose/contact staging, guided linkage, asset inventory, and six pilot patterns at `0.1.0`. The two editable SVG strips, review board and checksums are retained in `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-06-a1-character-directions/`. This is approval of the visual direction for the pilot. `pnpm verify` passed with 399 unit and 559 integration tests.
 
+### A2 acceptance model (2026-11-06)
+
+Create two local editable projects from the approved blocked-ball board. Use three scenes and one prepared 8–12 second take with the same phrase timing in both projects. Use local illustrative narration for the pilot and leave listening verification pending until review. Validate through the public CLI. Save the first contact-scene draft (`preview --draft --scene lift --json`) and the first full draft (`preview --draft --json`). Compare frame zero, grip or linkage contact, the stop and release, and the two seams. Expect both full drafts to contain the same captured take and phrase timing and to show the ball crossing only after the gate clears. Keep the two projects editable through source and profile files and use the existing declarative path where possible.
+
+**A2 drafts ready for listening review (2026-11-06).** Both local profile projects passed plan validation and rendered a 102-frame contact preview plus a 300-frame full draft at 540×960 and 30 fps. Stickman Ink uses three original passive SVG poses and native motion for the grip, plate and ball. Meja Mekanik uses declarative paths, shapes and transforms around a fixed pivot. Both full drafts decoded cleanly with zero reported frame outliers.
+
+| Pilot | Contact preview | Full preview | Frame review |
+|---|---|---|---|
+| Stickman Ink | `6a9122039f79-9a4ffbc9-6d8` | `5e72b0cc6f9b-a1218aff-850` | The arm meets the handle before the lift, the ball waits, and the reaction follows the release. One correction starts the ball on the tabletop. The contact preview reused its prior build after that opening edit. |
+| Meja Mekanik | `f1925d128d04-cd16537e-891` | `efffc5686bf4-f0c4ff50-92a` | The lever and plate move in a fixed projection. The ball stays in the same rail at both cuts and crosses after the plate is up. |
+
+The initial preflight caught a caption collision in both contact drafts. A guarded edit removed the redundant lower label and moved the title inside the safe zone. The original source, failed receipts and first successful Stickman full build are preserved. Both projects imported the same local Damayanti pilot master through `audio stage` and guarded `edit`. Their captured master and timing hashes match, and both full previews decode to identical audio samples. The measured speech windows start at 0, 2600 and 6000 ms. Fatih found the pilots interesting and requested Git integration of the evidence. Listening verification remains pending. The archive `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-06-a2-character-pilots/index.json` indexes 78 files including editable projects, builds, action strips, seam frames and audio receipts.
+
 The following existing CLI paths are the basis for pilot acceptance. Set `PROJECT` and `SCENE` from the authored project and use the recorded build IDs and source revisions in later review and revision steps.
 
 ```bash
