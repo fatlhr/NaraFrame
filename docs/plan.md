@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. All nine tasks are **PLANNED**, with local labels for discussion. Work stays behind the [earlier-milestone closure queue](#required-closure-queue-before-m5), [M5.1 closure](#m51--profile-composition-quality), and any other adopted predecessor. Execution follows the milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 passed its acceptance. The other eight tasks are **PLANNED**. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1611,6 +1611,22 @@ Fatih agreed to record the visual audit proposals and the default hook workflow 
 | **D1 · Pilot Paper Cutout and evaluate remaining engine gaps** | P3 | Try locked framing, hinge pivots, deliberate stepped movement and held poses with the existing timeline and a small recipe where useful. Consider a shared cue field, a recipe component inside a declarative scene, or render-segment reuse only for a demonstrated production constraint. | One editable preview and action strip that show the profile's rhythm. Any engine candidate comes with a reproducer, a narrow scope decision and an acceptance case. Segment reuse needs evidence that a one-shot edit is slow and must account for boundary transitions, captions, profile, media and recipe dependencies. |
 
 Character names, command names and the two pilot directions are working proposals. The authoring skill chooses the hook, story and shots. The engine uses the same versioned project inputs and resolved timeline for every profile. Prefer built-in primitives and small project-local recipes with the existing dependencies. A color palette alone is insufficient evidence of a distinct profile. Hook review measures comprehension, curiosity and payoff. Once an episode is published, observed audience data can inform which opening to try next.
+
+### A0 acceptance model (2026-11-06)
+
+Use the canonical skill and current CLI on three short plain briefs covering a process, a comparison and a misconception. Give each fresh author the brief and installed skill only. Save their first scene source, the profile decision and their reason for choosing the opening. Validate each project with `validate --stage plan --json`, then run one full `preview --draft --json` for each valid first source. Review frames from the first three seconds and the full payoff at phone size with audio muted. Expected: all three new projects select `general-explainer`, the openings are materially different, and the action in each first shot raises a question the video answers. Check an ordinary revision request against a project on another pinned profile. Its profile stays selected. Keep each trial short and retain the first attempt before fixing a concrete issue.
+
+**A0 acceptance passed (2026-11-06).** Three fresh authors used the installed skill and launcher on the `af61de0` runtime. The installed router and authoring guide match the updated source. Each author chose `general-explainer@1.0.0`, compared alternative openings and saved an editable draft. The authoring guide adapts [motion-film's beat sheet and early visual hook](https://github.com/arhen/motion-film/blob/67b570001231dfcdfe3a5be7cb8c2b1e4f3349fb/skills/motion-film-brief/SKILL.md) to NaraFrame's existing scene notes and public workflow.
+
+| Trial | Build and duration | Opening and payoff |
+|---|---|---|
+| Process | `6dd256da540c-71993303-f9e`, 10.5 s | Two arrivals and one service show the queue building. Two rounds prove the remainder grows by one each round. The first preview caught two payoff text-box collisions. One guarded edit fixed them and kept the opening. |
+| Comparison | `ce46aba0a849-e3204714-9c6`, 10.3 s | The same six boxes appear in one tall stack and two short ones. The height marker clarifies the initially broad question. The payoff shows the tradeoff between narrow and low spaces. |
+| Misconception | `5108393ade34-de5ef303-e94`, 10.0 s | The same row of coins spreads out. Counting each coin answers the question: the count stays six. |
+
+The independent reviewer described each opening before seeing its payoff. Four opening frames within three seconds and three payoff frames per draft were inspected at phone size. The full silent 540×960 MP4s decoded successfully. This evidence covers visible comprehension and payoff in sampled frames. An ordinary title edit in the fourth trial left the `current-issues@0.3.0` profile lock byte-identical.
+
+`pnpm verify` passed on Node 24.20.0 and pnpm 12.3.4 with 399 unit and 559 integration tests. The initial run caught an installer assertion that required the old one-off-or-series question. The updated test verifies the installed guide's bytes and the focused installer suite passed 31/31. The checksummed archive `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-06-a0-default-hook/index.json` records 74 files including the source, previews, review strips, initial failure and final gate logs.
 
 The following existing CLI paths are the basis for pilot acceptance. Set `PROJECT` and `SCENE` from the authored project and use the recorded build IDs and source revisions in later review and revision steps.
 
