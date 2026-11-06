@@ -1,8 +1,8 @@
 # NaraFrame — Development Plan
 
-Revision 2.2 · 2026-10-26 · MVP 2 integrated at `a701c39`; latest inspected main `23ca490` (engine 0.1.2)
+Revision 2.2 · Updated 2026-11-06 · MVP 2 integrated at `a701c39`
 
-**Current step:** M2.R1, M3.R1 and M3.R2 are integrated through #58–60. M4.R1 has passed installed first-run acceptance and its final gates. M4.R2 reconciles the retained closure record after M4.R1 integration. M5 remains paused.
+**Current step:** The earlier milestone queue through M4 is complete for the owner-approved scope. M2.R1 through M4.R1 are integrated through #58–60 and #63. M4.R2 reconciles all 14 M4 closure items. M5 remains paused pending Fatih's authorization.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -26,10 +26,10 @@ The snapshot includes the local **Batch F integration closure** and earlier hand
 
 ### Acceptance carried forward
 
-- NF-AC-06 repeatability: OPEN. Historical pixel variants and interruption/harness timeout caveats remain recorded.
-- NF-AC-16/17: D-VIS OPEN/deferred. No competitive visual/publication/export gate is inferred from technical closure.
+- NF-AC-06: current revision and reuse evidence is recorded in M3.R2. Standalone historical repeatability benchmarking was retired by the 2026-11-05 scope decision. Historical pixel variants and harness caveats remain recorded.
+- NF-AC-16/17 and D-VIS: see the 2026-11-05 CLOSED_NOT_PLANNED and CLOSED_ARCHIVED dispositions. The archived outputs retain their usage restrictions.
 - NF-AC-18: MET in recorded technical fixtures for audio modes, native preview, and narrated boundaries.
-- NF-AC-19: route accepted; parity with Bang Motion OPEN.
+- NF-AC-19: technical route accepted. The historical parity verdict is CLOSED_NOT_PLANNED under the 2026-11-05 scope decision.
 - NF-AC-20: ACCEPTED_INTERNAL. Public photo rights remain unresolved.
 - Batch E/F: declared binding/slot protection only, not arbitrary recipe validation or a sandbox.
 
@@ -241,10 +241,10 @@ Expected: a verified local master imports unchanged with usable phrase/cue bindi
 
 | Step | Status | Work and acceptance |
 |---|---|---|
-| M4.5.1 Distribution discovery and model | AUTHORIZED model below | `refine-spec.md` section 8: private workspace/package/path gaps, official host installation routes, source CLI checks from `/private/tmp`, release authority/rights boundaries. |
-| M4.5.2 Installable engine artifact | INTEGRATED (candidate-4 used for the trial exports) | Versioned local 0.1.0 archive, offline consumer installation, doctor/schema/create/profile/library and one installed starter draft evidenced. macOS arm64 only; no public release or final export. |
-| M4.5.3 Canonical skill and host installation | INTEGRATED; automatic host activation not observed | Complete copied skill + receipt/launcher verified for isolated Codex/Claude roots; explicit update/removal, identity drift, local-edit/symlink/conflict and rollback checks pass. Actual fresh host discovery/invocation is not yet observed. |
-| M4.5.4 Product README and consumer guide | INTEGRATED; public-facing rewrite scheduled as closing task C1 | English product README covers verified source/archive setup, both host installers and agent-independent usage, maintained starter, current authoring/revisions/audio/caption/approval contracts and limitations. File links checked; full final onboarding trial remains M4.5.5. |
+| M4.5.1 Distribution discovery and model | RECORDED and applied in the integrated distribution | `refine-spec.md` section 8: private workspace/package/path gaps, official host installation routes, source CLI checks from `/private/tmp`, release authority/rights boundaries. |
+| M4.5.2 Installable engine artifact | INTEGRATED | Candidate-4 was installed offline on macOS arm64 and used for both trial exports. Consumer checks covered doctor, schema, create, profiles, library and an installed starter preview. |
+| M4.5.3 Canonical skill and host installation | INTEGRATED. Explicit installed Codex invocation verified in M4.R1. | Copied skill, receipt and launcher verified in isolated Codex and Claude directories. The 2026-11-05 CLOSED_ACCEPTED_LIMIT disposition covers automatic discovery and separate cross-host activation. |
+| M4.5.4 Product README and consumer guide | INTEGRATED through C1, refreshed in #61 and #63 | Public README and installation guides cover supported setup and workflows. M4.5.5 records the frozen trial. M4.R1 checks the project-local installed route. |
 | M4.5.5 Frozen production/onboarding trial | CLOSED: attempt 2 exported and owner-accepted; attempt 1 retained; fix `8b22c94` | Freeze the installable engine, skill, profile/library/media and runtime; retain the original NF-AC-25 story/revision/profile requirements below. Demonstrate terminal-only source→preview→approved MP4 as well as fresh-context skill authoring. Use bounded examples and one consolidated review. |
 | M4.5.6 Cleanup, final gate and delivery | CLOSED: verify and serial E2E passed, covers retaken from finals, recoverable cleanup executed | After proof is preserved, inventory/archive remaining development experiments and disposable cache with checksum/location index and recovery instructions. Verify before recoverable removal; protect maintained samples/tests/library/history, all external projects, Git/worktrees/stash and AGENTS. Run one approved serial final E2E at closure, audit package contents and hand off versioned artifacts/limitations. Git integration and public publication remain separate. |
 
@@ -287,20 +287,22 @@ pnpm naraframe status ../NaraFrame-projects/mvp2/production/episode-01 --json
 
 Expected: a fresh-context agent reaches owner-approved MP4 through skill and public interfaces, without reading private renderer source or needing repeated supervisory relay. Revisions, undo/reuse, and the second profile are evidenced. Review covers composition/type, illustration, purposeful motion, continuity, and explanation without inventing a parity verdict.
 
-- [ ] Freeze source trees, all built runtime files, skill, profiles, library/recipe hashes, trust scope, media, audio/timing and runtime versions.
-- [ ] Complete consumer artifact/skill install/update checks before that freeze, including installed resource resolution, unknown/mismatched engine version, collision-safe installs and standalone CLI behavior.
-- [ ] Verify package allowlist, resource rights register, README commands/links and source/installed routes; distinguish local release readiness from public publication.
-- [ ] Record fresh-context reading/command boundaries, first drafts, elapsed/active time, corrections, reuse and provider usage.
-- [ ] Use a representative shot/contact sheet before full previews; review moving frames as well as stills.
-- [ ] Exercise headline, motion tempo, object/asset, caption, and profile revisions through ordinary source edits; show undo and reuse.
-- [ ] Check identity fields, undeclared recipe params, source/claim limits, media rights, and listening evidence. Do not infer public rights from internal approval.
-- [ ] Produce contact sheets, a cover artifact and delivery notes with sources, limitations, caption/post copy and final build receipts.
-- [ ] Obtain owner visual acceptance, then export and verify pointer/approval/source/hash, streams, duration/frame count and full decode.
-- [ ] Report technical, visual, export and publication statuses separately. Simulated platform overlays are QA aids, not guarantees about every platform UI.
-- [ ] Add focused regressions for accepted defects; if a defect forces runtime changes, retain the attempt and start a newly approved freeze.
-- [ ] Run `pnpm verify` and one serial full E2E for closure; document failures/caveats without retry-until-green or weakened assertions.
-- [ ] Archive experiments recoverably after preserving acceptance/gate evidence; verify checksum index and protected source/user state.
-- [ ] Consolidate Batch 3 handoff and NF-AC-21–27 disposition; request integration separately.
+- [x] Freeze source trees, all built runtime files, skill, profiles, library/recipe hashes, trust scope, media, audio/timing and runtime versions.
+- [x] Complete consumer artifact/skill install/update checks before that freeze, including installed resource resolution, unknown/mismatched engine version, collision-safe installs and standalone CLI behavior.
+- [x] Verify package allowlist, resource rights register, README commands/links and source/installed routes; distinguish local release readiness from public publication.
+- [x] Record fresh-context reading/command boundaries, first drafts, elapsed/active time, corrections, reuse and provider usage.
+- [x] Use a representative shot/contact sheet before full previews; review moving frames as well as stills.
+- [x] Exercise headline, motion tempo, object/asset, caption, and profile revisions through ordinary source edits; show undo and reuse.
+- [x] Check identity fields, undeclared recipe params, source/claim limits, media rights, and listening evidence. Do not infer public rights from internal approval.
+- [x] Produce contact sheets, a cover artifact and delivery notes with sources, limitations, caption/post copy and final build receipts.
+- [x] Obtain owner visual acceptance, then export and verify pointer/approval/source/hash, streams, duration/frame count and full decode.
+- [x] Report technical, visual, export and publication statuses separately. Simulated platform overlays are QA aids, not guarantees about every platform UI.
+- [x] Add focused regressions for accepted defects; if a defect forces runtime changes, retain the attempt and start a newly approved freeze.
+- [x] Run `pnpm verify` and one serial full E2E for closure; document failures/caveats without retry-until-green or weakened assertions.
+- [x] Archive experiments recoverably after preserving acceptance/gate evidence; verify checksum index and protected source/user state.
+- [x] Consolidate Batch 3 handoff and NF-AC-21–27 disposition; request integration separately.
+
+See the [M4.R2 reconciliation](#m4r2-closure-reconciliation-2026-11-06) for evidence and limits for each item, in order.
 
 **Out of scope:** GUI/hosted runtime/MCP service, stable public SDK expansion, automatic posting, a universal platform layout, new providers, open-ended polish, automatic package/marketplace publication, or declaring older D-VIS/rights/parity gates passed by proxy.
 
@@ -397,11 +399,11 @@ The following are new follow-up task IDs inside the original M2-M4 milestones. T
 
 #### M4.R2 — Close the M4 status record
 
-- [ ] Map all 14 retained closure checkboxes to the recorded trial exports, acceptance, gates, archive and handoff or to the explicit owner-authorized scope closure.
-- [ ] Correct substantiated status errors and retain exact evidence links/limits. An administrative closure is never labelled a test pass or publication approval.
-- [ ] Confirm M2.R1, M3.R1, M3.R2 and M4.R1 have reviewable receipts before recording earlier-milestone closure. Bring the technical and owner-review dispositions into this existing plan.
+- [x] Map all 14 retained closure checkboxes to the recorded trial exports, acceptance, gates, archive and handoff or to the explicit owner-authorized scope closure.
+- [x] Correct substantiated status errors and retain exact evidence links/limits. An administrative closure is never labelled a test pass or publication approval.
+- [x] Confirm M2.R1, M3.R1, M3.R2 and M4.R1 have reviewable receipts before recording earlier-milestone closure. Bring the technical and owner-review dispositions into this existing plan.
 
-M0 and M1 have no separately numbered active task open in the current plan. M2.R1, M3.R1, M3.R2 and M4.R1 are the product work retained for the next NaraFrame iteration. M4.R2 is the bounded documentation step needed to close the old milestones honestly. Raw gate preservation and supported graceful interruption remain ordinary feature-verification duties.
+M0 and M1 have no separately numbered active task open. The [M4.R2 reconciliation](#m4r2-closure-reconciliation-2026-11-06) records closure for the five retained tasks and preserves the 2026-11-05 owner dispositions. Raw gate preservation and supported graceful interruption remain ordinary feature-verification duties.
 
 **Closed from the former queue.** Dedicated W2 SIGKILL forensics, W3 historical harness investigations, W4 native word-level enforcement, W6 standalone repeat-render benchmarking and W9 automatic/cross-host activation are closed for current scope. Only the specific source/build-integrity acceptance from W6 and explicit installed invocation from W9 are incorporated above.
 
@@ -1530,6 +1532,33 @@ The preserved acceptance archive now indexes 299 files and 10,549,103 bytes, inc
 
 
 **Final serial gate passed (2026-11-06).** Fatih authorized finishing M4 after the sleep-interrupted attempt. `pnpm --config.verify-deps-before-run=false test:e2e --reporter=verbose` exited 0 with 14/14 files and 24/24 tests in 1091.08s on Node 24.20.0 and pnpm 12.3.4. All five cases that timed out previously passed. The Mac was on AC power with command-scoped `caffeinate -i -s`. The bounded power log recorded no sleep during the run. Candidate diff SHA-256 `051d9e3b72d1be7fd2a55de17ec7bba315375842a554af4d3ec9fe89623e949b` identifies the four verified paths against `83abaee`. Intervening trunk PR #62 changed only the planning documents. The archived log is `m4-r1/2026-11-06-awake/e2e.log` (SHA-256 `b987ea57de5057e02457d5060a6f4bf40ed91ca349cb7f371c80c9c927a45306`). The durable index maps 315 files / 10,618,220 bytes, preserving both earlier failed attempts. The exact Node 22.0.0 floor route and explicit installed Codex skill invocation complete the M4.R1 acceptance. Integration precedes M4.R2. No new release was published.
+#### M4.R2 closure reconciliation (2026-11-06)
+
+The October receipts live under `/Users/fatih/Code/Playground/NaraFrame-projects/mvp2/production/` (`production/` below), the source checkout's `work/`, and `/Users/fatih/Code/Playground/NaraFrame-archive/2026-10-16/`. The November receipts are indexed under `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-05-product-closure/`. The pre-export review sheets are dated snapshots. The closure execution and independent review entries record the later owner decisions, export and archive checks.
+
+| Checklist item | Disposition and evidence |
+|---|---|
+| 01. Freeze | `production/reports/freeze-2.json` records the source and runtime, skill, resources, input and trust inventory. Candidate-4 tarball SHA-256 `ba4937d2f3e5dce16a879366301b7b5c86ec12e33c0146483d911869b1f111cb` matches the retained artifact. The independent review reproduced the installed runtime byte for byte. Its source-diff mismatch and unmatched test-file hashes remain documented. |
+| 02. Consumer and skill install | The M4.5 preparation handoff records the offline install, installed resource lookup, standalone launcher and failure/update/collision checks. [#63](https://github.com/fatlhr/NaraFrame/pull/63) adds the exact Node 22.0.0 floor and explicit Codex route. Automatic discovery and a cross-host activation matrix are CLOSED_ACCEPTED_LIMIT under the 2026-11-05 decision. |
+| 03. Package, rights and docs | Candidate-4's `engine-manifest.json`, the M4.5 preparation handoff and the two `delivery-notes.md` files record package contents and rights. [#61](https://github.com/fatlhr/NaraFrame/pull/61) and #63 record the current public guide and source/consumer routes. The October package proof covers the local archive. Trial media remain restricted. |
+| 04. Authoring and effort | `production/reports/fresh-author-episode-01.md` and the two `trial-2-episode-*.md` reports record reading and command boundaries, preserved drafts, elapsed time, corrections, reuse and zero provider calls. Separate active time and comparable cost were unmeasured. Historical effort backfilling is CLOSED_ACCEPTED_LIMIT under the 2026-11-05 decision. |
+| 05. Shot and motion review | `fresh-author-episode-01.md` records the scoped cause-shot iterations before the first full draft. Trial 2 retains contact sheets, extracted frame sequences and seam strips. The owner approved the two 1080 candidates. The episode-02 author reviewed extracted frames and recorded no separate real-time playback. |
+| 06. Revision and reuse | The Trial 2 reports show headline, tempo, object and profile revisions, undo and identical preview reuse. M4.2's owner-accepted caption fixtures and serial caption E2E cover supported edits. The trial retained the whole phrase when the partial-phrase request lacked word timing. |
+| 07. Identity, claims and listening | Delivery notes record identity, sources, rights and the prepared-voice listening check. M3.E/F record the declared recipe coverage and limits. The frozen trial used no trusted recipe. Episode-02 remains an unsourced illustrative restatement by the 2026-10-16 owner decision. The listening evidence applies to the prepared clips. |
+| 08. Handoff artifacts | `production/delivery/` retains both final covers and delivery notes with captions, post copy, rights and export references. Contact sheets remain with both approved preview builds. |
+| 09. Owner review and final output | The 2026-10-16 decision approved both candidates. Final builds `e470d85201ba-4cbfbbf3-368` and `944926cda123-7c5f110b-bdc` match their pointers, approval and source, artifact hashes, streams and duration. Full decode passed again. Both covers match the decoded final frames (30 and 33). |
+| 10. Separate delivery statuses | Technical acceptance is recorded. Owner visual acceptance covers the two trial builds. Both were exported for the recorded trial and remain unpublished. The rights inventory and claim limits still apply. Platform overlays are review aids. |
+| 11. Regression and new freeze | Attempt 1 and its corrupt samples are retained. The frame integrity fix and focused regressions are recorded in `8b22c94` and reviewed in [#34](https://github.com/fatlhr/NaraFrame/pull/34). The approved second freeze and independent review identify the runtime used for the exports. |
+| 12. Verify and serial E2E | The original October logs match their recorded hashes. M4.R1 passed verify, focused Node 22 distribution tests and 24/24 serial E2E. The interrupted and sleep-timeout runs remain indexed separately. |
+| 13. Recoverable archive | All 15,337 October payloads (727,074,976 bytes) and 315 November payloads match their indexes. The three extra October rows describe historical symlinks whose archived payloads are regular files, as noted in the independent review. The prior Trash access limit still applies. The closure PR touches only the three project documents. |
+| 14. Batch 3 handoff and integration | [NF-AC-21–27](spec.md#8-acceptance-status-and-boundaries) and the dated Batch 3 handoff record the owner review and integration in #34. #63 completes the installed-route check. This reconciliation closes the remaining documentation task for the approved scope. |
+
+The four feature receipts were checked against the November index and their merges are on main. [#58](https://github.com/fatlhr/NaraFrame/pull/58) (`e49fd23`, `m2-r1/before.json`, `after.json`) covers the safe CLI failure and recovery. [#59](https://github.com/fatlhr/NaraFrame/pull/59) (`b5d5d8b`, `m3-r1/identity-summary.json`) covers voice preservation and undo. [#60](https://github.com/fatlhr/NaraFrame/pull/60) (`7a4ea45`, `m3-r2/identity-summary.json`, `stale-approval.json`, `final.json`) covers source, preview, approval and reuse. #63 (`a55b071`, `m4-r1/floor-proof.json`, `fresh-trial-receipt.json`, `2026-11-06-awake/e2e.log` under that receipt folder) covers the installed first run and final gates.
+
+M4.R2 verification on the #63 baseline passed `pnpm --config.verify-deps-before-run=false verify` on Node 24.20.0 and pnpm 12.3.4. Biome checked 256 files, typecheck and build completed, and 387 unit plus 555 integration tests passed. The November index now also records `m4-r2/verify.log` (SHA-256 `94e2026f878b1644ebe45b1e97c964525992be12bd833f2257201969e3f36e5e`).
+
+The owner dispositions and the archive's usage restrictions still apply. The M5.1 checkpoint stays paused until Fatih authorizes resumption.
+
 ## 7. Visual authoring and character profiles — future candidates
 
 Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. All nine tasks are **PLANNED**, with local labels for discussion. Work stays behind the [earlier-milestone closure queue](#required-closure-queue-before-m5), the paused [M5.1 checkpoint](#m51--profile-composition-quality), and any other adopted predecessor. Execution follows the milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
