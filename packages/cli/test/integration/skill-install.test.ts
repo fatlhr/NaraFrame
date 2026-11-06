@@ -118,7 +118,14 @@ describe("canonical skill installation", () => {
     const receipt = JSON.parse(
       await readFile(join(r.destination, "installation.json"), "utf8"),
     );
-    expect(Object.keys(receipt.files)).toContain("examples/director-plan.md");
+    expect(Object.keys(receipt.files)).toEqual(
+      expect.arrayContaining(["authoring.md", "examples/director-plan.md"]),
+    );
+    await expect(
+      readFile(join(r.destination, "authoring.md"), "utf8"),
+    ).resolves.toBe(
+      await readFile(resolve("skills/naraframe/authoring.md"), "utf8"),
+    );
     const plan = await readFile(
       join(r.destination, "examples/director-plan.md"),
       "utf8",
@@ -135,9 +142,6 @@ describe("canonical skill installation", () => {
     expect(skill).toContain("profile list");
     expect(skill).toContain("profile new");
     expect(skill).toContain("SOURCES_WAIVED");
-    // One first message carries the explanation, the question and the install options.
-    expect(skill).toContain("as one message");
-    expect(skill).toContain("one-off video or a series?");
     expect(skill).toContain("examples/director-plan.md");
   });
   it.each(["codex", "claude"])(

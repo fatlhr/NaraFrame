@@ -57,6 +57,8 @@ pnpm naraframe render ../NaraFrame-projects/episode --approve-preview BUILD_ID -
 
 These commands do not make a newly created, unpopulated project production-ready. Assets, narration when required, and source data must first be authored through the existing workflow. Export requires owner approval of the matching preview; neither that approval nor a valid MP4 establishes publication rights.
 
+For a plain brief for a new video, the canonical skill selects `general-explainer` unless the user chooses an available profile or names an established series. A continuation or revision uses the pinned profile. The skill chooses an opening the story can answer and reviews the first three seconds of the draft with audio muted.
+
 `edit --from ... --expect ...` applies staged changes against an expected revision. `undo` restores the previous revision. `profile inspect` and `profile apply --dry-run` expose profile changes before applying them. `recipe trust --authorized-by ...` records explicit owner authorization for recipe code. `cache clean --dry-run` reports disposable artifacts before removal.
 
 New production projects live outside the repository, for example `../NaraFrame-projects/`. In-repository `work/` is optional development scratch, not a product dependency or the permanent home of client videos.

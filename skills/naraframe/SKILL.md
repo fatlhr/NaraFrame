@@ -16,7 +16,7 @@ When a user is new to NaraFrame, tell them this briefly in plain words before as
 - Before anything is exported it checks text fit, safe areas, transitions and corrupted frames.
 - Verified on macOS Apple Silicon only.
 
-Make this your first reply, as one message: these points in a few plain sentences, the question "is this a one-off video or a series?", and, when there is no engine (run its check first), the install options from *No engine*. Ask nothing else yet; series details come after the engine is ready (*Choosing a profile*, below).
+Keep this introduction brief. When the engine is ready, a plain request for a new video is enough to begin with the default profile. Ask about the series only when the user indicates one and it cannot be identified. When there is no engine, run its check first and give the options in *No engine*.
 
 Operate NaraFrame through its public CLI and authoritative project files. Keep the pinned profile in control of creative decisions and treat structured command results as the authority for readiness, repair, and resume decisions.
 
@@ -49,9 +49,9 @@ A route counts only if `doctor --json` through it returns a result. A launcher f
 Without an engine nothing can be validated or rendered. Do not write episode source until one is installed. The user should not have to read documentation first.
 
 1. Run `node "<this-skill-folder>/scripts/setup-engine.mjs" --check --json`. It only reads: prerequisites (Node 22 or newer, npm, Chrome or Chromium, FFmpeg/FFprobe, a font), the planned engine folder and size.
-2. Send **one** plain message that is also your first reply (*Start here*): the points there, the one-off-or-series question and both install options. "Engine" is the part that checks and renders the video; say it that way and avoid other jargon. Fill the brackets from the check (`plan.approximateDiskMB`, `plan.engineDir`, `missingPrerequisites`):
+2. Send **one** plain message that is also your first reply (*Start here*): the introduction and both install options. "Engine" is the part that checks and renders the video. Fill the brackets from the check (`plan.approximateDiskMB`, `plan.engineDir`, `missingPrerequisites`):
 
-   > [The *Start here* points, in a few plain sentences.] First question: is this a one-off video or a series?
+   > [The *Start here* points, in a few plain sentences.]
    >
    > To make it I need one small program on your computer: NaraFrame's engine, the part that checks and renders the video. It is about [N] MB, usually installs in under a minute, and goes into [folder]. Nothing else on your computer changes. [If a tool is missing: I would also need [tool in plain words]; I can install it with [command].]
    >
@@ -76,9 +76,9 @@ Without an engine nothing can be validated or rendered. Do not write episode sou
 
 Run `pnpm naraframe profile list --json` to show the built-ins: id, one-line purpose, whether sources are required, preferred length and voice style.
 
-- One-off video, or the user is unsure: `general-explainer`, the neutral explainer. It does not require sources, but specific facts still need them (*Claims and sources*).
-- News or current affairs: `current-issues`. It requires sources: ask the user for them and never invent or guess one to pass `requireSourcing`.
-- A series or a brand: after the engine is ready, ask for the series name, a background colour and an accent colour (and the language of the narration), then turn colour words into hex values yourself (for example dark green `#0F3D2E`, yellow `#F5C518`) and say which ones you picked so the owner can change them after the first preview. From the workspace folder, run `pnpm naraframe profile new <workspace>/profiles/<series-id> --from general-explainer --name "<series name>" --background <hex> --accent <hex> [--text <hex>] [--language <text>] --json`, with `--language` written as the audience would name it (for example "bahasa Indonesia"). The engine picks the text, panel and outline colours, checks they read well and checks the profile. Fill in the audience and voice lines of its `direction.md` from the user's answers, then `create <project> --profile <that-folder>`. Do this before the first episode so every episode starts from the same profile.
+- Existing episode or known series: read its pinned profile and keep it for a revision or continuation. Change an existing episode's profile only through the requested profile revision in [revisions.md](revisions.md).
+- New video: honor an explicit choice of an available profile. With no choice or series, use `general-explainer` and continue from the brief. For news or current affairs, offer `current-issues` when helpful and verify the story's sources before authoring regardless of profile. Never guess a source to satisfy `requireSourcing`.
+- New series or brand without a profile: after the engine is ready, ask for the series name, a background colour, an accent colour and the narration language if the brief leaves them open. Turn colour words into hex values and say which ones you picked. From the workspace folder, run `pnpm naraframe profile new <workspace>/profiles/<series-id> --from general-explainer --name "<series name>" --background <hex> --accent <hex> [--text <hex>] [--language <text>] --json`. Write the language as the audience would name it (for example "bahasa Indonesia"). The engine picks matching text, panel and outline colours. Fill in the audience and voice lines of its `direction.md`, then `create <project> --profile <that-folder>`.
 
 ### The verification ladder, cheapest first
 
