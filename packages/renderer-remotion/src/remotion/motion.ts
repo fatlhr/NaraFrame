@@ -4,6 +4,9 @@ import type {
   CompiledTransition,
   Layer,
 } from "@naraframe/core";
+
+export { transitionWindows as sceneTransitionWindowsFor } from "@naraframe/core/composition-quality";
+
 import { formatCount } from "@naraframe/core/count-format";
 import {
   cutPath,
@@ -554,47 +557,6 @@ const entryTransitionFor = (draft: CompiledDraft, sceneIndex: number) => {
     draft.scenes[sceneIndex]?.transitionIn ??
     draft.scenes[sceneIndex - 1]?.transitionOut;
   return incoming && incoming.type !== "cut" ? incoming : null;
-};
-
-export interface SceneTransitionWindow {
-  mode: "exit" | "entry";
-  /** Scene-local, inclusive. */
-  startFrame: number;
-  /** Scene-local, exclusive. */
-  endFrame: number;
-}
-
-/**
- * The scene-local frame ranges in which a boundary transition moves, fades or
- * scales this scene: its own exit near the tail and the entry half near the
- * head. `sceneTransitionStateFor` applies exactly these windows, and
- * `visual-preflight` samples them.
- */
-export const sceneTransitionWindowsFor = (
-  draft: CompiledDraft,
-  sceneIndex: number,
-): SceneTransitionWindow[] => {
-  const scene = draft.scenes[sceneIndex];
-  if (!scene) return [];
-  const sceneDurationInFrames = scene.endFrame - scene.startFrame;
-  const windows: SceneTransitionWindow[] = [];
-  const entry = entryTransitionFor(draft, sceneIndex);
-  if (entry) {
-    windows.push({
-      mode: "entry",
-      startFrame: 0,
-      endFrame: entry.durationInFrames,
-    });
-  }
-  const exit = exitTransitionFor(draft, sceneIndex);
-  if (exit) {
-    windows.push({
-      mode: "exit",
-      startFrame: sceneDurationInFrames - exit.durationInFrames,
-      endFrame: sceneDurationInFrames,
-    });
-  }
-  return windows;
 };
 
 /**

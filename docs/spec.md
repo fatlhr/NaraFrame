@@ -1,6 +1,6 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 1.3 · 2026-11-05 · MVP 2 integrated at `a701c39` · earlier closure queue reconciled on 2026-11-06 · M5.1 paused pending owner authorization
+Revision 1.3 · 2026-11-05 · MVP 2 integrated at `a701c39` · earlier closure queue reconciled on 2026-11-06 · M5.1 in final review
 
 MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. All three MVP 2 batches (M4.1–M4.5) are integrated in main as of `a701c39`: art direction and captions, library imports, prepared audio and series identity, the installable engine and skill, and a frozen production trial that ended in two owner-approved exports. Exported is not published: public rights for the trial media stay open. Follow-up findings F1–F7 have integrated fixes. The dated priority triage and completed closure queue are recorded in the plan.
 
@@ -107,13 +107,13 @@ The engine cannot prove that arbitrary trusted recipe code uses the supplied slo
 
 Contrast diagnostics reason about supported declarative backgrounds and motion bounds. Unknown artwork can remain unverified. They do not promise complete occlusion or arbitrary recipe analysis. Existing aesthetic advice retains its current policy; file safety, data integrity, and production constraints remain technical checks.
 
-### Planned profile composition policy — M5.1
+### Profile composition policy — M5.1
 
-Production feedback on 2026-10-26 is accepted for planning as **M5.1**, a candidate for the next MVP. It does not reopen MVP 2 or authorize implementation. The policy complements authoring in the skill and reusable library patterns: the skill chooses the explanatory object, framing, useful movement and reading holds; the engine checks the profile's measurable requirements.
+M5.1 complements authoring in the skill and reusable library patterns. The skill chooses the explanatory object, framing, useful movement and reading holds. The engine checks the profile's measurable requirements.
 
-An optional profile policy will enable rules individually, with thresholds and `off`, `warning` or `error` at each of `plan`, `preview` and `production`. New rules default to disabled. Existing source-v1 projects, profiles, typography roles, asset roles and legacy diagnostic policies keep their behavior when the new policy is absent. Profile pinning, explicit application and existing override/lock authority apply. The proposed field names and reports are specified in [M5.1 in the plan](plan.md#m51--profile-composition-quality); none is currently available in the public schema.
+An optional profile policy enables rules individually, with thresholds and `off`, `warning` or `error` at each of `plan`, `preview` and `production`. New rules default to disabled. Existing source-v1 projects, profiles, typography roles, asset roles and legacy diagnostic policies keep their behavior when the new policy is absent. Profile pinning, explicit application and existing override/lock authority apply. The public schema exposes the optional `render.compositionQuality` policy and scene `compositionQuality` annotations. The [M5.1 plan](plan.md#m51--profile-composition-quality) records the acceptance gates.
 
-| Rule | Planned measurable contract |
+| Rule | Measurable contract |
 |---|---|
 | Opening cover | At global video frame 0, a designated title text and main object are visibly present. A title or hero waiting for a reveal, including one starting at 0 with zero opacity, does not qualify. This concerns the video itself, independently of an exported cover image. |
 | Maximum visual inactivity | Measure the longest interval without effective visible change over the resolved full timeline, including its head, tail and scene boundaries. Use actual motion windows and visible text/count changes; ignore no-op or hidden animation. Explicit, bounded reading holds may exempt only their own intervals. |

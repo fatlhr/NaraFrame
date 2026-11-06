@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "padded-hero",
+      "status": "ready",
+      "kind": "png",
+      "path": "assets/padded-hero.png",
+      "sha256": "ba375038d63ed8e6cfaecc425d2d0126b67dd7b3e26d47b0b4b083dbe8c59d2a",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "NaraFrame schematic pin"
+      }
+    }
+  ]
+}

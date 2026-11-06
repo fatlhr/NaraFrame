@@ -11,7 +11,10 @@ import {
   Sha256Schema,
   VersionSchema,
 } from "./primitives.js";
-import { RenderTokensSchema } from "./profile.js";
+import {
+  CompositionQualityStageSchema,
+  RenderTokensSchema,
+} from "./profile.js";
 import { FocalPointSchema, LayerSchema } from "./scene.js";
 
 const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);
@@ -361,6 +364,28 @@ const CompiledSceneSchema = z
     layers: z.array(LayerSchema),
     beats: z.array(CompiledBeatSchema),
     camera: CompiledCameraSchema.optional(),
+    compositionQuality: z
+      .object({
+        titleId: IdSchema.optional(),
+        heroIds: z.array(IdSchema).optional(),
+        heroByBeat: z.record(IdSchema, z.array(IdSchema)).optional(),
+        activityIds: z.array(IdSchema).optional(),
+        readingHolds: z
+          .array(
+            z
+              .object({
+                startFrame: NonNegativeIntegerSchema,
+                endFrame: PositiveIntegerSchema,
+                reason: z.string(),
+              })
+              .strict(),
+          )
+          .optional(),
+        staticReason: z.string().optional(),
+        settledFrame: NonNegativeIntegerSchema.optional(),
+      })
+      .strict()
+      .optional(),
     /** How this scene exits into the next one; `cut` on the last scene. */
     transitionOut: CompiledTransitionSchema,
     /**
@@ -470,6 +495,7 @@ export const CompiledDraftSchema = z
     label: z.enum(["DRAFT • NO AUDIO", "DRAFT • WITH AUDIO", "FINAL"]),
     sourceRevision: Sha256Schema,
     assemblyKey: Sha256Schema,
+    compositionQualityStage: CompositionQualityStageSchema.optional(),
     profile: z
       .object({
         id: IdSchema,

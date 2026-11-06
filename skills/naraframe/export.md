@@ -6,6 +6,16 @@ Read this for a preview, review, approval or export, and for the audio, resoluti
 
 Preserve the first successful draft MP4, contact sheet and source before feedback, then inspect the exact paths in the successful result's `artifacts`. Start with `artifacts.storyboardPng`, a grid of the checked frames with their times under each frame; show it to the owner for a first look, and extract single frames with ffmpeg when text needs a closer read. Review scene entry, settled, beat peak, transition/final states, and any requested editorial timestamps; check masks during motion, hierarchy, overflow, collisions, and whether the object explains the takeaway. Metadata alone is not visual acceptance. Record reads/help, correction count, elapsed time, reuse and provider use; unknown cost or active time stays unknown. Keep owner visual acceptance separate from technical readiness.
 
+For an opted-in composition policy, read the issue `details` in the report. Match its preview-local `frame` and scene with `artifacts.framesJson`; use `sourceFrame` for its position in the full video. `checked` means a measurement ran; read its severity to see whether it passed. `pending` requires the right preview scope or browser check, `unverified` describes a measurement limit, and `exempt` records an allowed exception.
+
+For a risky seam, open the full preview and take a strip of seven consecutive frames centred on the first frame of the next scene. Pick its preview-local frame number from `framesJson`, then set `FIRST` to three frames before it (at least zero), and `LAST` to three after it (at most the last frame). Use the reported `previewMp4` path as `MP4`.
+
+```bash
+ffmpeg -v error -i "$MP4" -vf "select='between(n,$FIRST,$LAST)',scale=240:-2,tile=7x1" -frames:v 1 seam-strip.png
+```
+
+Keep the strip beside the episode review notes. Record the build ID, scene, preview and source frame ranges, what appears in motion, and the proposed source change. Use [the correction loop](revisions.md#the-correction-loop) to apply and inspect it.
+
 Run `status <project> --json` to resume or verify. Continue only from its authoritative current build and reported artifacts. A stale preview must be rebuilt and inspected.
 
 ## Scoped previews, resolution and reuse
@@ -14,7 +24,7 @@ To check or review one scene while others are unfinished, use `--scene <id>`: `v
 
 Previews default to 540×960. Use `preview --resolution 1080` when the owner needs to judge crop, line wrapping or small type at final size: it renders natively at 1080×1920 (still labelled DRAFT), has its own build keys, and a full 1080 preview of the current source can be approved for `render`. More pixels do not add detail a small source image lacks; say so instead of implying sharper media.
 
-After a change that cannot alter pixels, such as a scene `note`, `preview` reuses the earlier build's pixels and reports `data.reusedFromBuildId`; you still need a fresh review and approval for the new revision. A reused preview still gets a new build id (an approval binds one build to one source revision), but its MP4 and contact sheet are the earlier build's files, so no frames were rendered again: `reusedFromBuildId` names that build, and it is `null` after a real render. Use `--rerender` only when you need a real render.
+After an edit to a scene `note`, `preview` can reuse the earlier build's pixels when the assembly key still matches and reports `data.reusedFromBuildId`; you still need a fresh review and approval for the new revision. A change to an active composition policy, its annotations or evaluator version requires a fresh check. A reused preview still gets a new build id (an approval binds one build to one source revision), but its MP4 and contact sheet are the earlier build's files, so no frames were rendered again: `reusedFromBuildId` names that build, and it is `null` after a real render. Use `--rerender` only when you need a real render.
 
 ## Audio mode and soundtrack
 

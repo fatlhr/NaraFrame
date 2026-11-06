@@ -10,6 +10,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./composition-quality": {
+      "types": "./dist/compiler/composition-quality.d.ts",
+      "import": "./dist/compiler/composition-quality.js"
+    },
     "./count-format": {
       "types": "./dist/count-format.d.ts",
       "import": "./dist/count-format.js"

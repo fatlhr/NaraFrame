@@ -2,6 +2,7 @@ import { hashValue } from "../project/hash.js";
 import type { CompiledDraft } from "../schema/compiled.js";
 import type { PlanSource } from "../schema/export-schema.js";
 import type { NarrationBlock } from "../schema/narration.js";
+import { COMPOSITION_QUALITY_VERSION } from "./composition-quality.js";
 import { narrationTextHash } from "./voice-binding.js";
 
 /** Bump when a renderer change can alter pixels for identical input. */
@@ -68,6 +69,7 @@ const renderSubset = (draft: DraftBody) => {
   const {
     variety: _variety,
     captions: _captions,
+    compositionQuality: _quality,
     ...pixelTokens
   } = draft.profile.render;
   return pixelTokens;
@@ -195,6 +197,18 @@ export const computeAssemblyKey = (
       : null,
     captions: draft.captions ?? null,
     fonts: draft.fonts,
+    ...(draft.compositionQualityStage
+      ? {
+          compositionQuality: {
+            version: COMPOSITION_QUALITY_VERSION,
+            stage: draft.compositionQualityStage,
+            policy: draft.profile.render.compositionQuality,
+            annotations: draft.scenes.map(
+              (scene) => scene.compositionQuality ?? null,
+            ),
+          },
+        }
+      : {}),
     // Absent unless the project has one, so existing builds keep their keys.
     ...(draft.soundtrack
       ? {

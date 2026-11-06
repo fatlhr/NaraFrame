@@ -1,9 +1,17 @@
 import type { CompiledDraft, Issue, Layer } from "@naraframe/core";
+import { compositionCheckpoints } from "@naraframe/core/composition-quality";
 import { imagePlacement } from "@naraframe/core/image-placement";
 import { measureText } from "@remotion/layout-utils";
 import { captionLayoutFor } from "./captions.js";
+import type { CompositionPaint } from "./composition-paint.js";
+import {
+  inspectCompositionScene,
+  inspectInactivity,
+  intersect,
+} from "./composition-quality.js";
 import {
   countedTextVariants,
+  drawProgressFor,
   type GroupTransform,
   groupScreenTransformFor,
   motionStateFor,
@@ -497,7 +505,16 @@ const framesForScene = (
   };
   const duration = scene.endFrame - scene.startFrame;
   add(0, "scene-entry");
-  add(Math.floor(duration * 0.25), "scene-settled");
+  if (draft.compositionQualityStage) {
+    for (const checkpoint of compositionCheckpoints(draft, sceneIndex)) {
+      if (checkpoint.frame !== null)
+        add(checkpoint.frame - scene.startFrame, checkpoint.reason);
+    }
+  }
+  add(
+    Math.floor(duration * 0.25),
+    draft.compositionQualityStage ? "scene-quarter" : "scene-settled",
+  );
   add(duration - 1, "scene-final");
   scene.beats.forEach((beat) => {
     add(beat.startFrame, `beat-start:${beat.id}`);
@@ -505,7 +522,12 @@ const framesForScene = (
       beat.startFrame + Math.floor(beat.durationInFrames / 2),
       `beat-peak:${beat.id}`,
     );
-    add(beat.startFrame + beat.durationInFrames, `beat-settled:${beat.id}`);
+    add(
+      beat.startFrame + beat.durationInFrames,
+      draft.compositionQualityStage
+        ? `beat-end-sample:${beat.id}`
+        : `beat-settled:${beat.id}`,
+    );
   });
   scene.camera?.moves.forEach((move) => {
     add(move.startFrame, `camera-start:${move.id}`);
@@ -684,6 +706,7 @@ const panelDeadSpace = (
 export const resolveVisualPreflight = (
   input: CompiledDraft,
   loadedFontFamilies: ReadonlySet<string> = new Set(),
+  compositionPaint: CompositionPaint = new Map(),
 ): { draft: CompiledDraft; report: VisualPreflightReport } => {
   const draft = structuredClone(input);
   const issues: Issue[] = [];
@@ -758,6 +781,8 @@ export const resolveVisualPreflight = (
     }
   }
 
+  const activities: ReturnType<typeof inspectCompositionScene>["activity"][] =
+    [];
   draft.scenes.forEach((scene, sceneIndex) => {
     issues.push(...panelDeadSpace(scene, sceneIndex));
     issues.push(...recipeTextFit(draft, scene, sceneIndex, loadedFontFamilies));
@@ -970,6 +995,168 @@ export const resolveVisualPreflight = (
       const sceneState = sceneTransitionStateFor(draft, sceneIndex, localFrame);
       return withGroup * sceneState.opacity;
     };
+    if (draft.compositionQualityStage) {
+      const canvas = { x: 0, y: 0, width: draft.width, height: draft.height };
+      const bounds = compositionPaint.get(scene.id);
+      const leafLayers = scene.layers.filter((layer) => layer.type !== "group");
+      const layerOrder = (layer: Layer) => {
+        const parent = parentGroupOf.get(layer.id);
+        return [
+          parent?.zIndex ?? layer.zIndex,
+          parent ? 1 : 0,
+          parent
+            ? groups.indexOf(parent)
+            : leafLayers.findIndex((item) => item.id === layer.id),
+          layer.zIndex,
+          parent?.memberIds.indexOf(layer.id) ?? 0,
+        ];
+      };
+      const above = (candidate: Layer, target: Layer) => {
+        const right = layerOrder(target);
+        return (
+          (layerOrder(candidate)
+            .map((value, index) => value - (right[index] ?? 0))
+            .find((value) => value !== 0) ?? 0) > 0
+        );
+      };
+      const projected = (
+        layer: (typeof leafLayers)[number],
+        localFrame: number,
+        paint: Rectangle,
+      ) => {
+        const state = motionStateFor(draft, scene, layer.id, localFrame);
+        const box = boundsOf(
+          quadOnScreen(
+            layer.id,
+            transformedQuad(paint, state, layer.frame, layer.rotationDeg),
+            localFrame,
+          ),
+        );
+        return {
+          box,
+          state,
+          opacity: opacityOnScreen(
+            layer.id,
+            layer.opacity * state.opacity,
+            localFrame,
+          ),
+        };
+      };
+      const measured = inspectCompositionScene(
+        draft,
+        sceneIndex,
+        (layer, localFrame) => {
+          if (!layer.opacity) return null;
+          const state = motionStateFor(draft, scene, layer.id, localFrame);
+          if (
+            opacityOnScreen(
+              layer.id,
+              layer.opacity * state.opacity,
+              localFrame,
+            ) < 0.5
+          )
+            return null;
+          let paint: Rectangle | null | undefined;
+          if (layer.type === "text") {
+            if (!layer.text.trim()) return null;
+            const metrics = textMetrics.get(layer.id);
+            paint =
+              metrics && !metrics.overflow
+                ? textExtent(layer, metrics)
+                : undefined;
+          } else if (layer.type === "shape") {
+            paint = layer.frame;
+          } else {
+            if (
+              layer.type === "path" &&
+              drawProgressFor(scene, layer.id, localFrame) <= 0
+            )
+              return null;
+            paint = bounds?.get(layer.id);
+          }
+          if (!paint) return paint;
+          const effective = projected(layer, localFrame, paint);
+          const clip = sceneTransitionStateFor(
+            draft,
+            sceneIndex,
+            localFrame,
+          ).clipPath;
+          let clipBox: Rectangle = canvas;
+          if (clip?.startsWith("inset(")) {
+            const inset = Number.parseFloat(clip.slice("inset(".length)) / 100;
+            clipBox = {
+              x: inset * canvas.width,
+              y: inset * canvas.height,
+              width: (1 - 2 * inset) * canvas.width,
+              height: (1 - 2 * inset) * canvas.height,
+            };
+          }
+          const box = intersect(effective.box, clipBox);
+          if (!box) return null;
+          if (clip?.startsWith("circle(")) {
+            const radius =
+              (Number.parseFloat(clip.slice("circle(".length)) / 100) *
+              (Math.hypot(canvas.width, canvas.height) / Math.SQRT2);
+            const dx = Math.max(
+              box.x - canvas.width / 2,
+              canvas.width / 2 - box.x - box.width,
+              0,
+            );
+            const dy = Math.max(
+              box.y - canvas.height / 2,
+              canvas.height / 2 - box.y - box.height,
+              0,
+            );
+            if (Math.hypot(dx, dy) >= radius) return null;
+            if (
+              cornersOf(box).some(
+                ([x, y]) =>
+                  Math.hypot(x - canvas.width / 2, y - canvas.height / 2) >
+                  radius,
+              )
+            )
+              return undefined;
+          }
+          for (const other of leafLayers) {
+            if (
+              other.id === layer.id ||
+              !above(other, layer) ||
+              other.type === "text"
+            )
+              continue;
+            const cover = projected(other, localFrame, other.frame);
+            if (cover.opacity < 0.5 || !overlaps(box, cover.box)) continue;
+            const parent = parentGroupOf.get(other.id);
+            const parentRotation = parent
+              ? groupScreenTransformFor(draft, scene, parent, localFrame)
+                  .rotationDeg
+              : 0;
+            if (
+              other.type === "shape" &&
+              other.shape === "rectangle" &&
+              other.cornerRadius === 0 &&
+              /^#[0-9a-f]{6}$/i.test(other.fill) &&
+              cover.opacity >= 1 &&
+              other.rotationDeg + cover.state.rotationDeg === 0 &&
+              parentRotation === 0 &&
+              insideRectangle(box, cover.box)
+            )
+              return null;
+            if (insideRectangle(box, cover.box)) return undefined;
+          }
+          const parent = parentGroupOf.get(layer.id);
+          const group =
+            parent && groupScreenTransformFor(draft, scene, parent, localFrame);
+          return {
+            box,
+            opacity: effective.opacity,
+            pose: [state.rotationDeg, group ? group.rotationDeg : 0],
+          };
+        },
+      );
+      activities[sceneIndex] = measured.activity;
+      issues.push(...measured.issues);
+    }
     const checkedCaptionPairs = new Set<string>();
     if (captions) {
       for (const frame of frames.filter((item) => item.sceneId === scene.id)) {
@@ -1200,6 +1387,12 @@ export const resolveVisualPreflight = (
     }
   });
 
+  issues.push(
+    ...inspectInactivity(
+      draft,
+      draft.scenes.map((_, index) => activities[index]),
+    ),
+  );
   return {
     draft,
     report: {

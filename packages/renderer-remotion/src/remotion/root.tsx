@@ -1,5 +1,6 @@
 import type { CompiledDraft } from "@naraframe/core";
 import { Composition } from "remotion";
+import { loadCompositionPaint } from "./composition-paint.js";
 import { DraftVideo } from "./draft-video.js";
 import { loadBundledFonts } from "./typography.js";
 import {
@@ -72,7 +73,11 @@ export const RemotionRoot = () => (
     calculateMetadata={async ({ props }) => {
       const loadedFontFamilies = await loadBundledFonts(props.fonts);
       await document.fonts.ready;
-      const preflight = resolveVisualPreflight(props, loadedFontFamilies);
+      const preflight = resolveVisualPreflight(
+        props,
+        loadedFontFamilies,
+        await loadCompositionPaint(props),
+      );
       return {
         durationInFrames: props.totalFrames,
         fps: props.fps,

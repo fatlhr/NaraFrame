@@ -84,6 +84,63 @@ const VarietyPolicySchema = z
   })
   .strict();
 
+export const CompositionQualityStageSchema = z.enum([
+  "plan",
+  "preview",
+  "production",
+]);
+export type CompositionQualityStage = z.infer<
+  typeof CompositionQualityStageSchema
+>;
+
+const QualitySeveritySchema = z.enum(["off", "warning", "error"]);
+const qualityRule = {
+  enabled: z.boolean(),
+  stages: z
+    .object({
+      plan: QualitySeveritySchema,
+      preview: QualitySeveritySchema,
+      production: QualitySeveritySchema,
+    })
+    .strict(),
+};
+
+const CompositionQualitySchema = z
+  .object({
+    opening: z.object(qualityRule).strict().optional(),
+    inactivity: z
+      .object({
+        ...qualityRule,
+        maxMs: PositiveIntegerSchema,
+        allowReadingHolds: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    camera: z
+      .object({
+        ...qualityRule,
+        allowStatic: z.boolean().optional(),
+        minDisplacementPx: z.number().positive(),
+      })
+      .strict()
+      .optional(),
+    cuts: z
+      .object({
+        ...qualityRule,
+        maxConsecutive: PositiveIntegerSchema,
+      })
+      .strict()
+      .optional(),
+    hero: z
+      .object({
+        ...qualityRule,
+        minRatio: z.number().positive().max(1),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
 export const RenderTokensSchema = z
   .object({
     palette: z
@@ -132,6 +189,7 @@ export const RenderTokensSchema = z
       .strict()
       .optional(),
     variety: VarietyPolicySchema.optional(),
+    compositionQuality: CompositionQualitySchema.optional(),
     safeZone: z
       .object({
         top: z.number().int().nonnegative(),

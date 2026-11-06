@@ -25,6 +25,7 @@ import {
   type ReadabilityMetrics,
   type VarietyMetrics,
 } from "@naraframe/core";
+import { compositionCheckpoints } from "@naraframe/core/composition-quality";
 import {
   type RenderedDraft,
   renderDraft,
@@ -434,13 +435,21 @@ export const selectCheckedFrames = (
     });
   };
 
-  for (const scene of draft.scenes) {
+  for (const [index, scene] of draft.scenes.entries()) {
     add(scene.startFrame, scene.id, "scene-entry");
-    add(
-      scene.startFrame + Math.floor((scene.endFrame - scene.startFrame) * 0.25),
-      scene.id,
-      "scene-settled",
-    );
+    if (draft.compositionQualityStage) {
+      for (const checkpoint of compositionCheckpoints(draft, index)) {
+        if (checkpoint.frame !== null)
+          add(checkpoint.frame, scene.id, checkpoint.reason);
+      }
+    } else {
+      add(
+        scene.startFrame +
+          Math.floor((scene.endFrame - scene.startFrame) * 0.25),
+        scene.id,
+        "scene-settled",
+      );
+    }
     add(
       scene.startFrame + Math.floor((scene.endFrame - scene.startFrame) / 2),
       scene.id,
@@ -460,11 +469,14 @@ export const selectCheckedFrames = (
         scene.id,
         `semantic-beat:${beat.action}:${beat.id}`,
       );
-      add(
-        withinScene(scene.startFrame + beat.startFrame + beat.durationInFrames),
-        scene.id,
-        `semantic-beat-settled:${beat.action}:${beat.id}`,
-      );
+      if (!draft.compositionQualityStage)
+        add(
+          withinScene(
+            scene.startFrame + beat.startFrame + beat.durationInFrames,
+          ),
+          scene.id,
+          `semantic-beat-settled:${beat.action}:${beat.id}`,
+        );
     }
   }
 
