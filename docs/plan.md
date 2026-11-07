@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3, B1, B2 and C1 passed acceptance. Fatih closed C2 as `CLOSED_NOT_PLANNED` on 2026-11-07 and authorized D1, the remaining pilot. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3, B1, B2, C1 and the D1 pilot passed their recorded acceptance. Fatih closed C2 as `CLOSED_NOT_PLANNED` on 2026-11-07. The queue in this section is closed for its recorded scope. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each task addressed.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1757,3 +1757,15 @@ The index was faster in two of three pairs. The median wall-time gain was 10 ms 
 The prototype stays in the scratch benchmark. The [evidence index](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-c2-beat-index-probe/index.json) lists 49 checksummed files, including the timings, decoded-frame comparison, test logs and corruption receipt.
 
 **C2 scope closure (2026-11-07) · `CLOSED_NOT_PLANNED`.** Fatih chose to close C2 and continue to D1 after reviewing the 10 ms (0.07%) median wall-time gain. The prototype remains research evidence, below the 5% threshold for runtime adoption. Serial capture and the existing frame-integrity requirement remain the runtime contract.
+
+### D1 acceptance model (2026-11-07)
+
+Build one silent six-second Paper Cutout pilot about a folded bridge joining two banks. Use a fixed overhead view, layered cut-paper edges and a bridge with a pivot at its left end. Author short, multi-frame turns separated by held poses. Start the paper token's crossing only after the bridge reaches the opposite bank.
+
+Use `validate "$PROJECT" --stage plan --json` and `preview "$PROJECT" --draft --resolution 540 --json` with the local profile. Keep the source, first preview and six decoded checkpoints spanning the hinge poses and crossing. Check the held silhouettes, contact at the far bank, fixed camera and frame integrity. Open a new engine candidate only for a limitation demonstrated by this shot.
+
+**D1 technical pilot complete (2026-11-07).** The local `paper-cutout@0.1.0` profile produced the six-second silent draft `d4740859d069-0c6f7bed-f2a` through the installed launcher. The 180-frame preview is 540×960 at 30 fps. Original declarative paths provide the cut-paper edges and offset shadows. Symmetric group bounds put the existing centre pivot on the visible hinge. Six short linear transforms and their holds use the scene timeline. Frame inspection and colour-mask samples show the bridge settling at four orientations. The token holds its starting position until after docking, then advances in three steps while the bridge holds.
+
+Plan validation, full decode and frame integrity passed, with zero outliers. `pnpm verify` passed with 399 unit and 562 integration tests. The [local evidence index](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-d1-paper-cutout/index.json) links 20 checksummed files, including the editable project, local profile, first preview, six-frame strip and measured pose checks.
+
+This shot fits the existing declarative timeline. The evidence covers one silent, locked-view pilot and supports local authoring. Shared cue fields, mixed recipe scenes and render-segment reuse remain candidates for a separate demonstrated production constraint. Adding a packaged character entry point is separate from this pilot.
