@@ -1,6 +1,6 @@
 # NaraFrame — Product and Technical Specification
 
-Revision 1.3 · 2026-11-05 · MVP 2 integrated at `a701c39` · earlier closure queue reconciled on 2026-11-06 · M5.1 acceptance recorded on 2026-11-06
+Revision 1.4 · 2026-11-07 · MVP 2 integrated at `a701c39` · M5.1 accepted on 2026-11-06 · Visual Library and optional Studio planned
 
 MVP 1 (M0–M3) is integrated for its recorded technical scope. MVP 2, **Skill-led recurring production**, is M4. All three MVP 2 batches (M4.1–M4.5) are integrated in main as of `a701c39`: art direction and captions, library imports, prepared audio and series identity, the installable engine and skill, and a frozen production trial that ended in two owner-approved exports. Exported is not published: public rights for the trial media stay open. Follow-up findings F1–F7 have integrated fixes. The dated priority triage and completed closure queue are recorded in the plan.
 
@@ -14,7 +14,7 @@ NaraFrame turns a brief, a profile, and local media into editable motion videos.
 | Library | Reuse versioned patterns, recipes, and assets without rebuilding the visual language for every episode. |
 | Engine and runtime | Validate data, compile timing, render frames, manage media integrity, revisions, reuse, approvals, and MP4 publication. |
 
-A **profile** describes brand identity and production preferences. A **pattern** describes a reusable way to explain something. An **episode** supplies its story, copy, assets, and timing. These are different authorities: changing an episode must not silently change its profile or a shared library.
+A **profile** describes visual identity, production preferences, and optional brand requirements. A **shot pattern** is an editable way to show a specific action or relationship. A **story format** orders the shots, such as a comic with a panel reading order or a character story driven by action and consequence. An **episode** supplies the story, copy, assets, and timing and pins its own profile and imported patterns.
 
 With a skill-capable agent, the user works through briefs and ordinary revisions. The agent translates them into project data or parameters of an owner-trusted recipe. The user should not need to read the renderer or understand the schema to make a video through that route. The engine also accepts authored project data directly through its CLI; that route requires neither Claude nor Codex.
 
@@ -25,6 +25,27 @@ The engine is an independent local CLI. The canonical NaraFrame skill is an opti
 Prepare a versioned, installable engine artifact with a `naraframe` executable, runtime packages/resources, bundled profiles/library, a redistributable starter and documented prerequisites. It must run from a user's project directory without depending on this development checkout, its `work/`, private fixture locations or personal paths. Skill distribution carries all routed references/examples from one maintained source, with local install paths/adapters for Claude Code and Codex, a compatible engine version declaration, and conflict-safe update/removal. Host plugins may wrap the skill; they must not become necessary for direct CLI use.
 
 Current source installation remains supported. A packed artifact is not an npm publication, public release or marketplace acceptance. External publication needs its own authorization, code-license decision and resource/dependency rights review. macOS is the initial evidenced platform; Windows/Linux support is not inferred from portable file paths. Engine rendering remains local, with external browser/FFmpeg and provider boundaries documented.
+
+### Visual Library and optional Studio
+
+Choose a style for the job the video needs to do. This map records availability and proposed entries. The [Visual Library plan](plan.md#8-visual-library-knowledge-and-optional-studio) owns implementation and release gates.
+
+| Style | Choose it for | Codex entry | Availability |
+|---|---|---|---|
+| Motion Explainer | Explain one idea, process, or comparison | Plain brief or `$naraframe` | Available as `general-explainer`, the default |
+| Editorial / Current Issues | Explain an event with sourced claims | `$naraframe` with `current-issues` selected | Profile available |
+| Stickman Ink | Tell the story through poses, reactions, and prop contact | `$naraframe-stickman` | Available in a matching source build or local archive |
+| Meja Mekanik | Explain how connected machine parts move together | `$naraframe-mekanik` | Available in a matching source build or local archive |
+| Paper Cutout | Animate layered paper, folds, and stepped poses | `$naraframe-paper` | Available in a matching source build or local archive |
+| Bedah 2.5D | Show what is inside an object and how the parts fit | `$naraframe-3d` | Planned in V1 |
+| Motion Comic | Tell a story through panels, dialogue, and reaction poses | `$naraframe-comics` | Planned in V2 |
+| Story | Follow a character's goal, obstacle, action, and consequence across shots | `$naraframe-story` | Planned in V3 |
+
+Bedah 2.5D uses illustrated parts in a fixed projection and a predetermined sequence in the exported video. Clickable branches, free camera orbits, and mesh cutaways are outside V1. Data Motion, Route & Map, Editorial Collage, and Kinetic Type belong to the Motion Explainer pattern vocabulary. A separate entry requires a distinct motion language demonstrated on more than one brief.
+
+For a new episode, the authoring skill uses the explicitly selected profile or an established series profile. A plain brief defaults to `general-explainer`. Ordinary revisions use the episode's pinned profile. Switching the profile uses an explicit profile revision. CLI users select profiles with `--profile`. The proposed Studio picker reads installed profiles from `profile list --json`. Character wrappers and Studio use the same packaged profile and catalog versions.
+
+Studio is a proposed browser-local add-on for the independently installable engine. Both surfaces use the same project files, CLI operations, revisions, trust checks, and preview approval. Studio V1 covers a profile picker, a scene list, simple parameter edits, playback of engine-generated MP4s, and reviewed export. Its boundary and acceptance cases are in the [Studio roadmap](plan.md#optional-studio-roadmap).
 
 ### Product principles
 
@@ -89,7 +110,7 @@ Pattern attachments place unrotated sibling PNG props using named anchors under 
 
 ### Declarative composition
 
-Supported composition includes local images, passive validated SVG, paths, shapes, rich-text spans and role fonts, nested groups, local transforms, world/overlay spaces, camera motion, parallax depth, and billboard labels. SVG accepts a validated passive subset, including local gradients and clipping; scripts, handlers, external references, `foreignObject`, and built-in animation are rejected.
+Supported composition includes local images, passive validated SVG, paths, shapes, rich-text spans and role fonts, single-level groups, local transforms, world/overlay spaces, camera motion, parallax depth, and billboard labels. A group can contain ordinary layers. SVG accepts a validated passive subset, including local gradients and clipping. Validation rejects scripts, handlers, external references, `foreignObject`, and built-in animation.
 
 Motion includes reveal/exit, emphasis, focus/transform, camera movements, path drawing, following a path, and count-up. Playback is frame-derived rather than dependent on prior playback state. Concurrent claims on a property are rejected. Sequential motion and follow pose semantics must be documented accurately, including the first follow's pre-window pose and jumps between non-aligned follow endpoints.
 
