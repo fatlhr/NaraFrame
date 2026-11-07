@@ -22,6 +22,8 @@ describe("listProfiles", () => {
     expect(profiles.map((profile) => profile.id)).toEqual([
       "current-issues",
       "general-explainer",
+      "meja-mekanik",
+      "stickman-ink",
     ]);
     for (const profile of profiles) {
       expect(profile.summary.length).toBeGreaterThan(20);

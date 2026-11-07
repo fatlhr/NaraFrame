@@ -98,6 +98,49 @@ const expectCode = async (operation: Promise<unknown>, code: string) => {
   await expect(operation).rejects.toMatchObject({ code });
 };
 
+describe("character skill installation", () => {
+  it.each(["naraframe-stickman", "naraframe-mekanik"])(
+    "owns %s separately and preserves local edits on update",
+    async (skill) => {
+      const f = await fixture();
+      const canonical = await installSkill(options(f));
+      const canonicalReceipt = join(canonical.destination, "installation.json");
+      const canonicalBefore = await readFile(canonicalReceipt);
+      const selected = { ...options(f), skill };
+      await expectCode(installSkill(selected), "SKILL_SOURCE_MISSING");
+      await cp(resolve("skills", skill), join(f.engine, "skills", skill), {
+        recursive: true,
+      });
+      const installed = await installSkill(selected);
+      expect(installed.destination).toBe(
+        join(f.project, ".agents/skills", skill),
+      );
+      const receipt = JSON.parse(
+        await readFile(
+          join(installed.destination, "installation.json"),
+          "utf8",
+        ),
+      );
+      expect(receipt.skill).toBe(skill);
+      expect(receipt.engineEntry).toBe(f.entry);
+      expect(receipt.files["agents/openai.yaml"]).toMatch(/^[0-9a-f]{64}$/);
+      expect((await installSkill({ ...selected, update: true })).action).toBe(
+        "update",
+      );
+
+      const instructions = join(installed.destination, "SKILL.md");
+      const edited = `${await readFile(instructions, "utf8")}\nMy local note.\n`;
+      await writeFile(instructions, edited);
+      await expectCode(
+        installSkill({ ...selected, update: true }),
+        "SKILL_INSTALL_EDITED",
+      );
+      expect(await readFile(instructions, "utf8")).toBe(edited);
+      expect(await readFile(canonicalReceipt)).toEqual(canonicalBefore);
+    },
+  );
+});
+
 describe("canonical skill installation", () => {
   it("dry-run resolves version and destinations without writing host folders", async () => {
     const f = await fixture();

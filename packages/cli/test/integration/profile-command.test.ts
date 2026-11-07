@@ -232,6 +232,8 @@ describe("profile list", () => {
     expect(profiles.map((profile) => profile.id)).toEqual([
       "current-issues",
       "general-explainer",
+      "meja-mekanik",
+      "stickman-ink",
     ]);
     const byId = Object.fromEntries(
       profiles.map((profile) => [profile.id, profile]),
@@ -251,6 +253,14 @@ describe("profile list", () => {
       summary:
         "Teach one idea from a stable subject: how something works, what the numbers say, how two things differ.",
     });
+    expect(byId["meja-mekanik"]).toMatchObject({
+      version: "0.1.0",
+      summary: expect.stringContaining("fixed diagonal projection"),
+    });
+    expect(byId["stickman-ink"]).toMatchObject({
+      version: "0.1.0",
+      summary: expect.stringContaining("ink silhouettes"),
+    });
     for (const profile of profiles) {
       expect(profile.path).toMatch(new RegExp(`/profiles/${profile.id}$`));
       // The id in the list is exactly what `create --profile` accepts.
@@ -267,13 +277,15 @@ describe("profile list", () => {
     });
     expect(await runCli(["profile", "list"])).toBe(0);
     vi.restoreAllMocks();
-    expect(lines).toHaveLength(2);
+    expect(lines).toHaveLength(4);
     expect(lines[0]).toMatch(
       /^current-issues@0\.3\.0 \| sources required \| 15-30 s \| voice id-editorial-grounded-v1 \| Explain/,
     );
     expect(lines[1]).toMatch(
       /^general-explainer@1\.0\.0 \| sources optional \| 15-60 s \| voice id-teaching-warm-v1 \| Teach one idea/,
     );
+    expect(lines[2]).toMatch(/^meja-mekanik@0\.1\.0 \|/);
+    expect(lines[3]).toMatch(/^stickman-ink@0\.1\.0 \|/);
     expect((await run("profile", "list", "extra")).exitCode).toBe(3);
   });
 

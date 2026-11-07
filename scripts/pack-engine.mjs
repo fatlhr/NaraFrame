@@ -225,6 +225,8 @@ for (const path of [
   "starter/RIGHTS.json",
   "starter/params.json",
   "skills/naraframe",
+  "skills/naraframe-stickman",
+  "skills/naraframe-mekanik",
 ]) {
   await mkdir(dirname(join(target, path)), { recursive: true });
   await cp(join(root, path), join(target, path), {
@@ -324,6 +326,8 @@ const resources = [
   "profiles/general-explainer: repository-authored data, system font names only (no font, image or audio files)",
   "library/starter: repository-authored technical schematic PNGs, internal example use",
   "library/series/study-notes: repository-authored declarative templates and example values; no audio",
+  "profiles/stickman-ink and profiles/meja-mekanik: repository-authored profiles and direction",
+  "library/characters: original schematic SVG poses and declarative templates; no audio",
   "starter: neutral authored data, no media or fonts",
 ];
 if (registry) {

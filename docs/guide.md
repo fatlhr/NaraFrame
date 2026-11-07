@@ -176,6 +176,19 @@ The copied skill records its engine in `installation.json`. Its `scripts/narafra
 
 Your agent needs terminal and local file access to run NaraFrame. A skill in your machine's personal folder is not automatically available in Claude Cowork or cloud sessions. If you upload the skill to a chat, that environment still needs the engine, tools, and project media.
 
+### Character skills
+
+Use a current source build or local engine archive that includes the character profiles and catalogs. Install the canonical skill first, then add each character to the same workspace:
+
+```sh
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-stickman --json
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-mekanik --json
+```
+
+In Claude Code, use `/naraframe-stickman` or `/naraframe-mekanik` with your brief. For Codex, install with `--host codex` and invoke `$naraframe-stickman` or `$naraframe-mekanik`. A plain brief for a new video goes through the canonical skill and defaults to `general-explainer` unless a profile or series is selected. [Claude Code skills](https://code.claude.com/docs/en/skills) · [Codex skills](https://learn.chatgpt.com/docs/build-skills)
+
+Stickman Ink tells the story through pose changes and prop contact. Meja Mekanik shows how connected parts move from a fixed view. Each command selects the matching profile and versioned catalog. Use the same `--skill` value with `--update` or `--remove` to manage that installation.
+
 ### Example brief
 
 Replace the details in square brackets. Invoke `$naraframe` in Codex or `/naraframe` in Claude Code before using this prompt:

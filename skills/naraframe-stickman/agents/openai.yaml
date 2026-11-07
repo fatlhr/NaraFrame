@@ -1,0 +1,5 @@
+interface:
+  display_name: "NaraFrame Stickman Ink"
+  short_description: "Animate readable ink poses and prop contact"
+policy:
+  allow_implicit_invocation: false
