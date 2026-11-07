@@ -1,0 +1,709 @@
+{
+  "schemaVersion": 1,
+  "id": "stickman-ink",
+  "version": "0.1.0",
+  "provenance": {
+    "source": "NaraFrame blocked-ball character pilot and original schematic illustrations",
+    "license": "MIT"
+  },
+  "assets": [
+    {
+      "id": "pose-0",
+      "status": "ready",
+      "kind": "svg",
+      "path": "pose-0.svg",
+      "sha256": "cf67ec84f529fc33d060b69a4bd1e987b9f7c651a26734b4d8f8df272344df96",
+      "origin": {
+        "type": "generated",
+        "source": "Original SVG pose from A1 direction study"
+      },
+      "binding": "neutral"
+    },
+    {
+      "id": "pose-1",
+      "status": "ready",
+      "kind": "svg",
+      "path": "pose-1.svg",
+      "sha256": "9399e334172a6bf8465e2018a9fc560a0b24b78e03fb708e63d15e9fd38191c7",
+      "origin": {
+        "type": "generated",
+        "source": "Original SVG pose from A1 direction study"
+      },
+      "binding": "neutral"
+    },
+    {
+      "id": "pose-2",
+      "status": "ready",
+      "kind": "svg",
+      "path": "pose-2.svg",
+      "sha256": "182f6bdd4923f52ddea4097112161a03df0a266dc96008b5fc6596e9576b2206",
+      "origin": {
+        "type": "generated",
+        "source": "Original SVG pose from A1 direction study"
+      },
+      "binding": "neutral"
+    }
+  ],
+  "patterns": [
+    {
+      "id": "ink-notice",
+      "version": "0.1.0",
+      "description": "A planted stick figure leans toward an interrupted action.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/7/text"],
+          "description": "A short on-screen line for this shot."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What the viewer learns and which action shows it."
+        }
+      },
+      "template": {
+        "id": "jam",
+        "narrativeRole": "hook",
+        "durationMs": 2600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "ground",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M16 263 Q95 261 193 263",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#777777",
+                "width": 1
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "table",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M108 242 Q155 241 193 242 M116 243 L112 262 M181 243 L181 262",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#373737",
+                "width": 2.2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "gate-guide",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M150 242 L150 120 Q162 116 178 121 L178 242",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#777777",
+                "width": 1.7
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "gate-plate",
+              "type": "shape",
+              "frame": {
+                "x": 710.25,
+                "y": 914.5,
+                "width": 46.75,
+                "height": 365.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#BABABA"
+            },
+            {
+              "id": "handle",
+              "type": "shape",
+              "frame": {
+                "x": 667.75,
+                "y": 1025.0,
+                "width": 102.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "rectangle",
+              "fill": "#303030"
+            },
+            {
+              "id": "actor",
+              "type": "image",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "pose-0",
+              "fit": "contain"
+            },
+            {
+              "id": "ball",
+              "type": "shape",
+              "frame": {
+                "x": 548.75,
+                "y": 1212.0,
+                "width": 76.5,
+                "height": 76.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "shape": "circle",
+              "fill": "#393939"
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 102,
+                "y": 182,
+                "width": 876,
+                "height": 148
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 15,
+              "text": "Bola tertahan",
+              "role": "heading",
+              "color": "palette.text",
+              "fontSize": 74
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "ball-stops",
+            "targetId": "ball",
+            "startMs": 150,
+            "durationMs": 650,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 68.0
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "narration": {
+          "blockId": "pilot",
+          "phraseId": "jam"
+        },
+        "carriesFactualClaim": false,
+        "note": "Illustrative blocked-ball model. Pale paper, black pen poses, visible hand contact and grounded feet."
+      }
+    },
+    {
+      "id": "ink-grip-pull",
+      "version": "0.1.0",
+      "description": "The hand grips the handle before pulling the plate upward.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/8/text"],
+          "description": "A short on-screen line for this shot."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What the viewer learns and which action shows it."
+        }
+      },
+      "template": {
+        "id": "lift",
+        "narrativeRole": "explanation",
+        "durationMs": 3400,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "ground",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M16 263 Q95 261 193 263",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#777777",
+                "width": 1
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "table",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M108 242 Q155 241 193 242 M116 243 L112 262 M181 243 L181 262",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#373737",
+                "width": 2.2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "gate-guide",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M150 242 L150 120 Q162 116 178 121 L178 242",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#777777",
+                "width": 1.7
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "gate-plate",
+              "type": "shape",
+              "frame": {
+                "x": 710.25,
+                "y": 914.5,
+                "width": 46.75,
+                "height": 365.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#BABABA"
+            },
+            {
+              "id": "handle",
+              "type": "shape",
+              "frame": {
+                "x": 667.75,
+                "y": 1025.0,
+                "width": 102.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "rectangle",
+              "fill": "#303030"
+            },
+            {
+              "id": "actor",
+              "type": "image",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "pose-1",
+              "fit": "contain"
+            },
+            {
+              "id": "ball",
+              "type": "shape",
+              "frame": {
+                "x": 616.75,
+                "y": 1212.0,
+                "width": 76.5,
+                "height": 76.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "shape": "circle",
+              "fill": "#393939"
+            },
+            {
+              "id": "gripping-arm",
+              "type": "path",
+              "frame": {
+                "x": 242.75,
+                "y": 731.75,
+                "width": 450.5,
+                "height": 450.5
+              },
+              "opacity": 1,
+              "rotationDeg": 20,
+              "zIndex": 5,
+              "d": "M53 53 H106",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 106,
+                "height": 106
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 3.7
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 102,
+                "y": 182,
+                "width": 876,
+                "height": 148
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 15,
+              "text": "Pegang, lalu angkat",
+              "role": "heading",
+              "color": "palette.text",
+              "fontSize": 74
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "raise-gate-plate",
+            "targetId": "gate-plate",
+            "startMs": 230,
+            "durationMs": 1160,
+            "action": "transform",
+            "params": {
+              "to": {
+                "y": -153.0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "raise-handle",
+            "targetId": "handle",
+            "startMs": 230,
+            "durationMs": 1160,
+            "action": "transform",
+            "params": {
+              "to": {
+                "y": -153.0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "grip-pulls",
+            "targetId": "gripping-arm",
+            "startMs": 230,
+            "durationMs": 1160,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -40
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "narration": {
+          "blockId": "pilot",
+          "phraseId": "lift"
+        },
+        "carriesFactualClaim": false,
+        "note": "Illustrative blocked-ball model. Pale paper, black pen poses, visible hand contact and grounded feet."
+      }
+    },
+    {
+      "id": "ink-release",
+      "version": "0.1.0",
+      "description": "The ball clears the gate and the figure holds a relaxed pose.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/7/text"],
+          "description": "A short on-screen line for this shot."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What the viewer learns and which action shows it."
+        }
+      },
+      "template": {
+        "id": "release",
+        "narrativeRole": "payoff",
+        "durationMs": 4000,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "ground",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M16 263 Q95 261 193 263",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#777777",
+                "width": 1
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "table",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M108 242 Q155 241 193 242 M116 243 L112 262 M181 243 L181 262",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#373737",
+                "width": 2.2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "gate-guide",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M150 242 L150 120 Q162 116 178 121 L178 242",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#777777",
+                "width": 1.7
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "gate-plate",
+              "type": "shape",
+              "frame": {
+                "x": 710.25,
+                "y": 761.5,
+                "width": 46.75,
+                "height": 365.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#BABABA"
+            },
+            {
+              "id": "handle",
+              "type": "shape",
+              "frame": {
+                "x": 667.75,
+                "y": 872.0,
+                "width": 102.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "rectangle",
+              "fill": "#303030"
+            },
+            {
+              "id": "actor",
+              "type": "image",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "pose-2",
+              "fit": "contain"
+            },
+            {
+              "id": "ball",
+              "type": "shape",
+              "frame": {
+                "x": 616.75,
+                "y": 1212.0,
+                "width": 76.5,
+                "height": 76.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "shape": "circle",
+              "fill": "#393939"
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 102,
+                "y": 182,
+                "width": 876,
+                "height": 148
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 15,
+              "text": "Bola bisa lewat",
+              "role": "heading",
+              "color": "palette.text",
+              "fontSize": 74
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "ball-clears",
+            "targetId": "ball",
+            "startMs": 160,
+            "durationMs": 880,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 225.25
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "narration": {
+          "blockId": "pilot",
+          "phraseId": "release"
+        },
+        "carriesFactualClaim": false,
+        "note": "Illustrative blocked-ball model. Pale paper, black pen poses, visible hand contact and grounded feet."
+      }
+    }
+  ]
+}

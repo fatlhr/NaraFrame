@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3 passed acceptance. B1 is next in the five remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3 and B1 passed acceptance. B2 is next in the four remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1682,3 +1682,15 @@ Apply a params edit with `edit --from "$STAGING" --expect "$REVISION" --json`, t
 The manual undo test reproduced loss of a recipe file with a forbidden import. After the fix, `preservedInvalidCopy` contains those exact bytes, the prior trusted code and revision are restored, and the corrected preview is reusable. An otherwise valid code hash change requires new trust, and changing scene params invalidates approval for the old revision. The recovery regression covers a malformed manifest and its listed entry and helper. The guide now points recipe authors to `visual.params` for details beyond the recipe ID in `outline`, and the CLI registry identifies untrusted project code as unsupported.
 
 `pnpm verify` passed with 399 unit and 560 integration tests. The serial recipe production and text-fit E2E suites passed all three cases. The 29-file checksum index at `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-a3-recipe-workflow/index.json` links the previews, measurements, CLI receipts and gate logs.
+
+### B1 acceptance model (2026-11-07)
+
+Pack the engine and install the canonical skill and both named character skills into a clean consumer directory. Use `node "$ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$CONSUMER" --skill naraframe-stickman --json` and the matching Meja Mekanik command. Invoke each installed skill explicitly and use the shared launcher to inspect its packaged profile and catalog at `0.1.0`, create a project, stage one A2 pattern with editable title and note, apply it with guarded `edit`, and render a short scoped draft. The profile lock, library import and preview must match the selected character. A plain new-video prompt should select the canonical skill and `general-explainer`.
+
+Exercise an incomplete character bundle and confirm that it stops with an actionable diagnostic. Exercise a receipt-owned update and a refused update after editing a wrapper locally. The conflict must leave the edited file and the canonical skill intact. Record the host and invocation that actually run.
+
+**B1 accepted for the explicit installed-file route (2026-11-07).** In a clean consumer workspace outside the checkout, the project installer copied the canonical skill and both character skills from the local engine archive. The Codex Desktop session explicitly read each installed `SKILL.md`, followed its shared character guide and rendered through the installed launcher. Stickman Ink used `stickman-ink@0.1.0` with `ink-grip-pull@0.1.0` (build `5e8c215fdf74-82fd72c2-495`). Meja Mekanik used `meja-mekanik@0.1.0` with `mechanik-linkage@0.1.0` (build `19b5a6be18d7-a6406d71-90b`). Both 102-frame previews decoded cleanly and their contact frames were inspected. All six packaged patterns imported and passed plan validation. The plain-brief control followed the canonical instructions and pinned `general-explainer`.
+
+Claude Code project placement and receipt-owned update passed. A locally edited wrapper refused update with `SKILL_INSTALL_EDITED` and the canonical receipt matched its original bytes. A catalog with an omitted pose refused inspection with `ASSET_FILE_MISSING`. Host evidence covers explicit file use and installed CLI execution. Native slash activation in a logged-in Claude Code session and a fresh Codex model invocation remain unverified.
+
+`pnpm verify` passed with 399 unit and 562 integration tests. The archive `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-b1-character-skills/index.json` records 73 checksummed files including editable source, previews, installer receipts and gate logs.

@@ -66,9 +66,11 @@ export const engineIdentity = async (root: string): Promise<string> => {
         );
   }
   for (const resource of [
-    "profiles/current-issues",
+    "profiles",
     "library",
     "skills/naraframe",
+    "skills/naraframe-stickman",
+    "skills/naraframe-mekanik",
   ])
     await visit(join(root, resource), resource);
   for (const file of ["package.json", "scripts/install-skill.mjs"])

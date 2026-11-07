@@ -70,6 +70,8 @@ Add `--adopt` to bind a skill folder that was copied without the installer, such
 
 Add `--update` to replace a receipt-owned, unchanged install. Add `--remove` to remove only that owned install. Both support `--dry-run`. A destination with no matching receipt, local edits, extra files or symlinks is refused. Preserve those files and inspect the conflict; do not delete them to make the installer succeed. An existing symlink installed manually stays intact and must be migrated explicitly by its owner.
 
+With an engine package that includes the character profiles and catalogs, install the canonical skill first, then run the same installer with `--skill naraframe-stickman` or `--skill naraframe-mekanik` in the same scope. The character skills use the canonical launcher's engine binding. Use the same `--skill` option when updating or removing a character skill. Update the canonical binding and character skills from the same package when changing engines.
+
 ## Resolve setup failures
 
 - `SKILL_ENGINE_MISSING` or `SKILL_ENGINE_INCOMPATIBLE`: the pinned engine is gone, moved or cannot start. Run `setup-engine.mjs --check --json`, tell the user, and with their agreement run it again without `--check` (see above). A receipt-bound skill whose engine is gone stays bound to it: rebind with `--bind-skill`, or use a skill folder without a receipt. For an incompatible engine, install/build one supporting skill API 1; do not infer compatibility from a folder name.

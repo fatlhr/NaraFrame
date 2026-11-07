@@ -21,6 +21,7 @@ import { promisify } from "node:util";
 const run = promisify(execFile);
 const marker = "naraframe-skill-install/v1";
 const receiptFile = "installation.json";
+const skillNames = ["naraframe", "naraframe-stickman", "naraframe-mekanik"];
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const failure = (code, message) => {
@@ -61,7 +62,7 @@ export const inventorySkill = async (directory, prefix = "") => {
 // A folder with no receipt at all is refused, unless the caller asked to adopt
 // it. Adoption returns the folder's own inventory so that it can be compared with
 // the canonical skill; a present but unreadable receipt is never adopted.
-const checkExisting = async (destination, adopt = false) => {
+const checkExisting = async (destination, skill, adopt = false) => {
   const stat = await present(destination);
   if (!stat) return null;
   if (!stat.isDirectory() || stat.isSymbolicLink())
@@ -87,6 +88,7 @@ const checkExisting = async (destination, adopt = false) => {
   }
   if (
     receipt.owner !== marker ||
+    (receipt.skill ?? "naraframe") !== skill ||
     !receipt.files ||
     typeof receipt.files !== "object" ||
     Array.isArray(receipt.files)
@@ -109,17 +111,15 @@ const checkExisting = async (destination, adopt = false) => {
   return receipt;
 };
 
-const checkReferences = async (directory, files) => {
+const checkReferences = async (directory, files, skill) => {
   const frontmatter = await readFile(join(directory, "SKILL.md"), "utf8");
   const header = frontmatter.match(
     /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/,
   )?.[1];
-  if (
-    !header?.split(/\r?\n/).some((line) => /^name:\s*naraframe\s*$/.test(line))
-  )
+  if (header?.match(/^name:\s*(\S+)\s*$/m)?.[1] !== skill)
     throw failure(
       "SKILL_SOURCE_INVALID",
-      "The canonical skill must declare name: naraframe.",
+      `The skill must declare name: ${skill}.`,
     );
   for (const relative of Object.keys(files).filter((path) =>
     path.endsWith(".md"),
@@ -197,6 +197,13 @@ export const inspectEngine = async (entry) => {
 };
 
 export const installSkill = async (options) => {
+  const skill = options.skill ?? "naraframe";
+  const canonicalSkill = skill === "naraframe";
+  if (!skillNames.includes(skill))
+    throw failure(
+      "SKILL_INSTALL_USAGE",
+      `Choose --skill ${skillNames.join("|")}.`,
+    );
   if (
     !["claude", "codex"].includes(options.host) ||
     !["project", "user"].includes(options.scope)
@@ -254,8 +261,8 @@ export const installSkill = async (options) => {
         );
     }
   };
-  const destination = join(parent, "naraframe");
-  const old = await checkExisting(destination, options.adopt);
+  const destination = join(parent, skill);
+  const old = await checkExisting(destination, skill, options.adopt);
   const adopting = Boolean(old?.unreceipted);
   if (old && !adopting && !options.update && !options.remove)
     throw failure(
@@ -279,23 +286,21 @@ export const installSkill = async (options) => {
     : await inspectEngine(
         options.engineEntry ?? join(root, "packages/cli/dist/index.js"),
       );
-  const source = engine
-    ? join(engine.resourceRoot, "skills", "naraframe")
-    : null;
+  const source = engine ? join(engine.resourceRoot, "skills", skill) : null;
   if (source) {
     if (!(await present(join(source, "SKILL.md"))))
       throw failure(
         "SKILL_SOURCE_MISSING",
-        "The engine artifact does not include its canonical skill.",
+        `The engine artifact does not include ${skill}. Install an engine package that includes it.`,
       );
     const canonical = await inventorySkill(source);
     // The launcher is part of the canonical skill, not generated per install.
-    if (!("scripts/naraframe.mjs" in canonical))
+    if (canonicalSkill && !("scripts/naraframe.mjs" in canonical))
       throw failure(
         "SKILL_SOURCE_MISSING",
         "The engine's canonical skill has no scripts/naraframe.mjs launcher.",
       );
-    await checkReferences(source, canonical);
+    await checkReferences(source, canonical, skill);
     if (adopting) {
       // Adoption is for a copied, untouched skill folder only.
       const differences = [
@@ -327,6 +332,7 @@ export const installSkill = async (options) => {
     host: options.host,
     scope: options.scope,
     destination,
+    ...(!canonicalSkill ? { skill } : {}),
     engine,
     writesPerformed: false,
   };
@@ -354,9 +360,10 @@ export const installSkill = async (options) => {
     if (!options.remove) {
       await cp(source, candidate, { recursive: true, dereference: false });
       const files = await inventorySkill(candidate);
-      await checkReferences(candidate, files);
+      await checkReferences(candidate, files, skill);
       const receipt = {
         owner: marker,
+        ...(!canonicalSkill ? { skill } : {}),
         ...engine,
         host: options.host,
         scope: options.scope,
@@ -371,7 +378,7 @@ export const installSkill = async (options) => {
     }
     // Recheck after staging; no overwrite of edits made during preparation.
     await checkParents(stableParents);
-    const now = await checkExisting(destination, options.adopt);
+    const now = await checkExisting(destination, skill, options.adopt);
     if (JSON.stringify(now) !== JSON.stringify(old))
       throw failure(
         "SKILL_INSTALL_CONFLICT",
@@ -381,7 +388,7 @@ export const installSkill = async (options) => {
       await rename(destination, backup);
       saved = true;
       // Catch edits made between the last check and the move before deleting a backup.
-      const moved = await checkExisting(backup, options.adopt);
+      const moved = await checkExisting(backup, skill, options.adopt);
       if (JSON.stringify(moved) !== JSON.stringify(old))
         throw failure(
           "SKILL_INSTALL_CONFLICT",
@@ -427,6 +434,7 @@ const parse = (args) => {
     "project",
     "user-root",
     "engine-entry",
+    "skill",
   ]);
   const seen = new Set();
   for (let i = 0; i < args.length; i++) {

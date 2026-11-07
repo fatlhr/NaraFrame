@@ -54,6 +54,7 @@ describe("skill formula", () => {
       "art-direction.md",
       "authoring.md",
       "captions.md",
+      "characters.md",
       "export.md",
       "installation.md",
       "library.md",

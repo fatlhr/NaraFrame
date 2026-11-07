@@ -1,0 +1,1347 @@
+{
+  "schemaVersion": 1,
+  "id": "meja-mekanik",
+  "version": "0.1.0",
+  "provenance": {
+    "source": "NaraFrame blocked-ball character pilot and original schematic illustrations",
+    "license": "MIT"
+  },
+  "assets": [],
+  "patterns": [
+    {
+      "id": "mechanik-jam",
+      "version": "0.1.0",
+      "description": "The ball stops against a plate with the guide and lever in view.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/16/text"],
+          "description": "A short on-screen line for this shot."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What the viewer learns and which action shows it."
+        }
+      },
+      "template": {
+        "id": "jam",
+        "narrativeRole": "hook",
+        "durationMs": 2600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "base-front",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M24 230 H157 V254 H24 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#888888",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#3A3A3A"
+            },
+            {
+              "id": "base-top",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M24 230 H157 L188 209 H54 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#AAAAAA",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#555555"
+            },
+            {
+              "id": "base-side",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M157 230 L188 209 V233 L157 254 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#8F8F8F",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#303030"
+            },
+            {
+              "id": "rails",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M32 215 H161 L181 201 M38 224 H163 L187 208",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#CACACA",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "guide",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M107 216 V126 L126 114 H145 V213",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#BBBBBB",
+                "width": 2.4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "plate",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M105 159 H123 V219 H105 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#EEEEEE",
+                "width": 1.4
+              },
+              "lineCap": "round",
+              "fill": "#AAAAAA"
+            },
+            {
+              "id": "plate-depth",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M123 159 L129 154 V214 L123 219 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#D0D0D0",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#777777"
+            },
+            {
+              "id": "slide-slot",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "d": "M99 161 H119",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#454545",
+                "width": 4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "ball",
+              "type": "shape",
+              "frame": {
+                "x": 336.25,
+                "y": 1097.25,
+                "width": 93.5,
+                "height": 93.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "shape": "circle",
+              "fill": "#EDEDED"
+            },
+            {
+              "id": "lever",
+              "type": "path",
+              "frame": {
+                "x": 510.5,
+                "y": 587.25,
+                "width": 425.0,
+                "height": 425.0
+              },
+              "opacity": 1,
+              "rotationDeg": -45,
+              "zIndex": 6,
+              "d": "M2 50 H90",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 100,
+                "height": 100
+              },
+              "stroke": {
+                "color": "#E8E8E8",
+                "width": 3
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "pivot",
+              "type": "shape",
+              "frame": {
+                "x": 701.75,
+                "y": 778.5,
+                "width": 42.5,
+                "height": 42.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "shape": "circle",
+              "fill": "#D6D6D6"
+            },
+            {
+              "id": "pivot-core",
+              "type": "shape",
+              "frame": {
+                "x": 714.5,
+                "y": 791.25,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "shape": "circle",
+              "fill": "#444444"
+            },
+            {
+              "id": "bolt-0",
+              "type": "shape",
+              "frame": {
+                "x": 217.25,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-1",
+              "type": "shape",
+              "frame": {
+                "x": 344.75,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-2",
+              "type": "shape",
+              "frame": {
+                "x": 676.25,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-3",
+              "type": "shape",
+              "frame": {
+                "x": 723.0,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 102,
+                "y": 182,
+                "width": 876,
+                "height": 148
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 15,
+              "text": "Bola tertahan",
+              "role": "heading",
+              "color": "palette.text",
+              "fontSize": 74
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "ball-stops",
+            "targetId": "ball",
+            "startMs": 150,
+            "durationMs": 650,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 102.0
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "narration": {
+          "blockId": "pilot",
+          "phraseId": "jam"
+        },
+        "carriesFactualClaim": false,
+        "note": "Illustrative blocked-ball model. Dark workshop, fixed diagonal projection, rigid parts and clear flow."
+      }
+    },
+    {
+      "id": "mechanik-linkage",
+      "version": "0.1.0",
+      "description": "The lever turns about a fixed pivot while the plate rises on its guide.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/16/text"],
+          "description": "A short on-screen line for this shot."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What the viewer learns and which action shows it."
+        }
+      },
+      "template": {
+        "id": "lift",
+        "narrativeRole": "explanation",
+        "durationMs": 3400,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "base-front",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M24 230 H157 V254 H24 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#888888",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#3A3A3A"
+            },
+            {
+              "id": "base-top",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M24 230 H157 L188 209 H54 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#AAAAAA",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#555555"
+            },
+            {
+              "id": "base-side",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M157 230 L188 209 V233 L157 254 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#8F8F8F",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#303030"
+            },
+            {
+              "id": "rails",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M32 215 H161 L181 201 M38 224 H163 L187 208",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#CACACA",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "guide",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M107 216 V126 L126 114 H145 V213",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#BBBBBB",
+                "width": 2.4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "plate",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M105 159 H123 V219 H105 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#EEEEEE",
+                "width": 1.4
+              },
+              "lineCap": "round",
+              "fill": "#AAAAAA"
+            },
+            {
+              "id": "plate-depth",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M123 159 L129 154 V214 L123 219 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#D0D0D0",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#777777"
+            },
+            {
+              "id": "slide-slot",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "d": "M99 161 H119",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#454545",
+                "width": 4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "ball",
+              "type": "shape",
+              "frame": {
+                "x": 438.25,
+                "y": 1097.25,
+                "width": 93.5,
+                "height": 93.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "shape": "circle",
+              "fill": "#EDEDED"
+            },
+            {
+              "id": "lever",
+              "type": "path",
+              "frame": {
+                "x": 510.5,
+                "y": 587.25,
+                "width": 425.0,
+                "height": 425.0
+              },
+              "opacity": 1,
+              "rotationDeg": -45,
+              "zIndex": 6,
+              "d": "M2 50 H90",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 100,
+                "height": 100
+              },
+              "stroke": {
+                "color": "#E8E8E8",
+                "width": 3
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "pivot",
+              "type": "shape",
+              "frame": {
+                "x": 701.75,
+                "y": 778.5,
+                "width": 42.5,
+                "height": 42.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "shape": "circle",
+              "fill": "#D6D6D6"
+            },
+            {
+              "id": "pivot-core",
+              "type": "shape",
+              "frame": {
+                "x": 714.5,
+                "y": 791.25,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "shape": "circle",
+              "fill": "#444444"
+            },
+            {
+              "id": "bolt-0",
+              "type": "shape",
+              "frame": {
+                "x": 217.25,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-1",
+              "type": "shape",
+              "frame": {
+                "x": 344.75,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-2",
+              "type": "shape",
+              "frame": {
+                "x": 676.25,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-3",
+              "type": "shape",
+              "frame": {
+                "x": 723.0,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 102,
+                "y": 182,
+                "width": 876,
+                "height": 148
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 15,
+              "text": "Tuas mengangkat pelat",
+              "role": "heading",
+              "color": "palette.text",
+              "fontSize": 74
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "plate-mid",
+            "targetId": "plate",
+            "startMs": 230,
+            "durationMs": 580,
+            "action": "transform",
+            "params": {
+              "to": {
+                "y": -144.5
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "plate-open",
+            "targetId": "plate",
+            "startMs": 810,
+            "durationMs": 580,
+            "action": "transform",
+            "params": {
+              "to": {
+                "y": -233.75
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "plate-depth-mid",
+            "targetId": "plate-depth",
+            "startMs": 230,
+            "durationMs": 580,
+            "action": "transform",
+            "params": {
+              "to": {
+                "y": -144.5
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "plate-depth-open",
+            "targetId": "plate-depth",
+            "startMs": 810,
+            "durationMs": 580,
+            "action": "transform",
+            "params": {
+              "to": {
+                "y": -233.75
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "slide-slot-mid",
+            "targetId": "slide-slot",
+            "startMs": 230,
+            "durationMs": 580,
+            "action": "transform",
+            "params": {
+              "to": {
+                "y": -144.5
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "slide-slot-open",
+            "targetId": "slide-slot",
+            "startMs": 810,
+            "durationMs": 580,
+            "action": "transform",
+            "params": {
+              "to": {
+                "y": -233.75
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "lever-mid",
+            "targetId": "lever",
+            "startMs": 230,
+            "durationMs": 580,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 45
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "lever-open",
+            "targetId": "lever",
+            "startMs": 810,
+            "durationMs": 580,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 71
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "narration": {
+          "blockId": "pilot",
+          "phraseId": "lift"
+        },
+        "carriesFactualClaim": false,
+        "note": "Illustrative blocked-ball model. Dark workshop, fixed diagonal projection, rigid parts and clear flow."
+      }
+    },
+    {
+      "id": "mechanik-flow",
+      "version": "0.1.0",
+      "description": "The open guide lets the ball pass and a path cue traces its route.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/17/text"],
+          "description": "A short on-screen line for this shot."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What the viewer learns and which action shows it."
+        }
+      },
+      "template": {
+        "id": "release",
+        "narrativeRole": "payoff",
+        "durationMs": 4000,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "base-front",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M24 230 H157 V254 H24 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#888888",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#3A3A3A"
+            },
+            {
+              "id": "base-top",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M24 230 H157 L188 209 H54 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#AAAAAA",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#555555"
+            },
+            {
+              "id": "base-side",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M157 230 L188 209 V233 L157 254 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#8F8F8F",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#303030"
+            },
+            {
+              "id": "rails",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M32 215 H161 L181 201 M38 224 H163 L187 208",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#CACACA",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "guide",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M107 216 V126 L126 114 H145 V213",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#BBBBBB",
+                "width": 2.4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "plate",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M105 104 H123 V164 H105 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#EEEEEE",
+                "width": 1.4
+              },
+              "lineCap": "round",
+              "fill": "#AAAAAA"
+            },
+            {
+              "id": "plate-depth",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M123 104 L129 99 V159 L123 164 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#D0D0D0",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#777777"
+            },
+            {
+              "id": "slide-slot",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "d": "M99 106 H119",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#454545",
+                "width": 4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "ball",
+              "type": "shape",
+              "frame": {
+                "x": 438.25,
+                "y": 1097.25,
+                "width": 93.5,
+                "height": 93.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "shape": "circle",
+              "fill": "#EDEDED"
+            },
+            {
+              "id": "lever",
+              "type": "path",
+              "frame": {
+                "x": 510.5,
+                "y": 587.25,
+                "width": 425.0,
+                "height": 425.0
+              },
+              "opacity": 1,
+              "rotationDeg": 26,
+              "zIndex": 6,
+              "d": "M2 50 H90",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 100,
+                "height": 100
+              },
+              "stroke": {
+                "color": "#E8E8E8",
+                "width": 3
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "pivot",
+              "type": "shape",
+              "frame": {
+                "x": 701.75,
+                "y": 778.5,
+                "width": 42.5,
+                "height": 42.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "shape": "circle",
+              "fill": "#D6D6D6"
+            },
+            {
+              "id": "pivot-core",
+              "type": "shape",
+              "frame": {
+                "x": 714.5,
+                "y": 791.25,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "shape": "circle",
+              "fill": "#444444"
+            },
+            {
+              "id": "bolt-0",
+              "type": "shape",
+              "frame": {
+                "x": 217.25,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-1",
+              "type": "shape",
+              "frame": {
+                "x": 344.75,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-2",
+              "type": "shape",
+              "frame": {
+                "x": 676.25,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "bolt-3",
+              "type": "shape",
+              "frame": {
+                "x": 723.0,
+                "y": 1263.0,
+                "width": 17.0,
+                "height": 17.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "circle",
+              "fill": "#999999"
+            },
+            {
+              "id": "flow-cue",
+              "type": "path",
+              "frame": {
+                "x": 94.0,
+                "y": 260.0,
+                "width": 892.5,
+                "height": 1581.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M131 187 H165 M159 182 L165 187 L159 192",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 210,
+                "height": 372
+              },
+              "stroke": {
+                "color": "#D5D5D5",
+                "width": 1.7
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 102,
+                "y": 182,
+                "width": 876,
+                "height": 148
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 15,
+              "text": "Bola bisa lewat",
+              "role": "heading",
+              "color": "palette.text",
+              "fontSize": 74
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "trace-flow",
+            "targetId": "flow-cue",
+            "startMs": 130,
+            "durationMs": 470,
+            "action": "draw",
+            "params": {
+              "easingPreset": "linear"
+            }
+          },
+          {
+            "id": "ball-clears",
+            "targetId": "ball",
+            "startMs": 160,
+            "durationMs": 880,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 306.0
+              },
+              "easingPreset": "linear"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "narration": {
+          "blockId": "pilot",
+          "phraseId": "release"
+        },
+        "carriesFactualClaim": false,
+        "note": "Illustrative blocked-ball model. Dark workshop, fixed diagonal projection, rigid parts and clear flow."
+      }
+    }
+  ]
+}

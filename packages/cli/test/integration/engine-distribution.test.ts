@@ -108,6 +108,8 @@ describe("offline engine distribution", () => {
     expect(listed.map((profile) => profile.id)).toEqual([
       "current-issues",
       "general-explainer",
+      "meja-mekanik",
+      "stickman-ink",
     ]);
     for (const profile of listed)
       expect(profile.path).toBe(join(engine, "profiles", profile.id));

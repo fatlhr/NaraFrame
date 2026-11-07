@@ -1,0 +1,5 @@
+interface:
+  display_name: "NaraFrame Meja Mekanik"
+  short_description: "Explain cause and effect with moving parts"
+policy:
+  allow_implicit_invocation: false
