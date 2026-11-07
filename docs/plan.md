@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3, B1 and B2 passed acceptance. C1 is next in the three remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3, B1, B2 and C1 passed acceptance. C2 is next in the two remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1711,3 +1711,30 @@ Save each first full `preview --draft --json` and review frame zero, the cut, co
 Both edits reported one retained voice asset and one changed scene. The captured master, phrase timing and decoded audio matched across first, revised and restored previews. Both undos restored the first source and reused its compatible build with matching decoded frames. `pnpm verify` passed with 399 unit and 562 integration tests. The [local archive](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-b2-stamp-character-repeatability/index.json) contains 58 checksummed files, including both source projects, previews, frame strips and CLI receipts.
 
 **B2 accepted (2026-11-07).** Fatih watched the paired first drafts and confirmed that both characters were still easy to recognize and that the narration text and timing matched. The take was restaged with the owner listening receipt. Both visual edits and undos passed again on the verified revisions. Each retained the same audio master, timing, verified text binding and decoded audio. All six previews from this second pass reused compatible builds. The [owner review record](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-b2-stamp-character-repeatability/owner-review/index.json) binds the confirmation to the reviewed clip and 21 additional checksummed evidence files.
+
+### C1 measurement model (2026-11-07)
+
+Use the light B2 Stickman Ink episode and a controlled dense derivative of the Meja Mekanik episode with more visible moving parts. Keep their duration and resolution matched. From a clean project copy, time `preview --draft --resolution 540 --scene stamp --json` and the full equivalent. Give each first render a cold Webpack cache, then repeat the same command to measure compatible build reuse. Change one visual property in the dense stamp scene through guarded `edit`, and measure both preview scopes with warm Webpack.
+
+Use timestamp probes in a scratch copy of the built runtime and sample the CLI process tree's resident memory. Record load/compile/source sync, cache lookup, bundle, browser preflight, capture/encode and verification/publication. Keep frame integrity active. Compare where time goes in a one-shot iteration, then identify one bounded candidate for C2.
+
+**C1 measurements (2026-11-07).** The light stamp shot has 12 layers and 9 beats. The dense derivative has 74 layers and 70 beats. Runs were serial on the same arm64 macOS 15.7.5 host with Node 24.20.0, Remotion 4.0.521, Chrome 156.0.8078.81 and FFmpeg 7.1.1. Every run used 540×960 at 30 fps. Scoped previews contain 174 frames and omit the soundtrack by design. Full previews contain 240 frames with the shared take. Each matrix cell is a single observation. Peak RSS is the sum of sampled process-tree RSS at roughly 200 ms intervals, which can count shared pages more than once. Wall time includes startup and teardown.
+
+| Fixture and scope | Cache outcome | Load, compile, sync (s) | Lookup (s) | Bundle (s) | Browser preflight (s) | Capture and encode (s) | Verify and publish (s) | Wall (s) | Peak RSS (MiB) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Light shot | Cold miss | 0.06 | 0.51 | 5.57 | 1.77 | 11.46 | 0.99 | 21.45 | 953 |
+| Light shot | Hit | 0.05 | 0.08 | 0 | 0 | 0 | 0.33 | 0.85 | 129 |
+| Light full | Cold miss | 0.04 | 0.08 | 5.33 | 1.29 | 15.13 | 1.02 | 23.23 | 1126 |
+| Light full | Hit | 0.05 | 0.08 | 0 | 0 | 0 | 0.34 | 0.85 | 138 |
+| Dense shot | Cold miss | 0.05 | 0.07 | 5.33 | 0.94 | 11.08 | 1.10 | 18.86 | 1302 |
+| Dense shot | Hit | 0.05 | 0.08 | 0 | 0 | 0 | 0.35 | 0.80 | 165 |
+| Dense full | Cold miss | 0.05 | 0.07 | 5.76 | 0.71 | 15.28 | 1.13 | 23.24 | 1334 |
+| Dense full | Hit | 0.05 | 0.08 | 0 | 0 | 0 | 0.38 | 0.85 | 169 |
+| Dense shot, edited | Warm Webpack, build miss | 0.05 | 0.08 | 0.87 | 0.91 | 11.04 | 1.08 | 14.32 | 1214 |
+| Dense full, edited | Warm Webpack, build miss | 0.05 | 0.08 | 0.87 | 0.80 | 15.03 | 1.16 | 18.27 | 1202 |
+
+The guarded grip-color edit took 0.36 s and retained one of two scene keys and the voice asset. Capture and encode account for 77% of the edited shot and 82% of the edited full preview. A repeat of the edited scoped render spent 10.16 s between the first and last captured frames, 0.39 s opening the capture browser and 0.34 s from the last captured frame until the render call returned. Both cold full previews took about 23.24 s, while dense full peak RSS was about 207 MiB higher. The matrix measures latency and memory for these two fixtures.
+
+For C2, start inside the serial frame capture loop. Profile repeated motion evaluation by layer target on the same warm dense shot. A per-scene beat index is a bounded candidate if that work contributes enough time to support a repeatable improvement. Use matched runs and keep frame integrity and serial capture in the acceptance check. The current matrix attributes little edit latency to compile, warm bundling or review sheets.
+
+**C1 complete.** Every measured preview retained the existing frame-integrity check and reported zero outliers. `pnpm verify` passed with 399 unit and 562 integration tests. The [local evidence index](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-c1-preview-profile/index.json) lists 57 checksummed files, including both source fixtures, raw timings and reports, the scratch instrumentation patch and the gate log.
