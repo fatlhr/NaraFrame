@@ -57,33 +57,33 @@ You need internet access to fetch the repository and dependencies for source set
 
 ### Install from npm
 
-The published engine is `naraframe@0.1.2` and supports Node.js 22 or newer. From a workspace folder:
+The published engine is `naraframe@0.2.0` and supports Node.js 22 or newer. From a workspace folder:
 
 ```sh
-npm install --save-exact naraframe@0.1.2
+npm install --save-exact naraframe@0.2.0
 NARAFRAME_ENGINE="$PWD/node_modules/naraframe"
 npx naraframe version --json
 npx naraframe doctor --json
 ```
 
-This installs the CLI and bundled resources locally; it does not install a browser, FFmpeg or a skill into your agent. Fix any prerequisites reported by `doctor` before rendering. For a single command, use `npx -y naraframe@0.1.2 <command>`.
+This installs the CLI and bundled resources locally; it does not install a browser, FFmpeg or a skill into your agent. Fix any prerequisites reported by `doctor` before rendering. For a single command, use `npx -y naraframe@0.2.0 <command>`.
 
 Keep `NARAFRAME_ENGINE` as an absolute path for the skill and starter commands below. The examples also show `pnpm naraframe` from a source checkout; from the npm workspace, use `npx naraframe` instead. When working elsewhere, use `node "$NARAFRAME_ENGINE/packages/cli/dist/index.js"`. Keep video projects outside the engine's installation folder.
 
 ### Install a supplied engine archive
 
-Use this route if you have `naraframe-engine-0.1.2.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 22 or newer first, and install it in a dedicated directory:
+Use this route if you have `naraframe-engine-0.2.0.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 22 or newer first, and install it in a dedicated directory:
 
 ```sh
 mkdir naraframe-runtime
 cd naraframe-runtime
-npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.1.2.tgz
+npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.2.0.tgz
 NARAFRAME_ENGINE="$PWD/node_modules/naraframe-engine"
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" version --json
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" doctor --json
 ```
 
-`version` reports engine version `0.1.2`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
+`version` reports engine version `0.2.0`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
 
 The archive includes a neutral silent starter, profiles, reusable library data, the complete skill, and its installer. It excludes private production projects and development fixtures. Check the companion `engine-manifest.json` checksum and the archive's `distribution-rights.json` before use. NaraFrame code uses the MIT License; runtime dependencies retain their own licensing terms.
 
@@ -178,7 +178,18 @@ Your agent needs terminal and local file access to run NaraFrame. A skill in you
 
 ### Character skills
 
-Use a current source build or local engine archive that includes the character profiles and catalogs. Install the canonical skill first, then add each character to the same workspace:
+NaraFrame 0.2.0 includes Stickman Ink, Meja Mekanik and Paper Cutout. Use the matching [npm package](#install-from-npm), source build or local engine archive. Install the canonical skill first, then add the characters you want to use in the same workspace.
+
+For Codex, run these commands from your video workspace after setting `NARAFRAME_ENGINE` to the absolute engine path.
+
+```sh
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --json
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-stickman --json
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-mekanik --json
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-paper --json
+```
+
+For Claude Code, [install the canonical skill](#local-claude-code) first, then add the characters to the same workspace.
 
 ```sh
 node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-stickman --json
@@ -189,6 +200,8 @@ node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project
 In Claude Code, use `/naraframe-stickman`, `/naraframe-mekanik` or `/naraframe-paper` with your brief. For Codex, install with `--host codex` and invoke `$naraframe-stickman`, `$naraframe-mekanik` or `$naraframe-paper`. A plain brief for a new video goes through the canonical skill and defaults to `general-explainer` unless a profile or series is selected. [Claude Code skills](https://code.claude.com/docs/en/skills) · [Codex skills](https://learn.chatgpt.com/docs/build-skills)
 
 Stickman Ink tells the story through pose changes and prop contact. Meja Mekanik shows how connected parts move from a fixed view. Paper Cutout uses layered paper in an overhead view, with short turns and held poses. Each command selects the matching profile and versioned catalog. Use the same `--skill` value with `--update` or `--remove` to manage that installation.
+
+The included shot patterns behind the [README examples](../README.md#choose-a-visual-style) are `ink-grip-pull` for Stickman Ink, `mechanik-linkage` for Meja Mekanik, and `paper-bridge` for Paper Cutout. Each is version `0.1.0` in `library/characters/<profile-id>/catalog.json` inside the engine. Use the selected skill with a brief about that action, or [import the pattern from the CLI](#reuse-a-composition).
 
 ### Example brief
 

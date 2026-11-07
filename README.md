@@ -4,14 +4,14 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 [![Tested on macOS Apple Silicon](https://img.shields.io/badge/tested%20on-macOS%20Apple%20Silicon-555?style=flat-square)](#what-you-need)
-[![Version 0.1.2](https://img.shields.io/badge/version-0.1.2%20early%20release-f5a623?style=flat-square)](#good-to-know)
+[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0%20early%20release-f5a623?style=flat-square)](#good-to-know)
 [![Works with Claude Code and Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex-7a5af5?style=flat-square)](#install)
 
 Tell your agent what the next episode is about. NaraFrame turns that into a 9:16 video with the same look as every episode before it, shows you a preview, and exports exactly the version you approved.
 
 ![Four moments from a NaraFrame explainer about why ice floats: the question, the molecules spreading out, a density comparison and the answer](docs/assets/readme/hero.png)
 
-[Quick start](#quick-start) · [What you can make](#style-gallery) · [How it works](#how-it-works) · [Your series look](#series-look) · [Revisions and reuse](#what-you-save) · [Install](#install) · [Uninstall](#uninstall) · [Questions](#questions) · [Technical guide](docs/guide.md)
+[Quick start](#quick-start) · [What you can make](#style-gallery) · [Choose a visual style](#choose-a-visual-style) · [How it works](#how-it-works) · [Your series look](#series-look) · [Revisions and reuse](#what-you-save) · [Install](#install) · [Uninstall](#uninstall) · [Questions](#questions) · [Technical guide](docs/guide.md)
 
 <a id="quick-start"></a>
 
@@ -64,6 +64,22 @@ Also possible:
 | 📺 | **A series with a recognisable opening** | An intro, a signature and a sign-off that every episode shares. |
 | 🎙️ | **Narrated or silent** | A recorded voice-over with captions on the key phrases, music only, or no sound at all. |
 
+<a id="choose-a-visual-style"></a>
+
+### Choose a visual style
+
+A plain brief for a new video uses **Motion Explainer**. Choose a specific style when the way objects or characters move is part of the explanation. An ordinary revision keeps the episode's selected profile.
+
+| Style and profile ID | Best for | How to choose in Codex | What the rendered example shows |
+|---|---|---|---|
+| **Motion Explainer** · `general-explainer` | One idea, a process, or a comparison | Start with a plain brief or choose `$naraframe` | Ice floats, then a density comparison explains why. [See the frame](docs/assets/readme/gallery-science.png) |
+| **Editorial / Current Issues** · `current-issues` | An event explained with sourced claims | Choose `$naraframe` and ask for `current-issues` | An El Niño explainer uses a thermometer to show the heat. [See the frame](docs/assets/readme/gallery-news.png) |
+| **Stickman Ink** · `stickman-ink` | A character's pose, reaction, or contact with a prop | Choose `$naraframe-stickman` | A drawn character reaches for and pulls a gate handle. The grip and pose explain the action. |
+| **Meja Mekanik** · `meja-mekanik` | How linked machine parts move together | Choose `$naraframe-mekanik` | A lever pivots, its pin slides in a slot, and the connected gate lifts. |
+| **Paper Cutout** · `paper-cutout` | Layered paper, folds, and movement in short steps | Choose `$naraframe-paper` | A hinged paper bridge opens in steps and holds in place before a token crosses. |
+
+Install the character skills from the matching NaraFrame engine. The guide covers project installation in Codex and Claude Code, plus how to preview the included shot patterns yourself. [Install character skills and preview a pattern](docs/guide.md#character-skills)
+
 <a id="how-it-works"></a>
 
 ## ⚙️ How it works
@@ -71,7 +87,7 @@ Also possible:
 | Step | You | NaraFrame and your agent |
 |:---:|---|---|
 | 1️⃣ | **Ask:** "Make a 20-second explainer about why ice floats," or "Start a weekly series for my science channel." | Explains what NaraFrame does and, the first time, offers to install the engine. |
-| 2️⃣ | **Pick the look:** one-off video or a series? | Uses a neutral explainer look, or creates your series look from a name and colours. |
+| 2️⃣ | **Pick the look:** one-off video, character style, or a series? | Uses the default explainer profile, the style you select, or a series profile made from your name and colours. |
 | 3️⃣ | **Review:** "make the headline shorter," "slow the second scene down." | Shows a preview and a storyboard image, then changes only what you asked for. |
 | 4️⃣ | **Approve and export.** | Delivers a 1080×1920 MP4 of exactly the version you approved. |
 
@@ -135,7 +151,7 @@ Your agent doesn't invent a style from scratch each time. It picks from a fixed 
 
 | Menu | What's on it |
 |---|---|
-| 🎨 **Looks (profiles)** | A neutral explainer look, an editorial look that requires sources, or your own series look from a name and colours |
+| 🎨 **Looks (profiles)** | Built-in explainer, editorial and character styles, plus custom series profiles. [Choose a visual style](#choose-a-visual-style) |
 | 🎞️ **Shot patterns** | Explain an object, follow a route, compare numbers, pull back to show the bigger picture, land a headline, hold a quiet moment, pin notes to a picture |
 | 🏃 **Moves** | Reveal, draw a line, follow along a path, count up, emphasise, focus, and camera pans and zooms |
 | 🔀 **Transitions** | Cut, push through, reveal through a shape, or a match cut that carries the eye from one scene to the next |
@@ -195,7 +211,7 @@ Then start a new session in that project and explicitly invoke `$naraframe` in C
 The published engine also works directly from your terminal:
 
 ```bash
-npx -y naraframe@0.1.2 doctor --json
+npx -y naraframe@0.2.0 doctor --json
 ```
 
 The [technical guide](docs/guide.md#install-from-npm) covers installation, project files, previews, revisions and export.
@@ -237,7 +253,7 @@ Your video projects and exported MP4s live in your own folders and are not touch
 
 ## 📌 Good to know
 
-- 🌱 NaraFrame is an early release (0.1.2). Expect rough edges, and please report them in the issues.
+- 🌱 NaraFrame is an early release (0.2.0). Expect rough edges, and please report them in the issues.
 - 🎞️ It animates with a fixed set of moves: reveals, camera moves, transitions, counters and drawn paths. It suits clear explainers; it is not a free-form animation tool.
 - 🔎 Facts on screen are your responsibility. NaraFrame helps you label claims and cite sources, and a profile can require sources before export, but it cannot check facts for you.
 - 📤 An export is a video file on your computer. Where you post it is up to you.

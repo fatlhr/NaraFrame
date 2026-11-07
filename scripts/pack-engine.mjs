@@ -26,7 +26,7 @@ if (flags.length !== 2 || flags[0] !== "--out") throw new Error(usage);
 if (process.versions.node !== "24.20.0")
   throw new Error("Use pinned Node 24.20.0");
 const out = resolve(flags[1]);
-const PACKAGE_VERSION = "0.1.2";
+const PACKAGE_VERSION = "0.2.0";
 const REPOSITORY = "https://github.com/fatlhr/NaraFrame";
 const INTERNAL = ["@naraframe/core", "@naraframe/renderer-remotion"];
 const json = async (path) => JSON.parse(await readFile(path, "utf8"));
@@ -257,6 +257,8 @@ const registryReadme = [
   "```",
   "",
   "Edit the files in your project, then run `npx naraframe validate` and `npx naraframe preview`. Final export requires approval of a full preview. A neutral editable demo is in [starter/demo](starter/demo); [starter instructions](starter/README.md) explain the included library pattern.",
+  "",
+  "The [visual style chooser](https://github.com/fatlhr/NaraFrame#choose-a-visual-style) shows the bundled profiles, character skills and preview examples.",
   "",
   "[Skill installation](skills/naraframe/installation.md) covers project and user installs, explicit updates and conflict-safe removal. The skill is optional; the CLI works without an agent account.",
   "",
