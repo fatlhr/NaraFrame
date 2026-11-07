@@ -1,8 +1,8 @@
 # NaraFrame — Development Plan
 
-Revision 2.2 · Updated 2026-11-06 · MVP 2 integrated at `a701c39`
+Revision 2.3 · Updated 2026-11-07 · MVP 2 integrated at `a701c39`
 
-**Current step:** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers the approved scope.
+**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. [Section 8](#8-visual-library-knowledge-and-optional-studio) records the new documentation package and the proposals awaiting implementation approval.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -1782,3 +1782,54 @@ Claude Code project placement and receipt-owned update passed. The installer ref
 **Codex follow-up (2026-11-07).** A clean workspace with the local archive's project installs exposed `naraframe`, `naraframe-stickman`, `naraframe-mekanik` and `naraframe-paper` as enabled repository skills in Codex CLI 0.167.0's `skills/list` response. This verifies discovery. Authoring used the installed Paper Cutout file and public launcher in the existing session.
 
 The second Paper Cutout example, *Amplop terkunci tanpa lem?*, uses original layered paper shapes in a fixed overhead view. The tab recoils, slips through a slot in two steps, then catches on a small tug. The silent 5.4-second first preview `f0fa488da842-f3bd8221-0bc` and the payoff-copy revision `647ebdc48c99-424d497d-a4f` each decoded 162 frames with zero integrity outliers. The duration is intentionally shorter than the profile recommendation. Text over path layers was inspected in the decoded frames after the report marked contrast unverified. Guarded edit changed one text layer. Undo restored the original source revision, and the next preview reused byte-identical video from the first build. The [local evidence index](/Users/fatih/.codex/visualizations/2026/11/05/01a1ac90-1f4e-7611-8999-fc5db593b215/paper-cutout-amplop/index.json) lists 32 checksummed files including both previews, the first validation failure, editable source and the discovery receipt.
+
+## 8. Visual Library, Knowledge, and optional Studio
+
+Fatih authorized V0 and U0 as one documentation package. The [style map and product contract](spec.md#visual-library-and-optional-studio) define routing and availability. The [gap analysis and reference decisions](refine-spec.md#11-visual-library-and-studio-research) record evidence, licensing boundaries, and adaptations. The tasks below retain their own approval and acceptance. M5.1 and the A0–D2 queue keep their recorded closures, including the C2 owner disposition.
+
+### V0 and U0 documentation checklist
+
+- [x] **V0 spec.** Record the style map, default and explicit routing, pinned revisions, Bedah 2.5D scope, and the optional Studio contract. Correct the documented group depth.
+- [x] **V0 knowledge.** Record the audit baseline, source references, adaptation decisions, measured C1/C2 results, hypotheses, and separate SVG-as-music validation finding.
+- [x] **U0 Studio research.** Map the Bang Story-inspired workflow to existing engine commands. Separate authored scene order from playback time in the rendered MP4.
+- [x] **V0 task register.** Record V1–V7 and U1–U2 with dependencies, approval boundaries, and inspectable acceptance. Keep the original closure receipts in their sections.
+- [x] **V0 README draft.** Record the style chooser format and release gate below. Check style names, commands, availability, and acceptance across the three documents. Verify added links and review the scoped diff.
+
+**Documentation acceptance (2026-11-07).** The style and task maps match across the three documents. The scoped diff check passed and 22 local links and 15 external references resolved. The prior closure record is preserved. The README chooser is a draft in this plan. V1–V7 and U1–U2 retain the status and approval boundaries below.
+
+### Visual Library roadmap
+
+| Task | Priority / status | Dependencies and work | Acceptance |
+|---|---|---|---|
+| V1 Bedah 2.5D | P0 / proposed | After V0 and separate approval. Author a fixed-projection `assembled → exploded → function → reassembled` pattern with layered SVG/PNG, leader lines, and settled reading holds. Package `naraframe-3d` through V5. | Show a tape dispenser and a flashlight. The same parts can be followed through separation and reassembly at phone size and in grayscale. |
+| V2 Motion Comic | P1 / proposed | After V1 and separate approval. Author three panels with an explicit reading order, manual crops, focus on the active panel, reaction poses, and dialogue holds. Package `naraframe-comics` through V5. | Two stories read clearly with audio muted. Panels, dialogue, crops, and timing can be revised. |
+| V3 Story | P1 / proposed | After V2 and separate approval. Author a goal, obstacle, action, and consequence, with pose sheets and consistent props across shots. Package `naraframe-story` through V5. | On two briefs a reviewer can identify the action that causes the next shot and track the character and prop across the seam. |
+| V4 Motion Explainer patterns | P1 / proposed | After V3 and separate approval. Add a cause-and-effect diagram and an Editorial Collage assembly pattern to `general-explainer`. Choose the pattern by shot intent. | Two plain briefs use `general-explainer`. The first three seconds establish a visual question, and the payoff answers it. |
+| V5 Distribution and README | P1 / per-style release gate | Apply to each approved style before listing it publicly. Extend the existing installer and engine package with the relevant profile, versioned catalog, and thin explicit wrapper where specified. Motion Explainer uses the canonical skill. | From a clean workspace and the documented artifact, use the Codex slash picker and explicit skill entry, then reach a preview. Confirm the plain-brief default, preserved profile pin on revision, and ordinary installer conflict handling. Include the demonstrated command, example, and install route in README. |
+| V6 Benchmarks on the new styles | P2 / proposed | After the Bedah and Comic fixtures exist and the benchmark is approved. Record cold, warm after one guarded edit, and compatible reuse for a dense project of each style. Time load, bundle, preflight, capture/encode, and verification separately. | Compare three matched pairs for at most one measured candidate. Promote only when the median wall time improves at least 5%, two pairs improve, and frame integrity, seams, audio, and approval all pass. Record the measured outcome if the candidate misses the threshold. |
+| V7 Engine changes backed by evidence | P3 / conditional | Open each subtask separately. Shared cues require repeatable retiming drift. Segment reuse requires a measured one-shot edit cost in a long project. | Reproducer, separate scope approval, and compatible behavior for existing projects. Segment identity covers effective boundaries, captions, audio, dependencies, and approval before reuse is attempted. |
+
+V1–V4 target zero new runtime packages. For each accepted feature, retain the first source and run `validate PROJECT --stage plan --json`, `preview PROJECT --draft --scene ID --json`, and `preview PROJECT --resolution 1080 --json`. Review the opening, contact, settled state, payoff, and seam. Run one guarded edit and undo. Where prepared voice is present, verify the master hash and listen at the contact and payoff. Add focused coverage after the manual path, then run `pnpm verify`. Apply V5 in the style's delivery package. Complete the earlier approved package before starting the next one.
+
+### README style chooser draft
+
+Place **Choose a visual style** near the existing [public gallery](../README.md#style-gallery). Source rows from the [style map](spec.md#visual-library-and-optional-studio). The public section lists routes evidenced for the named source build, local archive, or release. Internal pilots need an approved public example before they are linked from README.
+
+| Style | Best for | How to choose | Example |
+|---|---|---|---|
+| Motion Explainer | Explain a process or compare two things | Start with a plain brief or choose `$naraframe` | Why ice floats |
+| Editorial / Current Issues | Explain an event with sources | Choose `$naraframe` and the `current-issues` profile | The existing current-affairs gallery example |
+| Stickman Ink | Show a character reacting and making contact with a prop | Choose `$naraframe-stickman` from a matching source build or local archive | Candidate for rights and publication review · the character frees a jammed object |
+| Meja Mekanik | Show how connected parts move together | Choose `$naraframe-mekanik` from a matching source build or local archive | Candidate for rights and publication review · a linkage lifts a gate |
+| Paper Cutout | Show folds, layered paper, and stepped poses | Choose `$naraframe-paper` from a matching source build or local archive | Candidate for rights and publication review · a folded paper bridge opens |
+
+When a planned style passes V5, add one row with its exact name and command. Show Bedah 2.5D as a fixed-projection exploded view. List Studio once its own delivery evidence supports a documented install path.
+
+### Optional Studio roadmap
+
+| Task | Priority / status | Dependencies and work | Acceptance |
+|---|---|---|---|
+| U1 Local browser Studio | P2 / proposed | After U0 and separate approval. Package a separate HTML/CSS/JS and Node add-on. Proposed invocation is `naraframe-studio --engine <engine-root> --workspace <folder>`. Check `version` and `doctor`, show installed profiles, open/create projects, list authored scenes, import versioned patterns, edit visible text through staging and `edit --expect`, and support undo. | A project moves between Studio and CLI with the same profile and revision history. A concurrent CLI edit causes a visible revision conflict and reload. Requests outside the workspace, symlinks that escape it, and cross-origin mutations are rejected. |
+| U2 Preview, cancel, and export | P2 / proposed | After U1 and separate approval. Play the engine MP4. Report one active render job per session and forward cancel with `SIGINT`. Submit the user-selected full preview ID through `render --approve-preview`. | Scoped previews play, cancellation keeps the last valid build, stale previews require a new review, and export succeeds from a matching full preview. |
+
+The add-on binds to `127.0.0.1`, uses a local session, and permits a fixed set of CLI operations with structured arguments. File access is limited to the selected workspace and engine-reported project artifacts. The engine owns trust, revision, and approval checks. Timeline drag-and-drop, provider generation, and desktop installation remain separate proposals. [CLI mapping from U0](refine-spec.md#studio-research-and-cli-mapping) · [Approval workflow](guide.md#export-after-the-owner-approves-the-full-preview)
