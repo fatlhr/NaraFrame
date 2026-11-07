@@ -23,6 +23,7 @@ describe("listProfiles", () => {
       "current-issues",
       "general-explainer",
       "meja-mekanik",
+      "paper-cutout",
       "stickman-ink",
     ]);
     for (const profile of profiles) {

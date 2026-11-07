@@ -233,6 +233,7 @@ describe("profile list", () => {
       "current-issues",
       "general-explainer",
       "meja-mekanik",
+      "paper-cutout",
       "stickman-ink",
     ]);
     const byId = Object.fromEntries(
@@ -257,6 +258,10 @@ describe("profile list", () => {
       version: "0.1.0",
       summary: expect.stringContaining("fixed diagonal projection"),
     });
+    expect(byId["paper-cutout"]).toMatchObject({
+      version: "0.1.0",
+      summary: expect.stringContaining("fixed overhead view"),
+    });
     expect(byId["stickman-ink"]).toMatchObject({
       version: "0.1.0",
       summary: expect.stringContaining("ink silhouettes"),
@@ -277,7 +282,7 @@ describe("profile list", () => {
     });
     expect(await runCli(["profile", "list"])).toBe(0);
     vi.restoreAllMocks();
-    expect(lines).toHaveLength(4);
+    expect(lines).toHaveLength(5);
     expect(lines[0]).toMatch(
       /^current-issues@0\.3\.0 \| sources required \| 15-30 s \| voice id-editorial-grounded-v1 \| Explain/,
     );
@@ -285,7 +290,8 @@ describe("profile list", () => {
       /^general-explainer@1\.0\.0 \| sources optional \| 15-60 s \| voice id-teaching-warm-v1 \| Teach one idea/,
     );
     expect(lines[2]).toMatch(/^meja-mekanik@0\.1\.0 \|/);
-    expect(lines[3]).toMatch(/^stickman-ink@0\.1\.0 \|/);
+    expect(lines[3]).toMatch(/^paper-cutout@0\.1\.0 \|/);
+    expect(lines[4]).toMatch(/^stickman-ink@0\.1\.0 \|/);
     expect((await run("profile", "list", "extra")).exitCode).toBe(3);
   });
 

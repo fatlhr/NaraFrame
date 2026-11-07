@@ -1,0 +1,741 @@
+{
+  "schemaVersion": 1,
+  "id": "paper-cutout",
+  "version": "0.1.0",
+  "provenance": {
+    "source": "NaraFrame Paper Cutout bridge pilot and original declarative artwork",
+    "license": "MIT"
+  },
+  "assets": [],
+  "patterns": [
+    {
+      "id": "paper-bridge",
+      "version": "0.1.0",
+      "description": "A bridge turns about a fixed pin through held poses. A paper token crosses once it docks.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/24/text"],
+          "description": "A short title for the bridge shot."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What the viewer learns from the hinge and crossing."
+        }
+      },
+      "template": {
+        "id": "unfold",
+        "narrativeRole": "explanation",
+        "durationMs": 6000,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "backing-shadow",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "d": "M16 110 L228 105 L231 343 L20 346 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#D2BDA0",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#D2BDA0"
+            },
+            {
+              "id": "backing-card",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M13 105 L225 101 L228 339 L17 342 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#E4D2AE",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#E7D7B6"
+            },
+            {
+              "id": "water-shadow",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M56 115 L200 111 L207 136 L191 167 L201 200 L194 244 L205 275 L195 326 L67 331 L53 303 L64 277 L51 236 L63 201 L53 164 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#406F66",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#406F66"
+            },
+            {
+              "id": "water-paper",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M53 112 L197 108 L204 133 L188 164 L198 197 L191 241 L202 272 L192 323 L64 328 L50 300 L61 274 L48 233 L60 198 L50 161 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#54877A",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#54877A"
+            },
+            {
+              "id": "current-marks",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M108 132 Q119 128 129 131 M136 148 Q152 151 167 145 M111 177 Q131 169 151 176 M112 206 Q124 210 140 205 M108 270 Q135 264 161 270 M95 295 Q108 291 120 294 M136 306 Q155 303 170 305",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#8DB1A4",
+                "width": 1.4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "left-bank-shadow",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "d": "M17 113 L91 122 L85 147 L96 173 L87 200 L98 228 L92 254 L103 287 L91 318 L19 332 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#A98559",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#A98559"
+            },
+            {
+              "id": "left-bank",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "d": "M16 109 L89 119 L83 144 L94 170 L85 197 L96 225 L90 251 L101 284 L89 315 L18 329 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#CFAB72",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#DAB986"
+            },
+            {
+              "id": "right-bank-shadow",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "d": "M181 124 L221 112 L224 331 L176 322 L168 299 L182 268 L171 244 L176 219 L166 194 L175 165 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#A98559",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#A98559"
+            },
+            {
+              "id": "right-bank",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "d": "M179 121 L220 108 L222 328 L174 319 L166 296 L180 265 L169 241 L174 216 L164 191 L173 162 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#CFAB72",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#E4C597"
+            },
+            {
+              "id": "left-bank-fibers",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "d": "M30 133 L45 135 M58 145 L75 149 M23 187 L37 191 M39 275 L57 279 M67 304 L80 302 M24 309 L31 308 M30 243 L47 242",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#BC966A",
+                "width": 1.1
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "right-bank-fibers",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "d": "M188 139 L204 135 M183 174 L198 172 M193 284 L209 288 M184 305 L196 309 M208 246 L216 244",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#C4A378",
+                "width": 1.1
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "landing-mark",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "d": "M179 225 Q193 218 205 225 Q216 236 205 246 Q194 255 181 247",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#A77E61",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "left-stitch",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "d": "M22 216 Q36 210 43 218 M25 223 L32 222 M33 256 L43 260",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#8F694C",
+                "width": 1.3
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "right-stitch",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "d": "M198 200 L207 201 M198 205 L209 207 M196 263 L212 267",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#94724F",
+                "width": 1.3
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "bridge-edge",
+              "type": "path",
+              "frame": {
+                "x": 36.0,
+                "y": 976.5,
+                "width": 756.0,
+                "height": 162.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M84 13 L163 10 L168 16 L166 29 L84 27 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 168,
+                "height": 36
+              },
+              "stroke": {
+                "color": "#9C5A36",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#9C5A36"
+            },
+            {
+              "id": "bridge-face",
+              "type": "path",
+              "frame": {
+                "x": 36.0,
+                "y": 976.5,
+                "width": 756.0,
+                "height": 162.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M84 10 L163 7 L168 13 L166 25 L84 24 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 168,
+                "height": 36
+              },
+              "stroke": {
+                "color": "#C98E39",
+                "width": 1
+              },
+              "lineCap": "round",
+              "fill": "#F0AB43"
+            },
+            {
+              "id": "bridge-crease",
+              "type": "path",
+              "frame": {
+                "x": 36.0,
+                "y": 976.5,
+                "width": 756.0,
+                "height": 162.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M103 10 L104 24 M133 9 L134 24 M153 8 L155 24",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 168,
+                "height": 36
+              },
+              "stroke": {
+                "color": "#C58B49",
+                "width": 1.2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "bridge-grain",
+              "type": "path",
+              "frame": {
+                "x": 36.0,
+                "y": 976.5,
+                "width": 756.0,
+                "height": 162.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M92 16 L101 15 M109 20 L128 19 M139 14 L149 13 M156 19 L162 18",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 168,
+                "height": 36
+              },
+              "stroke": {
+                "color": "#F8C87A",
+                "width": 1.1
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "bridge",
+              "type": "group",
+              "memberIds": [
+                "bridge-edge",
+                "bridge-face",
+                "bridge-crease",
+                "bridge-grain"
+              ],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -64,
+                "opacity": 1
+              },
+              "zIndex": 12
+            },
+            {
+              "id": "pin-shadow",
+              "type": "shape",
+              "frame": {
+                "x": 398.25,
+                "y": 1044.0,
+                "width": 40.5,
+                "height": 40.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 13,
+              "shape": "circle",
+              "fill": "#956B48"
+            },
+            {
+              "id": "pin",
+              "type": "shape",
+              "frame": {
+                "x": 396.0,
+                "y": 1039.5,
+                "width": 36.0,
+                "height": 36.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 14,
+              "shape": "circle",
+              "fill": "#FFF2CD"
+            },
+            {
+              "id": "pin-center",
+              "type": "shape",
+              "frame": {
+                "x": 407.25,
+                "y": 1050.75,
+                "width": 13.5,
+                "height": 13.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 15,
+              "shape": "circle",
+              "fill": "#554535"
+            },
+            {
+              "id": "paper-token",
+              "type": "path",
+              "frame": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 1080.0,
+                "height": 1917.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 17,
+              "d": "M46 235 L48 229 L54 225 L61 228 L65 234 L61 241 L55 244 L48 241 Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 240,
+                "height": 426
+              },
+              "stroke": {
+                "color": "#FFF0D4",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#A33E33"
+            },
+            {
+              "id": "eyebrow",
+              "type": "text",
+              "frame": {
+                "x": 85.5,
+                "y": 162.0,
+                "width": 900.0,
+                "height": 54.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 30,
+              "text": "PAPER CUTOUT  /  01",
+              "role": "body",
+              "color": "#695447",
+              "fontSize": 35
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 85.5,
+                "y": 229.5,
+                "width": 913.5,
+                "height": 121.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 30,
+              "text": "Jembatan Lipat",
+              "role": "display",
+              "color": "palette.text",
+              "fontSize": 81
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "frame": {
+                "x": 90.0,
+                "y": 346.5,
+                "width": 909.0,
+                "height": 63.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 30,
+              "text": "Dari celah jadi jalan",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 45
+            },
+            {
+              "id": "hold-note",
+              "type": "text",
+              "frame": {
+                "x": 85.5,
+                "y": 1602.0,
+                "width": 904.5,
+                "height": 117.0
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 30,
+              "text": "Keping menunggu jembatan rapat",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 47
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "unfold-first",
+            "targetId": "bridge",
+            "startMs": 700,
+            "durationMs": 134,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 24
+              },
+              "easingPreset": "linear"
+            }
+          },
+          {
+            "id": "unfold-second",
+            "targetId": "bridge",
+            "startMs": 1500,
+            "durationMs": 134,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 49
+              },
+              "easingPreset": "linear"
+            }
+          },
+          {
+            "id": "dock",
+            "targetId": "bridge",
+            "startMs": 2300,
+            "durationMs": 134,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 64
+              },
+              "easingPreset": "linear"
+            }
+          },
+          {
+            "id": "step-one",
+            "targetId": "paper-token",
+            "startMs": 3100,
+            "durationMs": 134,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 220.5
+              },
+              "easingPreset": "linear"
+            }
+          },
+          {
+            "id": "step-two",
+            "targetId": "paper-token",
+            "startMs": 3850,
+            "durationMs": 134,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 382.5
+              },
+              "easingPreset": "linear"
+            }
+          },
+          {
+            "id": "step-three",
+            "targetId": "paper-token",
+            "startMs": 4600,
+            "durationMs": 134,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 630.0
+              },
+              "easingPreset": "linear"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "The bridge turns about the visible left pin. Show three settled hinge poses before the paper token crosses."
+      }
+    }
+  ]
+}
