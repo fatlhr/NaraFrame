@@ -109,6 +109,7 @@ describe("offline engine distribution", () => {
       "current-issues",
       "general-explainer",
       "meja-mekanik",
+      "paper-cutout",
       "stickman-ink",
     ]);
     for (const profile of listed)

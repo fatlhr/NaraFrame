@@ -183,11 +183,12 @@ Use a current source build or local engine archive that includes the character p
 ```sh
 node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-stickman --json
 node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-mekanik --json
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-paper --json
 ```
 
-In Claude Code, use `/naraframe-stickman` or `/naraframe-mekanik` with your brief. For Codex, install with `--host codex` and invoke `$naraframe-stickman` or `$naraframe-mekanik`. A plain brief for a new video goes through the canonical skill and defaults to `general-explainer` unless a profile or series is selected. [Claude Code skills](https://code.claude.com/docs/en/skills) · [Codex skills](https://learn.chatgpt.com/docs/build-skills)
+In Claude Code, use `/naraframe-stickman`, `/naraframe-mekanik` or `/naraframe-paper` with your brief. For Codex, install with `--host codex` and invoke `$naraframe-stickman`, `$naraframe-mekanik` or `$naraframe-paper`. A plain brief for a new video goes through the canonical skill and defaults to `general-explainer` unless a profile or series is selected. [Claude Code skills](https://code.claude.com/docs/en/skills) · [Codex skills](https://learn.chatgpt.com/docs/build-skills)
 
-Stickman Ink tells the story through pose changes and prop contact. Meja Mekanik shows how connected parts move from a fixed view. Each command selects the matching profile and versioned catalog. Use the same `--skill` value with `--update` or `--remove` to manage that installation.
+Stickman Ink tells the story through pose changes and prop contact. Meja Mekanik shows how connected parts move from a fixed view. Paper Cutout uses layered paper in an overhead view, with short turns and held poses. Each command selects the matching profile and versioned catalog. Use the same `--skill` value with `--update` or `--remove` to manage that installation.
 
 ### Example brief
 

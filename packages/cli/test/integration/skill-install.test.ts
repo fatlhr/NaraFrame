@@ -99,7 +99,7 @@ const expectCode = async (operation: Promise<unknown>, code: string) => {
 };
 
 describe("character skill installation", () => {
-  it.each(["naraframe-stickman", "naraframe-mekanik"])(
+  it.each(["naraframe-stickman", "naraframe-mekanik", "naraframe-paper"])(
     "owns %s separately and preserves local edits on update",
     async (skill) => {
       const f = await fixture();

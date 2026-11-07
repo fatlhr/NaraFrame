@@ -59,7 +59,7 @@ These commands do not make a newly created, unpopulated project production-ready
 
 For a plain brief for a new video, the canonical skill selects `general-explainer` unless the user chooses an available profile or names an established series. The skill can set an episode-local palette, choose movement that explains the subject, and review the opening with audio muted. A continuation or revision keeps the pinned profile and existing look unless the user requests a change.
 
-Explicit Stickman Ink and Meja Mekanik skills select their packaged `0.1.0` profiles and catalogs through the canonical launcher. Imported patterns and profile data are pinned in the episode through the existing project and library workflow.
+Explicit Stickman Ink, Meja Mekanik and Paper Cutout skills select their packaged `0.1.0` profiles and catalogs through the canonical launcher. Imported patterns and profile data are pinned in the episode through the existing project and library workflow.
 
 `edit --from ... --expect ...` applies staged changes against an expected revision. `undo` restores the previous revision. `profile inspect` and `profile apply --dry-run` expose profile changes before applying them. `recipe trust --authorized-by ...` records explicit owner authorization for recipe code. `cache clean --dry-run` reports disposable artifacts before removal.
 

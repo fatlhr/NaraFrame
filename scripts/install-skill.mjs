@@ -21,7 +21,12 @@ import { promisify } from "node:util";
 const run = promisify(execFile);
 const marker = "naraframe-skill-install/v1";
 const receiptFile = "installation.json";
-const skillNames = ["naraframe", "naraframe-stickman", "naraframe-mekanik"];
+const skillNames = [
+  "naraframe",
+  "naraframe-stickman",
+  "naraframe-mekanik",
+  "naraframe-paper",
+];
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const failure = (code, message) => {

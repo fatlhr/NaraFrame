@@ -1,0 +1,5 @@
+interface:
+  display_name: "NaraFrame Paper Cutout"
+  short_description: "Animate layered paper through held poses"
+policy:
+  allow_implicit_invocation: false
