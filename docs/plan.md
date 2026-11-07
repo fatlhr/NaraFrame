@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3 and B1 passed acceptance. B2 is next in the four remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3, B1 and B2 passed acceptance. C1 is next in the three remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1694,3 +1694,20 @@ Exercise an incomplete character bundle and confirm that it stops with an action
 Claude Code project placement and receipt-owned update passed. A locally edited wrapper refused update with `SKILL_INSTALL_EDITED` and the canonical receipt matched its original bytes. A catalog with an omitted pose refused inspection with `ASSET_FILE_MISSING`. Host evidence covers explicit file use and installed CLI execution. Native slash activation in a logged-in Claude Code session and a fresh Codex model invocation remain unverified.
 
 `pnpm verify` passed with 399 unit and 562 integration tests. The archive `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-b1-character-skills/index.json` records 73 checksummed files including editable source, previews, installer receipts and gate logs.
+
+### B2 acceptance model (2026-11-07)
+
+Use the packaged Stickman Ink and Meja Mekanik profiles on one new brief about a stamp leaving an ink mark. Open on the result and cut to a continuous press, lift and reveal. Show the hand at the grip in Stickman Ink and the guided shaft and plate in Meja Mekanik. Capture one shared local illustrative narration take and use it in both projects.
+
+Save each first full `preview --draft --json` and review frame zero, the cut, contact and the settled mark. Apply one visual change per project using `edit --from "$STAGING" --expect "$REVISION" --json`, render the revised draft, then run `undo` and preview again. Expect changed visual output, byte-identical audio and cue timing, restored source and compatible preview reuse. Owner review covers recognizable character behavior across episodes and listening to this take.
+
+**B2 technical review (2026-11-07).** Both episodes use the packaged `0.1.0` profiles with newly authored declarative shots. The first full drafts run 240 frames at 540×960 and share one 8-second local Damayanti take. The comparison strip checks frames 0, 65–66, 115 and 195. Stickman Ink uses a planted pose and a hand following the grip. Meja Mekanik isolates the guided shaft and moving plate in a fixed view.
+
+| Profile | First draft | Revised draft | Guarded visual edit |
+|---|---|---|---|
+| Stickman Ink | `daec82b0a8a3-4f07acae-94a` | `e159f87b6a6f-6c5c3d4f-8b9` | Add an ink accent where the hand presses. |
+| Meja Mekanik | `89f5c915fe99-d3ae96f7-0bc` | `727fdf4e1577-438130f9-99e` | Extend the shaft to meet the grip while preserving its lower contact point. |
+
+Both edits reported one retained voice asset and one changed scene. The captured master, phrase timing and decoded audio matched across first, revised and restored previews. Both undos restored the first source and reused its compatible build with matching decoded frames. `pnpm verify` passed with 399 unit and 562 integration tests. The [local archive](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-b2-stamp-character-repeatability/index.json) contains 58 checksummed files, including both source projects, previews, frame strips and CLI receipts.
+
+**B2 accepted (2026-11-07).** Fatih watched the paired first drafts and confirmed that both characters were still easy to recognize and that the narration text and timing matched. The take was restaged with the owner listening receipt. Both visual edits and undos passed again on the verified revisions. Each retained the same audio master, timing, verified text binding and decoded audio. All six previews from this second pass reused compatible builds. The [owner review record](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-b2-stamp-character-repeatability/owner-review/index.json) binds the confirmation to the reviewed clip and 21 additional checksummed evidence files.
