@@ -101,6 +101,8 @@ This is **trusted code, not a sandbox**. Static checks are not a security guaran
 
 Recipes may declare `bindings` and opt-in `textSlots`. Slot parameters point to a string or an array of strings; each array element is measured independently, not as a combined block. Style is resolved from the slot/profile and passed to the recipe. Preflight measures design-pixel boxes with loaded fonts before rendering. `wrap: words` uses pre-line semantics; `none` uses pre semantics. Terminal breaks, blank lines, and preserved NBSP are covered by browser-backed evidence. The current slot fit marker is `naraframe-text-fit/2`.
 
+Recipes receive design-pixel profile and text slot sizes at both preview resolutions. The renderer scales the entire 1080×1920 drawing once at 540. Corrected 540 recipe previews receive new render keys.
+
 The engine cannot prove that arbitrary trusted recipe code uses the supplied slot styles. Undeclared text, combined array height, general recipe collision/contrast, and some non-space line-breaking cases are outside this protection. No automatic shrinking or copy rewrite is implied.
 
 ### Validation boundaries

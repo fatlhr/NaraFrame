@@ -307,4 +307,40 @@ describe("recipe projects", () => {
     expect(undone.ok && undone.value.revisionId).toBe(synced.value.revisionId);
     expect(await readFile(index, "utf8")).toBe(original);
   });
+
+  it("preserves overwritten recipe bytes when undoing an invalid working copy", async () => {
+    const root = await makeRecipeProject();
+    const baseline = await syncWorkingCopy(root);
+    if (!baseline.ok) throw new Error("baseline");
+    const scenesPath = join(root, "scenes.json");
+    const scenes = JSON.parse(await readFile(scenesPath, "utf8"));
+    scenes.scenes[0].visual.params.title = "Revised title";
+    await writeFile(scenesPath, JSON.stringify(scenes));
+    expect((await syncWorkingCopy(root)).ok).toBe(true);
+
+    const files = [
+      ["recipes/frame-card/recipe.json", "{ broken\r\n"],
+      ["recipes/frame-card/index.tsx", 'import "node:fs";\r\n'],
+      ["recipes/frame-card/crop.ts", "invalid helper bytes\r\n"],
+    ] as const;
+    const original = await Promise.all(
+      files.map(([path]) => readFile(join(root, path))),
+    );
+    for (const [path, invalid] of files) {
+      await writeFile(join(root, path), invalid);
+    }
+    expect(await loadCodes(root)).toContain("RECIPE_MANIFEST_INVALID");
+
+    const undone = await undoProject({ root });
+    if (!undone.ok || !undone.value.preservedInvalidCopy)
+      throw new Error("undo did not preserve the invalid copy");
+    expect(undone.value.revisionId).toBe(baseline.value.revisionId);
+    for (const [i, [path, invalid]] of files.entries()) {
+      expect(
+        await readFile(join(undone.value.preservedInvalidCopy, path)),
+      ).toEqual(Buffer.from(invalid));
+      expect(await readFile(join(root, path))).toEqual(original[i]);
+    }
+    expect(await loadCodes(root)).toEqual([]);
+  });
 });

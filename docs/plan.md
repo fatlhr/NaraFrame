@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0, A1 and A2 passed acceptance. A3 is next in the six remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3 passed acceptance. B1 is next in the five remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1670,3 +1670,15 @@ pnpm naraframe status "$PROJECT" --json
 ```
 
 The scoped draft is for shot review. Use a full preview for soundtrack and cross-scene continuity. Compare both draft resolutions in A3 with the same source revision. Follow the existing feature delivery order once a task is authorized. Record the model and expected output, exercise the real workflow and review the artifacts, then add focused coverage and run the applicable gates.
+
+### A3 acceptance model (2026-11-07)
+
+Use one short silent scene and a local test recipe based on the existing text-card fixture. Position a marker using the profile safe zone and draw the title using a declared text slot. After recording fixture-only trust, run `pnpm naraframe preview "$PROJECT" --draft --resolution 540 --json` and repeat at 1080 for the same source revision. The marker and title should occupy the same normalized positions and sizes. Compare decoded frame bounds with a small tolerance for video encoding and font rasterization.
+
+Apply a params edit with `edit --from "$STAGING" --expect "$REVISION" --json`, then write an invalid local recipe file. Run `validate "$PROJECT" --stage plan --json` and `undo "$PROJECT" --json`. Expect an explicit recipe validation failure, a byte-exact copy of the overwritten invalid source under `preservedInvalidCopy`, and restoration of the prior accepted project and recipe hash. Verify that the restored recipe can reuse its preview, a different recipe hash requires trust, and the prior approval is stale while the params edit is active.
+
+**A3 accepted (2026-11-07).** On the same 18-frame source revision, the marker was initially half the intended height at 540. The recipe received profile sizes that had already been scaled, then the renderer scaled the scene again. With design-space tokens passed to the recipe, the marker's bounds are `[88, 160, 268, 224]` in design pixels at both resolutions. The decoded title edges agree within one design pixel. The corrected 540 render receives a new key, its old approval is refused, and the compatible 1080 preview is reused.
+
+The manual undo test reproduced loss of a recipe file with a forbidden import. After the fix, `preservedInvalidCopy` contains those exact bytes, the prior trusted code and revision are restored, and the corrected preview is reusable. An otherwise valid code hash change requires new trust, and changing scene params invalidates approval for the old revision. The recovery regression covers a malformed manifest and its listed entry and helper. The guide now points recipe authors to `visual.params` for details beyond the recipe ID in `outline`, and the CLI registry identifies untrusted project code as unsupported.
+
+`pnpm verify` passed with 399 unit and 560 integration tests. The serial recipe production and text-fit E2E suites passed all three cases. The 29-file checksum index at `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-a3-recipe-workflow/index.json` links the previews, measurements, CLI receipts and gate logs.

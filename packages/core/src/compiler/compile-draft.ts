@@ -1381,7 +1381,12 @@ export const compileDraft = (
   const recipeVisuals = new Map<string, CompiledRecipeVisual>();
   source.scenes.scenes.forEach((scene, sceneIndex) => {
     const visual = compileRecipeVisual(source, scene, sceneIndex, issues);
-    if (visual) recipeVisuals.set(scene.id, visual);
+    if (visual) {
+      recipeVisuals.set(
+        scene.id,
+        scaleX === 1 ? visual : { ...visual, designRender: renderTokens },
+      );
+    }
   });
 
   // Narration wiring: when narration.json exists, derive timeline, check

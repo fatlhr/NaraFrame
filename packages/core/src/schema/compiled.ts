@@ -175,6 +175,8 @@ const CompiledVisualSchema = z.discriminatedUnion("type", [
       /** Hash of the trusted code; any code change changes every key. */
       codeSha256: Sha256Schema,
       params: z.record(z.string(), z.unknown()),
+      /** The unscaled profile tokens when the output uses the draft format. */
+      designRender: RenderTokensSchema.optional(),
       /** The PNGs the params reference, with their real pixel size. */
       assets: z.record(
         IdSchema,

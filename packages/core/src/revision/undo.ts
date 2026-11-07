@@ -1,11 +1,13 @@
-import { cp, mkdir } from "node:fs/promises";
+import { cp, mkdir, mkdtemp } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import type { Result } from "../model/issue.js";
 import { sha256File } from "../project/hash.js";
+import { resolveSafeExistingFile } from "../project/safe-path.js";
 import { syncWorkingCopy } from "./capture.js";
 import { withProjectLock } from "./lock.js";
 import {
   absolute,
+  copyAtomic,
   issueFor,
   pathExists,
   readCurrentRevisionId,
@@ -32,25 +34,7 @@ export const undoProject = async (options: {
 }): Promise<Result<UndoResult>> => {
   const root = resolve(options.root);
   return withProjectLock(root, async (): Promise<Result<UndoResult>> => {
-    let preserved: string | null = null;
     const synced = await syncWorkingCopy(root, options.now);
-    if (!synced.ok) {
-      // Keep the uncommitted files before restoring over them.
-      const stamp = (options.now ?? (() => new Date().toISOString()))().replace(
-        /[:.]/g,
-        "-",
-      );
-      const target = join(root, "revisions", "recovered", stamp);
-      await mkdir(target, { recursive: true });
-      for (const path of SOURCE_FILES) {
-        const source = absolute(root, path);
-        if (await pathExists(source)) {
-          await cp(source, absolute(target, path), { recursive: true });
-        }
-      }
-      preserved = target;
-    }
-
     const current = await readCurrentRevisionId(root);
     const meta = current ? await readRevisionMeta(root, current) : null;
     if (!current || !meta) {
@@ -90,6 +74,43 @@ export const undoProject = async (options: {
           ),
         ],
       };
+    }
+
+    let preserved: string | null = null;
+    if (!synced.ok) {
+      // The target snapshot identifies recipe files even if the working
+      // manifest is unreadable. Preserve changed bytes before restoring them.
+      const stamp = (options.now ?? (() => new Date().toISOString()))().replace(
+        /[:.]/g,
+        "-",
+      );
+      const recovery = join(root, "revisions", "recovered");
+      await mkdir(recovery, { recursive: true });
+      preserved = await mkdtemp(join(recovery, `${stamp}-`));
+      for (const path of SOURCE_FILES) {
+        const source = absolute(root, path);
+        if (await pathExists(source)) {
+          await cp(source, absolute(preserved, path), { recursive: true });
+        }
+      }
+      for (const file of parent.media) {
+        if (!file.path.startsWith("recipes/")) continue;
+        const source = await resolveSafeExistingFile(root, file.path, {
+          artifact: file.path,
+          path: "/",
+        });
+        if (!source.ok) {
+          if (
+            source.issues.some((issue) => issue.code === "ASSET_PATH_UNSAFE")
+          ) {
+            return source;
+          }
+          continue;
+        }
+        if ((await sha256File(source.value)) !== file.sha256) {
+          await copyAtomic(source.value, absolute(preserved, file.path));
+        }
+      }
     }
 
     for (const file of parent.sources) {

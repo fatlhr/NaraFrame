@@ -370,6 +370,8 @@ pnpm naraframe preview ../my-videos/new-video --draft --json
 
 `outline` is a read-only map of the project: its current revision, and each scene's id, role, timing, transition, camera, claims, note, layer ids with text and frames, beats with timings and params, plus narration blocks with their phrases (no word lists), the captions mode and asset ids. Use it to find the scene, layer and beat ids to change without reading whole files; an invalid project exits 1 with the same issues as `validate --stage plan`. Without `--json` it prints one line for the project and one per scene. Add `--scene <scene-id>` to narrow it to one scene in full detail, with only the narration blocks and assets that scene uses; the human form then lists that scene's layers and beats, and an unknown id is `SCENE_NOT_FOUND` (exit 1).
 
+For a recipe scene, `outline --json` identifies the recipe. Read the scene's `visual.params` in `scenes.json` to find editable values and use the preview to inspect the rendered layout.
+
 Put only changed source files in `../my-videos/new-video-edit`. Preserve the project's relative file structure, such as `scenes.json` or `assets/manifest.json` alongside new media. Replace `SOURCE_REVISION` with the `sourceRevision` returned by `status`.
 
 `REVISION_CONFLICT` means the project changed since you last read its status. Read status again, adjust the revision, and retry.
@@ -422,6 +424,8 @@ For recipes, the engine compares only identity/palette params listed in `recipe.
 Profile-switch dry runs include `plan.bindings.recipeParams` and coverage. A mismatched binding produces a draft warning and blocks production/final. Read `RECIPE_BINDING_COVERAGE` and `data.brand.recipes` to see which params are checked.
 
 Recipes can opt into text-fit checks with `textSlots`. The engine resolves their styles from the profile and measures each declared slot before rendering. Overflow blocks preview; the recipe must use the supplied slot styles for that measurement to describe the rendered text. Array entries are measured independently.
+
+Lay out recipe scenes in the 1080×1920 design frame. The recipe's `profile` and `textSlots` supply design-pixel sizes at both draft resolutions. NaraFrame scales the finished drawing to the output size. Remotion's `useVideoConfig()` dimensions describe the output composition.
 
 Review undeclared params and marketing claims yourself. General recipe collisions and contrast still need frame inspection. Static scanning and declared-slot checks do not inspect arbitrary layout inside recipe code.
 
