@@ -1811,9 +1811,16 @@ Fatih authorized V0 and U0 as one documentation package. The [style map and prod
 
 V1–V4 target zero new runtime packages. For each accepted feature, retain the first source and run `validate PROJECT --stage plan --json`, `preview PROJECT --draft --scene ID --json`, and `preview PROJECT --resolution 1080 --json`. Review the opening, contact, settled state, payoff, and seam. Run one guarded edit and undo. Where prepared voice is present, verify the master hash and listen at the contact and payoff. Add focused coverage after the manual path, then run `pnpm verify`. Apply V5 in the style's delivery package. Complete the earlier approved package before starting the next one.
 
+### V5 follow-ups for the public style chooser
+
+- [ ] **V5.1 · Give Meja Mekanik English names.** Choose an English display name, profile ID, and skill name. Apply the public names consistently in the picker, CLI, README, and guide. Verify the new names through a clean install and check that updating from `0.2.0` still lets users open and revise episodes pinned to `meja-mekanik`, including their catalog references. Cover existing `naraframe-mekanik` installs in the update check.
+- [ ] **V5.2 · Rebuild the README visual gallery around released profiles.** Replace the layout, examples, and copy in [What you can make](../README.md#style-gallery). Give each released profile its own subject and approved render. Use the English name from V5.1 for the mechanical profile's example and add newly released profiles through the same V5 gate.
+  - Give each clip a playful opening action and a payoff that fits the profile. Use expressive poses and prop reactions where they belong, or make the subject itself move in an unexpected but readable way. Vary staging and rhythm so a reviewer can distinguish the styles with labels hidden and audio muted.
+  - Write each case brief, title, on-screen copy, and README description in English. Use English for captions and narration where present. Verify that each gallery preview or render link works and that the style chooser points to the matching example.
+
 ### README style chooser draft
 
-Place **Choose a visual style** near the existing [public gallery](../README.md#style-gallery). Source rows from the [style map](spec.md#visual-library-and-optional-studio). The public section lists routes evidenced for the named source build, local archive, or release. Internal pilots need an approved public example before they are linked from README.
+This V0 draft records the original chooser format. V5.2 replaces the public gallery and pairs it with the chooser. Source rows from the [style map](spec.md#visual-library-and-optional-studio). The public section lists routes evidenced for the named source build, local archive, or release. Internal pilots need an approved public example before they are linked from README.
 
 | Style | Best for | How to choose | Example |
 |---|---|---|---|
