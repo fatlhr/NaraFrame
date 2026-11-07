@@ -84,7 +84,7 @@ describe("offline engine distribution", () => {
       command: "version",
       success: true,
       data: {
-        version: "0.1.2",
+        version: "0.2.0",
         skillApiVersion: 1,
         sourceSchemaVersion: 1,
         renderEngine: "naraframe-draft/13",
@@ -145,7 +145,7 @@ describe("offline engine distribution", () => {
         Buffer.concat([bytes, Buffer.from("\nLocal change.\n")]),
       );
       const changed = invoke("version");
-      expect(changed.data.version).toBe("0.1.2");
+      expect(changed.data.version).toBe("0.2.0");
       expect(changed.data.engineIdentity).not.toBe(before);
     } finally {
       await writeFile(file, bytes);

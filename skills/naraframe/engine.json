@@ -1,6 +1,6 @@
 {
   "engine": "naraframe",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "node": ">=22",
   "approximateInstallMB": 240
 }

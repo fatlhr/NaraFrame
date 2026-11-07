@@ -74,7 +74,7 @@ const fixture = async () => {
     join(engine, "skills/naraframe/scripts/naraframe.mjs"),
   );
   const data = {
-    version: "0.1.2",
+    version: "0.2.0",
     skillApiVersion: 1,
     sourceSchemaVersion: 1,
     renderEngine: "naraframe-draft/13",
@@ -198,7 +198,7 @@ describe("canonical skill installation", () => {
       const receipt = JSON.parse(
         await readFile(join(r.destination, "installation.json"), "utf8"),
       );
-      expect(receipt.engineVersion).toBe("0.1.2");
+      expect(receipt.engineVersion).toBe("0.2.0");
       expect(receipt.resourceRoot).toBe(f.engine);
       const { stdout } = await run(
         process.execPath,
@@ -476,7 +476,7 @@ describe("canonical skill installation", () => {
     const r = await installSkill(options(f));
     await writeFile(
       f.entry,
-      `console.log(JSON.stringify({success:true,command:'version',data:${JSON.stringify({ ...f.data, version: "0.2.0" })}}));\n`,
+      `console.log(JSON.stringify({success:true,command:'version',data:${JSON.stringify({ ...f.data, version: "0.3.0" })}}));\n`,
     );
     await expect(
       run(process.execPath, [
@@ -534,7 +534,7 @@ describe("canonical skill installation", () => {
         await readFile(join(destination, "installation.json"), "utf8"),
       );
       expect(receipt.adopted).toBe(true);
-      expect(receipt.engineVersion).toBe("0.1.2");
+      expect(receipt.engineVersion).toBe("0.2.0");
       expect(Object.keys(receipt.files).sort()).toEqual([
         "SKILL.md",
         "guide.md",
@@ -710,7 +710,7 @@ describe("canonical skill installation", () => {
       const r = await installSkill(options(f));
       await writeFile(
         f.entry,
-        `console.log(JSON.stringify({success:true,command:'version',data:${JSON.stringify({ ...f.data, version: "0.2.0" })}}));\n`,
+        `console.log(JSON.stringify({success:true,command:'version',data:${JSON.stringify({ ...f.data, version: "0.3.0" })}}));\n`,
       );
       expectOneLine(
         (await launch(r.destination)).stderr,
