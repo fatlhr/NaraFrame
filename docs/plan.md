@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 and A1 passed acceptance. The remaining seven tasks are **PLANNED**. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0, A1 and A2 passed acceptance. A3 is next in the six remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1655,7 +1655,9 @@ Create two local editable projects from the approved blocked-ball board. Use thr
 | Stickman Ink | `6a9122039f79-9a4ffbc9-6d8` | `5e72b0cc6f9b-a1218aff-850` | The arm meets the handle before the lift, the ball waits, and the reaction follows the release. One correction starts the ball on the tabletop. The contact preview reused its prior build after that opening edit. |
 | Meja Mekanik | `f1925d128d04-cd16537e-891` | `efffc5686bf4-f0c4ff50-92a` | The lever and plate move in a fixed projection. The ball stays in the same rail at both cuts and crosses after the plate is up. |
 
-The initial preflight caught a caption collision in both contact drafts. A guarded edit removed the redundant lower label and moved the title inside the safe zone. The original source, failed receipts and first successful Stickman full build are preserved. Both projects imported the same local Damayanti pilot master through `audio stage` and guarded `edit`. Their captured master and timing hashes match, and both full previews decode to identical audio samples. The measured speech windows start at 0, 2600 and 6000 ms. Fatih found the pilots interesting and requested Git integration of the evidence. Listening verification remains pending. The archive `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-06-a2-character-pilots/index.json` indexes 78 files including editable projects, builds, action strips, seam frames and audio receipts.
+The initial preflight caught a caption collision in both contact drafts. A guarded edit removed the redundant lower label and moved the title inside the safe zone. The original source, failed receipts and first successful Stickman full build are preserved. Both projects imported the same local Damayanti pilot master through `audio stage` and guarded `edit`. Their captured master and timing hashes match, and both full previews decode to identical audio samples. The measured speech windows start at 0, 2600 and 6000 ms. The archive `/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-06-a2-character-pilots/index.json` indexes 78 files including editable projects, builds, action strips, seam frames and audio receipts.
+
+**A2 listening accepted (2026-11-07).** Fatih watched the two full drafts side by side and confirmed, “Sudah saya dengar, teks dan timing cocok.” The review used the original shared audio stream. The decoded samples match both archived builds, and all 78 archive files match their indexed hashes. This closes A2 for the two draft builds in the table. The original source and pending import receipts remain the historical snapshot of the rendered revisions.
 
 The following existing CLI paths are the basis for pilot acceptance. Set `PROJECT` and `SCENE` from the authored project and use the recorded build IDs and source revisions in later review and revision steps.
 
