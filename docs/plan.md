@@ -1596,7 +1596,7 @@ The owner dispositions and the archive's usage restrictions still apply. The M5.
 
 ## 7. Visual authoring and character profiles — future candidates
 
-Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3, B1, B2 and C1 passed acceptance. C2 is next in the two remaining planned tasks. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
+Fatih agreed to record the visual audit proposals and the default hook workflow on 2026-11-06. A0 through A3, B1, B2 and C1 passed acceptance. Fatih closed C2 as `CLOSED_NOT_PLANNED` on 2026-11-07 and authorized D1, the remaining pilot. Execution follows milestone order and task-specific owner authorization. The [findings and design decisions](refine-spec.md#10-default-authoring-and-character-profiles--2026-11-06) explain what each candidate addresses.
 
 | Task | Priority | Scope | Inspectable acceptance |
 |---|---|---|---|
@@ -1738,3 +1738,22 @@ The guarded grip-color edit took 0.36 s and retained one of two scene keys and t
 For C2, start inside the serial frame capture loop. Profile repeated motion evaluation by layer target on the same warm dense shot. A per-scene beat index is a bounded candidate if that work contributes enough time to support a repeatable improvement. Use matched runs and keep frame integrity and serial capture in the acceptance check. The current matrix attributes little edit latency to compile, warm bundling or review sheets.
 
 **C1 complete.** Every measured preview retained the existing frame-integrity check and reported zero outliers. `pnpm verify` passed with 399 unit and 562 integration tests. The [local evidence index](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-c1-preview-profile/index.json) lists 57 checksummed files, including both source fixtures, raw timings and reports, the scratch instrumentation patch and the gate log.
+
+### C2 measurement model (2026-11-07)
+
+Use the edited C1 dense shot with the same 174 frames at 540×960. Compare the current renderer with a scratch prototype that indexes beats by target for `motionStateFor` and retains existing beat order. Warm each Webpack cache once, then alternate three `preview --draft --resolution 540 --scene stamp --rerender --json` runs per variant. Instrument browser motion evaluation and end-to-end capture. Require at least 5% faster median wall time and a faster result in at least two pairs before promoting the prototype. Verify the source revision, assembly key, decoded video frames and frame-integrity report against the baseline.
+
+**C2 probe (2026-11-07).** Three matched warm runs per variant used the same 174-frame draft with local narration. The baseline had an extra unscored warmup while the log parser was corrected. Browser totals cover 12,800 instrumented motion evaluations in each run.
+
+| Median | Baseline | Beat index prototype |
+|---|---:|---:|
+| Beat lookup and position sorting | 37.8 ms | 8.6 ms |
+| Motion state evaluation | 61.8 ms | 32.6 ms |
+| Capture and encode | 11.223 s | 11.139 s |
+| Preview wall time | 14.206 s | 14.196 s |
+
+The index was faster in two of three pairs. The median wall-time gain was 10 ms (0.07%), below the 5% promotion threshold. Source revision, assembly key and media format matched. Two decoded-frame hashes occurred across the unscored and scored runs. The alternate hash appeared in a baseline warmup and an indexed run. The two outputs differed in frames 67–173 and had a mean SSIM of 0.999999. Every measured preview passed frame integrity. The historical TutorLog fixture still raised `RENDER_FRAME_INTEGRITY` at frame 69. The focused suites passed 37 unit and 43 integration tests.
+
+The prototype stays in the scratch benchmark. The [evidence index](/Users/fatih/Code/Playground/NaraFrame-projects/acceptance/2026-11-07-c2-beat-index-probe/index.json) lists 49 checksummed files, including the timings, decoded-frame comparison, test logs and corruption receipt.
+
+**C2 scope closure (2026-11-07) · `CLOSED_NOT_PLANNED`.** Fatih chose to close C2 and continue to D1 after reviewing the 10 ms (0.07%) median wall-time gain. The prototype remains research evidence, below the 5% threshold for runtime adoption. Serial capture and the existing frame-integrity requirement remain the runtime contract.
