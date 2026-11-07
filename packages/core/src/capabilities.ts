@@ -182,8 +182,9 @@ export const capabilityRegistry = (): CapabilityRegistry => {
         reason: "Only PNG is loaded and hashed by the asset pipeline.",
       },
       {
-        name: "per-project-code",
-        reason: "Projects are source only; no scene code is executed.",
+        name: "untrusted-project-code",
+        reason:
+          "A local recipe runs only after its exact code hash is trusted in that project.",
       },
     ],
   };

@@ -8,6 +8,7 @@ Run `status <project> --json` and read the project's `profile.lock.json`. Then f
 
 1. `outline <project>` (human form) prints one line for the project, with its current revision, and one line per scene with its id, role, length and counts. Pick the scene.
 2. `outline <project> --scene <id> --json` returns that scene in full: layer ids with text and frames, beat ids with timings and params, camera, claims and note, plus only the narration blocks and assets it uses. An unknown id is `SCENE_NOT_FOUND`. Add `--scene <id>` for the human form to list its layers and beats.
+   For a recipe scene, use the recipe ID in the outline and read `visual.params` in `scenes.json` for the editable values. Review layout in the preview.
 3. Build the change as a staged copy of just that scene: put the project's `scenes.json` (and `narration.json` if it changes) in the staging directory with a targeted `jq` update of that scene's entry, for example `jq '(.scenes[] | select(.id == "<id>") | .visual.layers[] | select(.id == "<layer>") | .text) = "<new text>"' <project>/scenes.json > <staging-dir>/scenes.json`. Do not read the whole file into context.
 
 Prefer `edit` over rewriting files in place when a change should be reviewable or undoable: put only the changed source files in a staging directory laid out like the project, read the current revision from `status` (`sourceRevision`, also `outline`'s `currentRevision`), then run `pnpm naraframe edit <project> --from <staging-dir> --expect <sourceRevision> --summary "<what changed>" --json`. `REVISION_CONFLICT` means the project moved on: re-read `status`, re-apply the change, retry. The result carries `data.reuse`: how much of the previous revision's voice, images, and scenes survived, and the recorded cost against a full regeneration (unknown or untracked spend stays visible and is never guessed).
@@ -17,6 +18,8 @@ To delete an optional source file in the same revision add `--remove narration.j
 `history <project> [--limit <n>]` lists the accepted revisions behind the project, newest first, each with its short id, kind (`baseline`, `edit`, `manual-capture`), time and summary, and marks the current one (`*` in text, `current: true` in `data.revisions`); it only reads. Run it before `undo` to see which revision one `undo` returns to (the one listed after the current). `undo` restores the previous accepted revision, including a removed file, without any provider call; receipts and spend are never rolled back. A revision you undid is no longer in the list, and `history` does not show direct edits not yet captured.
 
 A new project's first `scenes.json` is written straight into the project folder. Once the first preview or `edit` has captured it, change source through `edit`. Direct edits to the JSON files are still detected and captured as a revision before the next preview or edit; an invalid working copy is reported and left untouched.
+
+When `undo` rolls back an invalid working copy, `data.preservedInvalidCopy` gives the recovery directory. It contains the working source files and any changed recipe files that the restore overwrote.
 
 ## The correction loop
 

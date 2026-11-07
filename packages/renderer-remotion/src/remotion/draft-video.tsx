@@ -500,7 +500,7 @@ const RecipeScene = ({
         <Recipe
           params={scene.visual.params}
           assets={assets}
-          profile={draft.profile.render}
+          profile={scene.visual.designRender ?? draft.profile.render}
           textSlots={Object.fromEntries(
             (scene.visual.textSlots ?? []).map((slot) => [slot.id, slot.style]),
           )}

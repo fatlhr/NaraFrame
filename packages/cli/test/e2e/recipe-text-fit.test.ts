@@ -28,6 +28,7 @@ interface Event {
   success: boolean;
   buildId: string | null;
   sourceRevision: string | null;
+  artifacts: Record<string, string>;
   data: Record<string, unknown>;
   issues: Array<{
     code: string;
@@ -115,6 +116,42 @@ const overflow = (event: Event) =>
     .filter((issue) => issue.code === "RECIPE_TEXT_OVERFLOW")
     .map((issue) => [issue.path, issue.entityId]);
 
+const titleBounds = async (event: Event) => {
+  const { stdout: pixels } = await run(
+    "ffmpeg",
+    [
+      "-v",
+      "error",
+      "-i",
+      event.artifacts.previewMp4 ?? "",
+      "-frames:v",
+      "1",
+      "-vf",
+      "scale=540:960,crop=540:100:0:200,format=gray",
+      "-f",
+      "rawvideo",
+      "-",
+    ],
+    { encoding: "buffer" },
+  );
+  let left = 540;
+  let top = 100;
+  let right = -1;
+  let bottom = -1;
+  for (const [i, luma] of pixels.entries()) {
+    if (luma < 140) continue;
+    const x = i % 540;
+    const y = Math.floor(i / 540);
+    left = Math.min(left, x);
+    top = Math.min(top, y);
+    right = Math.max(right, x);
+    bottom = Math.max(bottom, y);
+  }
+  expect(right).toBeGreaterThan(left);
+  expect(bottom).toBeGreaterThan(top);
+  return [left, top, right, bottom];
+};
+
 describe("text fit of a recipe slot across a profile switch", () => {
   it("refuses an overflowing title at 540 and 1080, clears after an edit and undoes with reuse", async () => {
     const narrow = await writeProfile("narrow", "Arial, Helvetica, sans-serif");
@@ -166,6 +203,22 @@ describe("text fit of a recipe slot across a profile switch", () => {
     ).toContain("title (1)");
     const first = await cli("preview", project, "--draft");
     expect(first.success, JSON.stringify(first.issues)).toBe(true);
+    const firstNative = await cli(
+      "preview",
+      project,
+      "--draft",
+      "--resolution",
+      "1080",
+    );
+    expect(firstNative.success, JSON.stringify(firstNative.issues)).toBe(true);
+    expect(firstNative.sourceRevision).toBe(first.sourceRevision);
+    const draftBounds = await titleBounds(first);
+    const nativeBounds = await titleBounds(firstNative);
+    for (const [i, draftEdge] of draftBounds.entries()) {
+      expect(Math.abs(draftEdge - (nativeBounds[i] ?? -1))).toBeLessThanOrEqual(
+        2,
+      );
+    }
     const pointer = join(project, "preview", "current.json");
     const pointerBefore = await readFile(pointer, "utf8");
 

@@ -13,7 +13,10 @@ interface SlotStyle {
 
 interface Props {
   params: Record<string, unknown>;
-  profile: { palette: { background: string; text: string } };
+  profile: {
+    palette: { background: string; text: string };
+    safeZone: { left: number };
+  };
   textSlots: Record<string, SlotStyle>;
 }
 
@@ -26,7 +29,7 @@ export default function TextCard({ params, profile, textSlots }: Props) {
       <div
         style={{
           position: "absolute",
-          left: 160,
+          left: profile.safeZone.left,
           top: 400,
           width: slot.width,
           height: slot.height,
