@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 141 235">
+  <title>Paper receipt with torn edge</title>
+  <path d="M8 13 123 3l14 212-12 13-12-7-12 10-12-7-12 9-13-8-11 8-13-8-12 7-12-11Z" fill="#D7C5A8" stroke="#4D3A48" stroke-width="3"/>
+  <path d="M4 9 118 2l14 208-11 12-12-7-12 10-12-7-12 9-13-8-11 8-13-8-12 7-12-11Z" fill="#FFF1D7" stroke="#4D3A48" stroke-width="3"/>
+  <path d="M26 30h67m-65 14h47m-47 20h60m-59 26h39m-38 14h58m-56 16h37m-32 21h65m-60 27h48m-47 12h39" stroke="#806D77" stroke-width="3" stroke-linecap="round"/>
+  <path d="M40 194v15m6-15v15m8-15v15m6-15v15m8-15v15m6-15v15m8-15v15" stroke="#634B59" stroke-width="2"/>
+</svg>

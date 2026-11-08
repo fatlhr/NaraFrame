@@ -2,6 +2,15 @@
 
 Choose the pattern whose object explains the brief. Start with the viewer takeaway, then object/parts, frame, dominant/supporting type, beat purpose and pace, and incoming/outgoing focus. Save these decisions in the scene's `note`. Profile direction/preferences guide choices; its locks remain authoritative. A profile's duration recommendation can warn on a deliberately scoped 10-second proof without making it invalid.
 
+## Plain-brief explainer patterns
+
+Keep a plain new brief on `general-explainer`. Choose the pattern by what the viewer needs to understand in the shot.
+
+- **Cause and effect.** Open on a state that raises a question. Change one part and let its consequence play out in view. `sealed-straw@0.1.0` shows suspended water, air entering the straw, then water draining into the cup.
+- **Editorial Collage.** Open on one recognizable object and build the metaphor around it one cutout at a time. Give each arrival a visible landing. `hidden-key@0.1.0` covers a key with paper scraps, then clears the layers to reveal it.
+
+Use `version --json` to locate the engine resource root and `library inspect` on `library/explainers/catalog.json` to find these patterns in a matching engine. Import the matching subject using [library.md](library.md#inspect-stage-revise). For another subject, adapt the sequence with original geometry and verify the opening three seconds and the payoff in the actual preview.
+
 ## Runnable, editable pattern set
 
 [examples/art-direction/scenes.json](examples/art-direction/scenes.json) is source-v1 declarative source, not a recipe, engine module or live catalog import. It contains six independent 10-second scenes. Dependencies: a project created by the public CLI with pinned `current-issues` 0.3.0, its resolved typography/palette, and the current public capability registry. No media, provider, network, trust or arbitrary code is needed. Other profiles need a new fit/contrast review; these are editable structures, not approved artwork.

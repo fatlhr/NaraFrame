@@ -196,6 +196,20 @@ describe("offline engine distribution", () => {
       ]),
     });
   });
+
+  it("ships the plain-brief cause-and-effect and collage patterns", () => {
+    const result = invoke(
+      "library",
+      "inspect",
+      join(engine, "library/explainers/catalog.json"),
+    );
+    expect(result.success).toBe(true);
+    expect(result.data.catalog).toMatchObject({
+      id: "general-explainer-patterns",
+      version: "0.1.0",
+      patterns: [{ id: "sealed-straw" }, { id: "hidden-key" }],
+    });
+  });
   it("binds runtime/resources independently of version and refuses extra version arguments", async () => {
     const before = invoke("version").data.engineIdentity;
     expect(before).toMatch(/^[0-9a-f]{64}$/);
