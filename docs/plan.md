@@ -1845,6 +1845,8 @@ V1–V4 target zero new runtime packages. For each accepted feature, retain the 
   - Give each clip a playful opening action and a payoff that fits the profile. Use expressive poses and prop reactions where they belong, or make the subject itself move in an unexpected but readable way. Vary staging and rhythm so a reviewer can distinguish the styles with labels hidden and audio muted.
   - Write each case brief, title, on-screen copy, and README description in English. Use English for captions and narration where present. Verify that each gallery preview or render link works and that the style chooser points to the matching example.
 
+**V5.2 review checkpoint (2026-11-08).** The local gallery candidate pairs eight profiles with eight distinct English previews. The 46.9-second review reel and `gallery-index.json` retain each source revision, build ID, clip range and animation checksum. Inspected the visible copy, verified 16 gallery links and the install-guide anchor, and checked all eight preview reports for frame-integrity outliers. The animated assets total 216,270 bytes. `pnpm verify` passed 399 unit and 572 integration tests. The gallery remains open for owner review and the matching public release.
+
 ### README style chooser draft
 
 This V0 draft records the original chooser format. V5.2 replaces the public gallery and pairs it with the chooser. Source rows from the [style map](spec.md#visual-library-and-optional-studio). The public section lists routes evidenced for the named source build, local archive, or release. Internal pilots need an approved public example before they are linked from README.
