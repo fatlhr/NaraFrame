@@ -1,0 +1,1353 @@
+{
+  "schemaVersion": 1,
+  "id": "bedah-25d",
+  "version": "0.1.0",
+  "provenance": {
+    "source": "NaraFrame original fixed-projection illustrations",
+    "license": "MIT"
+  },
+  "assets": [
+    {
+      "id": "tape-base",
+      "status": "ready",
+      "kind": "svg",
+      "path": "tape-base.svg",
+      "sha256": "4298c4077121fab15d094915be6bc9c75ac8c4136e46b6b00ac0714f4a944d23",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Bedah 2.5D pilot illustration"
+      }
+    },
+    {
+      "id": "tape-roll",
+      "status": "ready",
+      "kind": "svg",
+      "path": "tape-roll.svg",
+      "sha256": "41a00f10323a44e0194d46b44a65ec7e357b254ba8d8819aabd0121a6d04ea32",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Bedah 2.5D pilot illustration"
+      }
+    },
+    {
+      "id": "tape-blade",
+      "status": "ready",
+      "kind": "svg",
+      "path": "tape-blade.svg",
+      "sha256": "34a5ed08b7f95bcbf492e27ea3f14fec5555f106e6b5a3526548cc647d04485c",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Bedah 2.5D pilot illustration"
+      }
+    },
+    {
+      "id": "tape-strip",
+      "status": "ready",
+      "kind": "svg",
+      "path": "tape-strip.svg",
+      "sha256": "8efc6b0107d1fe57c370f9105132adb28e9fd1e6b3b0b7c534782bea7b1db629",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Bedah 2.5D pilot illustration"
+      }
+    },
+    {
+      "id": "torch-body",
+      "status": "ready",
+      "kind": "svg",
+      "path": "torch-body.svg",
+      "sha256": "0170bf4975c9176480d63e79bb61ac8f35bb6a8ea523f89779142fd9cff212dc",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Bedah 2.5D pilot illustration"
+      }
+    },
+    {
+      "id": "torch-head",
+      "status": "ready",
+      "kind": "svg",
+      "path": "torch-head.svg",
+      "sha256": "42afca8cfa6ae5a7a83dc042b076d02f9cf0fc116eed34358b6e7b8b01da9825",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Bedah 2.5D pilot illustration"
+      }
+    },
+    {
+      "id": "torch-lens",
+      "status": "ready",
+      "kind": "svg",
+      "path": "torch-lens.svg",
+      "sha256": "df52b66c847dad72468faf836aa183271ded459c39e3326af613cb1947ea6d9d",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Bedah 2.5D pilot illustration"
+      }
+    },
+    {
+      "id": "torch-cell",
+      "status": "ready",
+      "kind": "svg",
+      "path": "torch-cell.svg",
+      "sha256": "ad9e64b399a3b7de04d4fed609bcab1bc9432512adc737e05e335ddc483797e4",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Bedah 2.5D pilot illustration"
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "id": "tape-dispenser",
+      "version": "0.1.0",
+      "description": "Follow the roll and serrated blade as they separate and dock.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short English title."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Part and action the viewer should follow."
+        }
+      },
+      "template": {
+        "id": "tape-dispenser",
+        "narrativeRole": "explanation",
+        "durationMs": 7600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 260,
+                "width": 888,
+                "height": 130
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Why tape tears",
+              "role": "display",
+              "color": "palette.text",
+              "fontSize": 88
+            },
+            {
+              "id": "issue",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 190,
+                "width": 888,
+                "height": 52
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "PARTS STUDY  /  01",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 34
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 406,
+                "width": 888,
+                "height": 96
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "A smooth pull meets a jagged edge.",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 44
+            },
+            {
+              "id": "rule",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M48 273H492",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#C8BB9F",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "tape-strip",
+              "type": "image",
+              "frame": {
+                "x": 334,
+                "y": 1012,
+                "width": 500,
+                "height": 132
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "assetId": "tape-strip",
+              "fit": "contain"
+            },
+            {
+              "id": "tape-roll",
+              "type": "image",
+              "frame": {
+                "x": 252,
+                "y": 816,
+                "width": 292,
+                "height": 314
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "assetId": "tape-roll",
+              "fit": "contain"
+            },
+            {
+              "id": "tape-base",
+              "type": "image",
+              "frame": {
+                "x": 182,
+                "y": 932,
+                "width": 704,
+                "height": 346
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "assetId": "tape-base",
+              "fit": "contain"
+            },
+            {
+              "id": "tape-blade",
+              "type": "image",
+              "frame": {
+                "x": 698,
+                "y": 1014,
+                "width": 136,
+                "height": 56
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 9,
+              "assetId": "tape-blade",
+              "fit": "contain"
+            },
+            {
+              "id": "payoff",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 1612,
+                "width": 888,
+                "height": 94
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Pull. Press. Tear.",
+              "role": "heading",
+              "color": "palette.text",
+              "fontSize": 56
+            },
+            {
+              "id": "cut-tab",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 10,
+              "d": "M406 516Q433 507 445 484L459 494Q448 522 418 535L415 528L409 527Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#65492E",
+                "width": 1.5
+              },
+              "lineCap": "round",
+              "fill": "#F9D382"
+            },
+            {
+              "id": "roll-label-leader",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 13,
+              "d": "M267 353 L287 338 H304",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#756B60",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "roll-label",
+              "type": "text",
+              "frame": {
+                "x": 622,
+                "y": 650,
+                "width": 310,
+                "height": 82
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Roll feeds",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 40
+            },
+            {
+              "id": "base-label-leader",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 13,
+              "d": "M153 618 L122 662 H55",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#756B60",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "base-label",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 1348,
+                "width": 310,
+                "height": 82
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Base holds",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 40
+            },
+            {
+              "id": "blade-label-leader",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 13,
+              "d": "M421 673 L410 708 H330",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#756B60",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "blade-label",
+              "type": "text",
+              "frame": {
+                "x": 610,
+                "y": 1466,
+                "width": 310,
+                "height": 82
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Blade cuts",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 40
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "pull",
+            "targetId": "tape-strip",
+            "startMs": 110,
+            "durationMs": 470,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 54,
+                "y": -20
+              }
+            }
+          },
+          {
+            "id": "lift-away",
+            "targetId": "tape-strip",
+            "startMs": 740,
+            "durationMs": 220,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "lift-roll",
+            "targetId": "tape-roll",
+            "startMs": 1040,
+            "durationMs": 650,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": -14,
+                "y": -236
+              }
+            }
+          },
+          {
+            "id": "slide-blade",
+            "targetId": "tape-blade",
+            "startMs": 1480,
+            "durationMs": 670,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 76,
+                "y": 282
+              }
+            }
+          },
+          {
+            "id": "dock-blade",
+            "targetId": "tape-blade",
+            "startMs": 5550,
+            "durationMs": 550,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 0,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "dock-roll",
+            "targetId": "tape-roll",
+            "startMs": 5900,
+            "durationMs": 630,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 0,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "show-payoff",
+            "targetId": "payoff",
+            "startMs": 6510,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-cut-tab",
+            "targetId": "cut-tab",
+            "startMs": 6560,
+            "durationMs": 200,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "tape-snaps-free",
+            "targetId": "cut-tab",
+            "startMs": 6800,
+            "durationMs": 340,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 44,
+                "y": -56
+              }
+            }
+          },
+          {
+            "id": "show-roll-label-leader",
+            "targetId": "roll-label-leader",
+            "startMs": 2080,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-roll-label-leader",
+            "targetId": "roll-label-leader",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-roll-label",
+            "targetId": "roll-label",
+            "startMs": 2080,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-roll-label",
+            "targetId": "roll-label",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-base-label-leader",
+            "targetId": "base-label-leader",
+            "startMs": 3070,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-base-label-leader",
+            "targetId": "base-label-leader",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-base-label",
+            "targetId": "base-label",
+            "startMs": 3070,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-base-label",
+            "targetId": "base-label",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-blade-label-leader",
+            "targetId": "blade-label-leader",
+            "startMs": 4060,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-blade-label-leader",
+            "targetId": "blade-label-leader",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-blade-label",
+            "targetId": "blade-label",
+            "startMs": 4060,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-blade-label",
+            "targetId": "blade-label",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "Follow the roll and serrated blade as they separate and dock."
+      }
+    },
+    {
+      "id": "flashlight",
+      "version": "0.1.0",
+      "description": "Follow the lens, reflector and battery before the beam returns.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short English title."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Part and action the viewer should follow."
+        }
+      },
+      "template": {
+        "id": "flashlight",
+        "narrativeRole": "explanation",
+        "durationMs": 7600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 260,
+                "width": 888,
+                "height": 130
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "From cell to beam",
+              "role": "display",
+              "color": "palette.text",
+              "fontSize": 88
+            },
+            {
+              "id": "issue",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 190,
+                "width": 888,
+                "height": 52
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "PARTS STUDY  /  02",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 34
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 406,
+                "width": 888,
+                "height": 96
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Follow the parts that make light.",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 44
+            },
+            {
+              "id": "rule",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M48 273H492",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#C8BB9F",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "beam",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M228 391 143 286H393L311 391Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#E6BA58",
+                "width": 1.5
+              },
+              "lineCap": "round",
+              "fill": "#FBE3A1"
+            },
+            {
+              "id": "torch-cell",
+              "type": "image",
+              "frame": {
+                "x": 482,
+                "y": 1096,
+                "width": 140,
+                "height": 258
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "torch-cell",
+              "fit": "contain"
+            },
+            {
+              "id": "torch-body",
+              "type": "image",
+              "frame": {
+                "x": 412,
+                "y": 962,
+                "width": 278,
+                "height": 438
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "assetId": "torch-body",
+              "fit": "contain"
+            },
+            {
+              "id": "torch-head",
+              "type": "image",
+              "frame": {
+                "x": 382,
+                "y": 816,
+                "width": 336,
+                "height": 238
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "assetId": "torch-head",
+              "fit": "contain"
+            },
+            {
+              "id": "torch-lens",
+              "type": "image",
+              "frame": {
+                "x": 400,
+                "y": 770,
+                "width": 302,
+                "height": 96
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "assetId": "torch-lens",
+              "fit": "contain"
+            },
+            {
+              "id": "payoff",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 1618,
+                "width": 888,
+                "height": 90
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Power becomes light.",
+              "role": "heading",
+              "color": "palette.text",
+              "fontSize": 54
+            },
+            {
+              "id": "beam-payoff",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M228 391 143 286H393L311 391Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#E6BA58",
+                "width": 1.5
+              },
+              "lineCap": "round",
+              "fill": "#FBE3A1"
+            },
+            {
+              "id": "lens-label-leader",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 13,
+              "d": "M346 322 L363 308 H374",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#756B60",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "lens-label",
+              "type": "text",
+              "frame": {
+                "x": 760,
+                "y": 588,
+                "width": 224,
+                "height": 82
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Lens",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 40
+            },
+            {
+              "id": "head-label-leader",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 13,
+              "d": "M183 402 H148",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#756B60",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "head-label",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 762,
+                "width": 310,
+                "height": 82
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Reflector",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 40
+            },
+            {
+              "id": "cell-label-leader",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 13,
+              "d": "M309 753 H335",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#756B60",
+                "width": 1.5
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "cell-label",
+              "type": "text",
+              "frame": {
+                "x": 686,
+                "y": 1478,
+                "width": 298,
+                "height": 82
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Battery",
+              "role": "body",
+              "color": "palette.text",
+              "fontSize": 40
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "switch-on",
+            "targetId": "beam",
+            "startMs": 110,
+            "durationMs": 170,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "switch-off",
+            "targetId": "beam",
+            "startMs": 600,
+            "durationMs": 250,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "lift-lens",
+            "targetId": "torch-lens",
+            "startMs": 980,
+            "durationMs": 660,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": -10,
+                "y": -170
+              }
+            }
+          },
+          {
+            "id": "lift-head",
+            "targetId": "torch-head",
+            "startMs": 1320,
+            "durationMs": 690,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": -2,
+                "y": -86
+              }
+            }
+          },
+          {
+            "id": "release-cell",
+            "targetId": "torch-cell",
+            "startMs": 1540,
+            "durationMs": 730,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": -14,
+                "y": 324
+              }
+            }
+          },
+          {
+            "id": "seat-cell",
+            "targetId": "torch-cell",
+            "startMs": 5480,
+            "durationMs": 520,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 0,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "seat-head",
+            "targetId": "torch-head",
+            "startMs": 5740,
+            "durationMs": 570,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 0,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "seat-lens",
+            "targetId": "torch-lens",
+            "startMs": 6010,
+            "durationMs": 570,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 0,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "light-returns",
+            "targetId": "beam-payoff",
+            "startMs": 6560,
+            "durationMs": 180,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-payoff",
+            "targetId": "payoff",
+            "startMs": 6610,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-lens-label-leader",
+            "targetId": "lens-label-leader",
+            "startMs": 2010,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-lens-label-leader",
+            "targetId": "lens-label-leader",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-lens-label",
+            "targetId": "lens-label",
+            "startMs": 2010,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-lens-label",
+            "targetId": "lens-label",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-head-label-leader",
+            "targetId": "head-label-leader",
+            "startMs": 3000,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-head-label-leader",
+            "targetId": "head-label-leader",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-head-label",
+            "targetId": "head-label",
+            "startMs": 3000,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-head-label",
+            "targetId": "head-label",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-cell-label-leader",
+            "targetId": "cell-label-leader",
+            "startMs": 4000,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-cell-label-leader",
+            "targetId": "cell-label-leader",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-cell-label",
+            "targetId": "cell-label",
+            "startMs": 4000,
+            "durationMs": 240,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "hide-cell-label",
+            "targetId": "cell-label",
+            "startMs": 5200,
+            "durationMs": 240,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "Follow the lens, reflector and battery before the beam returns."
+      }
+    }
+  ]
+}

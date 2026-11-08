@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 119">
+  <title>Flashlight reflector and lamp</title>
+  <g stroke="#203632" stroke-width="4">
+    <path fill="#587F76" d="M4 29 23 92q8 23 61 23t61-23l19-63Z"/>
+    <ellipse fill="#AFC2B3" cx="84" cy="29" rx="80" ry="26"/>
+    <ellipse fill="#41564E" cx="84" cy="29" rx="60" ry="18"/>
+    <ellipse fill="#FFE29B" cx="84" cy="29" rx="15" ry="8"/>
+  </g>
+</svg>

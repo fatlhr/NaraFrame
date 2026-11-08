@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 129">
+  <title>Battery with a marked positive terminal</title>
+  <g stroke="#45382D" stroke-width="3">
+    <path fill="#CE914E" d="M7 23v88c0 9 12 15 28 15s28-6 28-15V23Z"/>
+    <ellipse fill="#EDD39B" cx="35" cy="23" rx="28" ry="11"/>
+    <path fill="#E1E6DF" d="M26 22V10q9-7 18 0v12q-9 5-18 0Z"/>
+    <path d="M25 55h20m-10-10v20" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

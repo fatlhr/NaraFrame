@@ -230,6 +230,7 @@ describe("profile list", () => {
     expect(event.data.action).toBe("list");
     const profiles = event.data.profiles as Listed[];
     expect(profiles.map((profile) => profile.id)).toEqual([
+      "bedah-25d",
       "current-issues",
       "general-explainer",
       "meja-mekanik",
@@ -282,16 +283,17 @@ describe("profile list", () => {
     });
     expect(await runCli(["profile", "list"])).toBe(0);
     vi.restoreAllMocks();
-    expect(lines).toHaveLength(5);
-    expect(lines[0]).toMatch(
+    expect(lines).toHaveLength(6);
+    expect(lines[0]).toMatch(/^bedah-25d@0\.1\.0 \|/);
+    expect(lines[1]).toMatch(
       /^current-issues@0\.3\.0 \| sources required \| 15-30 s \| voice id-editorial-grounded-v1 \| Explain/,
     );
-    expect(lines[1]).toMatch(
+    expect(lines[2]).toMatch(
       /^general-explainer@1\.0\.0 \| sources optional \| 15-60 s \| voice id-teaching-warm-v1 \| Teach one idea/,
     );
-    expect(lines[2]).toMatch(/^meja-mekanik@0\.1\.0 \|/);
-    expect(lines[3]).toMatch(/^paper-cutout@0\.1\.0 \|/);
-    expect(lines[4]).toMatch(/^stickman-ink@0\.1\.0 \|/);
+    expect(lines[3]).toMatch(/^meja-mekanik@0\.1\.0 \|/);
+    expect(lines[4]).toMatch(/^paper-cutout@0\.1\.0 \|/);
+    expect(lines[5]).toMatch(/^stickman-ink@0\.1\.0 \|/);
     expect((await run("profile", "list", "extra")).exitCode).toBe(3);
   });
 

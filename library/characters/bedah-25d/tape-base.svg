@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 173">
+  <title>Weighted tape dispenser base</title>
+  <g stroke="#432923" stroke-width="3" stroke-linejoin="round">
+    <path fill="#A14C38" d="M5 139 23 161H300Q332 161 342 139L350 66 324 47Z"/>
+    <path fill="#D77251" d="M5 139 2 100 41 37Q57 15 87 16l40 9 17 56q6 17 34 17h31l57-45 58-6-13 83q-3 10-22 10Z"/>
+    <ellipse fill="#804534" cx="92" cy="60" rx="20" ry="28"/>
+    <ellipse fill="#F3BC88" cx="92" cy="60" rx="8" ry="11"/>
+  </g>
+  <path d="M28 124H289l12-14" fill="none" stroke="#F6AF90" stroke-width="3"/>
+</svg>

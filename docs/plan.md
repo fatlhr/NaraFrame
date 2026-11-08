@@ -2,7 +2,7 @@
 
 Revision 2.3 · Updated 2026-11-07 · MVP 2 integrated at `a701c39`
 
-**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. [Section 8](#8-visual-library-knowledge-and-optional-studio) records the new documentation package and the proposals awaiting implementation approval.
+**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. [V1 Bedah 2.5D](#v1-bedah-25d-acceptance) passed local package acceptance. V2 Motion Comic is the next visual batch.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -1801,7 +1801,7 @@ Fatih authorized V0 and U0 as one documentation package. The [style map and prod
 
 | Task | Priority / status | Dependencies and work | Acceptance |
 |---|---|---|---|
-| V1 Bedah 2.5D | P0 / proposed | After V0 and separate approval. Author a fixed-projection `assembled → exploded → function → reassembled` pattern with layered SVG/PNG, leader lines, and settled reading holds. Package `naraframe-3d` through V5. | Show a tape dispenser and a flashlight. The same parts can be followed through separation and reassembly at phone size and in grayscale. |
+| V1 Bedah 2.5D | P0 / verified in a local engine package | After V0 and separate approval. Author a fixed-projection `assembled → exploded → function → reassembled` pattern with layered SVG/PNG, leader lines, and settled reading holds. Package `naraframe-3d` through V5. | Tape dispenser and flashlight passed the local [V1 acceptance checks](#v1-bedah-25d-acceptance). |
 | V2 Motion Comic | P1 / proposed | After V1 and separate approval. Author three panels with an explicit reading order, manual crops, focus on the active panel, reaction poses, and dialogue holds. Package `naraframe-comics` through V5. | Two stories read clearly with audio muted. Panels, dialogue, crops, and timing can be revised. |
 | V3 Story | P1 / proposed | After V2 and separate approval. Author a goal, obstacle, action, and consequence, with pose sheets and consistent props across shots. Package `naraframe-story` through V5. | On two briefs a reviewer can identify the action that causes the next shot and track the character and prop across the seam. |
 | V4 Motion Explainer patterns | P1 / proposed | After V3 and separate approval. Add a cause-and-effect diagram and an Editorial Collage assembly pattern to `general-explainer`. Choose the pattern by shot intent. | Two plain briefs use `general-explainer`. The first three seconds establish a visual question, and the payoff answers it. |
@@ -1810,6 +1810,13 @@ Fatih authorized V0 and U0 as one documentation package. The [style map and prod
 | V7 Engine changes backed by evidence | P3 / conditional | Open each subtask separately. Shared cues require repeatable retiming drift. Segment reuse requires a measured one-shot edit cost in a long project. | Reproducer, separate scope approval, and compatible behavior for existing projects. Segment identity covers effective boundaries, captions, audio, dependencies, and approval before reuse is attempted. |
 
 V1–V4 target zero new runtime packages. For each accepted feature, retain the first source and run `validate PROJECT --stage plan --json`, `preview PROJECT --draft --scene ID --json`, and `preview PROJECT --resolution 1080 --json`. Review the opening, contact, settled state, payoff, and seam. Run one guarded edit and undo. Where prepared voice is present, verify the master hash and listen at the contact and payoff. Add focused coverage after the manual path, then run `pnpm verify`. Apply V5 in the style's delivery package. Complete the earlier approved package before starting the next one.
+
+### V1 Bedah 2.5D acceptance
+
+- [x] Author `tape-dispenser` and `flashlight` at `0.1.0` in the `bedah-25d` catalog. The dispenser separates the roll and blade from the base, then a loose strip snaps free. The flashlight separates its lens, reflector, and battery before the beam returns. Both use original SVG layers and declarative beats at a fixed projection.
+- [x] Run plan validation, scoped drafts for both subjects, and a full silent two-scene preview. The installed full build `831acc7cf63b-250a69c5-f6c` decoded 456 frames at 1080×1920 and 30 fps with zero frame-integrity outliers. Opening, separation, dock, payoff, and seam were checked at phone size. Six grayscale frames retained readable silhouettes and labels. A guarded title edit and undo restored source revision `717cc766d58181c67cd37178ac0469ded98a473a35829aafce68f303a66d749b`.
+- [x] Pack and install the canonical and `naraframe-3d` skills in a clean Codex workspace. Codex CLI `0.167.0` returned both enabled through `skills/list`. Following the installed wrapper and launcher reached scoped build `c246afd17b8e-81d36be5-97d` and the full build. The plain-brief control pinned `general-explainer`.
+- [x] Pass `pnpm verify` on Node 24.20.0 and pnpm 12.3.4 with 399 unit and 565 integration tests. The public gallery entry follows V5.2 and a matching public release.
 
 ### V5 follow-ups for the public style chooser
 

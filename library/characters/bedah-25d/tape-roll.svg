@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 146 157">
+  <title>Tape roll and central spool</title>
+  <g stroke="#49372C" stroke-width="3">
+    <path fill="#C39B55" d="M55 4h33c31 0 56 34 56 74s-25 75-56 75H55Z"/>
+    <ellipse fill="#F2D58C" cx="55" cy="78" rx="52" ry="74"/>
+    <ellipse fill="none" stroke="#BD9355" cx="55" cy="78" rx="43" ry="62"/>
+    <ellipse fill="#8B694A" cx="55" cy="78" rx="24" ry="34"/>
+  </g>
+  <path d="M69 51q-20 25 0 54" fill="none" stroke="#F7E1AC" stroke-width="3"/>
+</svg>
