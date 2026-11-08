@@ -213,6 +213,8 @@ Choose `$naraframe-3d` to show an object in use, separate its parts, and reassem
 
 For Motion Comic, use a matching source build or local engine archive that contains `profiles/motion-comic`. After installing the canonical skill, run the same installer with `--skill naraframe-comics` and choose `$naraframe-comics` in Codex. The `motion-comic` catalog includes `cookie-decoy@0.1.0` and `squeaky-sneaker@0.1.0`, with three editable panels and dialogue in each story. CLI authors can select `--profile motion-comic` and import either pattern.
 
+For Story, use a matching source build or local engine archive that contains `profiles/story`. Install the canonical skill, add `--skill naraframe-story` with the same installer, and choose `$naraframe-story` in Codex. The `story` catalog pairs `note-gust` with `note-catch` and `puddle-stop` with `puddle-cross`, all at `0.1.0`. CLI authors can select `--profile story` and import each pair in order.
+
 ### Example brief
 
 Replace the details in square brackets. Invoke `$naraframe` in Codex or `/naraframe` in Claude Code before using this prompt:

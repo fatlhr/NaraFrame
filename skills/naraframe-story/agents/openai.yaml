@@ -1,0 +1,5 @@
+interface:
+  display_name: "NaraFrame Story"
+  short_description: "Carry character actions across shots"
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 210">
+  <title>Courier taking a long step with the parcel</title>
+  <g stroke="#322B3B" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M57 137 39 164 21 185H12m67-45 23 13 17 31h12" fill="none" stroke-width="15"/>
+    <path d="M22 121Q9 91 35 83l13 31-6 29Z" fill="#DB7853" stroke-width="4"/>
+    <path d="M38 126 44 75 96 76 109 137Q62 151 38 126Z" fill="#54847E" stroke-width="4"/>
+    <path d="M93 105q16 17 30 3" fill="none" stroke="#322B3B" stroke-width="14"/>
+    <path d="M93 105q16 17 30 3" fill="none" stroke="#EAB68A" stroke-width="8"/>
+    <path d="M41 49q-2-31 29-34 37-3 38 35-3 38-35 38T41 49Z" fill="#EAB68A" stroke-width="4"/>
+    <path d="M36 45Q33 12 70 9q32-1 41 32 17-5 24 5-2 7-29 7Z" fill="#DC7251" stroke-width="4"/>
+    <path d="M77 56h1m17 0h1" stroke-width="6"/>
+    <path d="M85 68q7 4 12-2" stroke-width="3" fill="none"/>
+    <path d="M45 97q20 18 58 7" fill="none" stroke="#B7B99A" stroke-width="3"/>
+  </g>
+</svg>

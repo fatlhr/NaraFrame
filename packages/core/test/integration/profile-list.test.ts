@@ -27,6 +27,7 @@ describe("listProfiles", () => {
       "motion-comic",
       "paper-cutout",
       "stickman-ink",
+      "story",
     ]);
     for (const profile of profiles) {
       expect(profile.summary.length).toBeGreaterThan(20);

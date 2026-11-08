@@ -39,7 +39,7 @@ Choose a style for the job the video needs to do. This map records availability 
 | Paper Cutout | Animate layered paper, folds, and stepped poses | `$naraframe-paper` | Available in a matching source build or local archive |
 | Bedah 2.5D | Show what is inside an object and how the parts fit | `$naraframe-3d` | Available in a matching source build or local archive |
 | Motion Comic | Tell a story through panels, dialogue, and reaction poses | `$naraframe-comics` | Available in a matching source build or local archive |
-| Story | Follow a character's goal, obstacle, action, and consequence across shots | `$naraframe-story` | Planned in V3 |
+| Story | Follow a character's goal, obstacle, action, and consequence across shots | `$naraframe-story` | Available in a matching source build or local archive |
 
 Bedah 2.5D uses illustrated parts in a fixed projection and a predetermined sequence in the exported video. Clickable branches, free camera orbits, and mesh cutaways are outside V1. Data Motion, Route & Map, Editorial Collage, and Kinetic Type belong to the Motion Explainer pattern vocabulary. A separate entry requires a distinct motion language demonstrated on more than one brief.
 

@@ -28,6 +28,7 @@ const skillNames = [
   "naraframe-paper",
   "naraframe-3d",
   "naraframe-comics",
+  "naraframe-story",
 ];
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");

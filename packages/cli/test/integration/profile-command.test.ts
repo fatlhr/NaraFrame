@@ -237,6 +237,7 @@ describe("profile list", () => {
       "motion-comic",
       "paper-cutout",
       "stickman-ink",
+      "story",
     ]);
     const byId = Object.fromEntries(
       profiles.map((profile) => [profile.id, profile]),
@@ -284,7 +285,7 @@ describe("profile list", () => {
     });
     expect(await runCli(["profile", "list"])).toBe(0);
     vi.restoreAllMocks();
-    expect(lines).toHaveLength(7);
+    expect(lines).toHaveLength(8);
     expect(lines[0]).toMatch(/^bedah-25d@0\.1\.0 \|/);
     expect(lines[1]).toMatch(
       /^current-issues@0\.3\.0 \| sources required \| 15-30 s \| voice id-editorial-grounded-v1 \| Explain/,
@@ -296,6 +297,7 @@ describe("profile list", () => {
     expect(lines[4]).toMatch(/^motion-comic@0\.1\.0 \|/);
     expect(lines[5]).toMatch(/^paper-cutout@0\.1\.0 \|/);
     expect(lines[6]).toMatch(/^stickman-ink@0\.1\.0 \|/);
+    expect(lines[7]).toMatch(/^story@0\.1\.0 \|/);
     expect((await run("profile", "list", "extra")).exitCode).toBe(3);
   });
 
