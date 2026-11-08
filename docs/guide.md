@@ -215,6 +215,8 @@ For Motion Comic, use a matching source build or local engine archive that conta
 
 For Story, use a matching source build or local engine archive that contains `profiles/story`. Install the canonical skill, add `--skill naraframe-story` with the same installer, and choose `$naraframe-story` in Codex. The `story` catalog pairs `note-gust` with `note-catch` and `puddle-stop` with `puddle-cross`, all at `0.1.0`. CLI authors can select `--profile story` and import each pair in order.
 
+A matching source build or local engine archive also includes `library/explainers/catalog.json` for plain briefs on `general-explainer`. It has `sealed-straw@0.1.0` for cause and effect and `hidden-key@0.1.0` for editorial collage. Both start with a visual question and use editable layers to show the answer. Select the pattern by the subject of the shot.
+
 ### Example brief
 
 Replace the details in square brackets. Invoke `$naraframe` in Codex or `/naraframe` in Claude Code before using this prompt:

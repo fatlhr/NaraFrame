@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 186 94">
+  <title>Brass key cutout</title>
+  <path d="M12 30Q31 3 60 7q29 4 38 31h68l14 14-15 18-11-8-13 8-13-9-12 8H89q-13 21-38 20Q12 85 7 58Z" fill="#C98B59" stroke="#4E3644" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M8 24Q27 0 55 4q28 4 38 28h69l15 15-15 16-11-8-13 8-13-8-11 7H86Q72 84 48 81 11 77 6 52Z" fill="#F5CF81" stroke="#4E3644" stroke-width="4" stroke-linejoin="round"/>
+  <ellipse cx="49" cy="42" rx="17" ry="15" fill="#E4B47B" stroke="#4E3644" stroke-width="3"/>
+  <path d="M96 39h60" stroke="#FFF1B6" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -334,6 +334,7 @@ const resources = [
   "library/series/study-notes: repository-authored declarative templates and example values; no audio",
   "profiles: repository-authored profiles and direction",
   "library/characters: original SVG and PNG illustrations and declarative templates; no audio",
+  "library/explainers: original SVG cutouts and declarative explainer templates; no audio",
   "starter: neutral authored data, no media or fonts",
 ];
 if (registry) {

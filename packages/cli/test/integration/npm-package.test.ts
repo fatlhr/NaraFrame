@@ -201,6 +201,8 @@ describe("publishable npm package", () => {
       "library/characters/motion-comic/squeaky-sneaker.png",
       "library/characters/story/catalog.json",
       "library/characters/story/runner-step.svg",
+      "library/explainers/catalog.json",
+      "library/explainers/key-cutout.svg",
       "starter/README.md",
       "starter/demo/naraframe.json",
       "skills/naraframe/SKILL.md",

@@ -1,0 +1,715 @@
+{
+  "schemaVersion": 1,
+  "id": "general-explainer-patterns",
+  "version": "0.1.0",
+  "provenance": {
+    "source": "NaraFrame original cause-and-effect and editorial collage studies",
+    "license": "MIT"
+  },
+  "assets": [
+    {
+      "id": "key-cutout",
+      "status": "ready",
+      "kind": "svg",
+      "path": "key-cutout.svg",
+      "binding": "neutral",
+      "sha256": "d036e74a8725f8035e6e30b3edb73a28511a8c9aaf5455d9b3b5ed608901c7ff",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Editorial Collage artwork",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "memo-cutout",
+      "status": "ready",
+      "kind": "svg",
+      "path": "memo-cutout.svg",
+      "binding": "neutral",
+      "sha256": "7504de40dd25e36ca0833228562393f89934efdfbcd293de345b2f3b12cfbcf8",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Editorial Collage artwork",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "receipt-cutout",
+      "status": "ready",
+      "kind": "svg",
+      "path": "receipt-cutout.svg",
+      "binding": "neutral",
+      "sha256": "08fc788e6c21e1b8a30a8b9d5315314d5ca601a5483e035141c0a8ca5ea87a72",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Editorial Collage artwork",
+        "license": "MIT"
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "id": "sealed-straw",
+      "version": "0.1.0",
+      "description": "Show the suspended water first. Open the top to admit air and let the water fall.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short English question."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Visual question and the action that answers it."
+        }
+      },
+      "template": {
+        "id": "sealed-straw",
+        "narrativeRole": "explanation",
+        "durationMs": 7600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 270,
+                "width": 888,
+                "height": 120
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Why won\u2019t it drain?",
+              "color": "#342C3F",
+              "fontSize": 82,
+              "fontWeight": 800,
+              "role": "body",
+              "maxLines": 1
+            },
+            {
+              "id": "paper",
+              "type": "shape",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "shape": "rectangle",
+              "fill": "#F7ECD9",
+              "cornerRadius": 0
+            },
+            {
+              "id": "kicker",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 192,
+                "width": 890,
+                "height": 50
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "CAUSE AND EFFECT",
+              "color": "#342C3F",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "role": "body",
+              "maxLines": 1
+            },
+            {
+              "id": "held",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 438,
+                "width": 882,
+                "height": 78
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "The top is sealed.",
+              "color": "#342C3F",
+              "fontSize": 46,
+              "fontWeight": 700,
+              "role": "body",
+              "maxLines": 1
+            },
+            {
+              "id": "open",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 438,
+                "width": 882,
+                "height": 78
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Now air can enter.",
+              "color": "#342C3F",
+              "fontSize": 46,
+              "fontWeight": 700,
+              "role": "body",
+              "maxLines": 1
+            },
+            {
+              "id": "straw-body",
+              "type": "shape",
+              "frame": {
+                "x": 460,
+                "y": 678,
+                "width": 160,
+                "height": 530
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#F4FCF2",
+              "cornerRadius": 34,
+              "stroke": {
+                "color": "#4C766E",
+                "width": 5
+              }
+            },
+            {
+              "id": "water-column",
+              "type": "shape",
+              "frame": {
+                "x": 484,
+                "y": 800,
+                "width": 112,
+                "height": 396
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "shape": "rectangle",
+              "fill": "#6FACA7",
+              "cornerRadius": 24
+            },
+            {
+              "id": "stopper",
+              "type": "shape",
+              "frame": {
+                "x": 416,
+                "y": 638,
+                "width": 248,
+                "height": 68
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "shape": "rectangle",
+              "fill": "#D78274",
+              "cornerRadius": 26,
+              "stroke": {
+                "color": "#704448",
+                "width": 5
+              }
+            },
+            {
+              "id": "air-arrows",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "d": "M270 355V391m-9-10 9 10 9-10M206 371q26-39 43-31m-8-8 8 8-11 6",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#835274",
+                "width": 2.4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "cup",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M169 635H371l-28 94H197Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#54766F",
+                "width": 2.4
+              },
+              "lineCap": "round",
+              "fill": "#D5E7D9"
+            },
+            {
+              "id": "cup-rim",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "d": "M169 635H371",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#54766F",
+                "width": 2.4
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "pool",
+              "type": "shape",
+              "frame": {
+                "x": 420,
+                "y": 1370,
+                "width": 240,
+                "height": 46
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "shape": "rectangle",
+              "fill": "#72AAA2",
+              "cornerRadius": 20
+            },
+            {
+              "id": "answer",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 1580,
+                "width": 888,
+                "height": 104
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Air in. Water out.",
+              "color": "#342C3F",
+              "fontSize": 64,
+              "fontWeight": 800,
+              "role": "body",
+              "maxLines": 1
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "lift-seal",
+            "targetId": "stopper",
+            "startMs": 1570,
+            "durationMs": 630,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 156,
+                "y": -130,
+                "rotationDeg": 15
+              }
+            }
+          },
+          {
+            "id": "hide-sealed",
+            "targetId": "held",
+            "startMs": 2020,
+            "durationMs": 190,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-air-label",
+            "targetId": "open",
+            "startMs": 2260,
+            "durationMs": 190,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "air-enters",
+            "targetId": "air-arrows",
+            "startMs": 2180,
+            "durationMs": 320,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "down",
+              "distance": 24
+            }
+          },
+          {
+            "id": "column-falls",
+            "targetId": "water-column",
+            "startMs": 2740,
+            "durationMs": 800,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 0,
+                "y": 468,
+                "scale": 0.2
+              }
+            }
+          },
+          {
+            "id": "column-enters-cup",
+            "targetId": "water-column",
+            "startMs": 3290,
+            "durationMs": 250,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "cup-fills",
+            "targetId": "pool",
+            "startMs": 3330,
+            "durationMs": 380,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-answer",
+            "targetId": "answer",
+            "startMs": 3780,
+            "durationMs": 300,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 24
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "Show the suspended water first. Open the top to admit air and let the water fall."
+      }
+    },
+    {
+      "id": "hidden-key",
+      "version": "0.1.0",
+      "description": "Assemble a collage over a key, then peel back each layer to make the cause visible.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short English question."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Visual question and the action that answers it."
+        }
+      },
+      "template": {
+        "id": "hidden-key",
+        "narrativeRole": "explanation",
+        "durationMs": 7600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 270,
+                "width": 888,
+                "height": 120
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Where did the key go?",
+              "color": "#342C3F",
+              "fontSize": 78,
+              "fontWeight": 800,
+              "role": "body",
+              "maxLines": 1
+            },
+            {
+              "id": "paper",
+              "type": "shape",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "shape": "rectangle",
+              "fill": "#F2E3E5",
+              "cornerRadius": 0
+            },
+            {
+              "id": "kicker",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 192,
+                "width": 890,
+                "height": 50
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "EDITORIAL COLLAGE",
+              "color": "#342C3F",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "role": "body",
+              "maxLines": 1
+            },
+            {
+              "id": "board-shadow",
+              "type": "shape",
+              "frame": {
+                "x": 106,
+                "y": 730,
+                "width": 880,
+                "height": 674
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "shape": "rectangle",
+              "fill": "#AE8D98",
+              "cornerRadius": 34
+            },
+            {
+              "id": "board",
+              "type": "shape",
+              "frame": {
+                "x": 94,
+                "y": 704,
+                "width": 880,
+                "height": 674
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#DEC2CC",
+              "cornerRadius": 34,
+              "stroke": {
+                "color": "#715263",
+                "width": 5
+              }
+            },
+            {
+              "id": "key-cutout",
+              "type": "image",
+              "frame": {
+                "x": 338,
+                "y": 946,
+                "width": 372,
+                "height": 188
+              },
+              "opacity": 1,
+              "rotationDeg": -11,
+              "zIndex": 3,
+              "assetId": "key-cutout",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "memo-cutout",
+              "type": "image",
+              "frame": {
+                "x": 184,
+                "y": 822,
+                "width": 514,
+                "height": 388
+              },
+              "opacity": 1,
+              "rotationDeg": 8,
+              "zIndex": 4,
+              "assetId": "memo-cutout",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "receipt-cutout",
+              "type": "image",
+              "frame": {
+                "x": 448,
+                "y": 826,
+                "width": 282,
+                "height": 470
+              },
+              "opacity": 1,
+              "rotationDeg": -13,
+              "zIndex": 5,
+              "assetId": "receipt-cutout",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "answer",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 1580,
+                "width": 888,
+                "height": 108
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Clear one layer at a time.",
+              "color": "#342C3F",
+              "fontSize": 60,
+              "fontWeight": 800,
+              "role": "body",
+              "maxLines": 1
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "memo-slips-in",
+            "targetId": "memo-cutout",
+            "startMs": 690,
+            "durationMs": 470,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "right",
+              "distance": 240
+            }
+          },
+          {
+            "id": "receipt-slips-in",
+            "targetId": "receipt-cutout",
+            "startMs": 1280,
+            "durationMs": 540,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "left",
+              "distance": 236
+            }
+          },
+          {
+            "id": "fan-receipt",
+            "targetId": "receipt-cutout",
+            "startMs": 2950,
+            "durationMs": 660,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 290,
+                "y": -214,
+                "rotationDeg": 11
+              }
+            }
+          },
+          {
+            "id": "fan-memo",
+            "targetId": "memo-cutout",
+            "startMs": 3730,
+            "durationMs": 640,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": -106,
+                "y": 336,
+                "rotationDeg": -17
+              }
+            }
+          },
+          {
+            "id": "spot-the-key",
+            "targetId": "key-cutout",
+            "startMs": 4470,
+            "durationMs": 560,
+            "action": "emphasize",
+            "params": {
+              "easingPreset": "smooth",
+              "scale": 1.12
+            }
+          },
+          {
+            "id": "show-answer",
+            "targetId": "answer",
+            "startMs": 5060,
+            "durationMs": 300,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 24
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "Assemble a collage over a key, then peel back each layer to make the cause visible."
+      }
+    }
+  ]
+}
