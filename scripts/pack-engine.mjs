@@ -227,6 +227,7 @@ for (const path of [
   "skills/naraframe",
   "skills/naraframe-stickman",
   "skills/naraframe-mekanik",
+  "skills/naraframe-mechanics",
   "skills/naraframe-paper",
   "skills/naraframe-3d",
   "skills/naraframe-comics",

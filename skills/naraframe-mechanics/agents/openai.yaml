@@ -1,0 +1,5 @@
+interface:
+  display_name: "NaraFrame Mechanic’s Bench"
+  short_description: "Explain how connected mechanical parts move"
+policy:
+  allow_implicit_invocation: false

@@ -233,7 +233,7 @@ describe("profile list", () => {
       "bedah-25d",
       "current-issues",
       "general-explainer",
-      "meja-mekanik",
+      "mechanics-bench",
       "motion-comic",
       "paper-cutout",
       "stickman-ink",
@@ -257,7 +257,7 @@ describe("profile list", () => {
       summary:
         "Teach one idea from a stable subject: how something works, what the numbers say, how two things differ.",
     });
-    expect(byId["meja-mekanik"]).toMatchObject({
+    expect(byId["mechanics-bench"]).toMatchObject({
       version: "0.1.0",
       summary: expect.stringContaining("fixed diagonal projection"),
     });
@@ -293,7 +293,7 @@ describe("profile list", () => {
     expect(lines[2]).toMatch(
       /^general-explainer@1\.0\.0 \| sources optional \| 15-60 s \| voice id-teaching-warm-v1 \| Teach one idea/,
     );
-    expect(lines[3]).toMatch(/^meja-mekanik@0\.1\.0 \|/);
+    expect(lines[3]).toMatch(/^mechanics-bench@0\.1\.0 \|/);
     expect(lines[4]).toMatch(/^motion-comic@0\.1\.0 \|/);
     expect(lines[5]).toMatch(/^paper-cutout@0\.1\.0 \|/);
     expect(lines[6]).toMatch(/^stickman-ink@0\.1\.0 \|/);

@@ -23,6 +23,7 @@ describe("listProfiles", () => {
       "bedah-25d",
       "current-issues",
       "general-explainer",
+      "mechanics-bench",
       "meja-mekanik",
       "motion-comic",
       "paper-cutout",

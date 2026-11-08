@@ -1592,15 +1592,19 @@ const profileCommand = async (args: readonly string[]): Promise<Execution> => {
     if (parsed.error || parsed.positionals.length > 0 || parsed.flags.size > 0)
       return usageFailure("profile", parsed.error ?? usageText);
     const listed = await listProfiles(resolve(repositoryRoot, "profiles"));
+    // Keep the 0.2.0 ID resolvable for installed wrappers and pinned projects.
+    const profiles = listed.profiles.filter(
+      (profile) => profile.id !== "meja-mekanik",
+    );
     const seconds = (ms: number): string => `${Number((ms / 1000).toFixed(1))}`;
     return {
       exitCode: 0,
       event: commonEvent("profile", {
         issues: listed.issues,
-        data: { action: "list", profiles: listed.profiles },
+        data: { action: "list", profiles },
       }),
-      human: listed.profiles.length
-        ? listed.profiles.map(
+      human: profiles.length
+        ? profiles.map(
             (profile) =>
               `${profile.id}@${profile.version} | ${profile.requireSourcing ? "sources required" : "sources optional"} | ${seconds(profile.preferredDurationMs.min)}-${seconds(profile.preferredDurationMs.max)} s | voice ${profile.voiceStyleSignature} | ${profile.summary}`,
           )

@@ -71,6 +71,7 @@ export const engineIdentity = async (root: string): Promise<string> => {
     "skills/naraframe",
     "skills/naraframe-stickman",
     "skills/naraframe-mekanik",
+    "skills/naraframe-mechanics",
     "skills/naraframe-paper",
     "skills/naraframe-3d",
     "skills/naraframe-comics",
