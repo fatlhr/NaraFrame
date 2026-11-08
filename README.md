@@ -52,9 +52,9 @@ Eight short, silent previews. Watch how each style uses movement to show an idea
 | | |
 |:---:|:---:|
 | ![A sealed straw holds water in place. Lift the seal and the water drops.](docs/assets/readme/profiles/general-explainer.webp)<br>**Motion Explainer**<br>*Why won’t it drain?* | ![A spacecraft hits Dimorphos and its orbit changes.](docs/assets/readme/profiles/current-issues.webp)<br>**Editorial / Current Issues**<br>*An asteroid nudge* |
-| ![A stick figure leans into a tug until the kite slips free.](docs/assets/readme/profiles/stickman-ink.webp)<br>**Stickman Ink**<br>*Kite in the fence* | ![Follow a pin in its slot to see what lifts the gate.](docs/assets/readme/profiles/mechanics-bench.webp)<br>**Mechanic’s Bench**<br>*A pin lifts a gate* |
+| ![A stick figure plants both heels, yanks the kite free, and tumbles backward.](docs/assets/readme/profiles/stickman-ink.webp)<br>**Stickman Ink**<br>*Kite in the Fence* | ![Follow a pin in its slot to see what lifts the gate.](docs/assets/readme/profiles/mechanics-bench.webp)<br>**Mechanic’s Bench**<br>*A pin lifts a gate* |
 | ![A folded bridge lands, then a paper token crosses.](docs/assets/readme/profiles/paper-cutout.webp)<br>**Paper Cutout**<br>*A bridge made of paper* | ![A dispenser separates into parts and snaps back together.](docs/assets/readme/profiles/bedah-25d.webp)<br>**Bedah 2.5D**<br>*Why tape tears* |
-| ![Three panels follow a robot, a squeak, and a librarian’s reaction.](docs/assets/readme/profiles/motion-comic.webp)<br>**Motion Comic**<br>*The Squeaky Sneaker* | ![The wind steals a note. The courier’s reach carries through the cut.](docs/assets/readme/profiles/story.webp)<br>**Story**<br>*The Windy Note* |
+| ![Three panels follow a robot, a squeak, and a librarian’s reaction.](docs/assets/readme/profiles/motion-comic.webp)<br>**Motion Comic**<br>*The Squeaky Sneaker* | ![Rain puts out a match. The traveler cups the next flame and lights a lantern.](docs/assets/readme/profiles/story.webp)<br>**Story**<br>*The Last Match* |
 
 The DART example draws on [NASA’s orbital analysis](https://www.nasa.gov/missions/dart/nasa-study-asteroids-orbit-shape-changed-after-dart-impact/).
 
@@ -68,12 +68,12 @@ A plain brief for a new video uses **Motion Explainer**. Choose a profile when i
 |---|---|---|---|
 | **Motion Explainer** · `general-explainer` | A process, comparison, or cause and effect | Start with a plain brief or choose `$naraframe` | [Why won’t it drain?](docs/assets/readme/profiles/general-explainer.webp) |
 | **Editorial / Current Issues** · `current-issues` | A sourced explanation of an event | Choose `$naraframe` and ask for `current-issues` | [An asteroid nudge](docs/assets/readme/profiles/current-issues.webp) |
-| **Stickman Ink** · `stickman-ink` | A pose, reaction, or interaction with a prop | Choose `$naraframe-stickman` | [Kite in the fence](docs/assets/readme/profiles/stickman-ink.webp) |
+| **Stickman Ink** · `stickman-ink` | A pose, reaction, or interaction with a prop | Choose `$naraframe-stickman` | [Kite in the Fence](docs/assets/readme/profiles/stickman-ink.webp) |
 | **Mechanic’s Bench** · `mechanics-bench` | A mechanism with connected parts | Choose `$naraframe-mechanics` | [A pin lifts a gate](docs/assets/readme/profiles/mechanics-bench.webp) |
 | **Paper Cutout** · `paper-cutout` | Layers, folds, and stepped movement | Choose `$naraframe-paper` | [A bridge made of paper](docs/assets/readme/profiles/paper-cutout.webp) |
 | **Bedah 2.5D** · `bedah-25d` | An exploded view of how an object fits together | Choose `$naraframe-3d` | [Why tape tears](docs/assets/readme/profiles/bedah-25d.webp) |
 | **Motion Comic** · `motion-comic` | A short story told through panels and dialogue | Choose `$naraframe-comics` | [The Squeaky Sneaker](docs/assets/readme/profiles/motion-comic.webp) |
-| **Story** · `story` | An action and consequence across shots | Choose `$naraframe-story` | [The Windy Note](docs/assets/readme/profiles/story.webp) |
+| **Story** · `story` | An action and consequence across shots | Choose `$naraframe-story` | [The Last Match](docs/assets/readme/profiles/story.webp) |
 
 Install character skills from a matching source build or local engine archive. The published npm `0.2.0` package includes Stickman Ink, the original Mechanic’s Bench entry (`$naraframe-mekanik` with `meja-mekanik`), and Paper Cutout. [Install character skills and preview a pattern](docs/guide.md#character-skills)
 

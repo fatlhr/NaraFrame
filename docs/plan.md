@@ -1847,6 +1847,8 @@ V1–V4 target zero new runtime packages. For each accepted feature, retain the 
 
 **V5.2 review checkpoint (2026-11-08).** The local gallery candidate pairs eight profiles with eight distinct English previews. The 46.9-second review reel and `gallery-index.json` retain each source revision, build ID, clip range and animation checksum. Inspected the visible copy, verified 16 gallery links and the install-guide anchor, and checked all eight preview reports for frame-integrity outliers. The animated assets total 216,270 bytes. `pnpm verify` passed 399 unit and 572 integration tests. The gallery remains open for owner review and the matching public release.
 
+**V5.2 visual revision (2026-11-08).** Owner review requested stronger character animation and illustration for Story and Stickman Ink. Story now uses *The Last Match*, with a rooftop establishing shot and a close-up of hands shielding the flame. Stickman Ink uses four hand-drawn poses and a kite line that carries the pull across the cut. Local preview builds `619c4a219a79-7093c8c8-8e6` and `985d6c295e3b-dceed178-528` passed frame integrity. The 13.9-second revision reel isolates these two clips. Owner review remains open.
+
 ### README style chooser draft
 
 This V0 draft records the original chooser format. V5.2 replaces the public gallery and pairs it with the chooser. Source rows from the [style map](spec.md#visual-library-and-optional-studio). The public section lists routes evidenced for the named source build, local archive, or release. Internal pilots need an approved public example before they are linked from README.
