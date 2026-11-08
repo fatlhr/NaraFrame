@@ -1,0 +1,5 @@
+interface:
+  display_name: "NaraFrame Motion Comic"
+  short_description: "Tell a short story through moving comic panels"
+policy:
+  allow_implicit_invocation: false

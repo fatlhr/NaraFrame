@@ -211,6 +211,8 @@ node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project 
 
 Choose `$naraframe-3d` to show an object in use, separate its parts, and reassemble it at a fixed projection. The `bedah-25d` catalog includes `tape-dispenser@0.1.0` and `flashlight@0.1.0`. CLI authors can select `--profile bedah-25d` and import either pattern.
 
+For Motion Comic, use a matching source build or local engine archive that contains `profiles/motion-comic`. After installing the canonical skill, run the same installer with `--skill naraframe-comics` and choose `$naraframe-comics` in Codex. The `motion-comic` catalog includes `cookie-decoy@0.1.0` and `squeaky-sneaker@0.1.0`, with three editable panels and dialogue in each story. CLI authors can select `--profile motion-comic` and import either pattern.
+
 ### Example brief
 
 Replace the details in square brackets. Invoke `$naraframe` in Codex or `/naraframe` in Claude Code before using this prompt:

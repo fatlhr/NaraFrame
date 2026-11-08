@@ -104,6 +104,7 @@ describe("character skill installation", () => {
     "naraframe-mekanik",
     "naraframe-paper",
     "naraframe-3d",
+    "naraframe-comics",
   ])(
     "owns %s separately and preserves local edits on update",
     async (skill) => {

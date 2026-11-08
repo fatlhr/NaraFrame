@@ -234,6 +234,7 @@ describe("profile list", () => {
       "current-issues",
       "general-explainer",
       "meja-mekanik",
+      "motion-comic",
       "paper-cutout",
       "stickman-ink",
     ]);
@@ -283,7 +284,7 @@ describe("profile list", () => {
     });
     expect(await runCli(["profile", "list"])).toBe(0);
     vi.restoreAllMocks();
-    expect(lines).toHaveLength(6);
+    expect(lines).toHaveLength(7);
     expect(lines[0]).toMatch(/^bedah-25d@0\.1\.0 \|/);
     expect(lines[1]).toMatch(
       /^current-issues@0\.3\.0 \| sources required \| 15-30 s \| voice id-editorial-grounded-v1 \| Explain/,
@@ -292,8 +293,9 @@ describe("profile list", () => {
       /^general-explainer@1\.0\.0 \| sources optional \| 15-60 s \| voice id-teaching-warm-v1 \| Teach one idea/,
     );
     expect(lines[3]).toMatch(/^meja-mekanik@0\.1\.0 \|/);
-    expect(lines[4]).toMatch(/^paper-cutout@0\.1\.0 \|/);
-    expect(lines[5]).toMatch(/^stickman-ink@0\.1\.0 \|/);
+    expect(lines[4]).toMatch(/^motion-comic@0\.1\.0 \|/);
+    expect(lines[5]).toMatch(/^paper-cutout@0\.1\.0 \|/);
+    expect(lines[6]).toMatch(/^stickman-ink@0\.1\.0 \|/);
     expect((await run("profile", "list", "extra")).exitCode).toBe(3);
   });
 

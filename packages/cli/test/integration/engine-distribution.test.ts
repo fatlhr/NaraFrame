@@ -110,6 +110,7 @@ describe("offline engine distribution", () => {
       "current-issues",
       "general-explainer",
       "meja-mekanik",
+      "motion-comic",
       "paper-cutout",
       "stickman-ink",
     ]);
@@ -145,6 +146,33 @@ describe("offline engine distribution", () => {
       version: "0.1.0",
       patterns: [{ id: "tape-dispenser" }, { id: "flashlight" }],
     });
+  });
+
+  it("ships both Motion Comic stories with three manual crops per page", () => {
+    const catalog = join(
+      engine,
+      "library/characters/motion-comic/catalog.json",
+    );
+    const result = invoke("library", "inspect", catalog);
+    expect(result.success).toBe(true);
+    expect(result.data.catalog).toMatchObject({
+      id: "motion-comic",
+      version: "0.1.0",
+      patterns: [{ id: "cookie-decoy" }, { id: "squeaky-sneaker" }],
+    });
+    for (const pattern of result.data.catalog.patterns) {
+      expect(pattern.template.visual.layers).toEqual(
+        expect.arrayContaining(
+          [12, 252, 492].map((y, index) =>
+            expect.objectContaining({
+              id: `panel-${index + 1}`,
+              assetId: pattern.id,
+              crop: expect.objectContaining({ y }),
+            }),
+          ),
+        ),
+      );
+    }
   });
   it("binds runtime/resources independently of version and refuses extra version arguments", async () => {
     const before = invoke("version").data.engineIdentity;

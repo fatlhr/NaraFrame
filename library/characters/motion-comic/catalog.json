@@ -1,0 +1,1545 @@
+{
+  "schemaVersion": 1,
+  "id": "motion-comic",
+  "version": "0.1.0",
+  "provenance": {
+    "source": "NaraFrame original comic artwork",
+    "license": "MIT"
+  },
+  "assets": [
+    {
+      "id": "cookie-decoy",
+      "status": "ready",
+      "kind": "png",
+      "path": "cookie-decoy.png",
+      "sha256": "6de22f94bea4b674810bde20e28bd04689f1d278712b9e37d68c74d8ff6b11c8",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Motion Comic page",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "squeaky-sneaker",
+      "status": "ready",
+      "kind": "png",
+      "path": "squeaky-sneaker.png",
+      "sha256": "d5454261c362fcd9f9221ad61f3e30271cf7305291a9b3688651dc8a99004d3c",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Motion Comic page",
+        "license": "MIT"
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "id": "cookie-decoy",
+      "version": "0.1.0",
+      "description": "A mouse distracts a watchful cat, takes the cookie, and leaves an empty plate.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short English comic title."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What changes between the three panels."
+        }
+      },
+      "template": {
+        "id": "cookie-decoy",
+        "narrativeRole": "explanation",
+        "durationMs": 7600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 250,
+                "width": 888,
+                "height": 118
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "The Cookie Decoy",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 82,
+              "fontWeight": 800,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "kicker",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 188,
+                "width": 880,
+                "height": 46
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "COMIC STRIP  /  01",
+              "role": "body",
+              "color": "#514454",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "heading-rule",
+              "type": "shape",
+              "frame": {
+                "x": 98,
+                "y": 394,
+                "width": 880,
+                "height": 6
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "shape": "rectangle",
+              "fill": "#282431",
+              "cornerRadius": 0
+            },
+            {
+              "id": "panel-1-paper",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 494,
+                "width": 890,
+                "height": 312
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#F3EADB",
+              "cornerRadius": 0,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "panel-1",
+              "type": "image",
+              "frame": {
+                "x": 100,
+                "y": 500,
+                "width": 882,
+                "height": 300
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "cookie-decoy",
+              "fit": "cover",
+              "cornerRadius": 0,
+              "crop": {
+                "x": 26,
+                "y": 12,
+                "width": 588,
+                "height": 200
+              }
+            },
+            {
+              "id": "panel-1-outline",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 802,
+                "width": 890,
+                "height": 6
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 10,
+              "shape": "rectangle",
+              "fill": "#BA514B",
+              "cornerRadius": 0
+            },
+            {
+              "id": "panel-1-index",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 442,
+                "width": 64,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "01",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-1-cursor",
+              "type": "shape",
+              "frame": {
+                "x": 170,
+                "y": 460,
+                "width": 68,
+                "height": 10
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "shape": "rectangle",
+              "fill": "#BA514B",
+              "cornerRadius": 0
+            },
+            {
+              "id": "bubble-1",
+              "type": "shape",
+              "frame": {
+                "x": 488,
+                "y": 518,
+                "width": 226,
+                "height": 62
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 14,
+              "shape": "rectangle",
+              "fill": "#FFF7E6",
+              "cornerRadius": 20,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "dialogue-1",
+              "type": "text",
+              "frame": {
+                "x": 496,
+                "y": 520,
+                "width": 210,
+                "height": 58
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "My cookie.",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "center",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-2-paper",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 872,
+                "width": 890,
+                "height": 312
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#F3EADB",
+              "cornerRadius": 0,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "panel-2",
+              "type": "image",
+              "frame": {
+                "x": 100,
+                "y": 878,
+                "width": 882,
+                "height": 300
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "cookie-decoy",
+              "fit": "cover",
+              "cornerRadius": 0,
+              "crop": {
+                "x": 30,
+                "y": 252,
+                "width": 588,
+                "height": 200
+              }
+            },
+            {
+              "id": "panel-2-outline",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 1180,
+                "width": 890,
+                "height": 6
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 10,
+              "shape": "rectangle",
+              "fill": "#BA514B",
+              "cornerRadius": 0
+            },
+            {
+              "id": "panel-2-index",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 820,
+                "width": 64,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "02",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-2-cursor",
+              "type": "shape",
+              "frame": {
+                "x": 170,
+                "y": 838,
+                "width": 68,
+                "height": 10
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "shape": "rectangle",
+              "fill": "#BA514B",
+              "cornerRadius": 0
+            },
+            {
+              "id": "bubble-2",
+              "type": "shape",
+              "frame": {
+                "x": 116,
+                "y": 896,
+                "width": 212,
+                "height": 62
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 14,
+              "shape": "rectangle",
+              "fill": "#FFF7E6",
+              "cornerRadius": 20,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "dialogue-2",
+              "type": "text",
+              "frame": {
+                "x": 124,
+                "y": 898,
+                "width": 196,
+                "height": 58
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "Look left!",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "center",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-3-paper",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 1250,
+                "width": 890,
+                "height": 312
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#F3EADB",
+              "cornerRadius": 0,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "panel-3",
+              "type": "image",
+              "frame": {
+                "x": 100,
+                "y": 1256,
+                "width": 882,
+                "height": 300
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "cookie-decoy",
+              "fit": "cover",
+              "cornerRadius": 0,
+              "crop": {
+                "x": 26,
+                "y": 492,
+                "width": 588,
+                "height": 200
+              }
+            },
+            {
+              "id": "panel-3-outline",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 1558,
+                "width": 890,
+                "height": 6
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 10,
+              "shape": "rectangle",
+              "fill": "#BA514B",
+              "cornerRadius": 0
+            },
+            {
+              "id": "panel-3-index",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 1198,
+                "width": 64,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "03",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-3-cursor",
+              "type": "shape",
+              "frame": {
+                "x": 170,
+                "y": 1216,
+                "width": 68,
+                "height": 10
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "shape": "rectangle",
+              "fill": "#BA514B",
+              "cornerRadius": 0
+            },
+            {
+              "id": "bubble-3",
+              "type": "shape",
+              "frame": {
+                "x": 510,
+                "y": 1274,
+                "width": 152,
+                "height": 62
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 14,
+              "shape": "rectangle",
+              "fill": "#FFF7E6",
+              "cornerRadius": 20,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "dialogue-3",
+              "type": "text",
+              "frame": {
+                "x": 518,
+                "y": 1276,
+                "width": 136,
+                "height": 58
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "HEY!",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "center",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "focus-panel-1-outline",
+            "targetId": "panel-1-outline",
+            "startMs": 0,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "leave-panel-1-outline",
+            "targetId": "panel-1-outline",
+            "startMs": 2060,
+            "durationMs": 140,
+            "action": "exit",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-1-cursor",
+            "targetId": "panel-1-cursor",
+            "startMs": 0,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "leave-panel-1-cursor",
+            "targetId": "panel-1-cursor",
+            "startMs": 2060,
+            "durationMs": 140,
+            "action": "exit",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-panel-1",
+            "targetId": "panel-1",
+            "startMs": 0,
+            "durationMs": 180,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-bubble-1",
+            "targetId": "bubble-1",
+            "startMs": 280,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-dialogue-1",
+            "targetId": "dialogue-1",
+            "startMs": 280,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-2-outline",
+            "targetId": "panel-2-outline",
+            "startMs": 2230,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "leave-panel-2-outline",
+            "targetId": "panel-2-outline",
+            "startMs": 4440,
+            "durationMs": 140,
+            "action": "exit",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-2-cursor",
+            "targetId": "panel-2-cursor",
+            "startMs": 2230,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "leave-panel-2-cursor",
+            "targetId": "panel-2-cursor",
+            "startMs": 4440,
+            "durationMs": 140,
+            "action": "exit",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-panel-2",
+            "targetId": "panel-2",
+            "startMs": 2230,
+            "durationMs": 180,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 9,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-bubble-2",
+            "targetId": "bubble-2",
+            "startMs": 2510,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-dialogue-2",
+            "targetId": "dialogue-2",
+            "startMs": 2510,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-3-outline",
+            "targetId": "panel-3-outline",
+            "startMs": 4610,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-3-cursor",
+            "targetId": "panel-3-cursor",
+            "startMs": 4610,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-panel-3",
+            "targetId": "panel-3",
+            "startMs": 4610,
+            "durationMs": 180,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 9,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-bubble-3",
+            "targetId": "bubble-3",
+            "startMs": 5020,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-dialogue-3",
+            "targetId": "dialogue-3",
+            "startMs": 5020,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "A mouse distracts a watchful cat, takes the cookie, and leaves an empty plate."
+      }
+    },
+    {
+      "id": "squeaky-sneaker",
+      "version": "0.1.0",
+      "description": "A robot squeaks past a librarian, switches to felt slippers, and walks quietly.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short English comic title."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "What changes between the three panels."
+        }
+      },
+      "template": {
+        "id": "squeaky-sneaker",
+        "narrativeRole": "explanation",
+        "durationMs": 7600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 250,
+                "width": 888,
+                "height": 118
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "The Squeaky Sneaker",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 82,
+              "fontWeight": 800,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "kicker",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 188,
+                "width": 880,
+                "height": 46
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "COMIC STRIP  /  02",
+              "role": "body",
+              "color": "#514454",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "heading-rule",
+              "type": "shape",
+              "frame": {
+                "x": 98,
+                "y": 394,
+                "width": 880,
+                "height": 6
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "shape": "rectangle",
+              "fill": "#282431",
+              "cornerRadius": 0
+            },
+            {
+              "id": "panel-1-paper",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 494,
+                "width": 890,
+                "height": 312
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#F3EADB",
+              "cornerRadius": 0,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "panel-1",
+              "type": "image",
+              "frame": {
+                "x": 100,
+                "y": 500,
+                "width": 882,
+                "height": 300
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "squeaky-sneaker",
+              "fit": "cover",
+              "cornerRadius": 0,
+              "crop": {
+                "x": 26,
+                "y": 12,
+                "width": 588,
+                "height": 200
+              }
+            },
+            {
+              "id": "panel-1-outline",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 802,
+                "width": 890,
+                "height": 6
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 10,
+              "shape": "rectangle",
+              "fill": "#80609D",
+              "cornerRadius": 0
+            },
+            {
+              "id": "panel-1-index",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 442,
+                "width": 64,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "01",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-1-cursor",
+              "type": "shape",
+              "frame": {
+                "x": 170,
+                "y": 460,
+                "width": 68,
+                "height": 10
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "shape": "rectangle",
+              "fill": "#80609D",
+              "cornerRadius": 0
+            },
+            {
+              "id": "bubble-1",
+              "type": "shape",
+              "frame": {
+                "x": 476,
+                "y": 518,
+                "width": 234,
+                "height": 62
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 14,
+              "shape": "rectangle",
+              "fill": "#FFF7E6",
+              "cornerRadius": 20,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "dialogue-1",
+              "type": "text",
+              "frame": {
+                "x": 484,
+                "y": 520,
+                "width": 218,
+                "height": 58
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "Quiet feet.",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "center",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-2-paper",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 872,
+                "width": 890,
+                "height": 312
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#F3EADB",
+              "cornerRadius": 0,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "panel-2",
+              "type": "image",
+              "frame": {
+                "x": 100,
+                "y": 878,
+                "width": 882,
+                "height": 300
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "squeaky-sneaker",
+              "fit": "cover",
+              "cornerRadius": 0,
+              "crop": {
+                "x": 30,
+                "y": 252,
+                "width": 588,
+                "height": 200
+              }
+            },
+            {
+              "id": "panel-2-outline",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 1180,
+                "width": 890,
+                "height": 6
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 10,
+              "shape": "rectangle",
+              "fill": "#80609D",
+              "cornerRadius": 0
+            },
+            {
+              "id": "panel-2-index",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 820,
+                "width": 64,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "02",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-2-cursor",
+              "type": "shape",
+              "frame": {
+                "x": 170,
+                "y": 838,
+                "width": 68,
+                "height": 10
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "shape": "rectangle",
+              "fill": "#80609D",
+              "cornerRadius": 0
+            },
+            {
+              "id": "bubble-2",
+              "type": "shape",
+              "frame": {
+                "x": 780,
+                "y": 896,
+                "width": 158,
+                "height": 62
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 14,
+              "shape": "rectangle",
+              "fill": "#FFF7E6",
+              "cornerRadius": 20,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "dialogue-2",
+              "type": "text",
+              "frame": {
+                "x": 788,
+                "y": 898,
+                "width": 142,
+                "height": 58
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "Shh!",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "center",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-3-paper",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 1250,
+                "width": 890,
+                "height": 312
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "shape": "rectangle",
+              "fill": "#F3EADB",
+              "cornerRadius": 0,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "panel-3",
+              "type": "image",
+              "frame": {
+                "x": 100,
+                "y": 1256,
+                "width": 882,
+                "height": 300
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "assetId": "squeaky-sneaker",
+              "fit": "cover",
+              "cornerRadius": 0,
+              "crop": {
+                "x": 26,
+                "y": 492,
+                "width": 588,
+                "height": 200
+              }
+            },
+            {
+              "id": "panel-3-outline",
+              "type": "shape",
+              "frame": {
+                "x": 96,
+                "y": 1558,
+                "width": 890,
+                "height": 6
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 10,
+              "shape": "rectangle",
+              "fill": "#80609D",
+              "cornerRadius": 0
+            },
+            {
+              "id": "panel-3-index",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 1198,
+                "width": 64,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "03",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "panel-3-cursor",
+              "type": "shape",
+              "frame": {
+                "x": 170,
+                "y": 1216,
+                "width": 68,
+                "height": 10
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "shape": "rectangle",
+              "fill": "#80609D",
+              "cornerRadius": 0
+            },
+            {
+              "id": "bubble-3",
+              "type": "shape",
+              "frame": {
+                "x": 542,
+                "y": 1274,
+                "width": 260,
+                "height": 62
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 14,
+              "shape": "rectangle",
+              "fill": "#FFF7E6",
+              "cornerRadius": 20,
+              "stroke": {
+                "color": "#282431",
+                "width": 4
+              }
+            },
+            {
+              "id": "dialogue-3",
+              "type": "text",
+              "frame": {
+                "x": 550,
+                "y": 1276,
+                "width": 244,
+                "height": 58
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "Much better.",
+              "role": "body",
+              "color": "#282431",
+              "fontSize": 32,
+              "fontWeight": 700,
+              "maxLines": 1,
+              "textAlign": "center",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            },
+            {
+              "id": "impact",
+              "type": "text",
+              "frame": {
+                "x": 210,
+                "y": 1106,
+                "width": 310,
+                "height": 60
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 24,
+              "text": "SQUEAK!",
+              "role": "body",
+              "color": "#543570",
+              "fontSize": 40,
+              "fontWeight": 900,
+              "maxLines": 1,
+              "textAlign": "left",
+              "verticalAlign": "center",
+              "lineHeight": 1.04
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "focus-panel-1-outline",
+            "targetId": "panel-1-outline",
+            "startMs": 0,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "leave-panel-1-outline",
+            "targetId": "panel-1-outline",
+            "startMs": 1960,
+            "durationMs": 140,
+            "action": "exit",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-1-cursor",
+            "targetId": "panel-1-cursor",
+            "startMs": 0,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "leave-panel-1-cursor",
+            "targetId": "panel-1-cursor",
+            "startMs": 1960,
+            "durationMs": 140,
+            "action": "exit",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-panel-1",
+            "targetId": "panel-1",
+            "startMs": 0,
+            "durationMs": 180,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-bubble-1",
+            "targetId": "bubble-1",
+            "startMs": 280,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-dialogue-1",
+            "targetId": "dialogue-1",
+            "startMs": 280,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-2-outline",
+            "targetId": "panel-2-outline",
+            "startMs": 2130,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "leave-panel-2-outline",
+            "targetId": "panel-2-outline",
+            "startMs": 4460,
+            "durationMs": 140,
+            "action": "exit",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-2-cursor",
+            "targetId": "panel-2-cursor",
+            "startMs": 2130,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "leave-panel-2-cursor",
+            "targetId": "panel-2-cursor",
+            "startMs": 4460,
+            "durationMs": 140,
+            "action": "exit",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-panel-2",
+            "targetId": "panel-2",
+            "startMs": 2130,
+            "durationMs": 180,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 9,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-bubble-2",
+            "targetId": "bubble-2",
+            "startMs": 2410,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-dialogue-2",
+            "targetId": "dialogue-2",
+            "startMs": 2410,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-3-outline",
+            "targetId": "panel-3-outline",
+            "startMs": 4630,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "focus-panel-3-cursor",
+            "targetId": "panel-3-cursor",
+            "startMs": 4630,
+            "durationMs": 140,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-panel-3",
+            "targetId": "panel-3",
+            "startMs": 4630,
+            "durationMs": 180,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 9,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-bubble-3",
+            "targetId": "bubble-3",
+            "startMs": 5040,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-dialogue-3",
+            "targetId": "dialogue-3",
+            "startMs": 5040,
+            "durationMs": 160,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 10,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-impact",
+            "targetId": "impact",
+            "startMs": 2275,
+            "durationMs": 130,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 13,
+              "easingPreset": "snappy"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "A robot squeaks past a librarian, switches to felt slippers, and walks quietly."
+      }
+    }
+  ]
+}

@@ -24,6 +24,7 @@ describe("listProfiles", () => {
       "current-issues",
       "general-explainer",
       "meja-mekanik",
+      "motion-comic",
       "paper-cutout",
       "stickman-ink",
     ]);
