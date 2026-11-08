@@ -70,7 +70,7 @@ Add `--adopt` to bind a skill folder that was copied without the installer, such
 
 Add `--update` to replace a receipt-owned, unchanged install. Add `--remove` to remove only that owned install. Both support `--dry-run`. A destination with no matching receipt, local edits, extra files or symlinks is refused. Preserve those files and inspect the conflict; do not delete them to make the installer succeed. An existing symlink installed manually stays intact and must be migrated explicitly by its owner.
 
-With an engine package that includes the character profiles and catalogs, install the canonical skill first. Then run the same installer in that scope with the character's `--skill` value. Mechanic’s Bench uses `naraframe-mechanics` in matching source builds and local archives. The published `0.2.0` package uses `naraframe-mekanik`, which remains available for existing installations. Character skills use the canonical launcher's engine binding. Use the same `--skill` value when updating or removing an installed skill. Update the canonical binding and character skills from the same package when changing engines.
+With an engine package that includes the character profiles and catalogs, install the canonical skill first. Then run the same installer in that scope with the character's `--skill` value. Mechanic’s Bench uses `naraframe-mechanics` in NaraFrame `0.3.0`. The `0.2.0` release used `naraframe-mekanik`, which remains available for existing installations. Character skills use the canonical launcher's engine binding. Use the same `--skill` value when updating or removing an installed skill. Update the canonical binding and character skills from the same package when changing engines.
 
 ## Resolve setup failures
 

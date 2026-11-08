@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 [![Tested on macOS Apple Silicon](https://img.shields.io/badge/tested%20on-macOS%20Apple%20Silicon-555?style=flat-square)](#what-you-need)
-[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0%20early%20release-f5a623?style=flat-square)](#good-to-know)
+[![Version 0.3.0](https://img.shields.io/badge/version-0.3.0%20early%20release-f5a623?style=flat-square)](#good-to-know)
 [![Works with Claude Code and Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex-7a5af5?style=flat-square)](#install)
 
 Tell your agent what the next episode is about. NaraFrame turns that into a 9:16 video with the same look as every episode before it, shows you a preview, and exports exactly the version you approved.
@@ -75,7 +75,7 @@ A plain brief for a new video uses **Motion Explainer**. Choose a profile when i
 | **Motion Comic** · `motion-comic` | A short story told through panels and dialogue | Choose `$naraframe-comics` | [The Squeaky Sneaker](docs/assets/readme/profiles/motion-comic.webp) |
 | **Story** · `story` | An action and consequence across shots | Choose `$naraframe-story` | [The Last Match](docs/assets/readme/profiles/story.webp) |
 
-Install character skills from a matching source build or local engine archive. The published npm `0.2.0` package includes Stickman Ink, the original Mechanic’s Bench entry (`$naraframe-mekanik` with `meja-mekanik`), and Paper Cutout. [Install character skills and preview a pattern](docs/guide.md#character-skills)
+Install `naraframe@0.3.0` from npm to get the profiles and character skills shown above. Existing Mechanic’s Bench projects keep their `meja-mekanik` profile pin. [Install character skills and preview a pattern](docs/guide.md#character-skills)
 
 <a id="how-it-works"></a>
 
@@ -208,7 +208,7 @@ Then start a new session in that project and explicitly invoke `$naraframe` in C
 The published engine also works directly from your terminal:
 
 ```bash
-npx -y naraframe@0.2.0 doctor --json
+npx -y naraframe@0.3.0 doctor --json
 ```
 
 The [technical guide](docs/guide.md#install-from-npm) covers installation, project files, previews, revisions and export.
@@ -250,7 +250,7 @@ Your video projects and exported MP4s live in your own folders and are not touch
 
 ## 📌 Good to know
 
-- 🌱 NaraFrame is an early release (0.2.0). Expect rough edges, and please report them in the issues.
+- 🌱 NaraFrame is an early release (0.3.0). Expect rough edges, and please report them in the issues.
 - 🎞️ It animates with a fixed set of moves: reveals, camera moves, transitions, counters and drawn paths. It suits clear explainers; it is not a free-form animation tool.
 - 🔎 Facts on screen are your responsibility. NaraFrame helps you label claims and cite sources, and a profile can require sources before export, but it cannot check facts for you.
 - 📤 An export is a video file on your computer. Where you post it is up to you.

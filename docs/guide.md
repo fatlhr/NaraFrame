@@ -57,33 +57,33 @@ You need internet access to fetch the repository and dependencies for source set
 
 ### Install from npm
 
-The published engine is `naraframe@0.2.0` and supports Node.js 22 or newer. From a workspace folder:
+The published engine is `naraframe@0.3.0` and supports Node.js 22 or newer. From a workspace folder:
 
 ```sh
-npm install --save-exact naraframe@0.2.0
+npm install --save-exact naraframe@0.3.0
 NARAFRAME_ENGINE="$PWD/node_modules/naraframe"
 npx naraframe version --json
 npx naraframe doctor --json
 ```
 
-This installs the CLI and bundled resources locally; it does not install a browser, FFmpeg or a skill into your agent. Fix any prerequisites reported by `doctor` before rendering. For a single command, use `npx -y naraframe@0.2.0 <command>`.
+This installs the CLI and bundled resources locally; it does not install a browser, FFmpeg or a skill into your agent. Fix any prerequisites reported by `doctor` before rendering. For a single command, use `npx -y naraframe@0.3.0 <command>`.
 
 Keep `NARAFRAME_ENGINE` as an absolute path for the skill and starter commands below. The examples also show `pnpm naraframe` from a source checkout; from the npm workspace, use `npx naraframe` instead. When working elsewhere, use `node "$NARAFRAME_ENGINE/packages/cli/dist/index.js"`. Keep video projects outside the engine's installation folder.
 
 ### Install a supplied engine archive
 
-Use this route if you have `naraframe-engine-0.2.0.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 22 or newer first, and install it in a dedicated directory:
+Use this route if you have `naraframe-engine-0.3.0.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 22 or newer first, and install it in a dedicated directory:
 
 ```sh
 mkdir naraframe-runtime
 cd naraframe-runtime
-npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.2.0.tgz
+npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.3.0.tgz
 NARAFRAME_ENGINE="$PWD/node_modules/naraframe-engine"
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" version --json
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" doctor --json
 ```
 
-`version` reports engine version `0.2.0`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
+`version` reports engine version `0.3.0`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
 
 The archive includes a neutral silent starter, profiles, reusable library data, the complete skill, and its installer. It excludes private production projects and development fixtures. Check the companion `engine-manifest.json` checksum and the archive's `distribution-rights.json` before use. NaraFrame code uses the MIT License; runtime dependencies retain their own licensing terms.
 
@@ -178,46 +178,29 @@ Your agent needs terminal and local file access to run NaraFrame. A skill in you
 
 ### Character skills
 
-NaraFrame 0.2.0 includes Stickman Ink, the original Meja Mekanik entry for Mechanic’s Bench, and Paper Cutout. Use the matching [npm package](#install-from-npm), source build or local engine archive. Install the canonical skill first, then add the characters you want to use in the same workspace. The commands below cover the published npm `0.2.0` package.
+NaraFrame 0.3.0 includes the profiles and catalogs in the [style gallery](../README.md#choose-a-visual-style). Install the canonical skill first, then add the styles you want in the same workspace. Set `NARAFRAME_ENGINE` to the absolute path of your [npm install](#install-from-npm), source checkout, or [local engine archive](#install-a-supplied-engine-archive).
 
-For Codex, run these commands from your video workspace after setting `NARAFRAME_ENGINE` to the absolute engine path.
+For Codex, run the installer from your video workspace:
 
 ```sh
 node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --json
-node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-stickman --json
-node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-mekanik --json
-node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-paper --json
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-comics --json
 ```
 
-For Claude Code, [install the canonical skill](#local-claude-code) first, then add the characters to the same workspace.
+Replace `naraframe-comics` with the style you want. In Codex, choose the installed skill with its `$` name or through the `/` menu. For a local Claude Code install, use `--host claude` in both commands and invoke the installed skill with `/`. Use the same `--skill` value with `--update` or `--remove` to manage that installation.
 
-```sh
-node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-stickman --json
-node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-mekanik --json
-node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project --project /absolute/path/video-projects --skill naraframe-paper --json
-```
+| Style | Skill name | CLI profile | Included examples |
+|---|---|---|---|
+| Stickman Ink | `naraframe-stickman` | `stickman-ink` | `ink-grip-pull` |
+| Mechanic’s Bench | `naraframe-mechanics` | `mechanics-bench` | `mechanik-linkage` |
+| Paper Cutout | `naraframe-paper` | `paper-cutout` | `paper-bridge` |
+| Bedah 2.5D | `naraframe-3d` | `bedah-25d` | `tape-dispenser`, `flashlight` |
+| Motion Comic | `naraframe-comics` | `motion-comic` | `cookie-decoy`, `squeaky-sneaker` |
+| Story | `naraframe-story` | `story` | `note-gust` with `note-catch`, `puddle-stop` with `puddle-cross` |
 
-In Claude Code, use `/naraframe-stickman`, `/naraframe-mekanik` or `/naraframe-paper` with your brief. For Codex, install with `--host codex` and invoke `$naraframe-stickman`, `$naraframe-mekanik` or `$naraframe-paper`. A plain brief for a new video goes through the canonical skill and defaults to `general-explainer` unless a profile or series is selected. [Claude Code skills](https://code.claude.com/docs/en/skills) · [Codex skills](https://learn.chatgpt.com/docs/build-skills)
+The style skills select their matching profile and catalog. CLI authors can select `--profile <profile-id>` and [import a pattern](#reuse-a-composition). The Mechanic’s Bench catalog is at `library/characters/meja-mekanik/catalog.json`. Projects from `0.2.0` keep their `meja-mekanik` pin. Use `--skill naraframe-mekanik --update` to upgrade an existing legacy skill.
 
-Stickman Ink tells the story through pose changes and prop contact. Mechanic’s Bench shows how connected parts move from a fixed view. Paper Cutout uses layered paper in an overhead view, with short turns and held poses. Each command selects the matching profile and versioned catalog. Use the same `--skill` value with `--update` or `--remove` to manage that installation.
-
-The included shot patterns behind the [README examples](../README.md#choose-a-visual-style) are `ink-grip-pull` for Stickman Ink, `mechanik-linkage` for Mechanic’s Bench, and `paper-bridge` for Paper Cutout. Each is version `0.1.0`. Use the selected skill with a brief about that action, or [import the pattern from the CLI](#reuse-a-composition).
-
-For a matching source build or local archive containing `profiles/mechanics-bench`, install with `--skill naraframe-mechanics` and choose `$naraframe-mechanics` in Codex or `/naraframe-mechanics` in Claude Code. CLI authors can use `--profile mechanics-bench`. The catalog still lives at `library/characters/meja-mekanik/catalog.json`. Existing projects keep their `meja-mekanik` pin and the legacy skill can be updated using `--skill naraframe-mekanik --update`.
-
-For Bedah 2.5D, use a matching source build or local engine archive that contains `profiles/bedah-25d`. After installing the canonical skill, add the explicit Codex entry in the same workspace.
-
-```sh
-node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-3d --json
-```
-
-Choose `$naraframe-3d` to show an object in use, separate its parts, and reassemble it at a fixed projection. The `bedah-25d` catalog includes `tape-dispenser@0.1.0` and `flashlight@0.1.0`. CLI authors can select `--profile bedah-25d` and import either pattern.
-
-For Motion Comic, use a matching source build or local engine archive that contains `profiles/motion-comic`. After installing the canonical skill, run the same installer with `--skill naraframe-comics` and choose `$naraframe-comics` in Codex. The `motion-comic` catalog includes `cookie-decoy@0.1.0` and `squeaky-sneaker@0.1.0`, with three editable panels and dialogue in each story. CLI authors can select `--profile motion-comic` and import either pattern.
-
-For Story, use a matching source build or local engine archive that contains `profiles/story`. Install the canonical skill, add `--skill naraframe-story` with the same installer, and choose `$naraframe-story` in Codex. The `story` catalog pairs `note-gust` with `note-catch` and `puddle-stop` with `puddle-cross`, all at `0.1.0`. CLI authors can select `--profile story` and import each pair in order.
-
-A matching source build or local engine archive also includes `library/explainers/catalog.json` for plain briefs on `general-explainer`. It has `sealed-straw@0.1.0` for cause and effect and `hidden-key@0.1.0` for editorial collage. Both start with a visual question and use editable layers to show the answer. Select the pattern by the subject of the shot.
+A plain brief uses the canonical skill and defaults to `general-explainer` unless you select a profile or series. Its catalog at `library/explainers/catalog.json` includes `sealed-straw@0.1.0` for cause and effect and `hidden-key@0.1.0` for editorial collage. Use the one that fits the subject.
 
 ### Example brief
 
