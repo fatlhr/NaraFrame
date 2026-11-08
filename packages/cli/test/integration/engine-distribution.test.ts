@@ -106,6 +106,7 @@ describe("offline engine distribution", () => {
       path: string;
     }>;
     expect(listed.map((profile) => profile.id)).toEqual([
+      "bedah-25d",
       "current-issues",
       "general-explainer",
       "meja-mekanik",
@@ -133,6 +134,17 @@ describe("offline engine distribution", () => {
       await readFile(join(project, "scenes.json"), "utf8"),
     );
     expect(scenes.scenes).toHaveLength(3);
+  });
+
+  it("ships the two Bedah 2.5D patterns with their SVG dependencies", () => {
+    const catalog = join(engine, "library/characters/bedah-25d/catalog.json");
+    const result = invoke("library", "inspect", catalog);
+    expect(result.success).toBe(true);
+    expect(result.data.catalog).toMatchObject({
+      id: "bedah-25d",
+      version: "0.1.0",
+      patterns: [{ id: "tape-dispenser" }, { id: "flashlight" }],
+    });
   });
   it("binds runtime/resources independently of version and refuses extra version arguments", async () => {
     const before = invoke("version").data.engineIdentity;

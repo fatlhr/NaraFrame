@@ -20,6 +20,7 @@ describe("listProfiles", () => {
     const { profiles, issues } = await listProfiles(builtIns);
     expect(issues).toEqual([]);
     expect(profiles.map((profile) => profile.id)).toEqual([
+      "bedah-25d",
       "current-issues",
       "general-explainer",
       "meja-mekanik",

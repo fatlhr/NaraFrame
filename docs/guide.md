@@ -203,6 +203,14 @@ Stickman Ink tells the story through pose changes and prop contact. Meja Mekanik
 
 The included shot patterns behind the [README examples](../README.md#choose-a-visual-style) are `ink-grip-pull` for Stickman Ink, `mechanik-linkage` for Meja Mekanik, and `paper-bridge` for Paper Cutout. Each is version `0.1.0` in `library/characters/<profile-id>/catalog.json` inside the engine. Use the selected skill with a brief about that action, or [import the pattern from the CLI](#reuse-a-composition).
 
+For Bedah 2.5D, use a matching source build or local engine archive that contains `profiles/bedah-25d`. After installing the canonical skill, add the explicit Codex entry in the same workspace.
+
+```sh
+node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host codex --scope project --project "$PWD" --skill naraframe-3d --json
+```
+
+Choose `$naraframe-3d` to show an object in use, separate its parts, and reassemble it at a fixed projection. The `bedah-25d` catalog includes `tape-dispenser@0.1.0` and `flashlight@0.1.0`. CLI authors can select `--profile bedah-25d` and import either pattern.
+
 ### Example brief
 
 Replace the details in square brackets. Invoke `$naraframe` in Codex or `/naraframe` in Claude Code before using this prompt:

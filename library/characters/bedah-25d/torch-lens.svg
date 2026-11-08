@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 151 48">
+  <title>Flashlight lens</title>
+  <g stroke="#2F4945" stroke-width="3">
+    <path fill="#60827E" d="M4 19v10c0 9 32 16 71 16s72-7 72-16V19Z"/>
+    <ellipse fill="#D4ECE6" cx="75" cy="19" rx="71" ry="16"/>
+  </g>
+  <path d="M32 17q25-9 65-6m-57 15 37-14" fill="none" stroke="#F7FFFF" stroke-width="3" stroke-linecap="round"/>
+</svg>

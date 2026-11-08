@@ -1,0 +1,5 @@
+interface:
+  display_name: "NaraFrame Bedah 2.5D"
+  short_description: "Show how parts fit in an exploded view"
+policy:
+  allow_implicit_invocation: false

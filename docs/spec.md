@@ -37,7 +37,7 @@ Choose a style for the job the video needs to do. This map records availability 
 | Stickman Ink | Tell the story through poses, reactions, and prop contact | `$naraframe-stickman` | Available in a matching source build or local archive |
 | Meja Mekanik | Explain how connected machine parts move together | `$naraframe-mekanik` | Available in a matching source build or local archive |
 | Paper Cutout | Animate layered paper, folds, and stepped poses | `$naraframe-paper` | Available in a matching source build or local archive |
-| Bedah 2.5D | Show what is inside an object and how the parts fit | `$naraframe-3d` | Planned in V1 |
+| Bedah 2.5D | Show what is inside an object and how the parts fit | `$naraframe-3d` | Available in a matching source build or local archive |
 | Motion Comic | Tell a story through panels, dialogue, and reaction poses | `$naraframe-comics` | Planned in V2 |
 | Story | Follow a character's goal, obstacle, action, and consequence across shots | `$naraframe-story` | Planned in V3 |
 

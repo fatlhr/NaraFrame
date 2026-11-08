@@ -228,6 +228,7 @@ for (const path of [
   "skills/naraframe-stickman",
   "skills/naraframe-mekanik",
   "skills/naraframe-paper",
+  "skills/naraframe-3d",
 ]) {
   await mkdir(dirname(join(target, path)), { recursive: true });
   await cp(join(root, path), join(target, path), {
@@ -329,7 +330,7 @@ const resources = [
   "profiles/general-explainer: repository-authored data, system font names only (no font, image or audio files)",
   "library/starter: repository-authored technical schematic PNGs, internal example use",
   "library/series/study-notes: repository-authored declarative templates and example values; no audio",
-  "profiles/stickman-ink, profiles/meja-mekanik and profiles/paper-cutout: repository-authored profiles and direction",
+  "profiles/stickman-ink, profiles/meja-mekanik, profiles/paper-cutout and profiles/bedah-25d: repository-authored profiles and direction",
   "library/characters: original schematic SVG poses and declarative templates; no audio",
   "starter: neutral authored data, no media or fonts",
 ];
