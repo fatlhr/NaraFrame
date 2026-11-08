@@ -35,7 +35,7 @@ Choose a style for the job the video needs to do. This map records availability 
 | Motion Explainer | Explain one idea, process, or comparison | Plain brief or `$naraframe` | Available as `general-explainer`, the default |
 | Editorial / Current Issues | Explain an event with sourced claims | `$naraframe` with `current-issues` selected | Profile available |
 | Stickman Ink | Tell the story through poses, reactions, and prop contact | `$naraframe-stickman` | Available in a matching source build or local archive |
-| Meja Mekanik | Explain how connected machine parts move together | `$naraframe-mekanik` | Available in a matching source build or local archive |
+| Mechanic’s Bench | Explain how connected machine parts move together | `$naraframe-mechanics` | Available in a matching source build or local archive. npm `0.2.0` uses `$naraframe-mekanik`. |
 | Paper Cutout | Animate layered paper, folds, and stepped poses | `$naraframe-paper` | Available in a matching source build or local archive |
 | Bedah 2.5D | Show what is inside an object and how the parts fit | `$naraframe-3d` | Available in a matching source build or local archive |
 | Motion Comic | Tell a story through panels, dialogue, and reaction poses | `$naraframe-comics` | Available in a matching source build or local archive |
@@ -80,7 +80,7 @@ These commands do not make a newly created, unpopulated project production-ready
 
 For a plain brief for a new video, the canonical skill selects `general-explainer` unless the user chooses an available profile or names an established series. The skill can set an episode-local palette, choose movement that explains the subject, and review the opening with audio muted. A continuation or revision keeps the pinned profile and existing look unless the user requests a change.
 
-Explicit Stickman Ink, Meja Mekanik and Paper Cutout skills select their packaged `0.1.0` profiles and catalogs through the canonical launcher. Imported patterns and profile data are pinned in the episode through the existing project and library workflow.
+Explicit Stickman Ink, Mechanic’s Bench and Paper Cutout skills select their packaged `0.1.0` profiles and catalogs through the canonical launcher. Imported patterns and profile data are pinned in the episode through the existing project and library workflow. `meja-mekanik` remains resolvable for existing installations and pinned projects.
 
 `edit --from ... --expect ...` applies staged changes against an expected revision. `undo` restores the previous revision. `profile inspect` and `profile apply --dry-run` expose profile changes before applying them. `recipe trust --authorized-by ...` records explicit owner authorization for recipe code. `cache clean --dry-run` reports disposable artifacts before removal.
 

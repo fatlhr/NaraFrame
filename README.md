@@ -75,10 +75,12 @@ A plain brief for a new video uses **Motion Explainer**. Choose a specific style
 | **Motion Explainer** · `general-explainer` | One idea, a process, or a comparison | Start with a plain brief or choose `$naraframe` | Ice floats, then a density comparison explains why. [See the frame](docs/assets/readme/gallery-science.png) |
 | **Editorial / Current Issues** · `current-issues` | An event explained with sourced claims | Choose `$naraframe` and ask for `current-issues` | An El Niño explainer uses a thermometer to show the heat. [See the frame](docs/assets/readme/gallery-news.png) |
 | **Stickman Ink** · `stickman-ink` | A character's pose, reaction, or contact with a prop | Choose `$naraframe-stickman` | A drawn character reaches for and pulls a gate handle. The grip and pose explain the action. |
-| **Meja Mekanik** · `meja-mekanik` | How linked machine parts move together | Choose `$naraframe-mekanik` | A lever pivots, its pin slides in a slot, and the connected gate lifts. |
+| **Mechanic’s Bench** · `mechanics-bench` | How linked machine parts move together | Choose `$naraframe-mechanics` in a matching source build or local archive | A lever pivots, its pin slides in a slot, and the connected gate lifts. |
 | **Paper Cutout** · `paper-cutout` | Layered paper, folds, and movement in short steps | Choose `$naraframe-paper` | A hinged paper bridge opens in steps and holds in place before a token crosses. |
 
 Install the character skills from the matching NaraFrame engine. The guide covers project installation in Codex and Claude Code, plus how to preview the included shot patterns yourself. [Install character skills and preview a pattern](docs/guide.md#character-skills)
+
+The published npm `0.2.0` package uses `$naraframe-mekanik` and the `meja-mekanik` profile ID for Mechanic’s Bench.
 
 <a id="how-it-works"></a>
 

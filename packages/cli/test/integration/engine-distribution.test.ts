@@ -109,7 +109,7 @@ describe("offline engine distribution", () => {
       "bedah-25d",
       "current-issues",
       "general-explainer",
-      "meja-mekanik",
+      "mechanics-bench",
       "motion-comic",
       "paper-cutout",
       "stickman-ink",
@@ -209,6 +209,12 @@ describe("offline engine distribution", () => {
       version: "0.1.0",
       patterns: [{ id: "sealed-straw" }, { id: "hidden-key" }],
     });
+  });
+
+  it("resolves the original mechanics profile for installed 0.2.0 skills", () => {
+    expect(invoke("profile", "inspect", "meja-mekanik").data.profile.id).toBe(
+      "meja-mekanik",
+    );
   });
   it("binds runtime/resources independently of version and refuses extra version arguments", async () => {
     const before = invoke("version").data.engineIdentity;

@@ -178,7 +178,7 @@ Your agent needs terminal and local file access to run NaraFrame. A skill in you
 
 ### Character skills
 
-NaraFrame 0.2.0 includes Stickman Ink, Meja Mekanik and Paper Cutout. Use the matching [npm package](#install-from-npm), source build or local engine archive. Install the canonical skill first, then add the characters you want to use in the same workspace.
+NaraFrame 0.2.0 includes Stickman Ink, the original Meja Mekanik entry for Mechanic’s Bench, and Paper Cutout. Use the matching [npm package](#install-from-npm), source build or local engine archive. Install the canonical skill first, then add the characters you want to use in the same workspace. The commands below cover the published npm `0.2.0` package.
 
 For Codex, run these commands from your video workspace after setting `NARAFRAME_ENGINE` to the absolute engine path.
 
@@ -199,9 +199,11 @@ node "$NARAFRAME_ENGINE/scripts/install-skill.mjs" --host claude --scope project
 
 In Claude Code, use `/naraframe-stickman`, `/naraframe-mekanik` or `/naraframe-paper` with your brief. For Codex, install with `--host codex` and invoke `$naraframe-stickman`, `$naraframe-mekanik` or `$naraframe-paper`. A plain brief for a new video goes through the canonical skill and defaults to `general-explainer` unless a profile or series is selected. [Claude Code skills](https://code.claude.com/docs/en/skills) · [Codex skills](https://learn.chatgpt.com/docs/build-skills)
 
-Stickman Ink tells the story through pose changes and prop contact. Meja Mekanik shows how connected parts move from a fixed view. Paper Cutout uses layered paper in an overhead view, with short turns and held poses. Each command selects the matching profile and versioned catalog. Use the same `--skill` value with `--update` or `--remove` to manage that installation.
+Stickman Ink tells the story through pose changes and prop contact. Mechanic’s Bench shows how connected parts move from a fixed view. Paper Cutout uses layered paper in an overhead view, with short turns and held poses. Each command selects the matching profile and versioned catalog. Use the same `--skill` value with `--update` or `--remove` to manage that installation.
 
-The included shot patterns behind the [README examples](../README.md#choose-a-visual-style) are `ink-grip-pull` for Stickman Ink, `mechanik-linkage` for Meja Mekanik, and `paper-bridge` for Paper Cutout. Each is version `0.1.0` in `library/characters/<profile-id>/catalog.json` inside the engine. Use the selected skill with a brief about that action, or [import the pattern from the CLI](#reuse-a-composition).
+The included shot patterns behind the [README examples](../README.md#choose-a-visual-style) are `ink-grip-pull` for Stickman Ink, `mechanik-linkage` for Mechanic’s Bench, and `paper-bridge` for Paper Cutout. Each is version `0.1.0`. Use the selected skill with a brief about that action, or [import the pattern from the CLI](#reuse-a-composition).
+
+For a matching source build or local archive containing `profiles/mechanics-bench`, install with `--skill naraframe-mechanics` and choose `$naraframe-mechanics` in Codex or `/naraframe-mechanics` in Claude Code. CLI authors can use `--profile mechanics-bench`. The catalog still lives at `library/characters/meja-mekanik/catalog.json`. Existing projects keep their `meja-mekanik` pin and the legacy skill can be updated using `--skill naraframe-mekanik --update`.
 
 For Bedah 2.5D, use a matching source build or local engine archive that contains `profiles/bedah-25d`. After installing the canonical skill, add the explicit Codex entry in the same workspace.
 

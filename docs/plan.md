@@ -2,7 +2,7 @@
 
 Revision 2.3 · Updated 2026-11-07 · MVP 2 integrated at `a701c39`
 
-**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. V1–V4 passed local package acceptance. [V5.1](#v5-follow-ups-for-the-public-style-chooser) is the next visual task.
+**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. V1–V4 and the V5.1 naming update passed local package acceptance. [V5.2](#v5-follow-ups-for-the-public-style-chooser) is the next visual task.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -1840,7 +1840,7 @@ V1–V4 target zero new runtime packages. For each accepted feature, retain the 
 
 ### V5 follow-ups for the public style chooser
 
-- [ ] **V5.1 · Give Meja Mekanik English names.** Choose an English display name, profile ID, and skill name. Apply the public names consistently in the picker, CLI, README, and guide. Verify the new names through a clean install and check that updating from `0.2.0` still lets users open and revise episodes pinned to `meja-mekanik`, including their catalog references. Cover existing `naraframe-mekanik` installs in the update check.
+- [x] **V5.1 · Give Meja Mekanik English names.** Use **Mechanic’s Bench**, `mechanics-bench`, and `naraframe-mechanics` in the picker, CLI, README, and guide. The original ID and catalog remain available for compatibility. A clean local archive install exposed the new skill through Codex CLI `0.167.0` `skills/list` and produced scoped build `7a76c12db16e-b80873a9-26c`. Updated a canonical and `naraframe-mekanik` skill installed from the checksum-verified npm `0.2.0` tarball. A guarded edit restaged the project's pinned library instance and produced `1c1931b4d2a1-5b2c1933-a2b`, with its `meja-mekanik` profile lock byte-identical. Both previews decoded 102 frames with zero outliers. `pnpm verify` passed 399 unit and 572 integration tests.
 - [ ] **V5.2 · Rebuild the README visual gallery around released profiles.** Replace the layout, examples, and copy in [What you can make](../README.md#style-gallery). Give each released profile its own subject and approved render. Use the English name from V5.1 for the mechanical profile's example and add newly released profiles through the same V5 gate.
   - Give each clip a playful opening action and a payoff that fits the profile. Use expressive poses and prop reactions where they belong, or make the subject itself move in an unexpected but readable way. Vary staging and rhythm so a reviewer can distinguish the styles with labels hidden and audio muted.
   - Write each case brief, title, on-screen copy, and README description in English. Use English for captions and narration where present. Verify that each gallery preview or render link works and that the style chooser points to the matching example.
@@ -1854,7 +1854,7 @@ This V0 draft records the original chooser format. V5.2 replaces the public gall
 | Motion Explainer | Explain a process or compare two things | Start with a plain brief or choose `$naraframe` | Why ice floats |
 | Editorial / Current Issues | Explain an event with sources | Choose `$naraframe` and the `current-issues` profile | The existing current-affairs gallery example |
 | Stickman Ink | Show a character reacting and making contact with a prop | Choose `$naraframe-stickman` from a matching source build or local archive | Candidate for rights and publication review · the character frees a jammed object |
-| Meja Mekanik | Show how connected parts move together | Choose `$naraframe-mekanik` from a matching source build or local archive | Candidate for rights and publication review · a linkage lifts a gate |
+| Mechanic’s Bench | Show how connected parts move together | Choose `$naraframe-mechanics` from a matching source build or local archive | Candidate for rights and publication review · a linkage lifts a gate |
 | Paper Cutout | Show folds, layered paper, and stepped poses | Choose `$naraframe-paper` from a matching source build or local archive | Candidate for rights and publication review · a folded paper bridge opens |
 
 When a planned style passes V5, add one row with its exact name and command. Show Bedah 2.5D as a fixed-projection exploded view. List Studio once its own delivery evidence supports a documented install path.

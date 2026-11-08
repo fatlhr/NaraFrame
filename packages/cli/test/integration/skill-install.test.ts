@@ -102,6 +102,7 @@ describe("character skill installation", () => {
   it.each([
     "naraframe-stickman",
     "naraframe-mekanik",
+    "naraframe-mechanics",
     "naraframe-paper",
     "naraframe-3d",
     "naraframe-comics",
