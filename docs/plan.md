@@ -2,7 +2,7 @@
 
 Revision 2.3 · Updated 2026-11-07 · MVP 2 integrated at `a701c39`
 
-**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. [V1 Bedah 2.5D](#v1-bedah-25d-acceptance) passed local package acceptance. V2 Motion Comic is the next visual batch.
+**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. [V1 Bedah 2.5D](#v1-bedah-25d-acceptance) and [V2 Motion Comic](#v2-motion-comic-acceptance) passed local package acceptance. V3 Story is the next visual batch.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -1802,7 +1802,7 @@ Fatih authorized V0 and U0 as one documentation package. The [style map and prod
 | Task | Priority / status | Dependencies and work | Acceptance |
 |---|---|---|---|
 | V1 Bedah 2.5D | P0 / verified in a local engine package | After V0 and separate approval. Author a fixed-projection `assembled → exploded → function → reassembled` pattern with layered SVG/PNG, leader lines, and settled reading holds. Package `naraframe-3d` through V5. | Tape dispenser and flashlight passed the local [V1 acceptance checks](#v1-bedah-25d-acceptance). |
-| V2 Motion Comic | P1 / proposed | After V1 and separate approval. Author three panels with an explicit reading order, manual crops, focus on the active panel, reaction poses, and dialogue holds. Package `naraframe-comics` through V5. | Two stories read clearly with audio muted. Panels, dialogue, crops, and timing can be revised. |
+| V2 Motion Comic | P1 / verified in a local engine package | After V1 and separate approval. Author three panels with an explicit reading order, manual crops, focus on the active panel, reaction poses, and dialogue holds. Package `naraframe-comics` through V5. | Two silent stories and a panel revision passed [V2 acceptance](#v2-motion-comic-acceptance). |
 | V3 Story | P1 / proposed | After V2 and separate approval. Author a goal, obstacle, action, and consequence, with pose sheets and consistent props across shots. Package `naraframe-story` through V5. | On two briefs a reviewer can identify the action that causes the next shot and track the character and prop across the seam. |
 | V4 Motion Explainer patterns | P1 / proposed | After V3 and separate approval. Add a cause-and-effect diagram and an Editorial Collage assembly pattern to `general-explainer`. Choose the pattern by shot intent. | Two plain briefs use `general-explainer`. The first three seconds establish a visual question, and the payoff answers it. |
 | V5 Distribution and README | P1 / per-style release gate | Apply to each approved style before listing it publicly. Extend the existing installer and engine package with the relevant profile, versioned catalog, and thin explicit wrapper where specified. Motion Explainer uses the canonical skill. | From a clean workspace and the documented artifact, use the Codex slash picker and explicit skill entry, then reach a preview. Confirm the plain-brief default, preserved profile pin on revision, and ordinary installer conflict handling. Include the demonstrated command, example, and install route in README. |
@@ -1817,6 +1817,13 @@ V1–V4 target zero new runtime packages. For each accepted feature, retain the 
 - [x] Run plan validation, scoped drafts for both subjects, and a full silent two-scene preview. The installed full build `831acc7cf63b-250a69c5-f6c` decoded 456 frames at 1080×1920 and 30 fps with zero frame-integrity outliers. Opening, separation, dock, payoff, and seam were checked at phone size. Six grayscale frames retained readable silhouettes and labels. A guarded title edit and undo restored source revision `717cc766d58181c67cd37178ac0469ded98a473a35829aafce68f303a66d749b`.
 - [x] Pack and install the canonical and `naraframe-3d` skills in a clean Codex workspace. Codex CLI `0.167.0` returned both enabled through `skills/list`. Following the installed wrapper and launcher reached scoped build `c246afd17b8e-81d36be5-97d` and the full build. The plain-brief control pinned `general-explainer`.
 - [x] Pass `pnpm verify` on Node 24.20.0 and pnpm 12.3.4 with 399 unit and 565 integration tests. The public gallery entry follows V5.2 and a matching public release.
+
+### V2 Motion Comic acceptance
+
+- [x] Author `cookie-decoy` and `squeaky-sneaker` at `0.1.0` in the `motion-comic` catalog. Both English stories use original PNG pages with three manual crops, an active panel marker, reaction poses, and editable dialogue. Checked the opening, distraction or interruption, payoff, and seam with audio muted at phone size.
+- [x] Both source-build scoped previews passed. The installed full review `863903c6b370-a52dabc7-523` decoded 456 frames at 1080×1920 and 30 fps with zero frame-integrity outliers. A guarded edit moved panel 2, adjusted its crop and reveal time, and changed its dialogue. Scoped build `8556381be2a3-f16e20a6-b2b` showed the revision. Undo restored `c729b8939e51a4646924f2a8f60ba898e3141e3a832b738433f7d8ccf580cabb`.
+- [x] Install the canonical and `naraframe-comics` skills in a clean workspace. Codex CLI `0.167.0` returned both enabled through `skills/list`. The installed wrapper and launcher led to both patterns, and the plain-brief control pinned `general-explainer`. The final archive installation repeated profile and catalog inspection with identical visual resources and a rebuilt engine identity that includes `naraframe-comics`.
+- [x] Pass `pnpm verify` on Node 24.20.0 and pnpm 12.3.4 with 399 unit and 567 integration tests. The public gallery entry follows V5.2 and a matching public release.
 
 ### V5 follow-ups for the public style chooser
 
