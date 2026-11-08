@@ -1,0 +1,1402 @@
+{
+  "schemaVersion": 1,
+  "id": "story",
+  "version": "0.1.0",
+  "provenance": {
+    "source": "NaraFrame original Story staging and pose artwork",
+    "license": "MIT"
+  },
+  "assets": [
+    {
+      "id": "runner-reach",
+      "status": "ready",
+      "kind": "svg",
+      "path": "runner-reach.svg",
+      "binding": "neutral",
+      "sha256": "5515883732dab0a484f520177c87987673de27fa27dcfc6d81f7d64685da23ef",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story pose or prop",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "runner-hold",
+      "status": "ready",
+      "kind": "svg",
+      "path": "runner-hold.svg",
+      "binding": "neutral",
+      "sha256": "62c27f131fe89744db564bd0ae1f2a93aa41cb12d4d1ced0482d2e4d0ecb798e",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story pose or prop",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "runner-step",
+      "status": "ready",
+      "kind": "svg",
+      "path": "runner-step.svg",
+      "binding": "neutral",
+      "sha256": "4917765cc704ae69759c9c3e72d1ed821a58f77217cbbaf1ce0493b634c14838",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story pose or prop",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "wind-note",
+      "status": "ready",
+      "kind": "svg",
+      "path": "wind-note.svg",
+      "binding": "neutral",
+      "sha256": "f6ace1e7b3ebb05ee55911478a9fdbd73e598c02d1ce1f997a5ffac4495c78c3",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story pose or prop",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "gift",
+      "status": "ready",
+      "kind": "svg",
+      "path": "gift.svg",
+      "binding": "neutral",
+      "sha256": "85bc0e356fb163608c66af1ce9e0824fc23c1ef889ba18f9e175434e7b09c734",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story pose or prop",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "plank",
+      "status": "ready",
+      "kind": "svg",
+      "path": "plank.svg",
+      "binding": "neutral",
+      "sha256": "45eccf157ea635d19f9a11141c1197b0c24ff8eaa8f4bdaf2d17165a6526e6c1",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story pose or prop",
+        "license": "MIT"
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "id": "note-gust",
+      "version": "0.1.0",
+      "description": "A gust steals the note. Carry its direction and the courier\u2019s reach into the catch.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short title shared across the story."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action or prop carried into the next shot."
+        }
+      },
+      "template": {
+        "id": "note-gust",
+        "narrativeRole": "explanation",
+        "durationMs": 3600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 248,
+                "width": 888,
+                "height": 130
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "The Windy Note",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 78,
+              "fontWeight": 800,
+              "maxLines": 1
+            },
+            {
+              "id": "chapter",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 192,
+                "width": 888,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "STORY  /  01",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 34,
+              "fontWeight": 700,
+              "maxLines": 1
+            },
+            {
+              "id": "horizon",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "d": "M0 704Q106 686 214 705T540 702V960H0Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#D6C9B1",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#E0D4BC"
+            },
+            {
+              "id": "terrain",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M0 650Q99 632 184 661T359 650T540 652V705Q423 720 325 705T0 704Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#D9CAA9",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#EFE3C8"
+            },
+            {
+              "id": "ground",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M37 684H501",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#A99E8A",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "wall",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M385 662V345H502V662M392 414h102m-103 68h103m-104 68h104m-103 67h103",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#B4AA94",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#E0D8BE"
+            },
+            {
+              "id": "courier",
+              "type": "image",
+              "frame": {
+                "x": 190,
+                "y": 918,
+                "width": 280,
+                "height": 420
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "assetId": "runner-reach",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "note",
+              "type": "image",
+              "frame": {
+                "x": 424,
+                "y": 1036,
+                "width": 124,
+                "height": 72
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "assetId": "wind-note",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "gust",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 7,
+              "d": "M109 456q51-21 103-26m26 25q46-16 105-17m-131-48q45-25 102-20",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#7E9294",
+                "width": 2.5
+              },
+              "lineCap": "round"
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "show-gust",
+            "targetId": "gust",
+            "startMs": 690,
+            "durationMs": 250,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "note-lifts",
+            "targetId": "note",
+            "startMs": 850,
+            "durationMs": 1100,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 300,
+                "y": -208
+              }
+            }
+          },
+          {
+            "id": "follow-note",
+            "targetId": "courier",
+            "startMs": 1060,
+            "durationMs": 1200,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 112,
+                "y": -14
+              }
+            }
+          },
+          {
+            "id": "clear-gust",
+            "targetId": "gust",
+            "startMs": 1570,
+            "durationMs": 340,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "A gust steals the note. Carry its direction and the courier\u2019s reach into the catch."
+      }
+    },
+    {
+      "id": "note-catch",
+      "version": "0.1.0",
+      "description": "The courier lunges at the same drifting note and holds on as both come back down.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short title shared across the story."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action or prop carried into the next shot."
+        }
+      },
+      "template": {
+        "id": "note-catch",
+        "narrativeRole": "explanation",
+        "durationMs": 4000,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 248,
+                "width": 888,
+                "height": 130
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "The Windy Note",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 78,
+              "fontWeight": 800,
+              "maxLines": 1
+            },
+            {
+              "id": "chapter",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 192,
+                "width": 888,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "STORY  /  01",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 34,
+              "fontWeight": 700,
+              "maxLines": 1
+            },
+            {
+              "id": "horizon",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "d": "M0 704Q106 686 214 705T540 702V960H0Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#D6C9B1",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#E0D4BC"
+            },
+            {
+              "id": "terrain",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M0 650Q99 632 184 661T359 650T540 652V705Q423 720 325 705T0 704Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#D9CAA9",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#EFE3C8"
+            },
+            {
+              "id": "ground",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M37 684H501",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#A99E8A",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "wall",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M385 662V345H502V662M392 414h102m-103 68h103m-104 68h104m-103 67h103",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#B4AA94",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#E0D8BE"
+            },
+            {
+              "id": "courier",
+              "type": "image",
+              "frame": {
+                "x": 302,
+                "y": 904,
+                "width": 280,
+                "height": 420
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "assetId": "runner-reach",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "note",
+              "type": "image",
+              "frame": {
+                "x": 724,
+                "y": 828,
+                "width": 124,
+                "height": 72
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "assetId": "wind-note",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "caught",
+              "type": "text",
+              "frame": {
+                "x": 102,
+                "y": 1558,
+                "width": 864,
+                "height": 100
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Got it!",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 60,
+              "fontWeight": 800,
+              "maxLines": 1
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "lunge",
+            "targetId": "courier",
+            "startMs": 310,
+            "durationMs": 760,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 206,
+                "y": -146
+              }
+            }
+          },
+          {
+            "id": "note-descends",
+            "targetId": "note",
+            "startMs": 220,
+            "durationMs": 850,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 30,
+                "y": 72
+              }
+            }
+          },
+          {
+            "id": "land",
+            "targetId": "courier",
+            "startMs": 1120,
+            "durationMs": 900,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 180,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "hold-note",
+            "targetId": "note",
+            "startMs": 1120,
+            "durationMs": 900,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 4,
+                "y": 218
+              }
+            }
+          },
+          {
+            "id": "show-caught",
+            "targetId": "caught",
+            "startMs": 2070,
+            "durationMs": 260,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "The courier lunges at the same drifting note and holds on as both come back down."
+      }
+    },
+    {
+      "id": "puddle-stop",
+      "version": "0.1.0",
+      "description": "The courier sees a puddle and slides a plank into position without letting go of the parcel.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short title shared across the story."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action or prop carried into the next shot."
+        }
+      },
+      "template": {
+        "id": "puddle-stop",
+        "narrativeRole": "explanation",
+        "durationMs": 3600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 248,
+                "width": 888,
+                "height": 130
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "The Puddle Crossing",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 78,
+              "fontWeight": 800,
+              "maxLines": 1
+            },
+            {
+              "id": "chapter",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 192,
+                "width": 888,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "STORY  /  02",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 34,
+              "fontWeight": 700,
+              "maxLines": 1
+            },
+            {
+              "id": "horizon",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "d": "M0 704Q106 686 214 705T540 702V960H0Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#D6C9B1",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#E0D4BC"
+            },
+            {
+              "id": "terrain",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M0 650Q99 632 184 661T359 650T540 652V705Q423 720 325 705T0 704Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#D9CAA9",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#EFE3C8"
+            },
+            {
+              "id": "ground",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M37 684H501",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#A99E8A",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "puddle",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M222 680Q229 656 269 659T358 651Q438 639 465 669T422 701Q363 704 325 694T265 694Q231 696 222 680Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#64898C",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#9CC1BF"
+            },
+            {
+              "id": "waterline",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M243 681q40 2 69-4m49-13q33-5 65-1m-51 22q26-4 48-1",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#E1EFE2",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "bridge",
+              "type": "image",
+              "frame": {
+                "x": 84,
+                "y": 1310,
+                "width": 418,
+                "height": 78
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "assetId": "plank",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "courier",
+              "type": "image",
+              "frame": {
+                "x": 160,
+                "y": 934,
+                "width": 280,
+                "height": 420
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "assetId": "runner-hold",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "parcel",
+              "type": "image",
+              "frame": {
+                "x": 342,
+                "y": 1096,
+                "width": 112,
+                "height": 108
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "assetId": "gift",
+              "fit": "contain",
+              "cornerRadius": 0
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "halt",
+            "targetId": "courier",
+            "startMs": 220,
+            "durationMs": 650,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 122,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "carry-in",
+            "targetId": "parcel",
+            "startMs": 220,
+            "durationMs": 650,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 122,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "bridge-gap",
+            "targetId": "bridge",
+            "startMs": 1240,
+            "durationMs": 870,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 360,
+                "y": 0
+              }
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "The courier sees a puddle and slides a plank into position without letting go of the parcel."
+      }
+    },
+    {
+      "id": "puddle-cross",
+      "version": "0.1.0",
+      "description": "The same courier carries the same parcel over the plank positioned in the previous shot.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/0/text"],
+          "description": "Short title shared across the story."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action or prop carried into the next shot."
+        }
+      },
+      "template": {
+        "id": "puddle-cross",
+        "narrativeRole": "explanation",
+        "durationMs": 4000,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "title",
+              "type": "text",
+              "frame": {
+                "x": 96,
+                "y": 248,
+                "width": 888,
+                "height": 130
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "The Puddle Crossing",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 78,
+              "fontWeight": 800,
+              "maxLines": 1
+            },
+            {
+              "id": "chapter",
+              "type": "text",
+              "frame": {
+                "x": 98,
+                "y": 192,
+                "width": 888,
+                "height": 48
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "STORY  /  02",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 34,
+              "fontWeight": 700,
+              "maxLines": 1
+            },
+            {
+              "id": "horizon",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "d": "M0 704Q106 686 214 705T540 702V960H0Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#D6C9B1",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#E0D4BC"
+            },
+            {
+              "id": "terrain",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "d": "M0 650Q99 632 184 661T359 650T540 652V705Q423 720 325 705T0 704Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#D9CAA9",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#EFE3C8"
+            },
+            {
+              "id": "ground",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "d": "M37 684H501",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#A99E8A",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "puddle",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "d": "M222 680Q229 656 269 659T358 651Q438 639 465 669T422 701Q363 704 325 694T265 694Q231 696 222 680Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#64898C",
+                "width": 2
+              },
+              "lineCap": "round",
+              "fill": "#9CC1BF"
+            },
+            {
+              "id": "waterline",
+              "type": "path",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "d": "M243 681q40 2 69-4m49-13q33-5 65-1m-51 22q26-4 48-1",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 540,
+                "height": 960
+              },
+              "stroke": {
+                "color": "#E1EFE2",
+                "width": 2
+              },
+              "lineCap": "round"
+            },
+            {
+              "id": "bridge",
+              "type": "image",
+              "frame": {
+                "x": 444,
+                "y": 1310,
+                "width": 418,
+                "height": 78
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "assetId": "plank",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "courier",
+              "type": "image",
+              "frame": {
+                "x": 282,
+                "y": 934,
+                "width": 280,
+                "height": 420
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "assetId": "runner-hold",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "parcel",
+              "type": "image",
+              "frame": {
+                "x": 464,
+                "y": 1096,
+                "width": 112,
+                "height": 108
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 8,
+              "assetId": "gift",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "step-pose",
+              "type": "image",
+              "frame": {
+                "x": 282,
+                "y": 934,
+                "width": 280,
+                "height": 420
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "assetId": "runner-step",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "land-pose",
+              "type": "image",
+              "frame": {
+                "x": 744,
+                "y": 934,
+                "width": 280,
+                "height": 420
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "assetId": "runner-hold",
+              "fit": "contain",
+              "cornerRadius": 0
+            },
+            {
+              "id": "dry",
+              "type": "text",
+              "frame": {
+                "x": 102,
+                "y": 1558,
+                "width": 864,
+                "height": 100
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "text": "Still dry.",
+              "role": "body",
+              "color": "#292D41",
+              "fontSize": 60,
+              "fontWeight": 800,
+              "maxLines": 1
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "leave-start-pose",
+            "targetId": "courier",
+            "startMs": 190,
+            "durationMs": 70,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-step-pose",
+            "targetId": "step-pose",
+            "startMs": 190,
+            "durationMs": 70,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "step-up",
+            "targetId": "step-pose",
+            "startMs": 210,
+            "durationMs": 560,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 122,
+                "y": -28
+              }
+            }
+          },
+          {
+            "id": "parcel-step-up",
+            "targetId": "parcel",
+            "startMs": 210,
+            "durationMs": 560,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 122,
+                "y": -28
+              }
+            }
+          },
+          {
+            "id": "cross-bridge",
+            "targetId": "step-pose",
+            "startMs": 800,
+            "durationMs": 780,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 308,
+                "y": -28
+              }
+            }
+          },
+          {
+            "id": "parcel-cross",
+            "targetId": "parcel",
+            "startMs": 800,
+            "durationMs": 780,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 308,
+                "y": -28
+              }
+            }
+          },
+          {
+            "id": "step-off",
+            "targetId": "step-pose",
+            "startMs": 1590,
+            "durationMs": 600,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 462,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "parcel-step-off",
+            "targetId": "parcel",
+            "startMs": 1590,
+            "durationMs": 600,
+            "action": "transform",
+            "params": {
+              "easingPreset": "smooth",
+              "to": {
+                "x": 462,
+                "y": 0
+              }
+            }
+          },
+          {
+            "id": "leave-step-pose",
+            "targetId": "step-pose",
+            "startMs": 2190,
+            "durationMs": 70,
+            "action": "exit",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-land-pose",
+            "targetId": "land-pose",
+            "startMs": 2190,
+            "durationMs": 70,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          },
+          {
+            "id": "show-dry",
+            "targetId": "dry",
+            "startMs": 2230,
+            "durationMs": 270,
+            "action": "reveal",
+            "params": {
+              "easingPreset": "smooth",
+              "direction": "up",
+              "distance": 0
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "carriesFactualClaim": false,
+        "note": "The same courier carries the same parcel over the plank positioned in the previous shot."
+      }
+    }
+  ]
+}

@@ -113,6 +113,7 @@ describe("offline engine distribution", () => {
       "motion-comic",
       "paper-cutout",
       "stickman-ink",
+      "story",
     ]);
     for (const profile of listed)
       expect(profile.path).toBe(join(engine, "profiles", profile.id));
@@ -173,6 +174,27 @@ describe("offline engine distribution", () => {
         ),
       );
     }
+  });
+
+  it("ships both Story shot pairs and their carried props", () => {
+    const catalog = join(engine, "library/characters/story/catalog.json");
+    const result = invoke("library", "inspect", catalog);
+    expect(result.success).toBe(true);
+    expect(result.data.catalog).toMatchObject({
+      id: "story",
+      version: "0.1.0",
+      patterns: [
+        { id: "note-gust" },
+        { id: "note-catch" },
+        { id: "puddle-stop" },
+        { id: "puddle-cross" },
+      ],
+      assets: expect.arrayContaining([
+        expect.objectContaining({ id: "wind-note" }),
+        expect.objectContaining({ id: "gift" }),
+        expect.objectContaining({ id: "runner-step" }),
+      ]),
+    });
   });
   it("binds runtime/resources independently of version and refuses extra version arguments", async () => {
     const before = invoke("version").data.engineIdentity;
