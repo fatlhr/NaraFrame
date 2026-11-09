@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { DEFAULT_COLORS, posedPoint, rigLayers } from "./rig.mjs";
+import { DEFAULT_COLORS, posedPoint, rigLayers, turnTo } from "./rig.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const VERSION = "0.2.0";
@@ -211,7 +211,10 @@ const phoneGlow = () => {
         action: "transform",
         startMs: 2500,
         durationMs: 500,
-        params: { to: { rotationDeg: -4 }, easingPreset: "smooth" },
+        params: {
+          to: { rotationDeg: turnTo(layers, "kid-head", -4) },
+          easingPreset: "smooth",
+        },
       },
     ],
     transition: { type: "cut" },
@@ -307,7 +310,10 @@ const porchLight = () => {
         action: "transform",
         startMs: 1300,
         durationMs: 400,
-        params: { to: { rotationDeg: -8 }, easingPreset: "smooth" },
+        params: {
+          to: { rotationDeg: turnTo(layers, "kid-head", -8) },
+          easingPreset: "smooth",
+        },
       },
       {
         id: "raise-arm",
@@ -315,7 +321,10 @@ const porchLight = () => {
         action: "transform",
         startMs: 1500,
         durationMs: 260,
-        params: { to: { rotationDeg: -92 }, easingPreset: "snappy" },
+        params: {
+          to: { rotationDeg: turnTo(layers, "kid-arm-n", -92) },
+          easingPreset: "snappy",
+        },
       },
       {
         id: "settle-arm",
@@ -323,7 +332,10 @@ const porchLight = () => {
         action: "transform",
         startMs: 1760,
         durationMs: 300,
-        params: { to: { rotationDeg: -84 }, easingPreset: "smooth" },
+        params: {
+          to: { rotationDeg: turnTo(layers, "kid-arm-n", -84) },
+          easingPreset: "smooth",
+        },
       },
       {
         id: "straighten",
@@ -331,7 +343,10 @@ const porchLight = () => {
         action: "transform",
         startMs: 1500,
         durationMs: 400,
-        params: { to: { rotationDeg: -6 }, easingPreset: "smooth" },
+        params: {
+          to: { rotationDeg: turnTo(layers, "kid-fore-n", -6) },
+          easingPreset: "smooth",
+        },
       },
     ],
     transition: { type: "cut" },

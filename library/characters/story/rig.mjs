@@ -333,6 +333,19 @@ export const posedPoint = (pose, chain, point) => {
   return rotateAbout(at, upper.lean, JOINTS.hip);
 };
 
+/**
+ * The `transform` beat value that turns a group to an absolute angle. A beat's
+ * rotation is added to the group's static `transform.rotationDeg`, so a beat
+ * writes the difference between the pose angle and that static angle.
+ */
+export const turnTo = (layers, id, absolute) => {
+  const layer = layers.find((item) => item.id === id);
+  if (!layer) throw new Error(`No layer ${id}`);
+  const base =
+    layer.type === "group" ? layer.transform.rotationDeg : layer.rotationDeg;
+  return Math.round((absolute - base) * 10) / 10;
+};
+
 /** Group rotations that put a figure into a pose, for `transform` beats. */
 export const poseAngles = (pose, facing = "right") => {
   const resolved = typeof pose === "string" ? POSES[pose] : pose;
