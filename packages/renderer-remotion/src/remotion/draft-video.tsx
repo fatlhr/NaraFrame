@@ -27,6 +27,7 @@ import {
   captionPadding,
 } from "./captions.js";
 import {
+  assetAt,
   countedTextFor,
   drawnPathFor,
   groupScreenTransformFor,
@@ -334,7 +335,7 @@ export const LayerView = ({
     >
       <AssetView
         draft={draft}
-        assetId={layer.assetId}
+        assetId={assetAt(scene, layer, localFrame)}
         fit={layer.fit}
         {...(layer.crop && layer.sourceSize
           ? {

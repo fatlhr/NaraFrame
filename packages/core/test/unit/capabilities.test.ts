@@ -25,6 +25,8 @@ const EVIDENCE: Record<string, string[]> = {
     "draw",
     "follow",
     "count",
+    // swap: compile-draft-swap and swap-step-motion.
+    "swap",
   ],
   // billboard: path-count-motion and compile-draft-m2-4-3.
   compositionMotion: [

@@ -218,6 +218,13 @@ export const CompiledBeatSchema = z.discriminatedUnion("action", [
   z
     .object({
       ...CompiledBeatBaseShape,
+      action: z.literal("swap"),
+      params: z.object({ assetId: IdSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...CompiledBeatBaseShape,
       action: z.literal("reveal"),
       params: z
         .object({

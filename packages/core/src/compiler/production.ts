@@ -62,7 +62,7 @@ export const computeSceneClosure = (
     sceneId,
     blockId: block?.id ?? null,
     audioAssetId: block && "audioAssetId" in block ? block.audioAssetId : null,
-    assetIds: [...referencedAssetIds([scene.visual])].sort(),
+    assetIds: [...referencedAssetIds([scene.visual, scene.beats])].sort(),
     transitionHandleFrom:
       previous && previous.transition.type !== "cut" ? previous.id : null,
   };
@@ -84,7 +84,7 @@ export const outOfScopeGaps = (
   );
   source.scenes.scenes.forEach((scene, index) => {
     if (scene.id === sceneId) return;
-    for (const id of referencedAssetIds([scene.visual])) {
+    for (const id of referencedAssetIds([scene.visual, scene.beats])) {
       if (planned.has(id)) {
         issues.push(
           problem(
@@ -151,7 +151,7 @@ export const checkProductionReadiness = (
   }
 
   const used = referencedAssetIds([
-    compiled.scenes.map((scene) => [scene.visual, scene.layers]),
+    compiled.scenes.map((scene) => [scene.visual, scene.layers, scene.beats]),
   ]);
   for (const id of [...used].sort()) {
     if (compiled.assets[id]?.kind === "placeholder") {

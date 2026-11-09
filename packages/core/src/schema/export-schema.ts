@@ -133,6 +133,14 @@ const referencedAssets = (
         }
       });
     }
+    scene.beats.forEach((beat, beatIndex) => {
+      if (beat.action === "swap") {
+        references.push({
+          assetId: beat.params.assetId,
+          path: `/scenes/${sceneIndex}/beats/${beatIndex}/params/assetId`,
+        });
+      }
+    });
   });
 
   return references;

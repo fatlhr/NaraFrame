@@ -65,7 +65,10 @@ export const drawnPathFor = (
   return cutPath(layer.d, pathLengthOf(layer.d) * progress);
 };
 
-const beatProgress = (beat: CompiledBeat, localFrame: number): number =>
+const beatProgress = (
+  beat: Exclude<CompiledBeat, { action: "swap" }>,
+  localFrame: number,
+): number =>
   interpolate(
     localFrame,
     [beat.startFrame, beat.startFrame + beat.durationInFrames],
@@ -180,6 +183,46 @@ export interface MotionState {
   anchor: { x: number; y: number };
 }
 
+/**
+ * The artwork an image layer shows at a frame: its own asset until the first
+ * swap starts, then the latest swap that has started.
+ */
+export const assetAt = (
+  scene: CompiledDraft["scenes"][number],
+  layer: Extract<Layer, { type: "image" }>,
+  localFrame: number,
+): string => {
+  let assetId = layer.assetId;
+  let latest = -1;
+  for (const beat of scene.beats) {
+    if (
+      beat.action === "swap" &&
+      beat.targetId === layer.id &&
+      beat.startFrame <= localFrame &&
+      beat.startFrame >= latest
+    ) {
+      assetId = beat.params.assetId;
+      latest = beat.startFrame;
+    }
+  }
+  return assetId;
+};
+
+/** Every asset an image layer can show in its scene, its own first. */
+export const assetsOf = (
+  scene: CompiledDraft["scenes"][number],
+  layer: Extract<Layer, { type: "image" }>,
+): string[] => [
+  ...new Set([
+    layer.assetId,
+    ...scene.beats.flatMap((beat) =>
+      beat.action === "swap" && beat.targetId === layer.id
+        ? [beat.params.assetId]
+        : [],
+    ),
+  ]),
+];
+
 type VisibilityBeat = Extract<CompiledBeat, { action: "reveal" | "exit" }>;
 
 /**
@@ -249,7 +292,39 @@ export const visibilityFor = (
   };
 };
 
+/**
+ * The frame a layer's motion is read at. A layer with `stepFps` holds each
+ * drawing for fps/stepFps frames (on twos at 15 in a 30 fps video), so its
+ * motion advances in steps; the time of each step stays on the clock, so a
+ * held layer keeps pace with the rest of the scene.
+ */
+export const steppedFrame = (
+  draft: CompiledDraft,
+  scene: CompiledDraft["scenes"][number],
+  targetId: string,
+  localFrame: number,
+): number => {
+  const target = scene.layers.find((layer) => layer.id === targetId);
+  const stepFps = target?.stepFps;
+  if (!stepFps || stepFps >= draft.fps) return localFrame;
+  const hold = draft.fps / stepFps;
+  return Math.floor(localFrame / hold + 1e-9) * hold;
+};
+
 export const motionStateFor = (
+  draft: CompiledDraft,
+  scene: CompiledDraft["scenes"][number],
+  targetId: string,
+  localFrame: number,
+): MotionState =>
+  motionStateAt(
+    draft,
+    scene,
+    targetId,
+    steppedFrame(draft, scene, targetId, localFrame),
+  );
+
+const motionStateAt = (
   draft: CompiledDraft,
   scene: CompiledDraft["scenes"][number],
   targetId: string,
