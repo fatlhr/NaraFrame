@@ -297,7 +297,7 @@ describe("profile list", () => {
     expect(lines[4]).toMatch(/^motion-comic@0\.1\.0 \|/);
     expect(lines[5]).toMatch(/^paper-cutout@0\.1\.0 \|/);
     expect(lines[6]).toMatch(/^stickman-ink@0\.1\.0 \|/);
-    expect(lines[7]).toMatch(/^story@0\.1\.0 \|/);
+    expect(lines[7]).toMatch(/^story@0\.2\.0 \|/);
     expect((await run("profile", "list", "extra")).exitCode).toBe(3);
   });
 

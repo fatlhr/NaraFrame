@@ -542,6 +542,8 @@ export const stageLibrary = async (
         }
     };
     remap(scene.visual);
+    // A swap beat names the pose it shows in its params.
+    remap(scene.beats);
     if (scene.visual.type === "composition")
       for (const layer of scene.visual.layers) {
         if (layer.type !== "image" || layer.focalPoint) continue;

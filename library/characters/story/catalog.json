@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "story",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "provenance": {
     "source": "NaraFrame original Story staging and pose artwork",
     "license": "MIT"
@@ -84,13 +84,130 @@
         "source": "Original NaraFrame Story pose or prop",
         "license": "MIT"
       }
+    },
+    {
+      "id": "phone",
+      "status": "ready",
+      "kind": "svg",
+      "path": "phone.svg",
+      "binding": "neutral",
+      "sha256": "9d1dedb00c5bf1a172f81a8dc19011c731b23d6383dbd93d372ffa62c11fa09e",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Phone body",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "screen-dark",
+      "status": "ready",
+      "kind": "svg",
+      "path": "screen-dark.svg",
+      "binding": "neutral",
+      "sha256": "2cc982fde1ec71eebdcbad74ceb7cd18f9e86bf10048eab3a411b8b8ebde0015",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Phone screen at rest",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "screen-lit",
+      "status": "ready",
+      "kind": "svg",
+      "path": "screen-lit.svg",
+      "binding": "neutral",
+      "sha256": "68904c818207071c7e89c2e85bf07552b19d86ab74c80c8473cbf1821723be5d",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Phone screen with a new message",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "glow-cool",
+      "status": "ready",
+      "kind": "svg",
+      "path": "glow-cool.svg",
+      "binding": "neutral",
+      "sha256": "59cfc87a01d5dfa9aa586d6d29d114532a2f3310c61b9d5b2362fc9c1cd72f2e",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Cool screen light",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "glow-warm",
+      "status": "ready",
+      "kind": "svg",
+      "path": "glow-warm.svg",
+      "binding": "neutral",
+      "sha256": "de5cff9a82809624c934f7b6caae8cb0cba89d0d8e7474eb59a00821ca3d6af7",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Warm lamp light",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "porch-lamp",
+      "status": "ready",
+      "kind": "svg",
+      "path": "porch-lamp.svg",
+      "binding": "neutral",
+      "sha256": "d0e38fcfd350316241dc998db5578ba79720ae654453ad512bd232e7f796de0f",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Wall lamp, off",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "lamp-on",
+      "status": "ready",
+      "kind": "svg",
+      "path": "lamp-on.svg",
+      "binding": "neutral",
+      "sha256": "7ecce9c58bced6d446248494ebebb2d1d08dc188f7ae370375a06a4274908b42",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Wall lamp, lit",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "door",
+      "status": "ready",
+      "kind": "svg",
+      "path": "door.svg",
+      "binding": "neutral",
+      "sha256": "0453bad22abb8f10c6ab26913dd558f7b7ef78a3f311311c1b7942997bae5f6f",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Front door",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "window",
+      "status": "ready",
+      "kind": "svg",
+      "path": "window.svg",
+      "binding": "neutral",
+      "sha256": "bba5c39e2546cb461ef29574a9b337a7bfed5f9efd55db2b0e321cc5a5af2574",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Story rig prop: Night window",
+        "license": "MIT"
+      }
     }
   ],
   "patterns": [
     {
       "id": "note-gust",
       "version": "0.1.0",
-      "description": "A gust steals the note. Carry its direction and the courier\u2019s reach into the catch.",
+      "description": "A gust steals the note. Carry its direction and the courier’s reach into the catch.",
       "parameters": {
         "title": {
           "type": "string",
@@ -368,7 +485,7 @@
           "type": "cut"
         },
         "carriesFactualClaim": false,
-        "note": "A gust steals the note. Carry its direction and the courier\u2019s reach into the catch."
+        "note": "A gust steals the note. Carry its direction and the courier’s reach into the catch."
       }
     },
     {
@@ -1396,6 +1513,1815 @@
         },
         "carriesFactualClaim": false,
         "note": "The same courier carries the same parcel over the plank positioned in the previous shot."
+      }
+    },
+    {
+      "id": "phone-glow",
+      "version": "0.2.0",
+      "description": "A seated, faceless figure in a dark room; the phone screen lights and a message card tells the story. Pair with porch-light, or cut to the same framing with head-down.",
+      "parameters": {
+        "sender": {
+          "type": "string",
+          "pointers": ["/visual/layers/35/text"],
+          "description": "Who the message is from."
+        },
+        "message": {
+          "type": "string",
+          "pointers": ["/visual/layers/36/text"],
+          "description": "The message that turns the story, one short line."
+        },
+        "skin": {
+          "type": "string",
+          "pointers": [
+            "/visual/layers/22/fill",
+            "/visual/layers/21/fill",
+            "/visual/layers/26/fill",
+            "/visual/layers/27/fill",
+            "/visual/layers/16/fill",
+            "/visual/layers/17/fill"
+          ],
+          "description": "Skin colour (default #C98B62)."
+        },
+        "hair": {
+          "type": "string",
+          "pointers": ["/visual/layers/23/fill"],
+          "description": "Hair colour (default #5A3A2A)."
+        },
+        "shirt": {
+          "type": "string",
+          "pointers": [
+            "/visual/layers/20/fill",
+            "/visual/layers/25/fill",
+            "/visual/layers/15/fill"
+          ],
+          "description": "Shirt colour (default #BC6049)."
+        },
+        "pants": {
+          "type": "string",
+          "pointers": [
+            "/visual/layers/10/fill",
+            "/visual/layers/11/fill",
+            "/visual/layers/5/fill",
+            "/visual/layers/6/fill"
+          ],
+          "description": "Trouser colour (default #3F5A73)."
+        }
+      },
+      "template": {
+        "id": "phone-glow",
+        "narrativeRole": "context",
+        "durationMs": 3600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "night",
+              "type": "shape",
+              "shape": "rectangle",
+              "fill": "#1C2133",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0
+            },
+            {
+              "id": "floor",
+              "type": "shape",
+              "shape": "rectangle",
+              "fill": "#252A3D",
+              "frame": {
+                "x": 0,
+                "y": 1400,
+                "width": 1080,
+                "height": 520
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "window",
+              "type": "image",
+              "assetId": "window",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 650,
+                "y": 420,
+                "width": 300,
+                "height": 367
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "bed",
+              "type": "shape",
+              "shape": "rectangle",
+              "fill": "#3A3F5C",
+              "frame": {
+                "x": 170,
+                "y": 1180,
+                "width": 600,
+                "height": 240
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "cornerRadius": 24
+            },
+            {
+              "id": "glow",
+              "type": "image",
+              "assetId": "glow-cool",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 276.2973241165155,
+                "y": 563.6982780060856,
+                "width": 660,
+                "height": 660
+              },
+              "opacity": 0.35,
+              "rotationDeg": 0,
+              "zIndex": 9
+            },
+            {
+              "id": "kid-thigh-f",
+              "type": "path",
+              "d": "M173 470A27 27 0 0 1 227 470L227 620A27 27 0 0 1 173 620Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#3F5A73",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shin-f",
+              "type": "path",
+              "d": "M177 620A23 23 0 0 1 223 620L223 752A23 23 0 0 1 177 752Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#3F5A73",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shoe-f",
+              "type": "path",
+              "d": "M176 742L222 742Q262 752 264 776L264 790L176 790Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#292D41",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-lower-f",
+              "type": "group",
+              "memberIds": ["kid-shin-f", "kid-shoe-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 82,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.775
+              }
+            },
+            {
+              "id": "kid-leg-f",
+              "type": "group",
+              "memberIds": ["kid-thigh-f", "kid-lower-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -82,
+                "opacity": 1
+              },
+              "zIndex": 1,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.5875
+              }
+            },
+            {
+              "id": "kid-thigh-n",
+              "type": "path",
+              "d": "M171 470A29 29 0 0 1 229 470L229 620A29 29 0 0 1 171 620Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#3F5A73",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shin-n",
+              "type": "path",
+              "d": "M175 620A25 25 0 0 1 225 620L225 752A25 25 0 0 1 175 752Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#3F5A73",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shoe-n",
+              "type": "path",
+              "d": "M174 742L222 742Q264 752 266 776L266 792L174 792Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#292D41",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-lower-n",
+              "type": "group",
+              "memberIds": ["kid-shin-n", "kid-shoe-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 88,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.775
+              }
+            },
+            {
+              "id": "kid-leg-n",
+              "type": "group",
+              "memberIds": ["kid-thigh-n", "kid-lower-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -88,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.5875
+              }
+            },
+            {
+              "id": "kid-upperarm-f",
+              "type": "path",
+              "d": "M180 238A20 20 0 0 1 220 238L220 362A20 20 0 0 1 180 362Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#BC6049",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-forearm-f",
+              "type": "path",
+              "d": "M184 362A16 16 0 0 1 216 362L216 468A16 16 0 0 1 184 468Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-hand-f",
+              "type": "path",
+              "d": "M179 484A21 21 0 1 0 221 484A21 21 0 1 0 179 484Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-fore-f",
+              "type": "group",
+              "memberIds": ["kid-forearm-f", "kid-hand-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -112,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.4525
+              }
+            },
+            {
+              "id": "kid-arm-f",
+              "type": "group",
+              "memberIds": ["kid-upperarm-f", "kid-fore-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -26,
+                "opacity": 1
+              },
+              "zIndex": 1,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.2975
+              }
+            },
+            {
+              "id": "kid-torso",
+              "type": "path",
+              "d": "M158 236Q160 206 200 204Q246 206 250 250Q258 330 248 420Q244 486 200 492Q150 488 148 430Q146 320 158 236Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#BC6049",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-neck",
+              "type": "path",
+              "d": "M187 172A17 17 0 0 1 221 172L221 214A17 17 0 0 1 187 214Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-skull",
+              "type": "path",
+              "d": "M146 128A62 62 0 1 0 270 128A62 62 0 1 0 146 128Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-hair",
+              "type": "path",
+              "d": "M150 150Q136 84 190 66Q250 54 270 108Q236 92 214 100Q186 112 182 150Q170 176 150 150Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#5A3A2A",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3
+            },
+            {
+              "id": "kid-head",
+              "type": "group",
+              "memberIds": ["kid-neck", "kid-skull", "kid-hair"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 20,
+                "opacity": 1
+              },
+              "zIndex": 3,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.25
+              }
+            },
+            {
+              "id": "kid-upperarm-n",
+              "type": "path",
+              "d": "M178 238A22 22 0 0 1 222 238L222 362A22 22 0 0 1 178 362Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#BC6049",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-forearm-n",
+              "type": "path",
+              "d": "M182 362A18 18 0 0 1 218 362L218 468A18 18 0 0 1 182 468Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-hand-n",
+              "type": "path",
+              "d": "M177 486A23 23 0 1 0 223 486A23 23 0 1 0 177 486Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 250,
+                "y": 618,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-fore-n",
+              "type": "group",
+              "memberIds": [
+                "kid-forearm-n",
+                "kid-hand-n",
+                "kid-phone",
+                "kid-screen"
+              ],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -108,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.4525
+              }
+            },
+            {
+              "id": "kid-arm-n",
+              "type": "group",
+              "memberIds": ["kid-upperarm-n", "kid-fore-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -32,
+                "opacity": 1
+              },
+              "zIndex": 4,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.2975
+              }
+            },
+            {
+              "id": "kid-upper",
+              "type": "group",
+              "memberIds": ["kid-arm-f", "kid-torso", "kid-head", "kid-arm-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 6,
+                "opacity": 1
+              },
+              "zIndex": 3,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.5875
+              }
+            },
+            {
+              "id": "kid",
+              "type": "group",
+              "memberIds": ["kid-leg-f", "kid-leg-n", "kid-upper"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 10,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.9875
+              }
+            },
+            {
+              "id": "kid-phone",
+              "type": "image",
+              "assetId": "phone",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 426,
+                "y": 1058,
+                "width": 48,
+                "height": 88
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3
+            },
+            {
+              "id": "kid-screen",
+              "type": "image",
+              "assetId": "screen-dark",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 430.5,
+                "y": 1062,
+                "width": 39,
+                "height": 73
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4
+            },
+            {
+              "id": "card",
+              "type": "shape",
+              "shape": "rectangle",
+              "fill": "#E9F1FF",
+              "frame": {
+                "x": 120,
+                "y": 250,
+                "width": 840,
+                "height": 230
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "cornerRadius": 36
+            },
+            {
+              "id": "card-sender",
+              "type": "text",
+              "text": "Dad",
+              "frame": {
+                "x": 176,
+                "y": 282,
+                "width": 728,
+                "height": 56
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 21,
+              "role": "label",
+              "color": "#3D5A9E",
+              "fontSize": 38,
+              "fontWeight": 700,
+              "maxLines": 1
+            },
+            {
+              "id": "card-message",
+              "type": "text",
+              "text": "I'm outside.",
+              "frame": {
+                "x": 176,
+                "y": 350,
+                "width": 728,
+                "height": 96
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 21,
+              "role": "heading",
+              "color": "#1C2133",
+              "fontSize": 64,
+              "fontWeight": 700,
+              "maxLines": 1
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "breath",
+            "targetId": "kid-upper",
+            "action": "emphasize",
+            "startMs": 0,
+            "durationMs": 1200,
+            "repeat": {
+              "intervalMs": 1400,
+              "untilMs": 3600
+            },
+            "params": {
+              "scale": 1.015,
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "screen-on",
+            "targetId": "kid-screen",
+            "action": "swap",
+            "startMs": 1100,
+            "durationMs": 100,
+            "params": {
+              "assetId": "screen-lit"
+            }
+          },
+          {
+            "id": "light-up",
+            "targetId": "glow",
+            "action": "transform",
+            "startMs": 1100,
+            "durationMs": 300,
+            "params": {
+              "to": {
+                "scale": 1.12
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "show-card",
+            "targetId": "card",
+            "action": "reveal",
+            "startMs": 1400,
+            "durationMs": 360,
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "show-card-sender",
+            "targetId": "card-sender",
+            "action": "reveal",
+            "startMs": 1400,
+            "durationMs": 360,
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "show-card-message",
+            "targetId": "card-message",
+            "action": "reveal",
+            "startMs": 1400,
+            "durationMs": 360,
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "look-up",
+            "targetId": "kid-head",
+            "action": "transform",
+            "startMs": 2500,
+            "durationMs": 500,
+            "params": {
+              "to": {
+                "rotationDeg": -4
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "note": "The phone lights and the message lands; carry the phone in hand and the night into the next shot."
+      }
+    },
+    {
+      "id": "porch-light",
+      "version": "0.2.0",
+      "description": "The figure stands in a doorway at night, phone in hand; a wall lamp switches on and the figure points into the dark. The light carries the story.",
+      "parameters": {
+        "skin": {
+          "type": "string",
+          "pointers": [
+            "/visual/layers/23/fill",
+            "/visual/layers/22/fill",
+            "/visual/layers/27/fill",
+            "/visual/layers/28/fill",
+            "/visual/layers/17/fill",
+            "/visual/layers/18/fill"
+          ],
+          "description": "Skin colour (default #C98B62)."
+        },
+        "hair": {
+          "type": "string",
+          "pointers": ["/visual/layers/24/fill"],
+          "description": "Hair colour (default #5A3A2A)."
+        },
+        "shirt": {
+          "type": "string",
+          "pointers": [
+            "/visual/layers/21/fill",
+            "/visual/layers/26/fill",
+            "/visual/layers/16/fill"
+          ],
+          "description": "Shirt colour (default #BC6049)."
+        },
+        "pants": {
+          "type": "string",
+          "pointers": [
+            "/visual/layers/11/fill",
+            "/visual/layers/12/fill",
+            "/visual/layers/6/fill",
+            "/visual/layers/7/fill"
+          ],
+          "description": "Trouser colour (default #3F5A73)."
+        }
+      },
+      "template": {
+        "id": "porch-light",
+        "narrativeRole": "context",
+        "durationMs": 3600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "night",
+              "type": "shape",
+              "shape": "rectangle",
+              "fill": "#161A28",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0
+            },
+            {
+              "id": "wall",
+              "type": "shape",
+              "shape": "rectangle",
+              "fill": "#2C3147",
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 760,
+                "height": 1660
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "ground",
+              "type": "shape",
+              "shape": "rectangle",
+              "fill": "#20243A",
+              "frame": {
+                "x": 0,
+                "y": 1640,
+                "width": 1080,
+                "height": 280
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "door",
+              "type": "image",
+              "assetId": "door",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 90,
+                "y": 1000,
+                "width": 330,
+                "height": 660
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "lamp",
+              "type": "image",
+              "assetId": "porch-lamp",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 520,
+                "y": 640,
+                "width": 100,
+                "height": 150
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3
+            },
+            {
+              "id": "glow",
+              "type": "image",
+              "assetId": "glow-warm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 70,
+                "y": 230,
+                "width": 1000,
+                "height": 1000
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4
+            },
+            {
+              "id": "kid-thigh-f",
+              "type": "path",
+              "d": "M173 470A27 27 0 0 1 227 470L227 620A27 27 0 0 1 173 620Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#3F5A73",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shin-f",
+              "type": "path",
+              "d": "M177 620A23 23 0 0 1 223 620L223 752A23 23 0 0 1 177 752Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#3F5A73",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shoe-f",
+              "type": "path",
+              "d": "M176 742L222 742Q262 752 264 776L264 790L176 790Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#292D41",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-lower-f",
+              "type": "group",
+              "memberIds": ["kid-shin-f", "kid-shoe-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.775
+              }
+            },
+            {
+              "id": "kid-leg-f",
+              "type": "group",
+              "memberIds": ["kid-thigh-f", "kid-lower-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 1,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.5875
+              }
+            },
+            {
+              "id": "kid-thigh-n",
+              "type": "path",
+              "d": "M171 470A29 29 0 0 1 229 470L229 620A29 29 0 0 1 171 620Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#3F5A73",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shin-n",
+              "type": "path",
+              "d": "M175 620A25 25 0 0 1 225 620L225 752A25 25 0 0 1 175 752Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#3F5A73",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shoe-n",
+              "type": "path",
+              "d": "M174 742L222 742Q264 752 266 776L266 792L174 792Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#292D41",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-lower-n",
+              "type": "group",
+              "memberIds": ["kid-shin-n", "kid-shoe-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.775
+              }
+            },
+            {
+              "id": "kid-leg-n",
+              "type": "group",
+              "memberIds": ["kid-thigh-n", "kid-lower-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.5875
+              }
+            },
+            {
+              "id": "kid-upperarm-f",
+              "type": "path",
+              "d": "M180 238A20 20 0 0 1 220 238L220 362A20 20 0 0 1 180 362Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#BC6049",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-forearm-f",
+              "type": "path",
+              "d": "M184 362A16 16 0 0 1 216 362L216 468A16 16 0 0 1 184 468Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-hand-f",
+              "type": "path",
+              "d": "M179 484A21 21 0 1 0 221 484A21 21 0 1 0 179 484Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-fore-f",
+              "type": "group",
+              "memberIds": [
+                "kid-forearm-f",
+                "kid-hand-f",
+                "kid-phone",
+                "kid-screen"
+              ],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -6,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.4525
+              }
+            },
+            {
+              "id": "kid-arm-f",
+              "type": "group",
+              "memberIds": ["kid-upperarm-f", "kid-fore-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -4,
+                "opacity": 1
+              },
+              "zIndex": 1,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.2975
+              }
+            },
+            {
+              "id": "kid-torso",
+              "type": "path",
+              "d": "M158 236Q160 206 200 204Q246 206 250 250Q258 330 248 420Q244 486 200 492Q150 488 148 430Q146 320 158 236Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#BC6049",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-neck",
+              "type": "path",
+              "d": "M187 172A17 17 0 0 1 221 172L221 214A17 17 0 0 1 187 214Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-skull",
+              "type": "path",
+              "d": "M146 128A62 62 0 1 0 270 128A62 62 0 1 0 146 128Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-hair",
+              "type": "path",
+              "d": "M150 150Q136 84 190 66Q250 54 270 108Q236 92 214 100Q186 112 182 150Q170 176 150 150Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#5A3A2A",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3
+            },
+            {
+              "id": "kid-head",
+              "type": "group",
+              "memberIds": ["kid-neck", "kid-skull", "kid-hair"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 3,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.25
+              }
+            },
+            {
+              "id": "kid-upperarm-n",
+              "type": "path",
+              "d": "M178 238A22 22 0 0 1 222 238L222 362A22 22 0 0 1 178 362Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#BC6049",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-forearm-n",
+              "type": "path",
+              "d": "M182 362A18 18 0 0 1 218 362L218 468A18 18 0 0 1 182 468Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-hand-n",
+              "type": "path",
+              "d": "M177 486A23 23 0 1 0 223 486A23 23 0 1 0 177 486Z",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 400,
+                "height": 800
+              },
+              "frame": {
+                "x": 420,
+                "y": 860,
+                "width": 400,
+                "height": 800
+              },
+              "stroke": {
+                "color": "#292D41",
+                "width": 5
+              },
+              "fill": "#C98B62",
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-fore-n",
+              "type": "group",
+              "memberIds": ["kid-forearm-n", "kid-hand-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -4,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.4525
+              }
+            },
+            {
+              "id": "kid-arm-n",
+              "type": "group",
+              "memberIds": ["kid-upperarm-n", "kid-fore-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 4,
+                "opacity": 1
+              },
+              "zIndex": 4,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.2975
+              }
+            },
+            {
+              "id": "kid-upper",
+              "type": "group",
+              "memberIds": ["kid-arm-f", "kid-torso", "kid-head", "kid-arm-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 3,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.5875
+              }
+            },
+            {
+              "id": "kid",
+              "type": "group",
+              "memberIds": ["kid-leg-f", "kid-leg-n", "kid-upper"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 10,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.9875
+              }
+            },
+            {
+              "id": "kid-phone",
+              "type": "image",
+              "assetId": "phone",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 596,
+                "y": 1300,
+                "width": 48,
+                "height": 88
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3
+            },
+            {
+              "id": "kid-screen",
+              "type": "image",
+              "assetId": "screen-lit",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 600.5,
+                "y": 1304,
+                "width": 39,
+                "height": 73
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "lamp-on",
+            "targetId": "lamp",
+            "action": "swap",
+            "startMs": 500,
+            "durationMs": 100,
+            "params": {
+              "assetId": "lamp-on"
+            }
+          },
+          {
+            "id": "light",
+            "targetId": "glow",
+            "action": "reveal",
+            "startMs": 500,
+            "durationMs": 300,
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "breath",
+            "targetId": "kid-upper",
+            "action": "emphasize",
+            "startMs": 300,
+            "durationMs": 1200,
+            "repeat": {
+              "intervalMs": 1400,
+              "untilMs": 3600
+            },
+            "params": {
+              "scale": 1.015,
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "turn",
+            "targetId": "kid-head",
+            "action": "transform",
+            "startMs": 1300,
+            "durationMs": 400,
+            "params": {
+              "to": {
+                "rotationDeg": -8
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "raise-arm",
+            "targetId": "kid-arm-n",
+            "action": "transform",
+            "startMs": 1500,
+            "durationMs": 260,
+            "params": {
+              "to": {
+                "rotationDeg": -92
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "settle-arm",
+            "targetId": "kid-arm-n",
+            "action": "transform",
+            "startMs": 1760,
+            "durationMs": 300,
+            "params": {
+              "to": {
+                "rotationDeg": -84
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "straighten",
+            "targetId": "kid-fore-n",
+            "action": "transform",
+            "startMs": 1500,
+            "durationMs": 400,
+            "params": {
+              "to": {
+                "rotationDeg": -6
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "note": "Cut from sitting to standing in the doorway; the phone stays in hand, and the lamp's light takes over from the screen's."
       }
     }
   ]
