@@ -2,7 +2,7 @@
 
 Revision 2.4 · Updated 2026-11-09 · MVP 2 integrated at `a701c39`
 
-**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. V1–V4 and V5.1 passed local package acceptance. The [V5.2 release](#v5-follow-ups-for-the-public-style-chooser) pairs the approved README gallery with npm `0.3.0`. [V6](#v6-render-benchmark-acceptance) is complete with benchmark evidence. V7 is conditional and Studio requires separate approval. The [0.4.0 character story motion tasks](#9-naraframe-040--character-story-motion-proposed) are proposed and await Fatih's scope decisions.
+**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. V1–V4 and V5.1 passed local package acceptance. The [V5.2 release](#v5-follow-ups-for-the-public-style-chooser) pairs the approved README gallery with npm `0.3.0`. [V6](#v6-render-benchmark-acceptance) is complete with benchmark evidence. V7 is conditional and Studio requires separate approval. The [0.4.0 character motion release](#s7-release-acceptance-2026-11-09) shipped Story and Stickman Ink rigs. Fatih approved the [N2 README refresh](#n2-readme-review-candidate) for integration. N1 is the next task.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -2051,3 +2051,20 @@ Fatih asked on 2026-11-09 to finish the remaining 0.4.0 work and bring it to rel
 - [x] Candidate: `node scripts/pack-engine.mjs --registry` produced `naraframe-0.4.0.tgz` (`engines.node >=22`) with SHA-256 `24ece053e28556208a563fbb05bd3491e64bf26ca1a3d6dc39580dec62211df6`; packing twice gave identical bytes, and the evidence-only plan edit after it does not enter the package.
 - [x] Clean install: the tarball installed into an empty workspace with `npm install`; the installed binary reported `0.4.0` and `naraframe-draft/14`, and `doctor` passed all eight checks. `install-skill.mjs` installed `naraframe`, `naraframe-story` and `naraframe-stickman` for Claude at project scope. Through the installed launcher, `story@0.2.0` with `phone-glow@0.2.0` reached scoped build `b0fb91e72da3-9a42ca79-cf9`, and `stickman-ink@0.2.0` with `ink-heave@0.2.0` reached `e5eb38e7fd65-68dceb17-2b1`; both validated with only the profile duration warning and reported `in-sync`.
 - [x] Publication (2026-11-09): Fatih authorized publishing in chat and approved npm's web login and the publish two-factor prompt with his security key in Chrome. `npm publish` of the candidate made [`naraframe@0.4.0`](https://www.npmjs.com/package/naraframe/v/0.4.0) the `latest` tag. The registry tarball's SHA-256 is `24ece053e28556208a563fbb05bd3491e64bf26ca1a3d6dc39580dec62211df6`, byte-identical to the candidate, and matches its `sha512` integrity. A fresh registry install on Node 23.10.0 reported `0.4.0` and `naraframe-draft/14`, passed all eight `doctor` checks, installed the three skills, and reached scoped story and stickman previews (`b0fb91e72da3-1a95d490-4d5`, `e5eb38e7fd65-aca79f35-1bf`).
+
+### N2 README review candidate
+
+Fatih authorized N2 followed by N1. The candidate replaces the Quick start hero, Editorial tile, workflow diagram, storyboard excerpt, and series comparison. The English example session follows the same popcorn episode. The gallery and chooser use the existing profile names.
+
+| README asset path under `docs/assets/readme/` | Source revision | NaraFrame preview build |
+|---|---|---|
+| `hero.png`, `storyboard.png`, and the warm half of `two-looks.png` | `8df7d66fc27aec67b460183626177108885fa77c6b3826a74790553847c07f2b` | `bfc450e9abff-a584eed9-5b7` |
+| `flow.png` | `3cc11a12aae2b178983fb87714d3c33e40aa5480a8b5b09f307717c2f894747d` | `7e66f87684ef-a66ffcb1-4ed` |
+| `profiles/current-issues.webp` | `9ff3263f3f6ea97d2a0a9380ae4d03136c31bfb749fb722b20201abfb92b0ba2` | `2502a44f6c56-9ab607fc-609` |
+| Night Lab half of `two-looks.png` | `c4b54348d88c8a0850df88b88ebe5b7a0ba7a87b189bb51dff645453c0734c49` | `fe95af209107-d866c51f-415` |
+
+All four source revisions passed plan validation and their full silent drafts decoded with zero frame-integrity outliers. The first and second popcorn looks share byte-identical scene and media sources. The CLI dry run and apply used the same local Night Lab profile after a guarded edit removed the episode palette override. The storyboard is a six-cell excerpt from the engine output. The gallery animation and stills crop the draft footer for the README. Verified 41 local image, link, and anchor references. The side-by-side review and render receipts are in the local `n2-readme-review` evidence folder.
+
+With the ignored local narrated sample present, `pnpm verify` passed Biome, typecheck, build, 415 unit tests, and 617 integration tests. The first worktree run reported 14 missing-fixture failures.
+
+Fatih approved the before-and-after visual review in chat on 2026-11-10 and authorized merging [PR #104](https://github.com/fatlhr/NaraFrame/pull/104) before starting N1. The npm README follows the next authorized release.

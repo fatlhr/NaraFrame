@@ -1,15 +1,15 @@
 # NaraFrame
 
-**Short vertical explainer videos for your series, made by the AI agent you already use.**
+**Make short, editable videos with the agent you already use.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 [![Tested on macOS Apple Silicon](https://img.shields.io/badge/tested%20on-macOS%20Apple%20Silicon-555?style=flat-square)](#what-you-need)
 [![Version 0.4.0](https://img.shields.io/badge/version-0.4.0%20early%20release-f5a623?style=flat-square)](#good-to-know)
 [![Works with Claude Code and Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex-7a5af5?style=flat-square)](#install)
 
-Tell your agent what the next episode is about. NaraFrame turns that into a 9:16 video with the same look as every episode before it, shows you a preview, and exports exactly the version you approved.
+Describe your next episode in plain language. Your agent builds an editable 9:16 video, and NaraFrame renders the preview on your Mac. Revise a shot, keep your series look, then export the version you approve.
 
-![Four moments from a NaraFrame explainer about why ice floats: the question, the molecules spreading out, a density comparison and the answer](docs/assets/readme/hero.png)
+![Three illustrated frames from Why Popcorn Pops show a kernel, a cutaway with trapped water, and the expanded flake](docs/assets/readme/hero.png)
 
 [Quick start](#quick-start) · [What you can make](#style-gallery) · [Choose a visual style](#choose-a-visual-style) · [How it works](#how-it-works) · [Your series look](#series-look) · [Revisions and reuse](#what-you-save) · [Install](#install) · [Uninstall](#uninstall) · [Questions](#questions) · [Technical guide](docs/guide.md)
 
@@ -27,7 +27,7 @@ Tell your agent what the next episode is about. NaraFrame turns that into a 9:16
 2. Ask for a video, for example:
 
    ```
-   Make a 20-second vertical explainer about why ice floats.
+   Make a 12-second vertical explainer about why popcorn pops. Show the kernel, the pressure building, and the pop. Keep it silent.
    ```
 
 3. Say **yes** when your agent offers to install NaraFrame's engine (about 240 MB). It checks Node.js, Chrome and FFmpeg first and tells you if anything is missing.
@@ -51,12 +51,12 @@ Eight short, silent previews. Watch how each style uses movement to show an idea
 
 | | |
 |:---:|:---:|
-| ![A sealed straw holds water in place. Lift the seal and the water drops.](docs/assets/readme/profiles/general-explainer.webp)<br>**Motion Explainer**<br>*Why won’t it drain?* | ![A spacecraft hits Dimorphos and its orbit changes.](docs/assets/readme/profiles/current-issues.webp)<br>**Editorial / Current Issues**<br>*An asteroid nudge* |
+| ![A sealed straw holds water in place. Lift the seal and the water drops.](docs/assets/readme/profiles/general-explainer.webp)<br>**Motion Explainer**<br>*Why won’t it drain?* | ![DART hits Dimorphos. An orbit diagram shows the shorter period measured by NASA.](docs/assets/readme/profiles/current-issues.webp)<br>**Editorial / Current Issues**<br>*DART changed an orbit* |
 | ![A stick figure plants both heels, yanks the kite free, and tumbles backward.](docs/assets/readme/profiles/stickman-ink.webp)<br>**Stickman Ink**<br>*Kite in the Fence* | ![Follow a pin in its slot to see what lifts the gate.](docs/assets/readme/profiles/mechanics-bench.webp)<br>**Mechanic’s Bench**<br>*A pin lifts a gate* |
 | ![A folded bridge lands, then a paper token crosses.](docs/assets/readme/profiles/paper-cutout.webp)<br>**Paper Cutout**<br>*A bridge made of paper* | ![A dispenser separates into parts and snaps back together.](docs/assets/readme/profiles/bedah-25d.webp)<br>**Bedah 2.5D**<br>*Why tape tears* |
 | ![Three panels follow a robot, a squeak, and a librarian’s reaction.](docs/assets/readme/profiles/motion-comic.webp)<br>**Motion Comic**<br>*The Squeaky Sneaker* | ![Rain puts out a match. The traveler cups the next flame and lights a lantern.](docs/assets/readme/profiles/story.webp)<br>**Story**<br>*The Last Match* |
 
-The DART example draws on [NASA’s orbital analysis](https://www.nasa.gov/missions/dart/nasa-study-asteroids-orbit-shape-changed-after-dart-impact/).
+The Editorial example visualizes DART’s impact and the change in Dimorphos’s orbital period. [NASA’s orbital analysis](https://www.nasa.gov/missions/dart/nasa-study-asteroids-orbit-shape-changed-after-dart-impact/).
 
 <a id="choose-a-visual-style"></a>
 
@@ -67,7 +67,7 @@ A plain brief for a new video uses **Motion Explainer**. Choose a profile when i
 | Style and profile ID | Best for | How to choose in Codex | Example |
 |---|---|---|---|
 | **Motion Explainer** · `general-explainer` | A process, comparison, or cause and effect | Start with a plain brief or choose `$naraframe` | [Why won’t it drain?](docs/assets/readme/profiles/general-explainer.webp) |
-| **Editorial / Current Issues** · `current-issues` | A sourced explanation of an event | Choose `$naraframe` and ask for `current-issues` | [An asteroid nudge](docs/assets/readme/profiles/current-issues.webp) |
+| **Editorial / Current Issues** · `current-issues` | A sourced explanation of an event | Choose `$naraframe` and ask for `current-issues` | [DART changed an orbit](docs/assets/readme/profiles/current-issues.webp) |
 | **Stickman Ink** · `stickman-ink` | A pose, reaction, or interaction with a prop | Choose `$naraframe-stickman` | [Kite in the Fence](docs/assets/readme/profiles/stickman-ink.webp) |
 | **Mechanic’s Bench** · `mechanics-bench` | A mechanism with connected parts | Choose `$naraframe-mechanics` | [A pin lifts a gate](docs/assets/readme/profiles/mechanics-bench.webp) |
 | **Paper Cutout** · `paper-cutout` | Layers, folds, and stepped movement | Choose `$naraframe-paper` | [A bridge made of paper](docs/assets/readme/profiles/paper-cutout.webp) |
@@ -83,23 +83,23 @@ Install `naraframe@0.4.0` from npm to get the profiles and character skills show
 
 | Step | You | NaraFrame and your agent |
 |:---:|---|---|
-| 1️⃣ | **Ask:** "Make a 20-second explainer about why ice floats," or "Start a weekly series for my science channel." | Explains what NaraFrame does and, the first time, offers to install the engine. |
-| 2️⃣ | **Pick the look:** one-off video, character style, or a series? | Uses the default explainer profile, the style you select, or a series profile made from your name and colours. |
-| 3️⃣ | **Review:** "make the headline shorter," "slow the second scene down." | Shows a preview and a storyboard image, then changes only what you asked for. |
+| 1️⃣ | **Ask for an episode.** Try “Make a short explainer about why popcorn pops.” | Explains what NaraFrame does and, the first time, offers to install the engine. |
+| 2️⃣ | **Pick a look.** Use an explainer, choose a character style, or set a look for the series. | Uses the default explainer profile, the style you select, or a series profile made from your name and colours. |
+| 3️⃣ | **Review a draft.** Try “Hold the cutaway a little longer.” | Shows the video and its storyboard. Ask for a change and review a new preview. |
 | 4️⃣ | **Approve and export.** | Delivers a 1080×1920 MP4 of exactly the version you approved. |
 
-![Five steps: ask the topic, pick a look, build with every scene checked, preview with a storyboard, approve and get the MP4; revisions loop from preview back to build](docs/assets/readme/flow.png)
+![Four steps from brief to export. A return arrow from review shows where to revise and preview again.](docs/assets/readme/flow.png)
 
-Every preview comes with a storyboard, so you can judge the whole video at a glance:
+Each preview includes a timestamped storyboard. Here are six frames from the popcorn example.
 
-![Storyboard image of a preview, with the time of each frame underneath](docs/assets/readme/storyboard.png)
+![NaraFrame storyboard for Why Popcorn Pops, with timestamped frames from all three scenes](docs/assets/readme/storyboard.png)
 
 ### 💬 What you can ask for
 
 | You say | NaraFrame does |
 |---|---|
-| "Make a short vertical explainer about why cats love boxes, no narration." | A silent one-off explainer in the neutral look |
-| "Start a weekly series called *Sains Santai*, dark green and yellow, in Indonesian." | Creates the series look, then the first episode |
+| "Show why popcorn pops in three shots, without narration." | A silent Motion Explainer with a kernel, cutaway and payoff |
+| "Start a weekly series called *Night Lab*. Use deep teal, pale mint and serif headlines." | Creates the series look, then the first episode |
 | "Use this recorded voice-over and only caption the key phrases." | Imports your audio once and captions the phrases you pick |
 | "Undo the last change." | Steps back one revision |
 | "Show me what changes if this series moves to our new brand profile." | Lists what will change before applying anything |
@@ -110,23 +110,23 @@ Every preview comes with a storyboard, so you can judge the whole video at a gla
 
 Here is an example of the supported workflow, starting on a Mac without the engine.
 
-> **You:** Start a weekly series for my science channel. First episode: why cats sleep in boxes, about 30 seconds, no voice for now.
+> **You:** Start a weekly science series. The first episode is about why popcorn pops. Keep it under 15 seconds and skip the narration.
 
 The agent explains what NaraFrame does, asks whether you want it to install the engine, and asks for the series name and colours.
 
-> **You:** Install it. The channel is *Sains Santai*, dark green and yellow, in Indonesian.
+> **You:** Install it. Call the series *Night Lab*. Give it deep teal, pale mint and serif headlines.
 
-It installs the engine, creates the *Sains Santai* series look, writes the scenes and shows you a preview with a storyboard.
+It installs the engine, creates the *Night Lab* profile and builds a preview with a storyboard.
 
-> **You:** Make the second headline shorter and slow the heat lines down.
+> **You:** Shorten the second headline and hold on the water inside the kernel.
 
-It changes just those parts, checks them again and shows a new preview.
+The agent updates the shot, checks it and shows the new preview.
 
 > **You:** Looks good. Export it.
 
 You get the final MP4 of exactly the version you approved. Next week:
 
-> **You:** Episode 2 of *Sains Santai*: why cats knead blankets.
+> **You:** For the next *Night Lab* episode, explain why onions make us cry.
 
 The new episode starts with the same look as episode 1.
 
@@ -136,11 +136,11 @@ The new episode starts with the same look as episode 1.
 
 ## 🎨 One look per series
 
-The same scenes in two series looks. The content stays; colours, type and the timing of reveals follow the profile.
+The same popcorn scenes in two looks. Countertop Science uses warm paper and bold type. Night Lab uses deep teal and serif headlines.
 
-![The same two scenes in two series profiles: a neutral navy explainer look on the left and a dark green and yellow series look on the right](docs/assets/readme/two-looks.png)
+![The cutaway and payoff from Why Popcorn Pops in warm Countertop Science and dark teal Night Lab looks](docs/assets/readme/two-looks.png)
 
-When you move a series to a new look, NaraFrame first shows what will change before anything is applied. Two of the videos above were moved to a new look this way, without redrawing anything.
+The second look comes from applying a new profile to the same episode. NaraFrame shows a change plan first. Clear any episode palette override to use the new profile’s colors. The scene copy, timing and illustrations carry across.
 
 ### 🍱 The menus behind the looks
 
