@@ -377,6 +377,36 @@ const reachFor = (
       unbounded: `a focus beat moves ${layer.id}, which this check does not model`,
     };
   }
+  // Turning or scaling about a pivot moves the centre, which the boxes below
+  // assume stays put; a layer that only travels is unaffected by its pivot.
+  const offCentre = (pivot: { x: number; y: number } | undefined) =>
+    pivot !== undefined && (pivot.x !== 0.5 || pivot.y !== 0.5);
+  if (offCentre(layer.pivot)) {
+    const turnsOrScales =
+      (layer.rotationDeg ?? 0) !== 0 ||
+      of(layer.id, ["transform"]).some(
+        (beat) =>
+          beat.action === "transform" &&
+          (beat.params.to.rotationDeg !== undefined ||
+            beat.params.to.scale !== undefined),
+      ) ||
+      (options.asBackdrop && of(layer.id, ["emphasize"]).length > 0);
+    if (turnsOrScales) {
+      return {
+        unbounded: `${layer.id} turns or scales about its pivot, which this check does not model`,
+      };
+    }
+  }
+  if (
+    group &&
+    offCentre(group.pivot) &&
+    options.asBackdrop &&
+    of(group.id, ["emphasize"]).length > 0
+  ) {
+    return {
+      unbounded: `${layer.id} scales with its group ${group.id} about the group's pivot, which this check does not model`,
+    };
+  }
   if (group && !options.withinGroup) {
     const groupMoves = of(group.id, ["transform", "follow", "focus"]);
     if (groupIsDisplaced(group) || groupMoves.length > 0) {

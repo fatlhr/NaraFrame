@@ -62,9 +62,19 @@ export const TypographyRoleSchema = z.enum([
   "label",
 ]);
 
+/**
+ * The point a layer turns and scales about, as a fraction of its frame (0-1
+ * on each axis; default the centre). A limb drawn at its natural size turns
+ * at its shoulder with `{ x: 0.1, y: 0.1 }`. For a group the fraction is of
+ * its members' combined bounds. A `focus` beat with an `anchor` on the same
+ * layer replaces it for the whole scene, as that anchor always has.
+ */
+export const PivotSchema = FocalPointSchema;
+
 const LayerPresentationShape = {
   opacity: z.number().min(0).max(1),
   rotationDeg: z.number(),
+  pivot: PivotSchema.optional(),
   zIndex: z.number().int(),
   slot: IdSchema.optional(),
   space: z.enum(["world", "overlay"]).optional(),
@@ -250,6 +260,7 @@ const GroupLayerSchema = z
       })
       .strict(),
     zIndex: z.number().int(),
+    pivot: PivotSchema.optional(),
     slot: IdSchema.optional(),
     space: z.enum(["world", "overlay"]).optional(),
     parallax: z.number().min(0).max(2).optional(),
