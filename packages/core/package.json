@@ -21,6 +21,10 @@
     "./image-placement": {
       "types": "./dist/asset/image-placement.d.ts",
       "import": "./dist/asset/image-placement.js"
+    },
+    "./groups": {
+      "types": "./dist/compiler/groups.d.ts",
+      "import": "./dist/compiler/groups.js"
     }
   },
   "dependencies": {

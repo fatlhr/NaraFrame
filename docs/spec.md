@@ -110,7 +110,7 @@ Pattern attachments place unrotated sibling PNG props using named anchors under 
 
 ### Declarative composition
 
-Supported composition includes local images, passive validated SVG, paths, shapes, rich-text spans and role fonts, single-level groups, local transforms, world/overlay spaces, camera motion, parallax depth, and billboard labels. A group can contain ordinary layers. SVG accepts a validated passive subset, including local gradients and clipping. Validation rejects scripts, handlers, external references, `foreignObject`, and built-in animation.
+Supported composition includes local images, passive validated SVG, paths, shapes, rich-text spans and role fonts, groups nested up to four levels, per-layer pivots, local transforms, world/overlay spaces, camera motion, parallax depth, and billboard labels. A group can contain ordinary layers and, when its layout is absolute, other groups. The root group sets the plane. SVG accepts a validated passive subset, including local gradients and clipping. Validation rejects scripts, handlers, external references, `foreignObject`, and built-in animation.
 
 Motion includes reveal/exit, emphasis, focus/transform, camera movements, path drawing, following a path, and count-up. Playback is frame-derived rather than dependent on prior playback state. Concurrent claims on a property are rejected. Sequential motion and follow pose semantics must be documented accurately, including the first follow's pre-window pose and jumps between non-aligned follow endpoints.
 

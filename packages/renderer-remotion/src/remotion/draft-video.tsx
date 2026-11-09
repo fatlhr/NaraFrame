@@ -1,5 +1,10 @@
 import type { CompiledDraft, Layer } from "@naraframe/core";
 import {
+  type GroupTree,
+  groupBoundsOf,
+  groupTree,
+} from "@naraframe/core/groups";
+import {
   type ImageCrop,
   imagePlacement,
 } from "@naraframe/core/image-placement";
@@ -390,32 +395,28 @@ const PlaneView = ({
 const GroupView = ({
   draft,
   group,
-  layersById,
+  tree,
   localFrame,
   scene,
 }: {
   draft: CompiledDraft;
   group: Extract<Layer, { type: "group" }>;
-  layersById: Map<string, Layer>;
+  tree: GroupTree;
   localFrame: number;
   scene: CompiledDraft["scenes"][number];
 }) => {
   const transform = groupScreenTransformFor(draft, scene, group, localFrame);
-  const members = group.memberIds.flatMap((memberId) => {
-    const member = layersById.get(memberId);
-    return member && member.type !== "group" ? [member] : [];
-  });
-  if (members.length === 0) {
+  // A nested group's box and transform origin come from all the plain layers
+  // inside it, so a forearm group turns about its elbow within the arm.
+  const bounds = groupBoundsOf(tree, group);
+  if (!bounds) {
     return null;
   }
-  const left = Math.min(...members.map((member) => member.frame.x));
-  const top = Math.min(...members.map((member) => member.frame.y));
-  const right = Math.max(
-    ...members.map((member) => member.frame.x + member.frame.width),
-  );
-  const bottom = Math.max(
-    ...members.map((member) => member.frame.y + member.frame.height),
-  );
+  const members = group.memberIds.flatMap((memberId) => {
+    const member = tree.byId.get(memberId);
+    return member ? [member] : [];
+  });
+  const { x: left, y: top, width, height } = bounds;
 
   return (
     <div
@@ -423,8 +424,8 @@ const GroupView = ({
         position: "absolute",
         left,
         top,
-        width: right - left,
-        height: bottom - top,
+        width,
+        height,
         opacity: transform.opacity,
         translate: `${transform.translateX}px ${transform.translateY}px`,
         scale: transform.scale,
@@ -442,15 +443,26 @@ const GroupView = ({
           height: draft.height,
         }}
       >
-        {members.map((member) => (
-          <LayerView
-            draft={draft}
-            key={member.id}
-            layer={member}
-            localFrame={localFrame}
-            scene={scene}
-          />
-        ))}
+        {members.map((member) =>
+          member.type === "group" ? (
+            <GroupView
+              draft={draft}
+              group={member}
+              key={member.id}
+              localFrame={localFrame}
+              scene={scene}
+              tree={tree}
+            />
+          ) : (
+            <LayerView
+              draft={draft}
+              key={member.id}
+              layer={member}
+              localFrame={localFrame}
+              scene={scene}
+            />
+          ),
+        )}
       </div>
     </div>
   );
@@ -592,12 +604,13 @@ const SceneView = ({
     );
   }
 
-  const layersById = new Map(scene.layers.map((layer) => [layer.id, layer]));
+  const tree = groupTree(scene.layers);
+  // Only root groups sit in a plane; nested groups render inside them.
   const groups = scene.layers.filter(
     (layer): layer is Extract<Layer, { type: "group" }> =>
-      layer.type === "group",
+      layer.type === "group" && !tree.parentOf.has(layer.id),
   );
-  const groupedIds = new Set(groups.flatMap((group) => group.memberIds));
+  const groupedIds = new Set(tree.parentOf.keys());
   const topLevelLayers = scene.layers.filter(
     (layer): layer is Exclude<Layer, { type: "group" }> =>
       layer.type !== "group" && !groupedIds.has(layer.id),
@@ -637,9 +650,9 @@ const SceneView = ({
           <GroupView
             draft={draft}
             group={group}
-            layersById={layersById}
             localFrame={localFrame}
             scene={scene}
+            tree={tree}
           />
         </PlaneView>
       ))}

@@ -1,6 +1,7 @@
 import type { Issue } from "../model/issue.js";
 import type { RenderTokens } from "../schema/profile.js";
 import type { Beat, Layer, Scene } from "../schema/scene.js";
+import { ancestorsOf, groupTree, leafMembersOf } from "./groups.js";
 import type { VarietyScene } from "./variety.js";
 
 /**
@@ -175,29 +176,31 @@ const scaleAbout = (
  * by their own `zIndex`, ties by `memberIds` order.
  */
 const paintKeys = (layers: readonly Layer[]): Map<string, number[]> => {
-  const groups = layers.filter(
-    (layer): layer is GroupLayer => layer.type === "group",
+  const tree = groupTree(layers);
+  const roots = layers.filter(
+    (layer): layer is GroupLayer =>
+      layer.type === "group" && !tree.parentOf.has(layer.id),
   );
-  const grouped = new Set(groups.flatMap((group) => group.memberIds));
   const topLevel = layers.filter(
-    (layer) => layer.type !== "group" && !grouped.has(layer.id),
+    (layer) => layer.type !== "group" && !tree.parentOf.has(layer.id),
   );
-  const byId = new Map(layers.map((layer) => [layer.id, layer]));
   const keys = new Map<string, number[]>();
   topLevel.forEach((layer, index) => {
     keys.set(layer.id, [layer.zIndex ?? 0, index, 0, 0]);
   });
-  groups.forEach((group, groupIndex) => {
+  // A nested group is a stacking context inside its parent: each level adds
+  // the member's zIndex and its place in memberIds.
+  const visit = (group: GroupLayer, prefix: number[]) => {
     group.memberIds.forEach((memberId, memberIndex) => {
-      const member = byId.get(memberId);
-      if (!member || member.type === "group") return;
-      keys.set(memberId, [
-        group.zIndex ?? 0,
-        topLevel.length + groupIndex,
-        member.zIndex ?? 0,
-        memberIndex,
-      ]);
+      const member = tree.byId.get(memberId);
+      if (!member) return;
+      const key = [...prefix, member.zIndex ?? 0, memberIndex];
+      if (member.type === "group") visit(member, key);
+      else keys.set(memberId, key);
     });
+  };
+  roots.forEach((group, groupIndex) => {
+    visit(group, [group.zIndex ?? 0, topLevel.length + groupIndex]);
   });
   return keys;
 };
@@ -500,10 +503,9 @@ const reachFor = (
     // between two boxes that do not overlap.
     const factor = largest(group.id);
     if (factor > 1) {
-      const members = group.memberIds.flatMap((id) => {
-        const member = byId.get(id);
-        return member && member.type !== "group" ? [member.frame] : [];
-      });
+      const members = leafMembersOf(groupTree([...byId.values()]), group).map(
+        (member) => member.frame,
+      );
       const anchor = centreOf(union(members));
       grown = grown.map((box) => union([box, scaleAbout(box, factor, anchor)]));
     }
@@ -517,11 +519,9 @@ const placementsFor = (
   startsMs: readonly number[] | undefined,
 ): Map<string, Placement> => {
   const byId = new Map(layers.map((layer) => [layer.id, layer]));
+  const tree = groupTree(layers);
   const groupOf = new Map<string, GroupLayer>();
-  for (const layer of layers) {
-    if (layer.type !== "group") continue;
-    for (const memberId of layer.memberIds) groupOf.set(memberId, layer);
-  }
+  for (const [memberId, parent] of tree.parentOf) groupOf.set(memberId, parent);
   const planeOf = (layer: Layer, group: GroupLayer | undefined): Plane => {
     const owner = group ?? layer;
     if (owner.space !== "world") return { kind: "overlay" };
@@ -535,26 +535,40 @@ const placementsFor = (
   const placements = new Map<string, Placement>();
   for (const layer of layers) {
     if (layer.type === "group") continue;
-    const group = groupOf.get(layer.id);
+    const ancestors = ancestorsOf(tree, layer.id);
+    const group = ancestors[0];
+    // In a nested group, a moving ancestor carries the layer in ways this
+    // check does not compose; a still skeleton is measured like any layer.
+    const nestedMotion =
+      ancestors.length > 1 &&
+      ancestors.some(
+        (ancestor) =>
+          groupIsDisplaced(ancestor) ||
+          (ancestor.pivot !== undefined &&
+            (ancestor.pivot.x !== 0.5 || ancestor.pivot.y !== 0.5) &&
+            ancestor.transform.rotationDeg !== 0) ||
+          beats.some(
+            (beat) =>
+              beat.targetId === ancestor.id &&
+              (beat.action === "transform" ||
+                beat.action === "follow" ||
+                beat.action === "focus" ||
+                beat.action === "emphasize"),
+          ),
+      );
+    const reachOf = (options: { withinGroup: boolean; asBackdrop: boolean }) =>
+      nestedMotion
+        ? {
+            unbounded: `${layer.id} moves with its nested groups, which this check does not track`,
+          }
+        : reachFor(layer, group, beats, byId, startsMs, options);
     placements.set(layer.id, {
       groupId: group?.id ?? null,
-      plane: planeOf(layer, group),
-      reach: reachFor(layer, group, beats, byId, startsMs, {
-        withinGroup: false,
-        asBackdrop: false,
-      }),
-      local: reachFor(layer, group, beats, byId, startsMs, {
-        withinGroup: true,
-        asBackdrop: false,
-      }),
-      backReach: reachFor(layer, group, beats, byId, startsMs, {
-        withinGroup: false,
-        asBackdrop: true,
-      }),
-      backLocal: reachFor(layer, group, beats, byId, startsMs, {
-        withinGroup: true,
-        asBackdrop: true,
-      }),
+      plane: planeOf(layer, ancestors.at(-1)),
+      reach: reachOf({ withinGroup: false, asBackdrop: false }),
+      local: reachOf({ withinGroup: true, asBackdrop: false }),
+      backReach: reachOf({ withinGroup: false, asBackdrop: true }),
+      backLocal: reachOf({ withinGroup: true, asBackdrop: true }),
       emphasized: beats.some(
         (beat) =>
           beat.action === "emphasize" &&
@@ -570,9 +584,12 @@ const placementsFor = (
               beat.params.scale > 1,
           ),
       ),
-      opacity: (layer.opacity ?? 1) * (group?.transform?.opacity ?? 1),
+      opacity: ancestors.reduce(
+        (opacity, ancestor) => opacity * (ancestor.transform?.opacity ?? 1),
+        layer.opacity ?? 1,
+      ),
       visibility: visibilityOf(
-        group ? [layer.id, group.id] : [layer.id],
+        [layer.id, ...ancestors.map((ancestor) => ancestor.id)],
         beats,
         startsMs,
       ),
