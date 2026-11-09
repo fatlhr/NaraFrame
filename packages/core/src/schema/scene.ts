@@ -360,12 +360,27 @@ export const PhraseAnchorSchema = z
   })
   .strict();
 
+/**
+ * Plays a beat again every `intervalMs` after its start, for each copy that
+ * ends by `untilMs` on the scene clock. Compile expands it into ordinary
+ * beats with derived ids (`breath-2`, `breath-3`, …), so the renderer and
+ * every timing check see only plain beats. Meant for idle motion: breath,
+ * blinking lights, steam, rain.
+ */
+export const BeatRepeatSchema = z
+  .object({
+    intervalMs: PositiveIntegerSchema,
+    untilMs: PositiveIntegerSchema,
+  })
+  .strict();
+
 const BeatBaseShape = {
   id: IdSchema,
   targetId: IdSchema,
   startMs: NonNegativeIntegerSchema,
   durationMs: PositiveIntegerSchema,
   at: PhraseAnchorSchema.optional(),
+  repeat: BeatRepeatSchema.optional(),
 };
 
 const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);

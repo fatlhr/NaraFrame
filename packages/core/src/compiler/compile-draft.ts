@@ -1164,6 +1164,29 @@ const startEdit = (beat: Beat, resolvedMs: number, targetMs: number): string =>
     ? `offsetMs ${(beat.at.offsetMs ?? 0) + (targetMs - resolvedMs)} on its phrase anchor`
     : `startMs ${targetMs}`;
 
+/**
+ * The shortest whole-millisecond interval at which `copies` copies of a beat
+ * `frames` long, starting at `startMs`, each start after the previous ends,
+ * once every start is rounded to its frame.
+ */
+const shortestRepeatIntervalMs = (
+  startMs: number,
+  frames: number,
+  copies: number,
+  fps: number,
+): number => {
+  const frameOf = (ms: number) => msToFrameOffset(ms, fps);
+  for (let interval = 1; ; interval += 1) {
+    let clear = true;
+    for (let copy = 1; copy <= copies && clear; copy += 1) {
+      clear =
+        frameOf(startMs + copy * interval) >=
+        frameOf(startMs + (copy - 1) * interval) + frames;
+    }
+    if (clear) return interval;
+  }
+};
+
 const validateMotionWindows = (
   scene: Scene,
   sceneIndex: number,
@@ -1180,8 +1203,12 @@ const validateMotionWindows = (
       modern: boolean;
       beatIndex: number;
       startMs: number;
+      repeatOf: string | undefined;
     }>
   >();
+  const repeatOf = repeatGroups.get(scene) ?? [];
+  // One report per repeat: its copies all overlap for the same reason.
+  const reportedRepeats = new Set<string>();
   scene.beats.forEach((beat, beatIndex) => {
     const startMs = starts.beats[beatIndex] ?? beat.startMs;
     for (const property of beatProperties(beat)) {
@@ -1189,6 +1216,7 @@ const validateMotionWindows = (
       const current = {
         beatIndex,
         startMs,
+        repeatOf: repeatOf[beatIndex],
         start: msToFrameOffset(startMs, fps),
         // A swap changes the artwork on one frame, whatever its duration.
         end:
@@ -1208,14 +1236,17 @@ const validateMotionWindows = (
           beat.action === "follow" ||
           beat.action === "count",
       };
-      const conflict = writes
-        .get(key)
-        ?.find(
-          (other) =>
-            (current.modern || other.modern) &&
-            current.start < other.end &&
-            current.end > other.start,
-        );
+      const conflict = writes.get(key)?.find(
+        (other) =>
+          // Copies of one repeated beat never overlap each other, whatever
+          // the action: an interval shorter than the beat is an error.
+          (current.modern ||
+            other.modern ||
+            (current.repeatOf !== undefined &&
+              current.repeatOf === other.repeatOf)) &&
+          current.start < other.end &&
+          current.end > other.start,
+      );
       if (conflict) {
         const other = scene.beats[conflict.beatIndex] as Beat;
         // Suggest moving whichever write starts later, or ending the earlier.
@@ -1235,13 +1266,31 @@ const validateMotionWindows = (
           room >= 1
             ? ` or end ${first.beat.id} by frame ${second.window.start - 1} (durationMs ${longestDurationMsFor(room, fps)} or less)`
             : "";
+        const ownRepeat =
+          current.repeatOf !== undefined &&
+          current.repeatOf === conflict.repeatOf;
+        if (ownRepeat && reportedRepeats.has(current.repeatOf as string)) {
+          writes.set(key, [...(writes.get(key) ?? []), current]);
+          continue;
+        }
+        if (ownRepeat) reportedRepeats.add(current.repeatOf as string);
+        const shortestInterval = ownRepeat
+          ? shortestRepeatIntervalMs(
+              starts.beats[repeatOf.indexOf(current.repeatOf)] ?? 0,
+              current.end - current.start,
+              repeatOf.filter((group) => group === current.repeatOf).length - 1,
+              fps,
+            )
+          : 0;
         issues.push(
           compileIssue(
             "MOTION_PROPERTY_OVERLAP",
             `/scenes/${sceneIndex}/beats/${beatIndex}`,
-            `Beat ${beat.id} writes ${property} on ${beat.targetId} over ${frameSpan(current.start, current.end)}${anchorNote(beat)}, overlapping beat ${other.id}, which writes it over ${frameSpan(conflict.start, conflict.end)}${anchorNote(other)} (${fps} fps; starts round to the nearest frame).`,
+            `Beat ${beat.id} writes ${property} on ${beat.targetId} over ${frameSpan(current.start, current.end)}${anchorNote(beat)}, overlapping beat ${other.id}, which writes it over ${frameSpan(conflict.start, conflict.end)}${anchorNote(other)} (${fps} fps; starts round to the nearest frame).${ownRepeat ? ` Both are copies of repeated beat ${current.repeatOf}.` : ""}`,
             "error",
-            `Start ${second.beat.id} at frame ${first.window.end} or later (${startEdit(second.beat, second.window.startMs, moveTo)})${shorten}. Writes to one target property must be sequential after rounding; different properties may overlap.`,
+            ownRepeat
+              ? `Set repeat.intervalMs on ${current.repeatOf} to ${shortestInterval} or more, or shorten its durationMs: each copy must end before the next starts.`
+              : `Start ${second.beat.id} at frame ${first.window.end} or later (${startEdit(second.beat, second.window.startMs, moveTo)})${shorten}. Writes to one target property must be sequential after rounding; different properties may overlap.`,
           ),
         );
       }
@@ -1270,7 +1319,12 @@ const validateMotionWindows = (
     };
     const earlier = reveals.get(beat.targetId) ?? [];
     const conflict = earlier.find(
-      (other) => current.start < other.end && current.end > other.start,
+      (other) =>
+        current.start < other.end &&
+        current.end > other.start &&
+        // Overlapping copies of one repeat are already an error above.
+        (repeatOf[beatIndex] === undefined ||
+          repeatOf[beatIndex] !== repeatOf[other.beatIndex]),
     );
     if (conflict) {
       const other = scene.beats[conflict.beatIndex] as Beat;
@@ -1378,7 +1432,127 @@ export interface CompileOptions {
 
 export type DraftResolution = 540 | 1080;
 
-export const compileDraft = (
+/**
+ * For a scene with repeated beats: each expanded beat's repeat group, the id
+ * of the source beat it copies, or undefined for a beat without `repeat`.
+ */
+const repeatGroups = new WeakMap<Scene, Array<string | undefined>>();
+
+/** The most copies one `repeat` may add. */
+export const MAX_BEAT_REPEATS = 200;
+
+interface RepeatExpansion {
+  source: PlanSource;
+  issues: Issue[];
+  /** Per scene index with repeats: expanded beat index → source beat index. */
+  sourceIndex: Map<number, number[]>;
+}
+
+/**
+ * Expands every `repeat` into ordinary beats before anything else reads the
+ * scene. Copy k starts k × intervalMs after the beat's resolved start, keeps
+ * its phrase anchor shifted by the same amount and is kept while it ends by
+ * `untilMs`. Copies take the ids `<id>-2`, `<id>-3`, … so the renderer, the
+ * timing checks and the frame strip see only plain beats.
+ */
+const expandBeatRepeats = (source: PlanSource): RepeatExpansion => {
+  const issues: Issue[] = [];
+  const sourceIndex = new Map<number, number[]>();
+  if (
+    !source.scenes.scenes.some((scene) => scene.beats.some((b) => b.repeat))
+  ) {
+    return { source, issues, sourceIndex };
+  }
+  const scenes = source.scenes.scenes.map((scene, sceneIndex) => {
+    if (!scene.beats.some((beat) => beat.repeat)) return scene;
+    const starts = resolveAnchoredStarts(source, scene, sceneIndex).beats;
+    const taken = new Set(scene.beats.map((beat) => beat.id));
+    const beats: Beat[] = [];
+    const origins: number[] = [];
+    const groups: Array<string | undefined> = [];
+    scene.beats.forEach((beat, beatIndex) => {
+      const { repeat, ...plain } = beat;
+      beats.push(plain as Beat);
+      origins.push(beatIndex);
+      groups.push(repeat ? beat.id : undefined);
+      if (!repeat) return;
+      const path = `/scenes/${sceneIndex}/beats/${beatIndex}/repeat`;
+      const startMs = starts[beatIndex] ?? beat.startMs;
+      const copies = Math.max(
+        0,
+        Math.floor(
+          (repeat.untilMs - startMs - beat.durationMs) / repeat.intervalMs,
+        ),
+      );
+      if (copies === 0) {
+        issues.push(
+          compileIssue(
+            "BEAT_REPEAT_EMPTY",
+            path,
+            `Beat ${beat.id} starts at ${startMs} ms and lasts ${beat.durationMs} ms, so no copy every ${repeat.intervalMs} ms ends by untilMs ${repeat.untilMs}; it plays once.`,
+            "warning",
+            `Set untilMs to ${startMs + repeat.intervalMs + beat.durationMs} or later, or remove repeat.`,
+          ),
+        );
+        return;
+      }
+      if (copies > MAX_BEAT_REPEATS) {
+        issues.push(
+          compileIssue(
+            "BEAT_REPEAT_INVALID",
+            path,
+            `Beat ${beat.id} would repeat ${copies} times; a repeat adds at most ${MAX_BEAT_REPEATS} copies.`,
+            "error",
+            "Lengthen intervalMs or end the repeat earlier with untilMs.",
+          ),
+        );
+        return;
+      }
+      const ids = Array.from(
+        { length: copies },
+        (_, index) => `${beat.id}-${index + 2}`,
+      );
+      const clash = ids.find((id) => taken.has(id));
+      if (clash) {
+        issues.push(
+          compileIssue(
+            "BEAT_REPEAT_INVALID",
+            path,
+            `Beat ${beat.id} repeats as ${ids[0]}…${ids.at(-1)}, but scene ${scene.id} already has a beat ${clash}.`,
+            "error",
+            `Rename beat ${clash} or beat ${beat.id} so the derived ids are free.`,
+          ),
+        );
+        return;
+      }
+      ids.forEach((id, index) => {
+        const shift = (index + 1) * repeat.intervalMs;
+        taken.add(id);
+        beats.push({
+          ...plain,
+          id,
+          startMs: beat.startMs + shift,
+          ...(beat.at
+            ? { at: { ...beat.at, offsetMs: (beat.at.offsetMs ?? 0) + shift } }
+            : {}),
+        } as Beat);
+        origins.push(beatIndex);
+        groups.push(beat.id);
+      });
+    });
+    const expanded: Scene = { ...scene, beats };
+    repeatGroups.set(expanded, groups);
+    sourceIndex.set(sceneIndex, origins);
+    return expanded;
+  });
+  return {
+    source: { ...source, scenes: { ...source.scenes, scenes } },
+    issues,
+    sourceIndex,
+  };
+};
+
+const compileExpandedDraft = (
   source: PlanSource,
   requestedScope: DraftScope = { type: "project" },
   options: CompileOptions = {},
@@ -2188,4 +2362,40 @@ export const compileDraft = (
     return { ok: false, issues: sortIssues(issues) };
   }
   return { ok: true, value: parsed.data, issues: sortIssues(issues) };
+};
+
+/**
+ * Compiles a plan. Repeated beats are expanded first; a diagnostic on a copy
+ * points at the source beat that holds its `repeat`, and names the copy's id.
+ */
+export const compileDraft = (
+  source: PlanSource,
+  requestedScope: DraftScope = { type: "project" },
+  options: CompileOptions = {},
+): Result<CompiledDraft> => {
+  const expansion = expandBeatRepeats(source);
+  const result = compileExpandedDraft(
+    expansion.source,
+    requestedScope,
+    options,
+  );
+  if (expansion.sourceIndex.size === 0 && expansion.issues.length === 0) {
+    return result;
+  }
+  const remap = (issue: Issue): Issue => {
+    const match = /^\/scenes\/(\d+)\/beats\/(\d+)(.*)$/.exec(issue.path);
+    if (!match || issue.artifact !== "scenes.json") return issue;
+    const origins = expansion.sourceIndex.get(Number(match[1]));
+    const original = origins?.[Number(match[2])];
+    if (original === undefined) return issue;
+    return {
+      ...issue,
+      path: `/scenes/${match[1]}/beats/${original}${match[3]}`,
+    };
+  };
+  const issues = sortIssues([...expansion.issues, ...result.issues.map(remap)]);
+  if (!result.ok || issues.some((issue) => issue.severity === "error")) {
+    return { ok: false, issues };
+  }
+  return { ...result, issues };
 };
