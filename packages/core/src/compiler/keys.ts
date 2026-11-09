@@ -20,7 +20,9 @@ import { narrationTextHash } from "./voice-binding.js";
 // 12: explicit caption policy, selectable cue windows and shared layout tokens.
 // 13: frames are captured serially; builds from parallel capture could hold
 //     frames grabbed before they finished painting and are not reused.
-export const RENDER_ENGINE = "naraframe-draft/13";
+// 14: reveals and exits play as one ordered sequence, so a layer revealed
+//     after an exit, or revealed twice, now shows instead of staying hidden.
+export const RENDER_ENGINE = "naraframe-draft/14";
 
 /**
  * Version of the text checks the visual preflight applies to a scene's text

@@ -442,3 +442,122 @@ describe("exit beat", () => {
     ).toBeCloseTo(40);
   });
 });
+
+describe("visibility sequence", () => {
+  // A card shown, taken away and shown again: reveal 0-9, exit 30-39 and
+  // reveal 60-69 at 30 fps.
+  const sequenceDraft = (
+    beats: Array<Record<string, unknown>>,
+  ): { draft: CompiledDraft; scene: CompiledDraft["scenes"][number] } => {
+    const scene = sceneOf("price", 0, 120, { type: "cut" });
+    scene.beats = beats.map((beat) => ({
+      targetId: "card",
+      ...beat,
+    })) as CompiledDraft["scenes"][number]["beats"];
+    return { draft: draftWithScenes([scene]), scene };
+  };
+  const reshown = () =>
+    sequenceDraft([
+      {
+        id: "in",
+        action: "reveal",
+        startFrame: 0,
+        durationInFrames: 9,
+        params: { direction: "up", distance: 24, easingPreset: "linear" },
+      },
+      {
+        id: "out",
+        action: "exit",
+        startFrame: 30,
+        durationInFrames: 9,
+        params: { direction: "up", distance: 30, easingPreset: "linear" },
+      },
+      {
+        id: "again",
+        action: "reveal",
+        startFrame: 60,
+        durationInFrames: 9,
+        params: { direction: "up", distance: 24, easingPreset: "linear" },
+      },
+    ]);
+
+  it("shows a layer again when it is revealed after an exit", () => {
+    const { draft, scene } = reshown();
+    const at = (frame: number) => motionStateFor(draft, scene, "card", frame);
+    expect(at(0).opacity).toBeCloseTo(0);
+    for (const frame of [9, 20, 29]) expect(at(frame).opacity).toBeCloseTo(1);
+    for (const frame of [39, 50, 59]) expect(at(frame).opacity).toBeCloseTo(0);
+    expect(at(64).opacity).toBeGreaterThan(0.3);
+    expect(at(64).opacity).toBeLessThan(0.8);
+    for (const frame of [69, 100, 119])
+      expect(at(frame).opacity).toBeCloseTo(1);
+  });
+
+  it("moves each part of the sequence only in its own window", () => {
+    const { draft, scene } = reshown();
+    const y = (frame: number) =>
+      motionStateFor(draft, scene, "card", frame).translateY;
+    // The first reveal starts below its frame, as it always has.
+    expect(y(0)).toBeCloseTo(24);
+    expect(y(20)).toBeCloseTo(0);
+    // The exit's drift holds while the card is hidden ...
+    expect(y(50)).toBeCloseTo(-30);
+    // ... and the next reveal brings it back from below to its frame.
+    expect(y(60)).toBeCloseTo(24);
+    expect(y(69)).toBeCloseTo(0);
+    expect(y(100)).toBeCloseTo(0);
+  });
+
+  it("keeps a layer shown when a second reveal follows without an exit", () => {
+    const { draft, scene } = sequenceDraft([
+      {
+        id: "in",
+        action: "reveal",
+        startFrame: 0,
+        durationInFrames: 9,
+        params: { direction: "up", distance: 24, easingPreset: "linear" },
+      },
+      {
+        id: "again",
+        action: "reveal",
+        startFrame: 60,
+        durationInFrames: 9,
+        params: { direction: "up", distance: 24, easingPreset: "linear" },
+      },
+    ]);
+    const at = (frame: number) => motionStateFor(draft, scene, "card", frame);
+    expect(at(30).opacity).toBeCloseTo(1);
+    expect(at(30).translateY).toBeCloseTo(0);
+    expect(at(64).opacity).toBeCloseTo(1);
+    expect(at(64).translateY).toBeCloseTo(0);
+  });
+
+  it("keeps the single reveal and single exit frames unchanged", () => {
+    const { draft, scene } = sequenceDraft([
+      {
+        id: "in",
+        action: "reveal",
+        startFrame: 10,
+        durationInFrames: 10,
+        params: { direction: "left", distance: 40, easingPreset: "linear" },
+      },
+      {
+        id: "out",
+        action: "exit",
+        startFrame: 50,
+        durationInFrames: 10,
+        params: { direction: "down", distance: 20, easingPreset: "linear" },
+      },
+    ]);
+    const at = (frame: number) => motionStateFor(draft, scene, "card", frame);
+    expect(at(5).opacity).toBeCloseTo(0);
+    expect(at(5).translateX).toBeCloseTo(40);
+    expect(at(15).opacity).toBeCloseTo(0.5);
+    expect(at(15).translateX).toBeCloseTo(20);
+    expect(at(30).opacity).toBeCloseTo(1);
+    expect(at(55).opacity).toBeCloseTo(0.5);
+    expect(at(55).translateY).toBeCloseTo(10);
+    expect(at(80).opacity).toBeCloseTo(0);
+    expect(at(80).translateY).toBeCloseTo(20);
+  });
+});
