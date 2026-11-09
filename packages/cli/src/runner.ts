@@ -713,7 +713,7 @@ const outlineCommand = async (args: readonly string[]): Promise<Execution> => {
             ),
             ...scene.beats.map(
               (beat) =>
-                `    beat ${beat.id} ${beat.action} ${beat.targetId} ${beat.startMs}+${beat.durationMs}`,
+                `    beat ${beat.id} ${beat.action} ${beat.targetId} ${beat.startMs}+${beat.durationMs}${beat.repeat ? ` every ${beat.repeat.intervalMs} until ${beat.repeat.untilMs}` : ""}`,
             ),
           ]
         : []),

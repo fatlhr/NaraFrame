@@ -31,6 +31,8 @@ export interface OutlineBeat {
   startMs: number;
   durationMs: number;
   at?: OutlineAnchor;
+  /** Compile expands it into copies with ids `<id>-2`, `<id>-3`, … */
+  repeat?: { intervalMs: number; untilMs: number };
   params: Record<string, unknown>;
 }
 
@@ -159,6 +161,7 @@ const outlineScene = (scene: Scene, startMs: number): OutlineScene => ({
     startMs: beat.startMs,
     durationMs: beat.durationMs,
     ...(beat.at ? { at: beat.at } : {}),
+    ...(beat.repeat ? { repeat: beat.repeat } : {}),
     params: beat.params,
   })),
 });
