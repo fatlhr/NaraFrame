@@ -788,6 +788,32 @@ const scaleRenderTokens = (
     : {}),
 });
 
+/**
+ * A beat's target resolves to the scene before any layer, so a layer that
+ * shares its scene's id can never be targeted on its own: a reveal meant for
+ * it hides the whole scene until the reveal. It stays a warning because
+ * existing projects compile with it and their frames must not change.
+ */
+const validateLayerIds = (scene: Scene, sceneIndex: number): Issue[] => {
+  if (scene.visual.type !== "composition") return [];
+  const layerIndex = scene.visual.layers.findIndex(
+    (layer) => layer.id === scene.id,
+  );
+  if (layerIndex === -1) return [];
+  const beats = scene.beats
+    .filter((beat) => beat.targetId === scene.id)
+    .map((beat) => beat.id);
+  return [
+    compileIssue(
+      "LAYER_ID_IS_SCENE_ID",
+      `/scenes/${sceneIndex}/visual/layers/${layerIndex}/id`,
+      `Layer ${scene.id} has the same id as its scene, so ${beats.length > 0 ? `beat${beats.length > 1 ? "s" : ""} ${beats.join(", ")} act${beats.length > 1 ? "" : "s"} on the whole scene, not on the layer` : "a beat can never target the layer on its own"}.`,
+      "warning",
+      `Rename the layer (for example ${scene.id}-text) and point its beats at the new id, or rename the scene.`,
+    ),
+  ];
+};
+
 const validateLayerFrames = (
   scene: Scene,
   sceneIndex: number,
@@ -1932,6 +1958,7 @@ const compileExpandedDraft = (
       renderCursor = endFrame;
     }
     issues.push(...validateLayerFrames(scene, sceneIndex, source));
+    issues.push(...validateLayerIds(scene, sceneIndex));
     const starts = resolveAnchoredStarts(source, scene, sceneIndex);
     issues.push(...starts.issues);
     issues.push(...validatePathsAndCounts(scene, sceneIndex, fps, starts));
