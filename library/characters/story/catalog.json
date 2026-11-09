@@ -2431,7 +2431,7 @@
             "durationMs": 500,
             "params": {
               "to": {
-                "rotationDeg": -4
+                "rotationDeg": -24
               },
               "easingPreset": "smooth"
             }
@@ -3286,7 +3286,7 @@
             "durationMs": 260,
             "params": {
               "to": {
-                "rotationDeg": -92
+                "rotationDeg": -96
               },
               "easingPreset": "snappy"
             }
@@ -3299,7 +3299,7 @@
             "durationMs": 300,
             "params": {
               "to": {
-                "rotationDeg": -84
+                "rotationDeg": -88
               },
               "easingPreset": "smooth"
             }
@@ -3312,7 +3312,7 @@
             "durationMs": 400,
             "params": {
               "to": {
-                "rotationDeg": -6
+                "rotationDeg": -2
               },
               "easingPreset": "smooth"
             }

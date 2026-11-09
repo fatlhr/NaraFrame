@@ -27,6 +27,25 @@ A pose is a set of group rotations (`transform.rotationDeg`). Values below are f
 | `hand-on-head` | 4 | 10 | -116 | -100 | 4 | -6 | 0 | 0 | 0 | 0 | 0 |
 | `hug` | 8 | 18 | -62 | -72 | -58 | -70 | 0 | 0 | 0 | 0 | 0 |
 
-Change a pose at a cut by setting the rotations in the next shot, with the figure in the same place and size. Within a shot, change only one or two joints with `transform` beats on those groups, and breathe with a repeated `emphasize` on `kid-upper`. A figure's groups are stacking contexts: one figure is entirely in front of another, so in a hug put the larger figure in front and hide the smaller one's arms behind it. A walk is a few repeated `transform` beats on `kid-leg-n` and `kid-leg-f` under a `transform` of `kid` across the floor; `stepFps: 12` on `kid` gives it a cut-out cadence. Swap a held screen or a lamp with `swap` to let the object carry the story. Staging brings the catalog's props as `<instance>-<id>`: `phone`, `screen-dark` and `screen-lit` (same size, for a swap), `glow-cool` and `glow-warm` (light that fades out inside the artwork), `porch-lamp` and `lamp-on`, `door` and `window`. The patterns write the shot note into `note`; change it with an ordinary edit after staging.
+Change a pose at a cut by setting the rotations in the next shot, with the figure in the same place and size. Within a shot, change only one or two joints with `transform` beats on those groups. A beat's `rotationDeg` is added to the group's static `transform.rotationDeg`, so to reach a table angle write the table angle minus the static one (`turnTo` in the rig scripts does this), and breathe with a repeated `emphasize` on `kid-upper`. A figure's groups are stacking contexts: one figure is entirely in front of another, so in a hug put the larger figure in front and hide the smaller one's arms behind it. A walk is a few repeated `transform` beats on `kid-leg-n` and `kid-leg-f` under a `transform` of `kid` across the floor; `stepFps: 12` on `kid` gives it a cut-out cadence. Swap a held screen or a lamp with `swap` to let the object carry the story. Staging brings the catalog's props as `<instance>-<id>`: `phone`, `screen-dark` and `screen-lit` (same size, for a swap), `glow-cool` and `glow-warm` (light that fades out inside the artwork), `porch-lamp` and `lamp-on`, `door` and `window`. The patterns write the shot note into `note`; change it with an ordinary edit after staging.
+
+## Stickman rig
+
+`stickman-ink@0.2.0` ships a jointed ink figure built the same way: stroke-only path layers in nested groups with the same group names (`kid`, `kid-upper`, `kid-arm-n`, `kid-fore-n`, `kid-leg-n`, `kid-lower-n` and their `-f` twins), drawn as round-capped ink lines. Its head is an image layer, `kid-face`, inside `kid-head`: `swap` it between `head-calm`, `head-alarm`, `head-effort` and `head-glad` to change the expression on the beat's frame. Stage `ink-heave` (a braced pull on a rope that drags a `crate`) or `ink-cheer` (relief, arms up, a hop) to get a figure, and copy its layers into your own shots. Both take `title` and `note`, like the 0.1.0 patterns.
+
+Poses are group rotations for a figure facing right; mirror them for one facing left. Forward is negative. Move the rig frame down by Drop × the rig's scale so the lower foot stays on the floor line. Write beats as the difference from the static angle, as for the Story rig.
+
+| Pose | `upper` | `head` | `arm-n` | `fore-n` | `arm-f` | `fore-f` | `leg-n` | `lower-n` | `leg-f` | `lower-f` | Drop |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `stand` | 0 | 0 | 6 | -6 | -6 | -8 | -3 | 0 | 4 | 0 | 0.2 |
+| `walk` | 4 | 0 | 22 | -18 | -22 | -16 | -24 | 14 | 22 | 18 | 8.5 |
+| `notice` | 10 | 8 | -20 | -40 | -12 | -30 | -3 | 0 | 4 | 0 | 0.2 |
+| `reach` | 12 | -4 | -78 | -6 | -10 | -20 | -3 | 0 | 4 | 0 | 0.2 |
+| `grip` | 6 | 4 | -64 | -26 | -58 | -30 | -30 | 6 | 26 | -4 | 14.6 |
+| `pull` | -18 | -6 | -88 | -2 | -84 | -4 | -30 | 6 | 26 | -4 | 14.6 |
+| `cheer` | -4 | -10 | -150 | -12 | 150 | 12 | -3 | 0 | 4 | 0 | 0.2 |
+| `crouch` | 28 | 10 | -40 | -50 | -34 | -44 | -74 | 116 | -64 | 110 | 72.8 |
+
+Keep hand contact through a move: `armsFor(lean, point)` in `library/characters/stickman-ink/rig.mjs` solves the arm angles that keep a hand on a fixed rig-space point for a given lean, which is how `ink-heave` keeps both hands on the rope while the body leans back past its mark. Shorten a rope as its load comes closer with a `draw` beat on a path that starts at the hand.
 
 Give every layer an id that differs from the scene's id. A beat whose `targetId` equals the scene id reveals or exits the whole scene: compile warns `LAYER_ID_IS_SCENE_ID`, and `library stage` refuses a new import whose scene id matches a pattern layer (`LIBRARY_SCENE_ID_CONFLICT`), so `--scene kid` fails for a rig pattern.

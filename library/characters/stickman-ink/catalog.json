@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "stickman-ink",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "provenance": {
     "source": "NaraFrame blocked-ball character pilot and original schematic illustrations",
     "license": "MIT"
@@ -42,6 +42,71 @@
         "source": "Original SVG pose from A1 direction study"
       },
       "binding": "neutral"
+    },
+    {
+      "id": "head-calm",
+      "status": "ready",
+      "kind": "svg",
+      "path": "head-calm.svg",
+      "binding": "neutral",
+      "sha256": "5aaf2118d526f6f86fc08103b67945162ef21ccd83f2540de53b3b7ec7d56b50",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Stickman Ink rig art: Ink head, calm",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "head-alarm",
+      "status": "ready",
+      "kind": "svg",
+      "path": "head-alarm.svg",
+      "binding": "neutral",
+      "sha256": "35ec34fe8dab5af6feaa5f6c617237139fbe5270cb392eb4f5e92739f5e6c7b3",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Stickman Ink rig art: Ink head, alarm",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "head-effort",
+      "status": "ready",
+      "kind": "svg",
+      "path": "head-effort.svg",
+      "binding": "neutral",
+      "sha256": "7b0bfa1cec91675b1f906c3bab38f802c218cdcb90b81bb8dbb2283e8cbf5d85",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Stickman Ink rig art: Ink head, effort",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "head-glad",
+      "status": "ready",
+      "kind": "svg",
+      "path": "head-glad.svg",
+      "binding": "neutral",
+      "sha256": "0e3291e05da5e487a26eb3729b54bb5fa142f89241e0f9c725b864246c05009f",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Stickman Ink rig art: Ink head, glad",
+        "license": "MIT"
+      }
+    },
+    {
+      "id": "crate",
+      "status": "ready",
+      "kind": "svg",
+      "path": "crate.svg",
+      "binding": "neutral",
+      "sha256": "7b588d04f43ebe5f3d67a3492bde8645a64fa31f884ee6eb17d2fae737ca2a20",
+      "origin": {
+        "type": "generated",
+        "source": "Original NaraFrame Stickman Ink rig art: Ink crate",
+        "license": "MIT"
+      }
     }
   ],
   "patterns": [
@@ -72,10 +137,10 @@
               "id": "ground",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -97,10 +162,10 @@
               "id": "table",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -122,10 +187,10 @@
               "id": "gate-guide",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -163,9 +228,9 @@
               "type": "shape",
               "frame": {
                 "x": 667.75,
-                "y": 1025.0,
-                "width": 102.0,
-                "height": 17.0
+                "y": 1025,
+                "width": 102,
+                "height": 17
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -177,10 +242,10 @@
               "id": "actor",
               "type": "image",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -193,7 +258,7 @@
               "type": "shape",
               "frame": {
                 "x": 548.75,
-                "y": 1212.0,
+                "y": 1212,
                 "width": 76.5,
                 "height": 76.5
               },
@@ -231,7 +296,7 @@
             "action": "transform",
             "params": {
               "to": {
-                "x": 68.0
+                "x": 68
               },
               "easingPreset": "smooth"
             }
@@ -275,10 +340,10 @@
               "id": "ground",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -300,10 +365,10 @@
               "id": "table",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -325,10 +390,10 @@
               "id": "gate-guide",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -366,9 +431,9 @@
               "type": "shape",
               "frame": {
                 "x": 667.75,
-                "y": 1025.0,
-                "width": 102.0,
-                "height": 17.0
+                "y": 1025,
+                "width": 102,
+                "height": 17
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -380,10 +445,10 @@
               "id": "actor",
               "type": "image",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -396,7 +461,7 @@
               "type": "shape",
               "frame": {
                 "x": 616.75,
-                "y": 1212.0,
+                "y": 1212,
                 "width": 76.5,
                 "height": 76.5
               },
@@ -459,7 +524,7 @@
             "action": "transform",
             "params": {
               "to": {
-                "y": -153.0
+                "y": -153
               },
               "easingPreset": "smooth"
             }
@@ -472,7 +537,7 @@
             "action": "transform",
             "params": {
               "to": {
-                "y": -153.0
+                "y": -153
               },
               "easingPreset": "smooth"
             }
@@ -529,10 +594,10 @@
               "id": "ground",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -554,10 +619,10 @@
               "id": "table",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -579,10 +644,10 @@
               "id": "gate-guide",
               "type": "path",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -620,9 +685,9 @@
               "type": "shape",
               "frame": {
                 "x": 667.75,
-                "y": 872.0,
-                "width": 102.0,
-                "height": 17.0
+                "y": 872,
+                "width": 102,
+                "height": 17
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -634,10 +699,10 @@
               "id": "actor",
               "type": "image",
               "frame": {
-                "x": 94.0,
-                "y": 260.0,
+                "x": 94,
+                "y": 260,
                 "width": 892.5,
-                "height": 1581.0
+                "height": 1581
               },
               "opacity": 1,
               "rotationDeg": 0,
@@ -650,7 +715,7 @@
               "type": "shape",
               "frame": {
                 "x": 616.75,
-                "y": 1212.0,
+                "y": 1212,
                 "width": 76.5,
                 "height": 76.5
               },
@@ -703,6 +768,1465 @@
         },
         "carriesFactualClaim": false,
         "note": "Illustrative blocked-ball model. Pale paper, black pen poses, visible hand contact and grounded feet."
+      }
+    },
+    {
+      "id": "ink-heave",
+      "version": "0.2.0",
+      "description": "A jointed ink figure braces on a rope, leans back past its mark and drags a crate closer. Both hands stay on the rope; the face swaps to effort.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/25/text"],
+          "description": "Short title shared across the story."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action or prop carried into the next shot."
+        }
+      },
+      "template": {
+        "id": "ink-heave",
+        "narrativeRole": "context",
+        "durationMs": 3200,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "ground",
+              "type": "path",
+              "d": "M40 20Q300 15 540 20T1040 20",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 1080,
+                "height": 40
+              },
+              "frame": {
+                "x": 0,
+                "y": 1480,
+                "width": 1080,
+                "height": 40
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 5
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0
+            },
+            {
+              "id": "rope",
+              "type": "path",
+              "d": "M0 20L700 20",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 700,
+                "height": 40
+              },
+              "frame": {
+                "x": 368,
+                "y": 1220.5,
+                "width": 700,
+                "height": 40
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 5
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4
+            },
+            {
+              "id": "crate",
+              "type": "image",
+              "assetId": "crate",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 760,
+                "y": 1240,
+                "width": 312,
+                "height": 260
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5
+            },
+            {
+              "id": "kid-thigh-f",
+              "type": "path",
+              "d": "M98 220L98 304",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shin-f",
+              "type": "path",
+              "d": "M98 304L98 386M92 388L112 388",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-lower-f",
+              "type": "group",
+              "memberIds": ["kid-shin-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -4,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.76
+              }
+            },
+            {
+              "id": "kid-leg-f",
+              "type": "group",
+              "memberIds": ["kid-thigh-f", "kid-lower-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 26,
+                "opacity": 1
+              },
+              "zIndex": 1,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.55
+              }
+            },
+            {
+              "id": "kid-thigh-n",
+              "type": "path",
+              "d": "M98 220L98 304",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shin-n",
+              "type": "path",
+              "d": "M98 304L98 386M92 388L112 388",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-lower-n",
+              "type": "group",
+              "memberIds": ["kid-shin-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 6,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.76
+              }
+            },
+            {
+              "id": "kid-leg-n",
+              "type": "group",
+              "memberIds": ["kid-thigh-n", "kid-lower-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -30,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.55
+              }
+            },
+            {
+              "id": "kid-upperarm-f",
+              "type": "path",
+              "d": "M100 116L100 180",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-forearm-f",
+              "type": "path",
+              "d": "M100 180L100 240",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-fore-f",
+              "type": "group",
+              "memberIds": ["kid-forearm-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -67.9,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.45
+              }
+            },
+            {
+              "id": "kid-arm-f",
+              "type": "group",
+              "memberIds": ["kid-upperarm-f", "kid-fore-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 4.1,
+                "opacity": 1
+              },
+              "zIndex": 1,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.29
+              }
+            },
+            {
+              "id": "kid-torso",
+              "type": "path",
+              "d": "M100 104L100 150L99 190L98 220",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-neck",
+              "type": "path",
+              "d": "M100 96L100 112",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-face",
+              "type": "image",
+              "assetId": "head-calm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 227,
+                "y": 969.3,
+                "width": 108.5,
+                "height": 108.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-head",
+              "type": "group",
+              "memberIds": ["kid-neck", "kid-face"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 4,
+                "opacity": 1
+              },
+              "zIndex": 3,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.26
+              }
+            },
+            {
+              "id": "kid-upperarm-n",
+              "type": "path",
+              "d": "M100 116L100 180",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-forearm-n",
+              "type": "path",
+              "d": "M100 180L100 240",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 921.2,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-fore-n",
+              "type": "group",
+              "memberIds": ["kid-forearm-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -66.1,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.45
+              }
+            },
+            {
+              "id": "kid-arm-n",
+              "type": "group",
+              "memberIds": ["kid-upperarm-n", "kid-fore-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -2.7,
+                "opacity": 1
+              },
+              "zIndex": 4,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.29
+              }
+            },
+            {
+              "id": "kid-upper",
+              "type": "group",
+              "memberIds": ["kid-arm-f", "kid-torso", "kid-head", "kid-arm-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 4,
+                "opacity": 1
+              },
+              "zIndex": 3,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.55
+              }
+            },
+            {
+              "id": "kid",
+              "type": "group",
+              "memberIds": ["kid-leg-f", "kid-leg-n", "kid-upper"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 10,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.975
+              }
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "text": "One more pull",
+              "frame": {
+                "x": 102,
+                "y": 182,
+                "width": 876,
+                "height": 148
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "role": "heading",
+              "color": "#262626",
+              "maxLines": 2
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "strain",
+            "targetId": "kid-face",
+            "action": "swap",
+            "startMs": 300,
+            "durationMs": 100,
+            "params": {
+              "assetId": "head-effort"
+            }
+          },
+          {
+            "id": "lean-1",
+            "targetId": "kid-upper",
+            "action": "transform",
+            "startMs": 300,
+            "durationMs": 200,
+            "params": {
+              "to": {
+                "rotationDeg": 5
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "arm-1",
+            "targetId": "kid-arm-n",
+            "action": "transform",
+            "startMs": 300,
+            "durationMs": 200,
+            "params": {
+              "to": {
+                "rotationDeg": 3.3
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "fore-1",
+            "targetId": "kid-fore-n",
+            "action": "transform",
+            "startMs": 300,
+            "durationMs": 200,
+            "params": {
+              "to": {
+                "rotationDeg": -8.5
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-arm-1",
+            "targetId": "kid-arm-f",
+            "action": "transform",
+            "startMs": 300,
+            "durationMs": 200,
+            "params": {
+              "to": {
+                "rotationDeg": 2.9
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-fore-1",
+            "targetId": "kid-fore-f",
+            "action": "transform",
+            "startMs": 300,
+            "durationMs": 200,
+            "params": {
+              "to": {
+                "rotationDeg": -7.1
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "lean-2",
+            "targetId": "kid-upper",
+            "action": "transform",
+            "startMs": 500,
+            "durationMs": 380,
+            "params": {
+              "to": {
+                "rotationDeg": -20
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "arm-2",
+            "targetId": "kid-arm-n",
+            "action": "transform",
+            "startMs": 500,
+            "durationMs": 380,
+            "params": {
+              "to": {
+                "rotationDeg": -25.3
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "fore-2",
+            "targetId": "kid-fore-n",
+            "action": "transform",
+            "startMs": 500,
+            "durationMs": 380,
+            "params": {
+              "to": {
+                "rotationDeg": 62.6
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "far-arm-2",
+            "targetId": "kid-arm-f",
+            "action": "transform",
+            "startMs": 500,
+            "durationMs": 380,
+            "params": {
+              "to": {
+                "rotationDeg": -15
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "far-fore-2",
+            "targetId": "kid-fore-f",
+            "action": "transform",
+            "startMs": 500,
+            "durationMs": 380,
+            "params": {
+              "to": {
+                "rotationDeg": 38.6
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "lean-3",
+            "targetId": "kid-upper",
+            "action": "transform",
+            "startMs": 900,
+            "durationMs": 320,
+            "params": {
+              "to": {
+                "rotationDeg": -15
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "arm-3",
+            "targetId": "kid-arm-n",
+            "action": "transform",
+            "startMs": 900,
+            "durationMs": 320,
+            "params": {
+              "to": {
+                "rotationDeg": -12.9
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "fore-3",
+            "targetId": "kid-fore-n",
+            "action": "transform",
+            "startMs": 900,
+            "durationMs": 320,
+            "params": {
+              "to": {
+                "rotationDeg": 34.1
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-arm-3",
+            "targetId": "kid-arm-f",
+            "action": "transform",
+            "startMs": 900,
+            "durationMs": 320,
+            "params": {
+              "to": {
+                "rotationDeg": -10.1
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-fore-3",
+            "targetId": "kid-fore-f",
+            "action": "transform",
+            "startMs": 900,
+            "durationMs": 320,
+            "params": {
+              "to": {
+                "rotationDeg": 26.2
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "crate-slides",
+            "targetId": "crate",
+            "action": "transform",
+            "startMs": 560,
+            "durationMs": 1300,
+            "params": {
+              "to": {
+                "x": -200
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "rope-shortens",
+            "targetId": "rope",
+            "action": "draw",
+            "startMs": 560,
+            "durationMs": 1300,
+            "params": {
+              "from": 0.56,
+              "to": 0.2742857142857143,
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "note": "Brace, lean back past the mark and settle; the crate slides in. Cut on the strained face with the crate beside the figure."
+      }
+    },
+    {
+      "id": "ink-cheer",
+      "version": "0.2.0",
+      "description": "The crate has arrived. The ink figure's face swaps to relief, its arms go up past their mark and settle, and it hops once.",
+      "parameters": {
+        "title": {
+          "type": "string",
+          "pointers": ["/visual/layers/24/text"],
+          "description": "Short title shared across the story."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action or prop carried into the next shot."
+        }
+      },
+      "template": {
+        "id": "ink-cheer",
+        "narrativeRole": "explanation",
+        "durationMs": 3600,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "ground",
+              "type": "path",
+              "d": "M40 20Q300 15 540 20T1040 20",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 1080,
+                "height": 40
+              },
+              "frame": {
+                "x": 0,
+                "y": 1480,
+                "width": 1080,
+                "height": 40
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 5
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0
+            },
+            {
+              "id": "crate",
+              "type": "image",
+              "assetId": "crate",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 560,
+                "y": 1240,
+                "width": 312,
+                "height": 260
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5
+            },
+            {
+              "id": "kid-thigh-f",
+              "type": "path",
+              "d": "M98 220L98 304",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shin-f",
+              "type": "path",
+              "d": "M98 304L98 386M92 388L112 388",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-lower-f",
+              "type": "group",
+              "memberIds": ["kid-shin-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.76
+              }
+            },
+            {
+              "id": "kid-leg-f",
+              "type": "group",
+              "memberIds": ["kid-thigh-f", "kid-lower-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 4,
+                "opacity": 1
+              },
+              "zIndex": 1,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.55
+              }
+            },
+            {
+              "id": "kid-thigh-n",
+              "type": "path",
+              "d": "M98 220L98 304",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-shin-n",
+              "type": "path",
+              "d": "M98 304L98 386M92 388L112 388",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-lower-n",
+              "type": "group",
+              "memberIds": ["kid-shin-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.76
+              }
+            },
+            {
+              "id": "kid-leg-n",
+              "type": "group",
+              "memberIds": ["kid-thigh-n", "kid-lower-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -3,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.55
+              }
+            },
+            {
+              "id": "kid-upperarm-f",
+              "type": "path",
+              "d": "M100 116L100 180",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-forearm-f",
+              "type": "path",
+              "d": "M100 180L100 240",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-fore-f",
+              "type": "group",
+              "memberIds": ["kid-forearm-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -8,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.45
+              }
+            },
+            {
+              "id": "kid-arm-f",
+              "type": "group",
+              "memberIds": ["kid-upperarm-f", "kid-fore-f"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -6,
+                "opacity": 1
+              },
+              "zIndex": 1,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.29
+              }
+            },
+            {
+              "id": "kid-torso",
+              "type": "path",
+              "d": "M100 104L100 150L99 190L98 220",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-neck",
+              "type": "path",
+              "d": "M100 96L100 112",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-face",
+              "type": "image",
+              "assetId": "head-effort",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "frame": {
+                "x": 227,
+                "y": 947,
+                "width": 108.5,
+                "height": 108.5
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2
+            },
+            {
+              "id": "kid-head",
+              "type": "group",
+              "memberIds": ["kid-neck", "kid-face"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 3,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.26
+              }
+            },
+            {
+              "id": "kid-upperarm-n",
+              "type": "path",
+              "d": "M100 116L100 180",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-forearm-n",
+              "type": "path",
+              "d": "M100 180L100 240",
+              "viewBox": {
+                "minX": 0,
+                "minY": 0,
+                "width": 200,
+                "height": 400
+              },
+              "frame": {
+                "x": 120,
+                "y": 898.9,
+                "width": 310,
+                "height": 620
+              },
+              "stroke": {
+                "color": "#272727",
+                "width": 7
+              },
+              "lineCap": "round",
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1
+            },
+            {
+              "id": "kid-fore-n",
+              "type": "group",
+              "memberIds": ["kid-forearm-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -6,
+                "opacity": 1
+              },
+              "zIndex": 2,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.45
+              }
+            },
+            {
+              "id": "kid-arm-n",
+              "type": "group",
+              "memberIds": ["kid-upperarm-n", "kid-fore-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 6,
+                "opacity": 1
+              },
+              "zIndex": 4,
+              "pivot": {
+                "x": 0.5,
+                "y": 0.29
+              }
+            },
+            {
+              "id": "kid-upper",
+              "type": "group",
+              "memberIds": ["kid-arm-f", "kid-torso", "kid-head", "kid-arm-n"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 3,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.55
+              }
+            },
+            {
+              "id": "kid",
+              "type": "group",
+              "memberIds": ["kid-leg-f", "kid-leg-n", "kid-upper"],
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 10,
+              "pivot": {
+                "x": 0.49,
+                "y": 0.975
+              }
+            },
+            {
+              "id": "title",
+              "type": "text",
+              "text": "One more pull",
+              "frame": {
+                "x": 102,
+                "y": 182,
+                "width": 876,
+                "height": 148
+              },
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 20,
+              "role": "heading",
+              "color": "#262626",
+              "maxLines": 2
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "relief",
+            "targetId": "kid-face",
+            "action": "swap",
+            "startMs": 200,
+            "durationMs": 100,
+            "params": {
+              "assetId": "head-glad"
+            }
+          },
+          {
+            "id": "arms-up",
+            "targetId": "kid-arm-n",
+            "action": "transform",
+            "startMs": 300,
+            "durationMs": 360,
+            "params": {
+              "to": {
+                "rotationDeg": -168
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "arms-settle",
+            "targetId": "kid-arm-n",
+            "action": "transform",
+            "startMs": 660,
+            "durationMs": 300,
+            "params": {
+              "to": {
+                "rotationDeg": -156
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-arm-up",
+            "targetId": "kid-arm-f",
+            "action": "transform",
+            "startMs": 340,
+            "durationMs": 360,
+            "params": {
+              "to": {
+                "rotationDeg": 168
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "far-arm-settle",
+            "targetId": "kid-arm-f",
+            "action": "transform",
+            "startMs": 700,
+            "durationMs": 300,
+            "params": {
+              "to": {
+                "rotationDeg": 156
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "look-up",
+            "targetId": "kid-head",
+            "action": "transform",
+            "startMs": 300,
+            "durationMs": 400,
+            "params": {
+              "to": {
+                "rotationDeg": -12
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "hop",
+            "targetId": "kid",
+            "action": "transform",
+            "startMs": 700,
+            "durationMs": 220,
+            "params": {
+              "to": {
+                "y": -60
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "land",
+            "targetId": "kid",
+            "action": "transform",
+            "startMs": 920,
+            "durationMs": 260,
+            "params": {
+              "to": {
+                "y": 0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "breath",
+            "targetId": "kid-upper",
+            "action": "emphasize",
+            "startMs": 1200,
+            "durationMs": 1100,
+            "repeat": {
+              "intervalMs": 1200,
+              "untilMs": 3600
+            },
+            "params": {
+              "scale": 1.03,
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "note": "Open on the strained face from the last shot, then relief: arms up, a small hop, and a held breath beside the crate."
       }
     }
   ]
