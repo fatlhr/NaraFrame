@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-2ea44f?style=flat-square)](LICENSE)
 [![Tested on macOS Apple Silicon](https://img.shields.io/badge/tested%20on-macOS%20Apple%20Silicon-555?style=flat-square)](#what-you-need)
-[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0%20early%20release-f5a623?style=flat-square)](#good-to-know)
+[![Version 0.3.0](https://img.shields.io/badge/version-0.3.0%20early%20release-f5a623?style=flat-square)](#good-to-know)
 [![Works with Claude Code and Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Codex-7a5af5?style=flat-square)](#install)
 
 Tell your agent what the next episode is about. NaraFrame turns that into a 9:16 video with the same look as every episode before it, shows you a preview, and exports exactly the version you approved.
@@ -47,40 +47,35 @@ Using Codex or another agent? See [Install](#install). Want it gone later? [Unin
 
 ## 🖼️ What you can make
 
-Short vertical videos (9:16, 1080×1920) that explain one idea clearly, especially when you make them every week. The examples below use the NaraFrame skill with built-in profiles or a custom look made with `profile new`. They show authored compositions you can revise for another episode.
+Eight short, silent previews. Watch how each style uses movement to show an idea or tell a story.
 
-| | | |
-|:---:|:---:|:---:|
-| ![A science explainer about why ice floats, in the neutral explainer look](docs/assets/readme/gallery-science.png) | ![An episode of a weekly science series in its own dark green and yellow look](docs/assets/readme/gallery-series.png) | ![A news explainer about the 2023 El Niño and Indonesia's dry season, in the editorial look, with a thermometer gauge](docs/assets/readme/gallery-news.png) |
-| **🔬 How something works**<br>Neutral explainer look | **📺 A weekly series**<br>A look from a name and two colours | **📰 News and current affairs**<br>Editorial look that requires sources |
-| ![Why bread dough rises, drawn in ink on warm paper](docs/assets/readme/gallery-paper.png) | ![How river water becomes tap water: a route that draws itself through six stations, in teal and coral](docs/assets/readme/gallery-route.png) | ![Parts of a bicycle, with notes pinned to a drawn bike on deep violet](docs/assets/readme/gallery-pointers.png) |
-| **📄 Paper and ink**<br>Light, quiet editorial look | **🗺️ A route or process**<br>A path that draws itself | **🖼️ A picture with pointers**<br>Notes pinned to an image |
+| | |
+|:---:|:---:|
+| ![A sealed straw holds water in place. Lift the seal and the water drops.](docs/assets/readme/profiles/general-explainer.webp)<br>**Motion Explainer**<br>*Why won’t it drain?* | ![A spacecraft hits Dimorphos and its orbit changes.](docs/assets/readme/profiles/current-issues.webp)<br>**Editorial / Current Issues**<br>*An asteroid nudge* |
+| ![A stick figure plants both heels, yanks the kite free, and tumbles backward.](docs/assets/readme/profiles/stickman-ink.webp)<br>**Stickman Ink**<br>*Kite in the Fence* | ![Follow a pin in its slot to see what lifts the gate.](docs/assets/readme/profiles/mechanics-bench.webp)<br>**Mechanic’s Bench**<br>*A pin lifts a gate* |
+| ![A folded bridge lands, then a paper token crosses.](docs/assets/readme/profiles/paper-cutout.webp)<br>**Paper Cutout**<br>*A bridge made of paper* | ![A dispenser separates into parts and snaps back together.](docs/assets/readme/profiles/bedah-25d.webp)<br>**Bedah 2.5D**<br>*Why tape tears* |
+| ![Three panels follow a robot, a squeak, and a librarian’s reaction.](docs/assets/readme/profiles/motion-comic.webp)<br>**Motion Comic**<br>*The Squeaky Sneaker* | ![Rain puts out a match. The traveler cups the next flame and lights a lantern.](docs/assets/readme/profiles/story.webp)<br>**Story**<br>*The Last Match* |
 
-Also possible:
-
-| | Video | What it looks like |
-|:---:|---|---|
-| 📊 | **Comparisons and numbers** | Bars and counters land on the figure, with the unit and the qualifier kept readable. |
-| 📺 | **A series with a recognisable opening** | An intro, a signature and a sign-off that every episode shares. |
-| 🎙️ | **Narrated or silent** | A recorded voice-over with captions on the key phrases, music only, or no sound at all. |
+The DART example draws on [NASA’s orbital analysis](https://www.nasa.gov/missions/dart/nasa-study-asteroids-orbit-shape-changed-after-dart-impact/).
 
 <a id="choose-a-visual-style"></a>
 
 ### Choose a visual style
 
-A plain brief for a new video uses **Motion Explainer**. Choose a specific style when the way objects or characters move is part of the explanation. An ordinary revision keeps the episode's selected profile.
+A plain brief for a new video uses **Motion Explainer**. Choose a profile when its movement fits the story you want to tell. An ordinary revision keeps the episode’s selected profile.
 
-| Style and profile ID | Best for | How to choose in Codex | What the rendered example shows |
+| Style and profile ID | Best for | How to choose in Codex | Example |
 |---|---|---|---|
-| **Motion Explainer** · `general-explainer` | One idea, a process, or a comparison | Start with a plain brief or choose `$naraframe` | Ice floats, then a density comparison explains why. [See the frame](docs/assets/readme/gallery-science.png) |
-| **Editorial / Current Issues** · `current-issues` | An event explained with sourced claims | Choose `$naraframe` and ask for `current-issues` | An El Niño explainer uses a thermometer to show the heat. [See the frame](docs/assets/readme/gallery-news.png) |
-| **Stickman Ink** · `stickman-ink` | A character's pose, reaction, or contact with a prop | Choose `$naraframe-stickman` | A drawn character reaches for and pulls a gate handle. The grip and pose explain the action. |
-| **Mechanic’s Bench** · `mechanics-bench` | How linked machine parts move together | Choose `$naraframe-mechanics` in a matching source build or local archive | A lever pivots, its pin slides in a slot, and the connected gate lifts. |
-| **Paper Cutout** · `paper-cutout` | Layered paper, folds, and movement in short steps | Choose `$naraframe-paper` | A hinged paper bridge opens in steps and holds in place before a token crosses. |
+| **Motion Explainer** · `general-explainer` | A process, comparison, or cause and effect | Start with a plain brief or choose `$naraframe` | [Why won’t it drain?](docs/assets/readme/profiles/general-explainer.webp) |
+| **Editorial / Current Issues** · `current-issues` | A sourced explanation of an event | Choose `$naraframe` and ask for `current-issues` | [An asteroid nudge](docs/assets/readme/profiles/current-issues.webp) |
+| **Stickman Ink** · `stickman-ink` | A pose, reaction, or interaction with a prop | Choose `$naraframe-stickman` | [Kite in the Fence](docs/assets/readme/profiles/stickman-ink.webp) |
+| **Mechanic’s Bench** · `mechanics-bench` | A mechanism with connected parts | Choose `$naraframe-mechanics` | [A pin lifts a gate](docs/assets/readme/profiles/mechanics-bench.webp) |
+| **Paper Cutout** · `paper-cutout` | Layers, folds, and stepped movement | Choose `$naraframe-paper` | [A bridge made of paper](docs/assets/readme/profiles/paper-cutout.webp) |
+| **Bedah 2.5D** · `bedah-25d` | An exploded view of how an object fits together | Choose `$naraframe-3d` | [Why tape tears](docs/assets/readme/profiles/bedah-25d.webp) |
+| **Motion Comic** · `motion-comic` | A short story told through panels and dialogue | Choose `$naraframe-comics` | [The Squeaky Sneaker](docs/assets/readme/profiles/motion-comic.webp) |
+| **Story** · `story` | An action and consequence across shots | Choose `$naraframe-story` | [The Last Match](docs/assets/readme/profiles/story.webp) |
 
-Install the character skills from the matching NaraFrame engine. The guide covers project installation in Codex and Claude Code, plus how to preview the included shot patterns yourself. [Install character skills and preview a pattern](docs/guide.md#character-skills)
-
-The published npm `0.2.0` package uses `$naraframe-mekanik` and the `meja-mekanik` profile ID for Mechanic’s Bench.
+Install `naraframe@0.3.0` from npm to get the profiles and character skills shown above. Existing Mechanic’s Bench projects keep their `meja-mekanik` profile pin. [Install character skills and preview a pattern](docs/guide.md#character-skills)
 
 <a id="how-it-works"></a>
 
@@ -213,7 +208,7 @@ Then start a new session in that project and explicitly invoke `$naraframe` in C
 The published engine also works directly from your terminal:
 
 ```bash
-npx -y naraframe@0.2.0 doctor --json
+npx -y naraframe@0.3.0 doctor --json
 ```
 
 The [technical guide](docs/guide.md#install-from-npm) covers installation, project files, previews, revisions and export.
@@ -255,7 +250,7 @@ Your video projects and exported MP4s live in your own folders and are not touch
 
 ## 📌 Good to know
 
-- 🌱 NaraFrame is an early release (0.2.0). Expect rough edges, and please report them in the issues.
+- 🌱 NaraFrame is an early release (0.3.0). Expect rough edges, and please report them in the issues.
 - 🎞️ It animates with a fixed set of moves: reveals, camera moves, transitions, counters and drawn paths. It suits clear explainers; it is not a free-form animation tool.
 - 🔎 Facts on screen are your responsibility. NaraFrame helps you label claims and cite sources, and a profile can require sources before export, but it cannot check facts for you.
 - 📤 An export is a video file on your computer. Where you post it is up to you.

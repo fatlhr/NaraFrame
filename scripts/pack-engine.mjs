@@ -26,7 +26,7 @@ if (flags.length !== 2 || flags[0] !== "--out") throw new Error(usage);
 if (process.versions.node !== "24.20.0")
   throw new Error("Use pinned Node 24.20.0");
 const out = resolve(flags[1]);
-const PACKAGE_VERSION = "0.2.0";
+const PACKAGE_VERSION = "0.3.0";
 const REPOSITORY = "https://github.com/fatlhr/NaraFrame";
 const INTERNAL = ["@naraframe/core", "@naraframe/renderer-remotion"];
 const json = async (path) => JSON.parse(await readFile(path, "utf8"));
