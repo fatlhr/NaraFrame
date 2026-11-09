@@ -5,6 +5,7 @@ import {
   ScenesSchema,
 } from "@naraframe/core";
 import { describe, expect, it } from "vitest";
+import { hashValue } from "../../src/project/hash.js";
 import { narratedScene, narratedSource } from "./narrated-source.js";
 
 const figure: Extract<Layer, { type: "shape" }> = {
@@ -279,6 +280,14 @@ describe("repeated beats (S5)", () => {
       return computeSceneRenderKeys(result.value)[0]?.key;
     };
     expect(keyFor(1400)).not.toBe(keyFor(1500));
+  });
+
+  it("keeps the authored source's revision, not the expanded one", () => {
+    // status, outline, edit --expect and approvals all key on this hash.
+    const source = silent([scene([breath()])]);
+    const result = compileDraft(source);
+    if (!result.ok) throw new Error(codes(result.issues).join());
+    expect(result.value.sourceRevision).toBe(hashValue(source));
   });
 
   it("leaves a scene without repeats exactly as before", () => {
