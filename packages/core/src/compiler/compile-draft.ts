@@ -1582,6 +1582,9 @@ const compileExpandedDraft = (
   source: PlanSource,
   requestedScope: DraftScope = { type: "project" },
   options: CompileOptions = {},
+  // The source as authored, before repeats expand. Its hash is the
+  // revision id that `status`, `outline`, `edit --expect` and approvals use.
+  authored: PlanSource = source,
 ): Result<CompiledDraft> => {
   const mode = options.mode ?? "draft";
   const qualityStage =
@@ -2292,7 +2295,7 @@ const compileExpandedDraft = (
     return { ok: false, issues: sortIssues(issues) };
   }
 
-  const sourceRevision = hashValue(source);
+  const sourceRevision = hashValue(authored);
   const compiledScope =
     requestedScope.type === "project"
       ? ({ type: "project" } as const)
@@ -2405,6 +2408,7 @@ export const compileDraft = (
     expansion.source,
     requestedScope,
     options,
+    source,
   );
   if (expansion.sourceIndex.size === 0 && expansion.issues.length === 0) {
     return result;
