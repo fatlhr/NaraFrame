@@ -786,6 +786,10 @@ export const ScenesSchema = z
             context.addIssue({
               code: "custom",
               message: `Layer already belongs to group ${owner}`,
+              params: {
+                naraframeCode: "GROUP_MEMBER_SHARED",
+                suggestion: `Keep ${memberId} in one group: remove it from ${layer.id} or from ${owner}, or nest one group inside the other.`,
+              },
               path: [
                 "scenes",
                 sceneIndex,
@@ -812,24 +816,34 @@ export const ScenesSchema = z
         const path = ["scenes", sceneIndex, "visual", "layers", layerIndex];
         const seen = new Set<string>([layer.id]);
         let depth = 1;
+        let child = layer.id;
         let parent = parentOf(layer.id);
         while (parent !== undefined) {
           if (seen.has(parent)) {
             context.addIssue({
               code: "custom",
-              message: `Group ${layer.id} contains itself through group ${parent}; nested groups must not form a cycle`,
+              message: `Group ${layer.id} contains itself through group ${child}; nested groups must not form a cycle`,
+              params: {
+                naraframeCode: "GROUP_CYCLE",
+                suggestion: `Remove ${child} from the memberIds of ${parent}, or ${parent} from those of its parent, so the groups form a tree.`,
+              },
               path: [...path, "memberIds"],
             });
             return;
           }
           seen.add(parent);
           depth += 1;
+          child = parent;
           parent = parentOf(parent);
         }
         if (depth > MAX_GROUP_DEPTH) {
           context.addIssue({
             code: "custom",
             message: `Group ${layer.id} is nested ${depth} groups deep; at most ${MAX_GROUP_DEPTH} levels are supported`,
+            params: {
+              naraframeCode: "GROUP_DEPTH_EXCEEDED",
+              suggestion: `Flatten the chain to ${MAX_GROUP_DEPTH} groups: merge ${layer.id} into its parent or move its members up a level.`,
+            },
             path: [...path, "memberIds"],
           });
         }

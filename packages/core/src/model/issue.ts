@@ -45,11 +45,19 @@ export const issuesFromZodError = (
   error.issues.flatMap((zodIssue) =>
     issuePaths(zodIssue).map((path) => {
       const isUnsupportedVersion = path.at(-1) === "schemaVersion";
+      // A refinement may name its own NaraFrame code and repair, such as the
+      // nested-group checks; everything else is a plain schema error.
+      const named =
+        zodIssue.code === "custom"
+          ? (zodIssue.params as
+              | { naraframeCode?: string; suggestion?: string }
+              | undefined)
+          : undefined;
 
       return {
         code: isUnsupportedVersion
           ? "SCHEMA_VERSION_UNSUPPORTED"
-          : "SCHEMA_INVALID",
+          : (named?.naraframeCode ?? "SCHEMA_INVALID"),
         severity: "error",
         responsible: "agent",
         artifact,
@@ -59,7 +67,8 @@ export const issuesFromZodError = (
           : zodIssue.message,
         suggestion: isUnsupportedVersion
           ? "Use schemaVersion 1 or migrate the source before retrying."
-          : "Correct the value at the reported path and validate again.",
+          : (named?.suggestion ??
+            "Correct the value at the reported path and validate again."),
       } satisfies Issue;
     }),
   );

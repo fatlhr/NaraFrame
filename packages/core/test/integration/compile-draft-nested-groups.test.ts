@@ -1,5 +1,9 @@
 import type { Beat, Layer, PlanSource, Scene } from "@naraframe/core";
-import { compileDraft, ScenesSchema } from "@naraframe/core";
+import {
+  compileDraft,
+  ScenesSchema,
+  validatePlanSource,
+} from "@naraframe/core";
 import { describe, expect, it } from "vitest";
 import { narratedSource } from "./narrated-source.js";
 
@@ -102,6 +106,49 @@ describe("nested groups (S3)", () => {
     expect(five.some((message) => message.includes("at most 4 levels"))).toBe(
       true,
     );
+  });
+
+  it("reports each skeleton error under its own code and repair", () => {
+    const codesFor = (layers: Layer[]) => {
+      const result = validatePlanSource(silentSource([scene(layers)]));
+      return result.ok
+        ? []
+        : result.issues.map((issue) => [issue.code, issue.suggestion]);
+    };
+    const [cycle] = codesFor([
+      shape("a"),
+      group("one", ["a", "two"]),
+      group("two", ["one"]),
+    ]);
+    expect(cycle?.[0]).toBe("GROUP_CYCLE");
+    expect(cycle?.[1]).toBe(
+      "Remove two from the memberIds of one, or one from those of its parent, so the groups form a tree.",
+    );
+    const [shared] = codesFor([
+      shape("a"),
+      group("one", ["a"]),
+      group("two", ["a"]),
+    ]);
+    expect(shared).toEqual([
+      "GROUP_MEMBER_SHARED",
+      "Keep a in one group: remove it from two or from one, or nest one group inside the other.",
+    ]);
+    const deep = codesFor([
+      shape("leaf"),
+      group("g1", ["leaf"]),
+      group("g2", ["g1"]),
+      group("g3", ["g2"]),
+      group("g4", ["g3"]),
+      group("g5", ["g4"]),
+    ]);
+    expect(deep.map(([code]) => code)).toContain("GROUP_DEPTH_EXCEEDED");
+    // Other group rules stay plain schema errors.
+    const plane = codesFor([
+      shape("a"),
+      group("inner", ["a"], { space: "world" }),
+      group("outer", ["inner"]),
+    ]);
+    expect(plane.map(([code]) => code)).toEqual(["SCHEMA_INVALID"]);
   });
 
   it("keeps the plane on the root group", () => {
