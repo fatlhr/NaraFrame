@@ -1918,6 +1918,12 @@ Fatih asked on 2026-11-09 to turn the coverable findings from the Bang Nalar ras
 
 **Outside 0.4.0.** Mesh bending, contour morphing, additional easings or spring, video, Lottie and Rive layers, SVG patterns, filters and blend modes, and camera drift. Each needs a production case and a scope decision. A shot that needs a bending, fully acted character uses a trusted recipe in the meantime.
 
+**Next development (recorded 2026-11-09, after 0.4.0).** Fatih chose to publish 0.4.0 first and keep this as the first candidate for the next development round. It needs its own reproducer, scope decision and acceptance under the milestone gate.
+
+| Task | Reason | Starting point | Acceptance |
+|---|---|---|---|
+| **N1 · Deterministic frames in scaled camera windows** | Two renders of one project on one engine are not byte-identical inside focus pushes, zooms and emphasize pulses, on both 0.3.0 and 0.4.0 (see *S7 release acceptance*). The difference is invisible at phone size, but it makes "upgraded projects render identical frames" checks unreliable and needs its cause confirmed, because parallel capture under load once corrupted frames silently (`/13`). | `test-fixtures/project-general-explainer` (focus push over a media image) and `samples/krakatau-draft` (focus and emphasize window). Compare decoded rasters, not only frame hashes: H.264 carries one changed frame until the next keyframe. Candidates: Chrome rasterization flags, image decode timing, sub-pixel camera transform rounding. | Three to five renders of each project decode identical rasters in those windows, or the release check gains a documented per-pixel tolerance with evidence that it still catches real changes. Frame-integrity checks keep rejecting the known corrupt-frame fixture. Any renderer change bumps the identity once. |
+
 **Owner decisions needed before work starts.**
 
 1. Approve S0–S4 and S6–S7 as V7 subtasks, in order.
