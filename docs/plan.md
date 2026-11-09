@@ -2,7 +2,7 @@
 
 Revision 2.4 · Updated 2026-11-09 · MVP 2 integrated at `a701c39`
 
-**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. V1–V4 and V5.1 passed local package acceptance. The [V5.2 release](#v5-follow-ups-for-the-public-style-chooser) pairs the approved README gallery with npm `0.3.0`. [V6](#v6-render-benchmark-acceptance) is complete with benchmark evidence. V7 is conditional and Studio requires separate approval. The [0.4.0 character motion release](#s7-release-acceptance-2026-11-09) shipped Story and Stickman Ink rigs. Fatih approved the [N2 README refresh](#n2-readme-review-candidate) for integration. N1 is the next task.
+**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. V1–V4 and V5.1 passed local package acceptance. The [V5.2 release](#v5-follow-ups-for-the-public-style-chooser) pairs the approved README gallery with npm `0.3.0`. [V6](#v6-render-benchmark-acceptance) is complete with benchmark evidence. V7 is conditional and Studio requires separate approval. The [0.4.0 character motion release](#s7-release-acceptance-2026-11-09) shipped Story and Stickman Ink rigs. Fatih approved the [N2 README refresh](#n2-readme-review-candidate), merged through #104. [N1](#n1-frame-repeatability) passed with a bounded release comparison.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -2068,3 +2068,22 @@ All four source revisions passed plan validation and their full silent drafts de
 With the ignored local narrated sample present, `pnpm verify` passed Biome, typecheck, build, 415 unit tests, and 617 integration tests. The first worktree run reported 14 missing-fixture failures.
 
 Fatih approved the before-and-after visual review in chat on 2026-11-10 and authorized merging [PR #104](https://github.com/fatlhr/NaraFrame/pull/104) before starting N1. The npm README follows the next authorized release.
+
+### N1 frame repeatability
+
+Run the built CLI with `preview PROJECT --draft --resolution 540 --rerender --json` three times per fixture. Compare corresponding decoded video samples at 540×960 and 30 fps. Keep audio, the source revision and the assembly key fixed. Use distinct build IDs and require a passing frame-integrity report from each build.
+
+| Fixture | Frames per build | Build IDs | Differing frames by pair (1–2 / 1–3 / 2–3) | Zero-based range that differed |
+|---|---:|---|---|---|
+| `test-fixtures/project-general-explainer` | 560 | `1df25034762a-77c990c2-fd7`, `1df25034762a-413fc058-09e`, `1df25034762a-c15bf9db-68e` | 84 / 84 / 0 | 101–184 |
+| `samples/krakatau-draft` | 540 | `dc3175e7e2b1-9775bc42-fa7`, `dc3175e7e2b1-8e5ee152-421`, `dc3175e7e2b1-513e4d28-0b2` | 0 / 45 / 45 | 264–308 |
+
+The 2026-11-10 runs used Node 24.20.0, Remotion 4.0.521, Chrome 156.0.8078.81 and FFmpeg 7.1.1 on arm64 macOS. All six had zero frame-integrity outliers. Comparing the two highest luma-delta frames at 320 pixels wide showed the same readable copy and scene geometry. In the full renders, differences begin within the focus beats and also appear in the following H.264 frames. In the Explainer they stop at the next keyframe, frame 185. A separate three-run Remotion capture of Explainer frames 91–126 reproduced different JPEG buffers at frames 103–104 before H.264 encoding. Three PNG runs for that range matched. This isolates a source of the variation to capture. The probe leaves the exact Chrome rasterization mechanism unresolved.
+
+**Release comparison.** Use `node scripts/check-release-frames.mjs BASE.mp4 CANDIDATE.mp4` on two previews with passing frame-integrity reports. The checker requires matching video format and decoded timestamps, then compares the 8-bit YUV420 samples. It compares exactly by default. For a reviewed focus window, specify `--tolerate=START:END`, using zero-based inclusive start and exclusive end. Include a documented codec tail where the baseline showed one.
+
+For this 540p evidence, the windows are `--tolerate=91:185` for Explainer and `--tolerate=162:309` for Krakatau. Per frame, the luma peak and mean absolute deltas must be at most 48 and 0.25. Each chroma plane must stay at or below 16 and 0.15. Observed maxima across the six pairs were 42 and 0.202 for luma and 13 and 0.115 for chroma. Every frame outside the declared windows must match exactly. Use the exact check first for new fixtures and review any proposed tolerance at their actual resolution. Audio and approvals use their existing checks.
+
+All six pairs pass with the recorded windows. Exact mode rejects the 84 differing Explainer frames. The focused test rejects the one-frame bar corruption and a broad four-level tint even inside a tolerated window. A separate manual control rejects a persistent changed cut. The existing publication guard still rejects the corrupt fixture. The local `n1-frame-repeatability` evidence folder retains the render receipts, decoded frame hashes, raster matrix, capture probe and comparison outputs.
+
+N1 passed the tolerance route of its acceptance. `pnpm verify` passed Biome, typecheck, build, 415 unit tests and 619 integration tests. The renderer remains `naraframe-draft/14`.
