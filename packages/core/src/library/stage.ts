@@ -530,6 +530,19 @@ export const stageLibrary = async (
       );
     const scene = parameterize(receipt.pattern, options.params);
     scene.id = receipt.sceneId;
+    // A layer that shares its scene's id turns every beat on it into a beat on
+    // the whole scene. Refuse that for new imports; pinned instances already
+    // in a project keep regenerating as they are.
+    if (
+      receipt.disposition === "import" &&
+      scene.visual.type === "composition" &&
+      scene.visual.layers.some((layer) => layer.id === scene.id)
+    )
+      throw new LibraryError(
+        "LIBRARY_SCENE_ID_CONFLICT",
+        `Pattern ${receipt.pattern.id} has a layer ${scene.id}, the same id as the target scene, so beats on that layer would act on the whole scene.`,
+        `Stage it into a scene with another id, such as ${scene.id}-shot.`,
+      );
     // Rebind catalog asset IDs to this instance; receipt values retain catalog IDs.
     const remap = (value: unknown): void => {
       if (Array.isArray(value)) for (const item of value) remap(item);

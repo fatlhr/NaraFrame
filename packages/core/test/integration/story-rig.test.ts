@@ -143,6 +143,24 @@ describe("Story 0.2.0 faceless rig (S6)", () => {
     expect(green.assets).toEqual(red.assets);
   });
 
+  it("refuses a new import whose scene id matches a pattern layer", async () => {
+    const root = await project();
+    const staged = await stageLibrary({
+      root,
+      from: catalog,
+      pattern: "porch-light",
+      version: "0.2.0",
+      instance: "porch",
+      scene: "kid",
+      params: colors,
+    });
+    expect(staged.ok).toBe(false);
+    if (!staged.ok)
+      expect(staged.issues.map((issue) => issue.code)).toContain(
+        "LIBRARY_SCENE_ID_CONFLICT",
+      );
+  });
+
   it("keeps a pinned 0.1.0 project and its patterns working", async () => {
     // A profile folder as it was at 0.1.0, before the rig paragraph.
     const legacy = join(await temporary(), "story");
@@ -156,12 +174,13 @@ describe("Story 0.2.0 faceless rig (S6)", () => {
     );
     const root = await project(legacy);
     const lock = await readFile(join(root, "profile.lock.json"));
-    await importPattern(root, "note-gust", "0.1.0", "gust", {
+    // Not "gust": note-gust has a layer with that id.
+    await importPattern(root, "note-gust", "0.1.0", "gust-shot", {
       title: "The Windy Note",
       note: "Carry the reach into the catch.",
     });
     expect(await readFile(join(root, "profile.lock.json"))).toEqual(lock);
     const { draft } = await compiled(root);
-    expect(draft.scenes.map((scene) => scene.id)).toEqual(["gust"]);
+    expect(draft.scenes.map((scene) => scene.id)).toEqual(["gust-shot"]);
   });
 });
