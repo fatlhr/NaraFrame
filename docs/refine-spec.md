@@ -267,3 +267,43 @@ Bang Story separates browser-facing controls from privileged jobs and reports pr
 | Approve and export | Pass the user-selected full preview build ID to `render --approve-preview BUILD_ID --json`. The engine validates revision, scope, and approval. |
 
 The first Studio scope is the local browser workflow in U1 and U2. The [Studio roadmap](plan.md#optional-studio-roadmap) records access boundaries, cancellation behavior, and acceptance.
+
+## 12. Character story motion findings — 2026-11-09
+
+A raster-dot style test in the Bang Nalar story project (`productions/uji-gaya-raster/` in that project) produced a note on engine limits for jointed characters and on story motion in the owner's reference account. The note was checked against the `0.3.0` source at `1842632`. The [0.4.0 task list](plan.md#9-naraframe-040--character-story-motion-proposed) owns priorities and acceptance.
+
+The reference account barely animates its characters. Its stories move through camera, light, screens and pose changes at cuts. The test needed jointed limbs, pose changes and idle motion, and worked around them with square canvases centred on the shoulder, one layer per pose and hand-written breaths.
+
+### Source check
+
+| Finding from the test | Source evidence | Decision |
+|---|---|---|
+| A layer turns about its centre. | The renderer already sets `transformOrigin` from a motion anchor and preflight rotates bounds about it ([layer style](../packages/renderer-remotion/src/remotion/draft-video.tsx#L209), [preflight](../packages/renderer-remotion/src/remotion/visual-preflight.ts#L459)). Only a `focus` beat can set that anchor ([motion](../packages/renderer-remotion/src/remotion/motion.ts#L331)). | Expose a per-layer pivot. Small change, large effect. |
+| No skeleton. | A group can be moved as a parent, but its members cannot be groups ([group validator](../packages/core/src/schema/scene.ts#L708)); the renderer skips nested groups. Attachments are resolved at authoring time. | Allow bounded nested groups so upper arm, forearm and hand inherit their parent's motion. |
+| A card revealed, exited and revealed again never appears. | Reveal and exit multiply opacity ([motion](../packages/renderer-remotion/src/remotion/motion.ts#L302)), so any exit keeps the layer hidden for the rest of the scene and a second reveal also hides it until that reveal's window. The overlap check excludes `reveal` and nothing checks the sequence ([compile](../packages/core/src/compiler/compile-draft.ts#L1189)). | A silent defect. Fix before adding features. |
+| One pose needs one layer. | Image layers have one asset. | Add an instant asset swap on one layer. |
+| Motions on one property cannot stack. | `MOTION_PROPERTY_OVERLAP` covers transform, exit, draw, follow and count. `emphasize` multiplies scale outside that check. | Document `emphasize` with a small scale as a breath over a transform. No additive runtime. |
+| Only three easings. | `linear`, `smooth`, `snappy` ([schema](../packages/core/src/schema/scene.ts#L351)). | Document anticipation and overshoot as two or three consecutive transforms. Spring stays CLOSED_NOT_PLANNED. |
+| No loop. | Repeater is CLOSED_NOT_PLANNED. | Propose a compile-time expansion into ordinary beats, subject to an explicit scope decision. |
+| SVG has no gradients, patterns or filters. | Linear and radial gradients, `clipPath` and `mask` are accepted. `pattern`, `filter`, `style` and embedded images are refused ([sanitizer](../packages/core/src/asset/svg-sanitize.ts#L18)). No blend modes. | Light can use gradient overlays now. Pre-rendered raster shading is a valid PNG asset. Patterns, filters and blend modes wait for a production case. |
+| No video, Lottie or Rive layer. | Assets are PNG, SVG and audio. Video layers are CLOSED_NOT_PLANNED. | Out of 0.4.0. |
+| Camera moves are strictly sequential. | `CAMERA_MOVE_OVERLAP`. | Out of 0.4.0. |
+| The story profile has no character rig. | `story@0.1.0` ships four action patterns and poses. | Add a faceless rig and pose set after the engine tasks pass. |
+
+A trusted recipe can already draw a scene with nested pivots, swaps and loops in React/Remotion ([recipes](../skills/naraframe/authoring.md)). It requires owner trust for every code change, has no scene camera and has limited automated visual checks, so it stays the route for one-off articulated acting, not for daily production.
+
+### References
+
+No recorded reference covers skeletal rigs, Lottie or Rive. Earlier references map to the remaining work:
+
+- [Stickman Video Director B1](https://github.com/kaomei/stickman-video-director/blob/main/skills/directing-stickman-videos/references/b1-minimal-handdrawn.md): gaze, planted stance, anticipation and prop contact for the pose set.
+- [Hand Drawn Video Prompts](https://github.com/kaomei/hand-drawn-video-prompts/tree/main/hand-drawn-video-prompts): rigid cutout motion as a deliberate look.
+- Pixelorama and Storyboarder from the [X source list](https://x.com/renproton/status/2118392436863201677): pose holds, stepped timing and shot duration.
+- Flubber from the same list: contour morphing with different point counts, if a later case needs bending.
+- [OneTake](https://github.com/feitangyuan/onetake/blob/abb6d17279cdc749e27e99aa534a062d8fd01ced/SKILL.md#3--storyboard-as-rhythm-and-carry) (principle only, noncommercial licence) and [HyperFrames seam review](https://github.com/heygen-com/hyperframes/blob/336abaa80f405717b82111656f204d48bbde53b9/.agents/skills/seam-craft/SKILL.md): change the pose at a cut and inspect both sides.
+- [motion-film QA](https://github.com/arhen/motion-film/blob/67b570001231dfcdfe3a5be7cb8c2b1e4f3349fb/skills/motion-film-qa/SKILL.md): frame strips around joints and pose seams.
+- [Anti Slop](https://github.com/miqdadbadjuber/anti-slop/blob/main/skills/antislop/SKILL.md): justify each movement in a mostly still shot.
+
+### Expected coverage
+
+The proposed package addresses the test's pivot, skeleton, re-show and pose-swap findings in the engine. It turns breath, overshoot and gradient light into documented techniques, and proposes a loop expansion. Mesh bending, contour morphing, additional easings, video or Lottie layers, blend modes and camera drift remain out of scope. For a nearly still faceless character this should cover most of the test's problems. Fully acted characters with bending bodies still need a recipe or a later scope decision.
