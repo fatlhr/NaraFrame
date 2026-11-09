@@ -2,7 +2,7 @@
 
 Revision 2.4 · Updated 2026-11-09 · MVP 2 integrated at `a701c39`
 
-**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. V1–V4 and V5.1 passed local package acceptance. The [V5.2 release](#v5-follow-ups-for-the-public-style-chooser) pairs the approved README gallery with npm `0.3.0`. [V6](#v6-render-benchmark-acceptance) is complete with benchmark evidence. V7 is conditional and Studio requires separate approval. The [0.4.0 character motion release](#s7-release-acceptance-2026-11-09) shipped Story and Stickman Ink rigs. The [N2 README refresh](#n2-readme-review-candidate) is in visual review, ahead of N1.
+**Current status.** M4 is closed through #64. M5.1 passed its technical gates and received Fatih's visual approval on 2026-11-06. [PR #65](https://github.com/fatlhr/NaraFrame/pull/65) delivers that scope. The A0–D2 visual queue is closed. V1–V4 and V5.1 passed local package acceptance. The [V5.2 release](#v5-follow-ups-for-the-public-style-chooser) pairs the approved README gallery with npm `0.3.0`. [V6](#v6-render-benchmark-acceptance) is complete with benchmark evidence. V7 is conditional and Studio requires separate approval. The [0.4.0 character motion release](#s7-release-acceptance-2026-11-09) shipped Story and Stickman Ink rigs. Fatih approved the [N2 README refresh](#n2-readme-review-candidate) for integration. N1 is the next task.
 
 [spec.md](spec.md) is the product contract. [refine-spec.md](refine-spec.md) records production findings and decisions. [History](history/README.md) preserves the long M0–M3 record, old discovery, and the local Batch F closure before this rewrite.
 
@@ -2067,4 +2067,4 @@ All four source revisions passed plan validation and their full silent drafts de
 
 With the ignored local narrated sample present, `pnpm verify` passed Biome, typecheck, build, 415 unit tests, and 617 integration tests. The first worktree run reported 14 missing-fixture failures.
 
-N2 remains open until Fatih approves the visuals and the change merges. The npm README follows the next authorized release.
+Fatih approved the before-and-after visual review in chat on 2026-11-10 and authorized merging [PR #104](https://github.com/fatlhr/NaraFrame/pull/104) before starting N1. The npm README follows the next authorized release.
