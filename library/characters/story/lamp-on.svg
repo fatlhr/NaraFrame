@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 120">
+  <title>Wall lamp, lit</title>
+  <rect x="34" y="4" width="12" height="22" rx="4" fill="#292D41"/>
+  <path d="M14 26h52l-8 58H22Z" fill="#3B3F55" stroke="#292D41" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M24 34h32l-6 42H30Z" fill="#FFE7A8"/>
+  <rect x="20" y="84" width="40" height="10" rx="4" fill="#292D41"/>
+</svg>

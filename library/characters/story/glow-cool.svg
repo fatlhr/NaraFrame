@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <title>Cool screen light that fades out inside the artwork</title>
+  <defs>
+    <radialGradient id="g" cx="200" cy="200" r="196" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#CFE0FF" stop-opacity="0.85"/>
+      <stop offset="0.45" stop-color="#8FAAE6" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#5D74B8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#g)"/>
+</svg>

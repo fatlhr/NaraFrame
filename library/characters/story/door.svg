@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 600">
+  <title>Front door in its frame</title>
+  <rect x="6" y="6" width="288" height="594" fill="#5B4636" stroke="#292D41" stroke-width="8"/>
+  <rect x="34" y="34" width="232" height="566" fill="#7A5A41" stroke="#292D41" stroke-width="6"/>
+  <rect x="64" y="72" width="172" height="200" rx="6" fill="#6A4E39"/>
+  <rect x="64" y="310" width="172" height="250" rx="6" fill="#6A4E39"/>
+  <circle cx="232" cy="330" r="12" fill="#D9B45A" stroke="#292D41" stroke-width="4"/>
+</svg>

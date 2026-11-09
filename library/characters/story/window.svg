@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 440">
+  <title>Night window with a thin moon</title>
+  <rect x="8" y="8" width="344" height="424" rx="10" fill="#141A2C" stroke="#292D41" stroke-width="10"/>
+  <circle cx="250" cy="110" r="34" fill="#E9E1C6"/>
+  <circle cx="266" cy="100" r="30" fill="#141A2C"/>
+  <rect x="174" y="8" width="12" height="424" fill="#292D41"/>
+  <rect x="8" y="214" width="344" height="12" fill="#292D41"/>
+</svg>

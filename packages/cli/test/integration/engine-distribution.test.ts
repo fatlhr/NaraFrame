@@ -176,23 +176,27 @@ describe("offline engine distribution", () => {
     }
   });
 
-  it("ships both Story shot pairs and their carried props", () => {
+  it("ships the Story shot pairs, their carried props and the 0.2.0 rig patterns", () => {
     const catalog = join(engine, "library/characters/story/catalog.json");
     const result = invoke("library", "inspect", catalog);
     expect(result.success).toBe(true);
     expect(result.data.catalog).toMatchObject({
       id: "story",
-      version: "0.1.0",
+      version: "0.2.0",
       patterns: [
-        { id: "note-gust" },
-        { id: "note-catch" },
-        { id: "puddle-stop" },
-        { id: "puddle-cross" },
+        { id: "note-gust", version: "0.1.0" },
+        { id: "note-catch", version: "0.1.0" },
+        { id: "puddle-stop", version: "0.1.0" },
+        { id: "puddle-cross", version: "0.1.0" },
+        { id: "phone-glow", version: "0.2.0" },
+        { id: "porch-light", version: "0.2.0" },
       ],
       assets: expect.arrayContaining([
         expect.objectContaining({ id: "wind-note" }),
         expect.objectContaining({ id: "gift" }),
         expect.objectContaining({ id: "runner-step" }),
+        expect.objectContaining({ id: "screen-lit" }),
+        expect.objectContaining({ id: "lamp-on" }),
       ]),
     });
   });
