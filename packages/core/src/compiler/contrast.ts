@@ -231,6 +231,13 @@ interface Visibility {
   animated: boolean;
   /** False when a reveal or exit is anchored to a phrase whose time is not known here. */
   timed: boolean;
+  /**
+   * True when the layer or its group shows more than once: a reveal after an
+   * exit, or a second reveal or exit. One window cannot describe that.
+   */
+  reshown: boolean;
+  /** The reveal and exit beats it follows, so two layers that share them show together. */
+  beatIds: string;
   appears: number;
   full: number;
   fades: number;
@@ -270,15 +277,27 @@ const visibilityOf = (
   const visibility: Visibility = {
     animated: false,
     timed: true,
+    reshown: false,
+    beatIds: "",
     appears: 0,
     full: 0,
     fades: Number.POSITIVE_INFINITY,
     gone: Number.POSITIVE_INFINITY,
   };
+  const seen = new Map<
+    string,
+    { reveals: number; exits: number; revealAt?: number; exitAt?: number }
+  >();
   beats.forEach((beat, index) => {
     if (!ids.includes(beat.targetId)) return;
     if (beat.action !== "reveal" && beat.action !== "exit") return;
     visibility.animated = true;
+    visibility.beatIds += `${beat.id}\n`;
+    const count = seen.get(beat.targetId) ?? { reveals: 0, exits: 0 };
+    if (beat.action === "reveal") count.reveals += 1;
+    else count.exits += 1;
+    seen.set(beat.targetId, count);
+    if (count.reveals > 1 || count.exits > 1) visibility.reshown = true;
     const start = startsMs?.[index] ?? (beat.at ? undefined : beat.startMs);
     if (start === undefined) {
       visibility.timed = false;
@@ -286,12 +305,21 @@ const visibilityOf = (
     }
     const end = start + beat.durationMs;
     if (beat.action === "reveal") {
+      count.revealAt = start;
       visibility.appears = Math.max(visibility.appears, start);
       visibility.full = Math.max(visibility.full, end);
     } else {
+      count.exitAt = start;
       visibility.fades = Math.min(visibility.fades, start);
       visibility.gone = Math.min(visibility.gone, end);
     }
+    // An exit before a reveal hides a shown layer, then shows it again.
+    if (
+      count.revealAt !== undefined &&
+      count.exitAt !== undefined &&
+      count.exitAt < count.revealAt
+    )
+      visibility.reshown = true;
   });
   return visibility;
 };
@@ -825,8 +853,16 @@ const backdropFor = (
     // state it is read in, and are not judged.
     if (place.opacity === 0) continue;
     const shows = place.visibility;
-    if (shows.animated) {
-      const seen = textPlace.visibility;
+    const seen = textPlace.visibility;
+    // A backdrop that follows exactly the text's reveals and exits, such as a
+    // panel in the same revealed group, is shown whenever the text is.
+    if (shows.animated && shows.beatIds !== seen.beatIds) {
+      if (shows.reshown || seen.reshown) {
+        return {
+          kind: "unknown",
+          reason: `${layer.type} ${layer.id} or the text shows and hides more than once`,
+        };
+      }
       if (!shows.timed || !seen.timed) {
         return {
           kind: "unknown",

@@ -1237,6 +1237,54 @@ const validateMotionWindows = (
     }
   });
 
+  // Reveals predate the conflict check above, and existing projects overlap
+  // two reveals of one layer, so this stays a warning. Visibility is one
+  // ordered sequence: the later reveal takes over from the opacity the
+  // earlier one has reached, which is rarely what the author meant.
+  const reveals = new Map<
+    string,
+    Array<{ beatIndex: number; start: number; end: number; startMs: number }>
+  >();
+  scene.beats.forEach((beat, beatIndex) => {
+    if (beat.action !== "reveal") return;
+    const startMs = starts.beats[beatIndex] ?? beat.startMs;
+    const current = {
+      beatIndex,
+      startMs,
+      start: msToFrameOffset(startMs, fps),
+      end:
+        msToFrameOffset(startMs, fps) +
+        msToDurationFrames(beat.durationMs, fps),
+    };
+    const earlier = reveals.get(beat.targetId) ?? [];
+    const conflict = earlier.find(
+      (other) => current.start < other.end && current.end > other.start,
+    );
+    if (conflict) {
+      const other = scene.beats[conflict.beatIndex] as Beat;
+      const [first, second] =
+        conflict.start <= current.start
+          ? [
+              { beat: other, window: conflict },
+              { beat, window: current },
+            ]
+          : [
+              { beat, window: current },
+              { beat: other, window: conflict },
+            ];
+      issues.push(
+        compileIssue(
+          "VISIBILITY_OVERLAP",
+          `/scenes/${sceneIndex}/beats/${beatIndex}`,
+          `Reveal ${beat.id} on ${beat.targetId} runs over ${frameSpan(current.start, current.end)}${anchorNote(beat)}, overlapping reveal ${other.id} over ${frameSpan(conflict.start, conflict.end)}${anchorNote(other)} (${fps} fps; starts round to the nearest frame). The later reveal takes over from the opacity the earlier one has reached.`,
+          "warning",
+          `Start ${second.beat.id} at frame ${first.window.end} or later (${startEdit(second.beat, second.window.startMs, earliestStartMsFor(first.window.end, fps))}), or remove one reveal. A layer's reveals and exits play one after another.`,
+        ),
+      );
+    }
+    reveals.set(beat.targetId, [...earlier, current]);
+  });
+
   const moveStart = (moveIndex: number): number =>
     msToFrameOffset(
       starts.moves[moveIndex] ?? scene.camera?.moves[moveIndex]?.startMs ?? 0,

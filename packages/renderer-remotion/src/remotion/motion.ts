@@ -180,6 +180,75 @@ export interface MotionState {
   anchor: { x: number; y: number };
 }
 
+type VisibilityBeat = Extract<CompiledBeat, { action: "reveal" | "exit" }>;
+
+/**
+ * Opacity and travel from a layer's reveals and exits, read as one ordered
+ * sequence. Before its first reveal a layer is hidden; before a first exit it
+ * is shown. Each beat eases from the opacity the previous one left, so a
+ * layer can exit and be revealed again, and a reveal of a shown layer changes
+ * nothing. Only the latest beat that has started moves the layer: a reveal
+ * travels in by the share of opacity it adds, an exit drifts out by the share
+ * it removes and holds that drift until the next beat. Seeking to any frame
+ * gives the same result as playing to it.
+ */
+export const visibilityFor = (
+  beats: readonly CompiledBeat[],
+  targetId: string,
+  localFrame: number,
+): { opacity: number; translateX: number; translateY: number } => {
+  const sequence = beats
+    .filter(
+      (beat): beat is VisibilityBeat =>
+        beat.targetId === targetId &&
+        (beat.action === "reveal" || beat.action === "exit"),
+    )
+    .map((beat, order) => ({ beat, order }))
+    .sort(
+      (left, right) =>
+        left.beat.startFrame - right.beat.startFrame ||
+        left.order - right.order,
+    )
+    .map(({ beat }) => beat);
+  const first = sequence[0];
+  if (!first) return { opacity: 1, translateX: 0, translateY: 0 };
+
+  let opacity = first.action === "reveal" ? 0 : 1;
+  let travel = { beat: first, from: opacity, progress: 0 };
+  for (const beat of sequence) {
+    if (localFrame < beat.startFrame) break;
+    const progress = interpolate(
+      localFrame,
+      [beat.startFrame, beat.startFrame + beat.durationInFrames],
+      [0, 1],
+      { ...clamp, easing: easingFor(beat.params.easingPreset, beat.action) },
+    );
+    const from = opacity;
+    opacity =
+      beat.action === "reveal"
+        ? from + (1 - from) * progress
+        : from * (1 - progress);
+    travel = { beat, from, progress };
+  }
+
+  const { beat, from, progress } = travel;
+  const distance = beat.params.distance ?? 0;
+  // A reveal starts `distance` on the far side of its frame and arrives; an
+  // exit leaves toward its direction.
+  const offset =
+    beat.action === "reveal"
+      ? -(1 - progress) * distance * (1 - from)
+      : progress * distance * from;
+  const direction = beat.params.direction;
+  return {
+    opacity,
+    translateX:
+      direction === "right" ? offset : direction === "left" ? -offset : 0,
+    translateY:
+      direction === "down" ? offset : direction === "up" ? -offset : 0,
+  };
+};
+
 export const motionStateFor = (
   draft: CompiledDraft,
   scene: CompiledDraft["scenes"][number],
@@ -284,41 +353,19 @@ export const motionStateFor = (
   state.scale = transformPose.scale;
   state.rotationDeg = transformPose.rotationDeg;
 
+  const visibility = visibilityFor(scene.beats, targetId, localFrame);
+  state.opacity = visibility.opacity;
+  state.translateX += visibility.translateX;
+  state.translateY += visibility.translateY;
+
   for (const beat of scene.beats.filter((item) => item.targetId === targetId)) {
-    if (
-      beat.action === "transform" ||
-      beat.action === "follow" ||
-      beat.action === "draw" ||
-      beat.action === "count"
-    )
-      continue;
+    if (beat.action !== "emphasize" && beat.action !== "focus") continue;
     const progress = interpolate(
       localFrame,
       [beat.startFrame, beat.startFrame + beat.durationInFrames],
       [0, 1],
       { ...clamp, easing: easingFor(beat.params.easingPreset, beat.action) },
     );
-
-    if (beat.action === "reveal") {
-      state.opacity *= progress;
-      const offset = (1 - progress) * beat.params.distance;
-      if (beat.params.direction === "up") state.translateY += offset;
-      if (beat.params.direction === "down") state.translateY -= offset;
-      if (beat.params.direction === "left") state.translateX += offset;
-      if (beat.params.direction === "right") state.translateX -= offset;
-    }
-
-    if (beat.action === "exit") {
-      // The mirror of reveal. `interpolate` clamps, so every frame after the
-      // window reads progress 1 and the element stays hidden however the
-      // renderer arrives at that frame.
-      state.opacity *= 1 - progress;
-      const offset = progress * (beat.params.distance ?? 0);
-      if (beat.params.direction === "up") state.translateY -= offset;
-      if (beat.params.direction === "down") state.translateY += offset;
-      if (beat.params.direction === "left") state.translateX -= offset;
-      if (beat.params.direction === "right") state.translateX += offset;
-    }
 
     if (beat.action === "emphasize") {
       state.scale *= 1 + Math.sin(progress * Math.PI) * (beat.params.scale - 1);
