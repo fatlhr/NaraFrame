@@ -30,6 +30,7 @@ import {
   qualitySeverity,
 } from "./composition-quality.js";
 import { checkContrast } from "./contrast.js";
+import { groupTree, rootGroupOf } from "./groups.js";
 import { computeAssemblyKey } from "./keys.js";
 import { resolveNarrationTimeline } from "./narration-timeline.js";
 import { checkSourceProvenance } from "./provenance.js";
@@ -796,9 +797,11 @@ const validateLayerFrames = (
   const issues: Issue[] = [];
   const { width, height } = source.project.format.design;
   const safeZone = source.profile.render.safeZone;
+  // A nested group takes its plane from its root group.
+  const tree = groupTree(scene.visual.layers);
   const worldMemberIds = new Set(
     scene.visual.layers.flatMap((layer) =>
-      layer.type === "group" && layer.space === "world" ? layer.memberIds : [],
+      rootGroupOf(tree, layer.id)?.space === "world" ? [layer.id] : [],
     ),
   );
 

@@ -71,6 +71,9 @@ export const TypographyRoleSchema = z.enum([
  */
 export const PivotSchema = FocalPointSchema;
 
+/** How many groups deep a layer may sit: body, upper arm, forearm, hand. */
+export const MAX_GROUP_DEPTH = 4;
+
 const LayerPresentationShape = {
   opacity: z.number().min(0).max(1),
   rotationDeg: z.number(),
@@ -716,11 +719,11 @@ export const ScenesSchema = z
         const members = new Set<string>();
         layer.memberIds.forEach((memberId, memberIndex) => {
           const member = layersById.get(memberId);
-          if (!member || member.type === "group" || members.has(memberId)) {
+          if (!member || members.has(memberId) || memberId === layer.id) {
             context.addIssue({
               code: "custom",
               message:
-                "Group members must be unique IDs of non-group layers in the same scene",
+                "Group members must be unique IDs of other layers in the same scene",
               path: [
                 "scenes",
                 sceneIndex,
@@ -762,6 +765,62 @@ export const ScenesSchema = z
             memberOwners.set(memberId, layer.id);
           }
         });
+      });
+
+      // Nested groups form a simple skeleton: a group may hold groups, each
+      // layer has one parent, and the chain from a layer to its root group
+      // is at most MAX_GROUP_DEPTH groups long. Only the root group places
+      // the skeleton in a plane, and a stack or grid arranges plain layers.
+      const parentOf = (id: string) => memberOwners.get(id);
+      layers.forEach((layer, layerIndex) => {
+        if (layer.type !== "group") return;
+        const path = ["scenes", sceneIndex, "visual", "layers", layerIndex];
+        const seen = new Set<string>([layer.id]);
+        let depth = 1;
+        let parent = parentOf(layer.id);
+        while (parent !== undefined) {
+          if (seen.has(parent)) {
+            context.addIssue({
+              code: "custom",
+              message: `Group ${layer.id} contains itself through group ${parent}; nested groups must not form a cycle`,
+              path: [...path, "memberIds"],
+            });
+            return;
+          }
+          seen.add(parent);
+          depth += 1;
+          parent = parentOf(parent);
+        }
+        if (depth > MAX_GROUP_DEPTH) {
+          context.addIssue({
+            code: "custom",
+            message: `Group ${layer.id} is nested ${depth} groups deep; at most ${MAX_GROUP_DEPTH} levels are supported`,
+            path: [...path, "memberIds"],
+          });
+        }
+        const owner = parentOf(layer.id);
+        if (owner !== undefined) {
+          for (const key of ["space", "parallax", "billboard"] as const) {
+            if (layer[key] !== undefined) {
+              context.addIssue({
+                code: "custom",
+                message: `Nested group ${layer.id} takes its plane from its root group; remove ${key}`,
+                path: [...path, key],
+              });
+            }
+          }
+        }
+        if (
+          layer.layout &&
+          layer.layout.type !== "absolute" &&
+          layer.memberIds.some((id) => layersById.get(id)?.type === "group")
+        ) {
+          context.addIssue({
+            code: "custom",
+            message: `Group ${layer.id} arranges its members in a ${layer.layout.type}; a stack or grid holds plain layers, so nest groups only in an absolute group`,
+            path: [...path, "layout"],
+          });
+        }
       });
 
       const beatIds = new Set<string>();

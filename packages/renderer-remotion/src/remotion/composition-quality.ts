@@ -5,6 +5,7 @@ import {
   qualitySeverity,
   sourceFrameFor,
 } from "@naraframe/core/composition-quality";
+import { groupTree, leafMembersOf, rootGroupOf } from "@naraframe/core/groups";
 import {
   countedTextFor,
   drawProgressFor,
@@ -53,9 +54,10 @@ export const rectangleUnionArea = (boxes: Frame[]): number => {
 
 const leaves = (scene: Scene, ids: readonly string[]): Leaf[] => {
   const members = new Set(ids);
+  const tree = groupTree(scene.layers);
   for (const layer of scene.layers) {
     if (layer.type === "group" && members.has(layer.id)) {
-      for (const id of layer.memberIds) members.add(id);
+      for (const leaf of leafMembersOf(tree, layer)) members.add(leaf.id);
     }
   }
   return scene.layers.filter(
@@ -228,9 +230,9 @@ export const inspectCompositionScene = (
     const allowed = policy.camera.allowStatic && annotation?.staticReason;
     let displacement = 0;
     let unknown = scene.visual.type !== "composition";
-    const groups = scene.layers.filter((layer) => layer.type === "group");
+    const tree = groupTree(scene.layers);
     for (const target of targets) {
-      const group = groups.find((layer) => layer.memberIds.includes(target.id));
+      const group = rootGroupOf(tree, target.id);
       const owner = group ?? target;
       if (owner.space !== "world" || owner.parallax === 0) continue;
       for (const move of scene.camera?.moves ?? []) {

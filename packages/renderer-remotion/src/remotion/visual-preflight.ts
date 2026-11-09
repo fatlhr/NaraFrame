@@ -1,5 +1,12 @@
 import type { CompiledDraft, Issue, Layer } from "@naraframe/core";
 import { compositionCheckpoints } from "@naraframe/core/composition-quality";
+import {
+  ancestorsOf,
+  groupBoundsOf,
+  groupTree,
+  leafMembersOf,
+  rootGroupOf,
+} from "@naraframe/core/groups";
 import { imagePlacement } from "@naraframe/core/image-placement";
 import { measureText } from "@remotion/layout-utils";
 import { captionLayoutFor } from "./captions.js";
@@ -366,33 +373,6 @@ const transformedQuad = (
     bounds,
   );
 
-/**
- * Mirrors `GroupView`'s member-bounding-box math (draft-video.tsx) so the
- * transform-origin used here matches what the renderer actually applies.
- */
-const groupBoundsFor = (
-  scene: CompiledDraft["scenes"][number],
-  group: Extract<Layer, { type: "group" }>,
-): Rectangle => {
-  const layersById = new Map(scene.layers.map((layer) => [layer.id, layer]));
-  const members = group.memberIds.flatMap((memberId) => {
-    const member = layersById.get(memberId);
-    return member && member.type !== "group" ? [member] : [];
-  });
-  if (members.length === 0) {
-    return { x: 0, y: 0, width: 0, height: 0 };
-  }
-  const left = Math.min(...members.map((member) => member.frame.x));
-  const top = Math.min(...members.map((member) => member.frame.y));
-  const right = Math.max(
-    ...members.map((member) => member.frame.x + member.frame.width),
-  );
-  const bottom = Math.max(
-    ...members.map((member) => member.frame.y + member.frame.height),
-  );
-  return { x: left, y: top, width: right - left, height: bottom - top };
-};
-
 type Point = readonly [number, number];
 
 /** Corners in drawing order, so the result is a convex polygon. */
@@ -469,6 +449,34 @@ export const transformPoints = (
       originY + localX * sin + localY * cos + transform.translateY,
     ] as const;
   });
+};
+
+/**
+ * A layer's points carried through every group that holds it, innermost
+ * first: a hand turns with its forearm, the forearm with its arm, and so on,
+ * each about its own pivot within its members' bounds, as `GroupView` nests
+ * them. The plane and scene transition are applied separately.
+ */
+export const throughGroups = (
+  draft: CompiledDraft,
+  scene: CompiledDraft["scenes"][number],
+  layerId: string,
+  points: readonly Point[],
+  localFrame: number,
+  tree = groupTree(scene.layers),
+): Point[] => {
+  return ancestorsOf(tree, layerId).reduce<Point[]>(
+    (moved, ancestor) => {
+      const bounds = groupBoundsOf(tree, ancestor);
+      if (!bounds) return moved;
+      return transformPoints(
+        moved,
+        groupScreenTransformFor(draft, scene, ancestor, localFrame),
+        bounds,
+      );
+    },
+    [...points],
+  );
 };
 
 const captionIssue = (
@@ -624,18 +632,10 @@ const panelDeadSpace = (
   sceneIndex: number,
 ): Issue[] => {
   const issues: Issue[] = [];
+  const tree = groupTree(scene.layers);
   const frameOf = (layer: Layer): Rectangle | null => {
     if (layer.type === "group") {
-      return unionOf(
-        layer.memberIds.flatMap((memberId) => {
-          const member = scene.layers.find(
-            (candidate) => candidate.id === memberId,
-          );
-          const rectangle =
-            member && member.type !== "group" ? member.frame : null;
-          return rectangle ? [rectangle] : [];
-        }),
-      );
+      return unionOf(leafMembersOf(tree, layer).map((member) => member.frame));
     }
     return layer.frame;
   };
@@ -661,15 +661,11 @@ const panelDeadSpace = (
       if (index === panelIndex) return false;
       const contentFrames =
         layer.type === "group"
-          ? layer.memberIds.flatMap((memberId) => {
-              const member = scene.layers.find(
-                (candidate) => candidate.id === memberId,
-              );
-              return member &&
-                (member.type === "text" || member.type === "image")
+          ? leafMembersOf(tree, layer).flatMap((member) =>
+              member.type === "text" || member.type === "image"
                 ? [member.frame]
-                : [];
-            })
+                : [],
+            )
           : layer.type === "text" || layer.type === "image"
             ? [layer.frame]
             : [];
@@ -923,33 +919,27 @@ export const resolveVisualPreflight = (
       (layer): layer is Extract<Layer, { type: "group" }> =>
         layer.type === "group",
     );
+    const tree = groupTree(scene.layers);
+    // The root group places a layer in its plane and orders it among the
+    // scene's layers; every group around it adds its own motion.
     const parentGroupOf = new Map<string, Extract<Layer, { type: "group" }>>();
-    groups.forEach((group) => {
-      group.memberIds.forEach((memberId) => {
-        parentGroupOf.set(memberId, group);
-      });
-    });
-    const groupBoundsById = new Map(
-      groups.map((group) => [group.id, groupBoundsFor(scene, group)]),
-    );
+    for (const layer of scene.layers) {
+      const root = rootGroupOf(tree, layer.id);
+      if (root) parentGroupOf.set(layer.id, root);
+    }
     const quadOnScreen = (
       layerId: string,
       points: readonly Point[],
       localFrame: number,
     ): Point[] => {
       const group = parentGroupOf.get(layerId);
-      const withGroup = (() => {
-        if (!group) return points;
-        const transform = groupScreenTransformFor(
-          draft,
-          scene,
-          group,
-          localFrame,
-        );
-        const bounds = groupBoundsById.get(group.id);
-        if (!bounds) return points;
-        return transformPoints(points, transform, bounds);
-      })();
+      const withGroup = throughGroups(
+        draft,
+        scene,
+        layerId,
+        points,
+        localFrame,
+      );
       const planeOwner =
         group ?? scene.layers.find((layer) => layer.id === layerId);
       const plane = planeTransformFor(
@@ -987,11 +977,12 @@ export const resolveVisualPreflight = (
       ownOpacity: number,
       localFrame: number,
     ): number => {
-      const group = parentGroupOf.get(layerId);
-      const withGroup = group
-        ? ownOpacity *
-          groupScreenTransformFor(draft, scene, group, localFrame).opacity
-        : ownOpacity;
+      const withGroup = ancestorsOf(tree, layerId).reduce(
+        (opacity, ancestor) =>
+          opacity *
+          groupScreenTransformFor(draft, scene, ancestor, localFrame).opacity,
+        ownOpacity,
+      );
       const sceneState = sceneTransitionStateFor(draft, sceneIndex, localFrame);
       return withGroup * sceneState.opacity;
     };
@@ -1008,7 +999,11 @@ export const resolveVisualPreflight = (
             ? groups.indexOf(parent)
             : leafLayers.findIndex((item) => item.id === layer.id),
           layer.zIndex,
-          parent?.memberIds.indexOf(layer.id) ?? 0,
+          parent
+            ? leafMembersOf(tree, parent).findIndex(
+                (item) => item.id === layer.id,
+              )
+            : 0,
         ];
       };
       const above = (candidate: Layer, target: Layer) => {
@@ -1126,11 +1121,13 @@ export const resolveVisualPreflight = (
               continue;
             const cover = projected(other, localFrame, other.frame);
             if (cover.opacity < 0.5 || !overlaps(box, cover.box)) continue;
-            const parent = parentGroupOf.get(other.id);
-            const parentRotation = parent
-              ? groupScreenTransformFor(draft, scene, parent, localFrame)
-                  .rotationDeg
-              : 0;
+            const parentRotation = ancestorsOf(tree, other.id).reduce(
+              (total, ancestor) =>
+                total +
+                groupScreenTransformFor(draft, scene, ancestor, localFrame)
+                  .rotationDeg,
+              0,
+            );
             if (
               other.type === "shape" &&
               other.shape === "rectangle" &&
@@ -1144,13 +1141,17 @@ export const resolveVisualPreflight = (
               return null;
             if (insideRectangle(box, cover.box)) return undefined;
           }
-          const parent = parentGroupOf.get(layer.id);
-          const group =
-            parent && groupScreenTransformFor(draft, scene, parent, localFrame);
+          const groupRotation = ancestorsOf(tree, layer.id).reduce(
+            (total, ancestor) =>
+              total +
+              groupScreenTransformFor(draft, scene, ancestor, localFrame)
+                .rotationDeg,
+            0,
+          );
           return {
             box,
             opacity: effective.opacity,
-            pose: [state.rotationDeg, group ? group.rotationDeg : 0],
+            pose: [state.rotationDeg, groupRotation],
           };
         },
       );
