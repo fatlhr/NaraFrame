@@ -156,7 +156,7 @@
       "kind": "svg",
       "path": "porch-lamp.svg",
       "binding": "neutral",
-      "sha256": "d0e38fcfd350316241dc998db5578ba79720ae654453ad512bd232e7f796de0f",
+      "sha256": "fde6f0acbb9aa11e2929c39f633bb4b1e8008c1abbced9ca45fbc9b3ca532743",
       "origin": {
         "type": "generated",
         "source": "Original NaraFrame Story rig prop: Wall lamp, off",
@@ -1540,12 +1540,12 @@
             "/visual/layers/16/fill",
             "/visual/layers/17/fill"
           ],
-          "description": "Skin colour (default #C98B62)."
+          "description": "Skin colour, required; the rig uses #C98B62."
         },
         "hair": {
           "type": "string",
           "pointers": ["/visual/layers/23/fill"],
-          "description": "Hair colour (default #5A3A2A)."
+          "description": "Hair colour, required; the rig uses #5A3A2A."
         },
         "shirt": {
           "type": "string",
@@ -1554,7 +1554,7 @@
             "/visual/layers/25/fill",
             "/visual/layers/15/fill"
           ],
-          "description": "Shirt colour (default #BC6049)."
+          "description": "Shirt colour, required; the rig uses #BC6049."
         },
         "pants": {
           "type": "string",
@@ -1564,7 +1564,7 @@
             "/visual/layers/5/fill",
             "/visual/layers/6/fill"
           ],
-          "description": "Trouser colour (default #3F5A73)."
+          "description": "Trouser colour, required; the rig uses #3F5A73."
         }
       },
       "template": {
@@ -2360,7 +2360,7 @@
               "untilMs": 3600
             },
             "params": {
-              "scale": 1.015,
+              "scale": 1.03,
               "easingPreset": "smooth"
             }
           },
@@ -2458,12 +2458,12 @@
             "/visual/layers/17/fill",
             "/visual/layers/18/fill"
           ],
-          "description": "Skin colour (default #C98B62)."
+          "description": "Skin colour, required; the rig uses #C98B62."
         },
         "hair": {
           "type": "string",
           "pointers": ["/visual/layers/24/fill"],
-          "description": "Hair colour (default #5A3A2A)."
+          "description": "Hair colour, required; the rig uses #5A3A2A."
         },
         "shirt": {
           "type": "string",
@@ -2472,7 +2472,7 @@
             "/visual/layers/26/fill",
             "/visual/layers/16/fill"
           ],
-          "description": "Shirt colour (default #BC6049)."
+          "description": "Shirt colour, required; the rig uses #BC6049."
         },
         "pants": {
           "type": "string",
@@ -2482,7 +2482,7 @@
             "/visual/layers/6/fill",
             "/visual/layers/7/fill"
           ],
-          "description": "Trouser colour (default #3F5A73)."
+          "description": "Trouser colour, required; the rig uses #3F5A73."
         }
       },
       "template": {
@@ -3261,7 +3261,7 @@
               "untilMs": 3600
             },
             "params": {
-              "scale": 1.015,
+              "scale": 1.03,
               "easingPreset": "smooth"
             }
           },
