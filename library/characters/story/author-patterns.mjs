@@ -81,22 +81,22 @@ const colorParameters = (layers, id) => {
         "forearm-f",
         "hand-f",
       ]),
-      description: `Skin colour (default ${DEFAULT_COLORS.skin}).`,
+      description: `Skin colour, required; the rig uses ${DEFAULT_COLORS.skin}.`,
     },
     hair: {
       type: "string",
       pointers: pointers(["hair"]),
-      description: `Hair colour (default ${DEFAULT_COLORS.hair}).`,
+      description: `Hair colour, required; the rig uses ${DEFAULT_COLORS.hair}.`,
     },
     shirt: {
       type: "string",
       pointers: pointers(["torso", "upperarm-n", "upperarm-f"]),
-      description: `Shirt colour (default ${DEFAULT_COLORS.shirt}).`,
+      description: `Shirt colour, required; the rig uses ${DEFAULT_COLORS.shirt}.`,
     },
     pants: {
       type: "string",
       pointers: pointers(["thigh-n", "shin-n", "thigh-f", "shin-f"]),
-      description: `Trouser colour (default ${DEFAULT_COLORS.pants}).`,
+      description: `Trouser colour, required; the rig uses ${DEFAULT_COLORS.pants}.`,
     },
   };
 };
@@ -184,7 +184,7 @@ const phoneGlow = () => {
         startMs: 0,
         durationMs: 1200,
         repeat: { intervalMs: 1400, untilMs: 3600 },
-        params: { scale: 1.015, easingPreset: "smooth" },
+        params: { scale: 1.03, easingPreset: "smooth" },
       },
       {
         id: "screen-on",
@@ -299,7 +299,7 @@ const porchLight = () => {
         startMs: 300,
         durationMs: 1200,
         repeat: { intervalMs: 1400, untilMs: 3600 },
-        params: { scale: 1.015, easingPreset: "smooth" },
+        params: { scale: 1.03, easingPreset: "smooth" },
       },
       {
         id: "turn",
