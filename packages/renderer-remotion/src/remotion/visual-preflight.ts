@@ -451,7 +451,7 @@ const polygonsIntersect = (
  * already-transformed outline, so collision checks happen at the position
  * the layer actually renders at (see VF/M0.9.7 group-transform fix).
  */
-const transformPoints = (
+export const transformPoints = (
   points: readonly Point[],
   transform: GroupTransform,
   bounds: Rectangle,

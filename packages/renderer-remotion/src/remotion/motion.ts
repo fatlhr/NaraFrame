@@ -268,6 +268,8 @@ export const motionStateFor = (
   // from where the previous settled. A follower placed by its first beat
   // waits at the start of its path, so it never jumps onto the route.
   const target = scene.layers.find((layer) => layer.id === targetId);
+  // The layer turns and scales about its pivot until a focus beat moves it.
+  if (target?.pivot) state.anchor = { ...target.pivot };
   const pathOf = (pathId: string): PathLayer | undefined => {
     const layer = scene.layers.find((candidate) => candidate.id === pathId);
     return layer?.type === "path" ? layer : undefined;
