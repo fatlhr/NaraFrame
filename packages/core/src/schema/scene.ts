@@ -82,6 +82,11 @@ const LayerPresentationShape = {
   slot: IdSchema.optional(),
   space: z.enum(["world", "overlay"]).optional(),
   parallax: z.number().min(0).max(2).optional(),
+  /**
+   * Holds the layer's motion on 12 or 15 drawings a second, as hand-drawn
+   * animation often does, instead of moving on every output frame.
+   */
+  stepFps: z.union([z.literal(12), z.literal(15)]).optional(),
 };
 
 /**
@@ -264,6 +269,7 @@ const GroupLayerSchema = z
       .strict(),
     zIndex: z.number().int(),
     pivot: PivotSchema.optional(),
+    stepFps: z.union([z.literal(12), z.literal(15)]).optional(),
     slot: IdSchema.optional(),
     space: z.enum(["world", "overlay"]).optional(),
     parallax: z.number().min(0).max(2).optional(),
@@ -514,7 +520,21 @@ const CountBeatSchema = z
   })
   .strict();
 
+/**
+ * Changes an image layer's artwork at the beat's start frame, keeping its
+ * frame, fit, crop and pivot: one pose layer can show a sequence of poses.
+ * The change is instant; `durationMs` only keeps the beat inside its scene.
+ */
+const SwapBeatSchema = z
+  .object({
+    ...BeatBaseShape,
+    action: z.literal("swap"),
+    params: z.object({ assetId: IdSchema }).strict(),
+  })
+  .strict();
+
 export const BeatSchema = z.discriminatedUnion("action", [
+  SwapBeatSchema,
   ExitBeatSchema,
   RevealBeatSchema,
   EmphasizeBeatSchema,
@@ -856,6 +876,13 @@ export const ScenesSchema = z
           layers.some(
             (layer) => layer.type === "group" && layer.memberIds.includes(id),
           );
+        if (beat.action === "swap" && target?.type !== "image") {
+          context.addIssue({
+            code: "custom",
+            message: "A swap beat targets an image layer",
+            path: ["scenes", sceneIndex, "beats", beatIndex, "targetId"],
+          });
+        }
         if (beat.action === "draw" && target?.type !== "path") {
           context.addIssue({
             code: "custom",

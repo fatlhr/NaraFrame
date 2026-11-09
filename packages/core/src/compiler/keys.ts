@@ -97,7 +97,9 @@ export const computeSceneRenderKeys = (
   draft.scenes.map((scene, index) => {
     const previous = draft.scenes[index - 1];
     const incoming = scene.transitionIn ?? previous?.transitionOut;
-    const assets = [...referencedAssetIds([scene.visual, scene.layers])]
+    const assets = [
+      ...referencedAssetIds([scene.visual, scene.layers, scene.beats]),
+    ]
       .sort()
       .map((id) => [id, draft.assets[id] ?? null]);
     const overlap = <T extends { startFrame: number; endFrame: number }>(

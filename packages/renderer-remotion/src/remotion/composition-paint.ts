@@ -1,6 +1,7 @@
 import type { CompiledDraft, Frame, Layer } from "@naraframe/core";
 import { imagePlacement } from "@naraframe/core/image-placement";
 import { staticFile } from "remotion";
+import { assetsOf } from "./motion.js";
 
 type PaintLayer = Extract<Layer, { type: "image" | "path" }>;
 
@@ -145,7 +146,35 @@ export const loadCompositionPaint = async (
     for (const layer of scene.layers) {
       if (layer.type !== "image" && layer.type !== "path") continue;
       try {
-        bounds.set(layer.id, await paintBounds(draft, layer));
+        if (layer.type === "path") {
+          bounds.set(layer.id, await paintBounds(draft, layer));
+          continue;
+        }
+        // A layer that swaps poses paints wherever any of its poses paints.
+        const painted = await Promise.all(
+          assetsOf(scene, layer).map((assetId) =>
+            paintBounds(draft, { ...layer, assetId }),
+          ),
+        );
+        if (painted.some((box) => box === undefined)) {
+          bounds.set(layer.id, undefined);
+          continue;
+        }
+        const boxes = painted.filter((box): box is Frame => Boolean(box));
+        if (boxes.length === 0) {
+          bounds.set(layer.id, null);
+          continue;
+        }
+        const left = Math.min(...boxes.map((box) => box.x));
+        const top = Math.min(...boxes.map((box) => box.y));
+        const right = Math.max(...boxes.map((box) => box.x + box.width));
+        const bottom = Math.max(...boxes.map((box) => box.y + box.height));
+        bounds.set(layer.id, {
+          x: left,
+          y: top,
+          width: right - left,
+          height: bottom - top,
+        });
       } catch {
         bounds.set(layer.id, undefined);
       }

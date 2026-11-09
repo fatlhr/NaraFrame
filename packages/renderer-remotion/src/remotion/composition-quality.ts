@@ -7,6 +7,7 @@ import {
 } from "@naraframe/core/composition-quality";
 import { groupTree, leafMembersOf, rootGroupOf } from "@naraframe/core/groups";
 import {
+  assetAt,
   countedTextFor,
   drawProgressFor,
   planeTransformFor,
@@ -337,7 +338,7 @@ export const inspectCompositionScene = (
           ]
         : target.type === "image"
           ? [
-              assetKey(target.assetId),
+              assetKey(assetAt(scene, target, localFrame)),
               target.crop,
               target.fit,
               target.focalPoint,

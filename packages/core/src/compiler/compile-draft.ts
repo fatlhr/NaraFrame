@@ -715,6 +715,9 @@ const scaleBeat = (
   if (beat.action === "count") {
     return { ...common, action: beat.action, params: beat.params };
   }
+  if (beat.action === "swap") {
+    return { ...common, action: beat.action, params: beat.params };
+  }
 
   return { ...common, action: beat.action, params: beat.params };
 };
@@ -862,9 +865,11 @@ type MotionProperty =
   | "scale"
   | "rotationDeg"
   | "draw"
-  | "text";
+  | "text"
+  | "asset";
 
 const beatProperties = (beat: Beat): MotionProperty[] => {
+  if (beat.action === "swap") return ["asset"];
   if (beat.action === "draw") return ["draw"];
   if (beat.action === "count") return ["text"];
   if (beat.action === "follow") {
@@ -1185,14 +1190,18 @@ const validateMotionWindows = (
         beatIndex,
         startMs,
         start: msToFrameOffset(startMs, fps),
+        // A swap changes the artwork on one frame, whatever its duration.
         end:
           msToFrameOffset(startMs, fps) +
-          msToDurationFrames(beat.durationMs, fps),
+          (beat.action === "swap"
+            ? 1
+            : msToDurationFrames(beat.durationMs, fps)),
         // Actions introduced with explicit endpoint semantics are conflict
         // checked; overlaps among the original presets stay accepted so
         // existing projects keep compiling. `exit` belongs to the first group:
         // two writes to one opacity in the same window have no defined result.
         modern:
+          beat.action === "swap" ||
           beat.action === "transform" ||
           beat.action === "exit" ||
           beat.action === "draw" ||
@@ -1830,6 +1839,50 @@ export const compileDraft = (
         suggestion:
           "Reduce cornerRadius so the rendered mask matches the declared geometry.",
       });
+    });
+    // A swap shows another artwork in the same frame, fit and crop: it must
+    // be an image, and a cropped layer's poses must share its source size so
+    // the crop means the same pixels in every pose.
+    scene.beats.forEach((beat, beatIndex) => {
+      if (beat.action !== "swap") return;
+      const layer = layout.layers.find((item) => item.id === beat.targetId);
+      const asset = source.assets.assets.find(
+        (item) => item.id === beat.params.assetId,
+      );
+      if (!asset || layer?.type !== "image") return;
+      const path = `/scenes/${sceneIndex}/beats/${beatIndex}/params/assetId`;
+      if (asset.kind !== "png" && asset.kind !== "svg") {
+        issues.push(
+          compileIssue(
+            "SWAP_ASSET_INVALID",
+            path,
+            `Swap ${beat.id} shows asset ${asset.id}, which is ${asset.kind} audio, not artwork.`,
+            "error",
+            "Swap to a PNG or SVG asset.",
+          ),
+        );
+        return;
+      }
+      if (layer.crop) {
+        const own = source.imageSizes?.[layer.assetId];
+        const next = source.imageSizes?.[asset.id];
+        if (
+          !own ||
+          !next ||
+          own.width !== next.width ||
+          own.height !== next.height
+        ) {
+          issues.push(
+            compileIssue(
+              "SWAP_ASSET_INVALID",
+              path,
+              `Swap ${beat.id} shows asset ${asset.id} on cropped image ${layer.id}, but the two files are not the same pixel size, so the crop would frame a different part of each.`,
+              "error",
+              "Export every pose of a cropped layer at the same pixel size, or remove the crop.",
+            ),
+          );
+        }
+      }
     });
     varietyEntries.push({
       scene,
