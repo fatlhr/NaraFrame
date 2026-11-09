@@ -57,33 +57,33 @@ You need internet access to fetch the repository and dependencies for source set
 
 ### Install from npm
 
-The published engine is `naraframe@0.3.0` and supports Node.js 22 or newer. From a workspace folder:
+The published engine is `naraframe@0.4.0` and supports Node.js 22 or newer. From a workspace folder:
 
 ```sh
-npm install --save-exact naraframe@0.3.0
+npm install --save-exact naraframe@0.4.0
 NARAFRAME_ENGINE="$PWD/node_modules/naraframe"
 npx naraframe version --json
 npx naraframe doctor --json
 ```
 
-This installs the CLI and bundled resources locally; it does not install a browser, FFmpeg or a skill into your agent. Fix any prerequisites reported by `doctor` before rendering. For a single command, use `npx -y naraframe@0.3.0 <command>`.
+This installs the CLI and bundled resources locally; it does not install a browser, FFmpeg or a skill into your agent. Fix any prerequisites reported by `doctor` before rendering. For a single command, use `npx -y naraframe@0.4.0 <command>`.
 
 Keep `NARAFRAME_ENGINE` as an absolute path for the skill and starter commands below. The examples also show `pnpm naraframe` from a source checkout; from the npm workspace, use `npx naraframe` instead. When working elsewhere, use `node "$NARAFRAME_ENGINE/packages/cli/dist/index.js"`. Keep video projects outside the engine's installation folder.
 
 ### Install a supplied engine archive
 
-Use this route if you have `naraframe-engine-0.3.0.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 22 or newer first, and install it in a dedicated directory:
+Use this route if you have `naraframe-engine-0.4.0.tgz`. It is a local distribution artifact, not a package published on the npm registry. Activate Node 22 or newer first, and install it in a dedicated directory:
 
 ```sh
 mkdir naraframe-runtime
 cd naraframe-runtime
-npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.3.0.tgz
+npm install --offline --no-audit --no-fund /absolute/path/naraframe-engine-0.4.0.tgz
 NARAFRAME_ENGINE="$PWD/node_modules/naraframe-engine"
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" version --json
 node "$NARAFRAME_ENGINE/packages/cli/dist/index.js" doctor --json
 ```
 
-`version` reports engine version `0.3.0`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
+`version` reports engine version `0.4.0`, skill API `1`, and the installed resource root. Keep `NARAFRAME_ENGINE` as an absolute path when working on videos elsewhere. You can also invoke the local executable at `node_modules/.bin/naraframe`; it does not need a global npm installation.
 
 The archive includes a neutral silent starter, profiles, reusable library data, the complete skill, and its installer. It excludes private production projects and development fixtures. Check the companion `engine-manifest.json` checksum and the archive's `distribution-rights.json` before use. NaraFrame code uses the MIT License; runtime dependencies retain their own licensing terms.
 
@@ -178,7 +178,7 @@ Your agent needs terminal and local file access to run NaraFrame. A skill in you
 
 ### Character skills
 
-NaraFrame 0.3.0 includes the profiles and catalogs in the [style gallery](../README.md#choose-a-visual-style). Install the canonical skill first, then add the styles you want in the same workspace. Set `NARAFRAME_ENGINE` to the absolute path of your [npm install](#install-from-npm), source checkout, or [local engine archive](#install-a-supplied-engine-archive).
+NaraFrame 0.4.0 includes the profiles and catalogs in the [style gallery](../README.md#choose-a-visual-style). Install the canonical skill first, then add the styles you want in the same workspace. Set `NARAFRAME_ENGINE` to the absolute path of your [npm install](#install-from-npm), source checkout, or [local engine archive](#install-a-supplied-engine-archive).
 
 For Codex, run the installer from your video workspace:
 
