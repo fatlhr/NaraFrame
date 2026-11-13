@@ -2097,4 +2097,4 @@ The [reference study](refine-spec.md#13-visual-proof-in-motion-explainer) adds a
 - [x] Give a fresh author the public skill and CLI and a different brief. Eight illustrated battery cells moved from two rows into four pairs on `general-explainer`. Build `58b07f72ffb6-f93afaee-a92` decoded 192 frames with zero outliers. Four pair-panel spacing warnings remain in that independent draft. The opening, cells, and pair labels stayed readable in the grayscale review.
 - [x] Verify the packed engine ships both editable examples and validates them outside the checkout. `pnpm verify` passed Biome, typecheck, build, 415 unit and 620 integration tests.
 
-Visual approval is pending. Local review evidence is in the `explainer-visual-proof` folder.
+Fatih approved the visual trial in chat on 2026-11-13 for integration through [PR #106](https://github.com/fatlhr/NaraFrame/pull/106). Local review evidence is in the `explainer-visual-proof` folder.
