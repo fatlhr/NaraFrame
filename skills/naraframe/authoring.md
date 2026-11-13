@@ -29,7 +29,7 @@ For a plain brief on a new `general-explainer` project, pick a look that fits th
 
 Record the four slots as an episode-local `overrides["render.palette"]` value in the new project's `naraframe.json` before the first preview. Follow the profile's allowed paths. Check the actual foreground against its backing layer, especially labels inside shapes and any literal asset colors. Use the normal validation and preview checks before showing the result.
 
-Give the main object a way to respond to what happens. A queue can compress and shift when a slot opens. A mechanism can hinge and settle. A comparison can snap two states onto one baseline, then hold. Start with a readable subject, let the action carry the explanation, and hold once the result is clear. Use the camera when a closer view reveals something, and reuse a shape or position across a cut when it helps the viewer track the object. In a muted grayscale check, the action should still tell the story.
+Give the main object a way to respond to what happens. A queue can compress and shift when a slot opens. A mechanism can hinge and settle. A comparison can snap two states onto one baseline, then hold. Start with a readable subject, let the action carry the explanation, and hold once the result is clear. Use the camera when a closer view reveals something, and reuse a shape or position across a cut when it helps the viewer track the object. In a muted grayscale check, the action should still tell the story. When the shot explains a regrouping or a quantitative difference, use [visual proof patterns](art-direction.md#show-the-relationship-through-movement).
 
 ## The brief: write each scene's note first
 

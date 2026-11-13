@@ -2087,3 +2087,14 @@ For this 540p evidence, the windows are `--tolerate=91:185` for Explainer and `-
 All six pairs pass with the recorded windows. Exact mode rejects the 84 differing Explainer frames. The focused test rejects the one-frame bar corruption and a broad four-level tint even inside a tolerated window. A separate manual control rejects a persistent changed cut. The existing publication guard still rejects the corrupt fixture. The local `n1-frame-repeatability` evidence folder retains the render receipts, decoded frame hashes, raster matrix, capture probe and comparison outputs.
 
 N1 passed the tolerance route of its acceptance. `pnpm verify` passed Biome, typecheck, build, 415 unit tests and 619 integration tests. The renderer remains `naraframe-draft/14`.
+
+### Motion Explainer visual proof trial
+
+The [reference study](refine-spec.md#13-visual-proof-in-motion-explainer) adds an authoring route under the canonical skill. The editable examples use groups and transforms to regroup numbered tiles, then a shared baseline and equal units to explain a gap.
+
+- [x] Create an empty `general-explainer` project, copy `skills/naraframe/examples/art-direction/visual-proof.json` into its initial `scenes.json`, and run plan validation and a full draft preview. Build `4f857d8df6fe-d634e300-b95` decoded 315 frames at 540×960 with zero frame-integrity outliers. Reviewed the opening, movement, and result in color and grayscale. An early preflight exposed crossing tile labels. Separate travel lanes resolved the collisions.
+- [x] Run a guarded copy edit and undo. One scene changed, the profile lock stayed byte-identical, and undo restored revision `743749cbe2c144894c78708fdda668664557c12b1ba5b28aafd6d90accb47a15`.
+- [x] Give a fresh author the public skill and CLI and a different brief. Eight illustrated battery cells moved from two rows into four pairs on `general-explainer`. Build `58b07f72ffb6-f93afaee-a92` decoded 192 frames with zero outliers. Four pair-panel spacing warnings remain in that independent draft. The opening, cells, and pair labels stayed readable in the grayscale review.
+- [x] Verify the packed engine ships both editable examples and validates them outside the checkout. `pnpm verify` passed Biome, typecheck, build, 415 unit and 620 integration tests.
+
+Fatih approved the visual trial in chat on 2026-11-13 for integration through [PR #106](https://github.com/fatlhr/NaraFrame/pull/106). Local review evidence is in the `explainer-visual-proof` folder.
