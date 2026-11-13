@@ -307,3 +307,15 @@ No recorded reference covers skeletal rigs, Lottie or Rive. Earlier references m
 ### Expected coverage
 
 The proposed package addresses the test's pivot, skeleton, re-show and pose-swap findings in the engine. It turns breath, overshoot and gradient light into documented techniques, and proposes a loop expansion. Mesh bending, contour morphing, additional easings, video or Lottie layers, blend modes and camera drift remain out of scope. For a nearly still faceless character this should cover most of the test's problems. Fully acted characters with bending bodies still need a recipe or a later scope decision.
+
+## 13. Visual proof in Motion Explainer
+
+NaraFrame already has editable groups, transforms, reveals, paths and numeric labels. The prior `data-comparison` example displays two measures on one baseline. The new authoring examples make the change itself show the relationship.
+
+| Reference | Adaptation |
+|---|---|
+| iArt `motion-skills` at `ba94b70` points to the data-animation pack at `6570c0c` (MIT). Its chart skill separates the value scale from frame interpolation and inspects exact values and units. | Define the scale and labels before choosing animation. Use equal-sized units in the proof scene. For actual datasets, derive labels and geometry from the same values during authoring. [Motion Skills](https://github.com/iart-ai/motion-skills/tree/ba94b7067684e349204242432e8bf6c4d634a8ca) · [Chart animation skill](https://github.com/iart-ai/data-animation-skills/blob/6570c0c4fbc9daa8d7ac1f1163a890352344206b/skills/chart-animation/SKILL.md) |
+| 3Blue1Brown's Manim at `fafa083` (MIT) supports pairing parts explicitly across transformations. | Keep explicit identities for parts whose meaning survives a rearrangement. A stable NaraFrame group carries a tile and its number together. [TransformMatchingParts](https://github.com/3b1b/manim/blob/fafa083a4fb274bba9cabde0b6e2f50ba6da0622/manimlib/animation/transform_matching_parts.py) |
+| HyperFrames at `9701f4b` (Apache-2.0) builds its chart in reading order, lands the exact callout and gives it a hold. | Reveal the shared span, move only the extra units, and hold the difference with both original values readable. Verify the settled state in the existing NaraFrame preview. [Chart story](https://github.com/heygen-com/hyperframes/blob/9701f4bbf3d1ef41753dcf5613fead937e1edf2c/registry/components/chart-story/README.md) |
+
+The scenes and guidance are original NaraFrame source. Motion Explainer is the entry point in the canonical skill. The renderer uses ordinary declarative layers and beats.

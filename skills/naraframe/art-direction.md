@@ -11,6 +11,17 @@ Keep a plain new brief on `general-explainer`. Choose the pattern by what the vi
 
 Use `version --json` to locate the engine resource root and `library inspect` on `library/explainers/catalog.json` to find these patterns in a matching engine. Import the matching subject using [library.md](library.md#inspect-stage-revise). For another subject, adapt the sequence with original geometry and verify the opening three seconds and the payoff in the actual preview.
 
+## Show the relationship through movement
+
+Use this approach when an arrangement or comparison is the point of a Motion Explainer shot.
+
+- **Regroup the same objects.** Give each meaningful object a stable layer ID. Move its existing layer, or group its shape and label so they travel together. Start with the original arrangement already visible. Keep the viewer oriented with a mark or shape as the objects move. Introduce or remove layers only when the set actually changes.
+- **Make the difference visible.** For comparable quantities, align them to a shared baseline and use the same units and scale. Put the exact values next to what they measure. Use movement to isolate the difference or change. Hold the finished comparison with the values and units readable. For real data, verify the source and calculate positions, lengths and labels from the same values before authoring the beats.
+
+The [editable visual proof scenes](examples/art-direction/visual-proof.json) show twelve numbered tiles becoming three rows of four, and two rows of equal units with three extra units set apart. Both use illustrative quantities. Use the episode's chosen palette when adapting them. Try them in a new empty project created with `--profile general-explainer`. Copy the file into its initial `scenes.json`, then run `validate PROJECT --stage plan --json` and `preview PROJECT --draft --scene regroup-tiles --json` or select `compare-the-gap`. See [the example workflow below](#runnable-editable-pattern-set) for the guarded edit path after the first preview.
+
+At phone size, check the opening, the moment the relationship becomes visible, and the settled result with sound muted. For regrouping, follow one numbered tile from start to finish. For a comparison, confirm the scale and the label at the end, then inspect the frame at the cut if the next shot carries the result forward.
+
 ## Runnable, editable pattern set
 
 [examples/art-direction/scenes.json](examples/art-direction/scenes.json) is source-v1 declarative source, not a recipe, engine module or live catalog import. It contains six independent 10-second scenes. Dependencies: a project created by the public CLI with pinned `current-issues` 0.3.0, its resolved typography/palette, and the current public capability registry. No media, provider, network, trust or arbitrary code is needed. Other profiles need a new fit/contrast review; these are editable structures, not approved artwork.

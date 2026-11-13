@@ -215,6 +215,18 @@ describe("offline engine distribution", () => {
     });
   });
 
+  it("validates the editable visual proof scenes shipped with the skill", async () => {
+    const project = join(scratch, "visual proof");
+    expect(
+      invoke("create", project, "--profile", "general-explainer").success,
+    ).toBe(true);
+    await cp(
+      join(engine, "skills/naraframe/examples/art-direction/visual-proof.json"),
+      join(project, "scenes.json"),
+    );
+    expect(invoke("validate", project, "--stage", "plan").success).toBe(true);
+  });
+
   it("resolves the original mechanics profile for installed 0.2.0 skills", () => {
     expect(invoke("profile", "inspect", "meja-mekanik").data.profile.id).toBe(
       "meja-mekanik",
