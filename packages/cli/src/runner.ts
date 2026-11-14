@@ -1,5 +1,6 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type Approval,
@@ -50,7 +51,10 @@ import {
   withProjectLock,
   writePreviewSelection,
 } from "@naraframe/core";
-import { isVisualPreflightError } from "@naraframe/renderer-remotion";
+import {
+  inspectDraftFrames,
+  isVisualPreflightError,
+} from "@naraframe/renderer-remotion";
 import { cleanCache } from "./cache-clean.js";
 import {
   type CommandEventInput,
@@ -75,6 +79,7 @@ import {
   publishPreviewBuild,
   publishReusedPreviewBuild,
   selectCheckedFrames,
+  throwIfAborted,
 } from "./preview-build.js";
 import { readCurrentPreviewStatus } from "./preview-status.js";
 
@@ -111,6 +116,7 @@ Usage:
   naraframe validate [project] --stage plan|production [--scene <scene-id>] [--json]
   naraframe status [project] [--json]
   naraframe outline [project] [--scene <scene-id>] [--json]
+  naraframe inspect [project] --frames <frame[,frame...]> [--json]
   naraframe preview [project] [--draft] [--rerender] [--scene <scene-id>] [--resolution 540|1080] [--json]
   naraframe recipe trust [project] --recipe <id> --authorized-by <name> [--note <text>] [--json]
   naraframe edit <project> --expect <revision> [--from <staging-dir>] [--remove narration.json|captions.json]... [--summary <text>] [--json]
@@ -719,6 +725,119 @@ const outlineCommand = async (args: readonly string[]): Promise<Execution> => {
         : []),
     ],
   };
+};
+
+const inspectCommand = async (
+  args: readonly string[],
+  { signal }: RunCliOptions,
+): Promise<Execution> => {
+  const parsed = parseArguments(args, [], ["--frames"]);
+  const entries = parsed.values.get("--frames")?.split(",") ?? [];
+  const frames = entries.map(Number);
+  if (
+    parsed.error ||
+    parsed.positionals.length > 1 ||
+    entries.length < 1 ||
+    entries.length > 12 ||
+    entries.some((entry) => !/^\d+$/.test(entry)) ||
+    frames.some((frame) => !Number.isSafeInteger(frame)) ||
+    new Set(frames).size !== frames.length
+  ) {
+    return usageFailure(
+      "inspect",
+      parsed.error ??
+        "inspect accepts at most one project and requires --frames with 1–12 distinct zero-based frame indices separated by commas.",
+    );
+  }
+  throwIfAborted(signal);
+  const reject = (
+    issues: Issue[],
+    readiness: "invalid" | "not-ready" = "invalid",
+  ): Execution => ({
+    exitCode: 1,
+    event: commonEvent("inspect", {
+      status: "failed",
+      success: false,
+      readiness,
+      issues,
+    }),
+  });
+  const loaded = await loadPlanProject(parsed.positionals[0] ?? ".");
+  if (!loaded.ok) return reject(loaded.issues);
+  const audioConflicts = checkAudioModeConflicts(
+    loaded.value.source,
+    resolveAudioMode(loaded.value.source),
+  );
+  if (audioConflicts.length > 0) {
+    return reject([...loaded.issues, ...audioConflicts]);
+  }
+  const compiled = compileDraft(
+    loaded.value.source,
+    { type: "project" },
+    { resolution: 540, qualityStage: "preview" },
+  );
+  const issues = dedupeIssues([
+    ...loaded.issues,
+    ...compiled.issues.filter((issue) => !isPendingBrowserQuality(issue)),
+  ]);
+  if (!compiled.ok) return reject(issues);
+  const draft = compiled.value;
+  const outside = frames.filter((frame) => frame >= draft.totalFrames);
+  if (outside.length > 0) {
+    return usageFailure(
+      "inspect",
+      `Frame ${outside.join(", ")} outside the project range 0–${draft.totalFrames - 1}.`,
+    );
+  }
+  const untrustedRecipes = checkRecipeTrust(
+    draft,
+    await readRecipeTrust(loaded.value.root),
+  );
+  if (untrustedRecipes.length > 0) {
+    return reject([...issues, ...untrustedRecipes], "not-ready");
+  }
+  throwIfAborted(signal);
+  // Stills are temporary QA outputs. Keep them out of the project and its
+  // public media bundle, preview selection, revision history, and approvals.
+  const directory = await mkdtemp(join(tmpdir(), "naraframe-inspect-"));
+  const removeOutput = () => rm(directory, { recursive: true, force: true });
+  console.error(`Inspecting ${frames.length} frame(s) at 540p...`);
+  try {
+    const preflight = await inspectDraftFrames({
+      draft,
+      projectRoot: loaded.value.root,
+      frames,
+      outputDirectory: directory,
+      ...(signal ? { signal } : {}),
+    });
+    throwIfAborted(signal);
+    const samples = frames.map((frame) => ({
+      frame,
+      sceneId:
+        draft.scenes.find(
+          (scene) => frame >= scene.startFrame && frame < scene.endFrame,
+        )?.id ?? null,
+      path: join(directory, `frame-${frame}.png`),
+    }));
+    return {
+      exitCode: 0,
+      event: commonEvent("inspect", {
+        readiness: "draft-only",
+        sourceRevision: draft.sourceRevision,
+        scope: draft.scope,
+        artifacts: { inspectionDirectory: directory },
+        issues: dedupeIssues([...issues, ...preflight.issues]),
+        data: { fps: draft.fps, frames: samples },
+      }),
+      human: samples.map(
+        ({ frame, sceneId, path }) =>
+          `Frame ${frame} (${sceneId ?? "no scene"}): ${path}`,
+      ),
+    };
+  } catch (error) {
+    await removeOutput();
+    throw error;
+  }
 };
 
 const previewCommand = async (
@@ -2003,6 +2122,7 @@ const knownCommand = (value: string | undefined): CommandName =>
   value === "validate" ||
   value === "status" ||
   value === "outline" ||
+  value === "inspect" ||
   value === "preview" ||
   value === "edit" ||
   value === "undo" ||
@@ -2028,6 +2148,7 @@ const executeCommand = async (
   if (command === "validate") return validateCommand(args);
   if (command === "status") return statusCommand(args);
   if (command === "outline") return outlineCommand(args);
+  if (command === "inspect") return inspectCommand(args, options);
   if (command === "preview") return previewCommand(args, options);
   if (command === "edit") return editCommand(args);
   if (command === "undo") return undoCommand(args);

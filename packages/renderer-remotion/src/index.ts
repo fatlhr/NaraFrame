@@ -9,6 +9,7 @@ export type {
   RenderedDraft,
 } from "./render-draft.js";
 export {
+  inspectDraftFrames,
   isVisualPreflightError,
   RENDER_CONCURRENCY,
   renderDraft,
