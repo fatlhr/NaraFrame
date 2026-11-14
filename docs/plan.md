@@ -1797,6 +1797,8 @@ Fatih authorized V0 and U0 as one documentation package. The [style map and prod
 
 **Documentation acceptance (2026-11-07).** The style and task maps match across the three documents. The scoped diff check passed and 22 local links and 15 external references resolved. The prior closure record is preserved. The README chooser is a draft in this plan. V1–V7 and U1–U2 retain the status and approval boundaries below.
 
+- [x] **U0 OpenFilm follow-up.** Review the pinned source and update the Studio storyboard and the V7 frame inspection proposal. The scoped diff check passed, with eight local links and anchors and five pinned OpenFilm files verified. [Research and adaptation decisions](refine-spec.md#openfilm-follow-up)
+
 ### Visual Library roadmap
 
 | Task | Priority / status | Dependencies and work | Acceptance |
@@ -1807,7 +1809,7 @@ Fatih authorized V0 and U0 as one documentation package. The [style map and prod
 | V4 Motion Explainer patterns | P1 / verified in a local engine package | Add a cause-and-effect diagram and an Editorial Collage assembly pattern to `general-explainer`. Choose the pattern by shot intent. | Both default-profile briefs and the installed route passed [V4 acceptance](#v4-motion-explainer-acceptance). |
 | V5 Distribution and README | P1 / per-style release gate | Apply to each approved style before listing it publicly. Extend the existing installer and engine package with the relevant profile, versioned catalog, and thin explicit wrapper where specified. Motion Explainer uses the canonical skill. | From a clean workspace and the documented artifact, use the Codex slash picker and explicit skill entry, then reach a preview. Confirm the plain-brief default, preserved profile pin on revision, and ordinary installer conflict handling. Include the demonstrated command, example, and install route in README. |
 | V6 Benchmarks on the new styles | P2 / complete, measured | After the Bedah and Comic fixtures exist and the benchmark is approved. Record cold, warm after one guarded edit, and compatible reuse for a dense project of each style. Time load, bundle, preflight, capture/encode, and verification separately. | Compare three matched pairs for at most one measured candidate. Promote only when the median wall time improves at least 5%, two pairs improve, and frame integrity, seams, audio, and approval all pass. Record the measured outcome if the candidate misses the threshold. |
-| V7 Engine changes backed by evidence | P3 / conditional | Open each subtask separately. Shared cues require repeatable retiming drift. Segment reuse requires a measured one-shot edit cost in a long project. | Reproducer, separate scope approval, and compatible behavior for existing projects. Segment identity covers effective boundaries, captions, audio, dependencies, and approval before reuse is attempted. |
+| V7 Engine changes backed by evidence | Conditional, priority per subtask | Open each subtask separately. [Frame inspection](#v7-frame-inspection-experiment) needs a measured QA speedup. Shared cues require repeatable retiming drift. Segment reuse requires a measured one-shot edit cost in a long project. | Reproducer, separate scope approval, and compatible behavior for existing projects. Segment identity covers effective boundaries, captions, audio, dependencies, and approval before reuse is attempted. |
 
 V1–V4 target zero new runtime packages. For each accepted feature, retain the first source and run `validate PROJECT --stage plan --json`, `preview PROJECT --draft --scene ID --json`, and `preview PROJECT --resolution 1080 --json`. Review the opening, contact, settled state, payoff, and seam. Run one guarded edit and undo. Where prepared voice is present, verify the master hash and listen at the contact and payoff. Add focused coverage after the manual path, then run `pnpm verify`. Apply V5 in the style's delivery package. Complete the earlier approved package before starting the next one.
 
@@ -1889,12 +1891,26 @@ When a planned style passes V5, add one row with its exact name and command. Sho
 
 ### Optional Studio roadmap
 
+The [OpenFilm follow-up](refine-spec.md#openfilm-follow-up) extends U0 research. V7 frame inspection, U1, and U2 each require separate scope approval. The Studio review path uses current CLI artifacts and can ship independently of the V7 experiment.
+
 | Task | Priority / status | Dependencies and work | Acceptance |
 |---|---|---|---|
-| U1 Local browser Studio | P2 / proposed | After U0 and separate approval. Package a separate HTML/CSS/JS and Node add-on. Proposed invocation is `naraframe-studio --engine <engine-root> --workspace <folder>`. Check `version` and `doctor`, show installed profiles, open/create projects, list authored scenes, import versioned patterns, edit visible text through staging and `edit --expect`, and support undo. | A project moves between Studio and CLI with the same profile and revision history. A concurrent CLI edit causes a visible revision conflict and reload. Requests outside the workspace, symlinks that escape it, and cross-origin mutations are rejected. |
-| U2 Preview, cancel, and export | P2 / proposed | After U1 and separate approval. Play the engine MP4. Report one active render job per session and forward cancel with `SIGINT`. Submit the user-selected full preview ID through `render --approve-preview`. | Scoped previews play, cancellation keeps the last valid build, stale previews require a new review, and export succeeds from a matching full preview. |
+| U1 Local browser Studio | P1 / proposed | After U0 and separate approval. Package a separate HTML/CSS/JS and Node add-on. Proposed invocation is `naraframe-studio --engine <engine-root> --workspace <folder>`. Check `version` and `doctor`, show installed profiles, open/create projects, and import versioned patterns. Build storyboard cards from `outline --json` in authored order. Show thumbnails when the build covers the scene, plus shot notes and selected layer text. Copy shot reference copies the scene ID and source revision. Save text through staging and `edit --expect`; support `undo`. | Edit one layer's text from Studio, read the same revision and profile from CLI, then undo. An intervening CLI edit makes Studio report the revision conflict and request a reload. Verify the copied shot reference. Reject requests outside the workspace, symlinks that escape it, and cross-origin mutations. |
+| U2 Preview, cancel, and export | P2 / proposed | After U1 and separate approval. Play the official engine MP4. Show the build's revision and scope. Make `frames.json` checkpoints seek to `frame / fps` using the build FPS and use `sourceFrame` for the project position. Report one active render job per session and forward cancel with `SIGINT`. Submit the user-selected full preview ID through `render --approve-preview`. | Seek to the boot contact and both sides of each cut in a full *The Spare Boot* preview. Check the playback offset on a scoped preview of `boot-stops-door`. Cancellation keeps the last valid build. A stale MP4 can be identified and requires a new review before export. A matching full preview exports. |
 
 The add-on binds to `127.0.0.1`, uses a local session, and permits a fixed set of CLI operations with structured arguments. File access is limited to the selected workspace and engine-reported project artifacts. The engine owns trust, revision, and approval checks. Timeline drag-and-drop, provider generation, and desktop installation remain separate proposals. [CLI mapping from U0](refine-spec.md#studio-research-and-cli-mapping) · [Approval workflow](guide.md#export-after-the-owner-approves-the-full-preview)
+
+### V7 frame inspection experiment
+
+**P1 / proposed.** After the OpenFilm U0 follow-up and separate scope approval, use the existing Remotion `renderStill` and compiled timeline with zero new runtime dependencies. Capture serially at draft 540p. Accept 1–12 zero-based project frame indices and return each PNG path, frame, scene ID, FPS, and source revision in JSON. Keep the outputs as QA artifacts outside preview selection, approval, and export.
+
+```sh
+naraframe inspect PROJECT --frames 101,102,114,117,121,188,189 --json
+```
+
+- [ ] Use the editable *The Spare Boot* pilot at 30 fps. Review both sides of the cuts at 101/102 and 188/189, plus the approach, contact and reaction at 114/117/121. Record the project revision with the samples.
+- [ ] Warm the bundle. Run three serial pairs on the same revision and machine, comparing inspection with `naraframe preview PROJECT --draft --resolution 540 --rerender --json`. Promote the experiment only if the median inspection wall time is at least 30% lower.
+- [ ] Exercise out-of-range input and cancellation. Capture the PNGs in two different orders and compare the same frames by index. Verify that inspection leaves the current preview pointer and approval state intact. Use a full preview for timing, audio, and approval evidence. Add focused coverage after the manual path and run `pnpm verify`.
 
 ## 9. NaraFrame 0.4.0 — character story motion
 
