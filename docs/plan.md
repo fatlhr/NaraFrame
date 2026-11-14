@@ -1902,15 +1902,17 @@ The add-on binds to `127.0.0.1`, uses a local session, and permits a fixed set o
 
 ### V7 frame inspection experiment
 
-**P1 / proposed.** After the OpenFilm U0 follow-up and separate scope approval, use the existing Remotion `renderStill` and compiled timeline with zero new runtime dependencies. Capture serially at draft 540p. Accept 1–12 zero-based project frame indices and return each PNG path, frame, scene ID, FPS, and source revision in JSON. Keep the outputs as QA artifacts outside preview selection, approval, and export.
+**P1 / accepted on the source build.** Use the existing Remotion `renderStill` and compiled timeline with zero new runtime dependencies. Capture serially at draft 540p. Accept 1–12 distinct zero-based project frame indices and return each temporary PNG path, frame and scene ID, together with FPS and source revision in JSON. Keep the outputs as QA artifacts outside preview selection, approval, and export.
 
 ```sh
 naraframe inspect PROJECT --frames 101,102,114,117,121,188,189 --json
 ```
 
-- [ ] Use the editable *The Spare Boot* pilot at 30 fps. Review both sides of the cuts at 101/102 and 188/189, plus the approach, contact and reaction at 114/117/121. Record the project revision with the samples.
-- [ ] Warm the bundle. Run three serial pairs on the same revision and machine, comparing inspection with `naraframe preview PROJECT --draft --resolution 540 --rerender --json`. Promote the experiment only if the median inspection wall time is at least 30% lower.
-- [ ] Exercise out-of-range input and cancellation. Capture the PNGs in two different orders and compare the same frames by index. Verify that inspection leaves the current preview pointer and approval state intact. Use a full preview for timing, audio, and approval evidence. Add focused coverage after the manual path and run `pnpm verify`.
+- [x] Reviewed both cuts at 101/102 and 188/189 and the door and boot at 114/117/121 on the 30 fps *The Spare Boot* source revision `e2b3214ea28d6afa0fc5de507a37be20aab61ac2f80d94b36700e1f67b6c25e5`.
+- [x] Compared three warm serial pairs on the same source and host against `naraframe preview PROJECT --draft --resolution 540 --rerender --json`. Inspection/full preview wall times were 4.719/25.097 s, 3.918/28.299 s, and 6.300/26.591 s. The median fell from 26.591 s to 4.719 s, an 82.25% reduction against the 30% target. The first third-pair preview stalled before progress and was interrupted. The timings include the successful retry. All three completed 330-frame MP4s passed frame integrity.
+- [x] Frame 330 was rejected with `CLI_USAGE`. SIGINT after the first PNG returned 130 and removed the partial PNGs and inspection bundle. Current preview, revision selection, and a seeded approval receipt stayed byte-identical. Six of seven reordered PNGs matched exactly. Frame 102 differed by one RGB level at three pixels, with no visible change at review size. Full MP4 comparisons also varied between runs with an identical source revision and assembly key, including on the V7 build. Use full previews for timing, audio, and approvals.
+
+The [frame strip](/Users/fatih/.codex/visualizations/2026/11/05/01a1ac90-1f4e-7611-8999-fc5db593b215/v7-inspection/review.png) and [timings](/Users/fatih/.codex/visualizations/2026/11/05/01a1ac90-1f4e-7611-8999-fc5db593b215/v7-inspection/timings.json) retain the manual review. CLI coverage exercises order, frame bounds, cancellation, preview and approval isolation, and recipe trust. `pnpm verify` passed with 415 unit and 625 integration tests using a prebuilt local archive after the initial package hook timed out. The native-resolution E2E passed preview at 540p and 1080p and export from the reviewed build. A clean offline install of the same archive captured three PNGs. These checks cover the source build and local archive. npm publication is a separate release step.
 
 ## 9. NaraFrame 0.4.0 — character story motion
 

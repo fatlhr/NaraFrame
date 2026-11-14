@@ -14,6 +14,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type CliProcessHost, runCli, runCliProcess } from "@naraframe/cli";
 import { compileDraft, loadPlanProject } from "@naraframe/core";
+import * as renderer from "@naraframe/renderer-remotion";
 import { RenderFailure } from "@naraframe/renderer-remotion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -486,6 +487,134 @@ describe("public CLI command contract", () => {
       readiness: "draft-only",
       mode: "draft",
     });
+  });
+
+  it("inspects project frames in the requested order without changing preview or approval", async () => {
+    const project = await copyPublishedSample();
+    const current = join(project, "preview", "current.json");
+    const before = await readFile(current, "utf8");
+    const { buildId } = JSON.parse(before);
+    const manifest = JSON.parse(
+      await readFile(
+        join(project, "preview", "builds", buildId, "manifest.json"),
+        "utf8",
+      ),
+    );
+    const approvals = join(project, "revisions", "approvals");
+    const approval = join(approvals, `${manifest.sourceRevision}.json`);
+    await mkdir(approvals, { recursive: true });
+    await writeFile(
+      approval,
+      JSON.stringify({
+        schemaVersion: 1,
+        approvals: [
+          {
+            sourceRevision: manifest.sourceRevision,
+            assemblyKey: manifest.assemblyKey,
+            scope: { type: "project" },
+            previewBuildId: buildId,
+            autonomy: null,
+            approvedAt: "2026-11-14T00:00:00.000Z",
+          },
+        ],
+      }),
+    );
+    const approved = await readFile(approval, "utf8");
+    const capture = vi
+      .spyOn(renderer, "inspectDraftFrames")
+      .mockImplementation(async ({ draft, frames, outputDirectory }) => {
+        temporaryRoots.push(outputDirectory);
+        expect(draft.width).toBe(540);
+        expect(draft.scope).toEqual({ type: "project" });
+        await Promise.all(
+          frames.map((frame) =>
+            writeFile(join(outputDirectory, `frame-${frame}.png`), "fixture"),
+          ),
+        );
+        return { issues: [], frames: [] };
+      });
+    const result = await captureJsonResult([
+      "inspect",
+      project,
+      "--frames",
+      "2,0,1",
+      "--json",
+    ]);
+    expect(result.exitCode).toBe(0);
+    expect(capture).toHaveBeenCalledWith(
+      expect.objectContaining({ frames: [2, 0, 1] }),
+    );
+    expect(result.events).toEqual([
+      expect.objectContaining({
+        command: "inspect",
+        sourceRevision: manifest.sourceRevision,
+        buildId: null,
+        artifacts: { inspectionDirectory: expect.any(String) },
+        data: {
+          fps: 30,
+          frames: [2, 0, 1].map((frame) => ({
+            frame,
+            sceneId: expect.any(String),
+            path: expect.stringMatching(new RegExp(`frame-${frame}\\.png$`)),
+          })),
+        },
+      }),
+    ]);
+    expect(await readFile(current, "utf8")).toBe(before);
+    expect(await readFile(approval, "utf8")).toBe(approved);
+  });
+
+  it.each(["0,0", "0,,1", "999999"])(
+    "rejects invalid inspection frame list %s before rendering",
+    async (frames) => {
+      const capture = vi.spyOn(renderer, "inspectDraftFrames");
+      const result = await captureJsonResult([
+        "inspect",
+        sampleRoot,
+        "--frames",
+        frames,
+        "--json",
+      ]);
+      expect(result.exitCode).toBe(3);
+      expect(capture).not.toHaveBeenCalled();
+      expect(result.events).toEqual([
+        expect.objectContaining({
+          command: "inspect",
+          issues: [expect.objectContaining({ code: "CLI_USAGE" })],
+        }),
+      ]);
+    },
+  );
+
+  it("removes partial inspection images on cancellation", async () => {
+    const controller = new AbortController();
+    let directory: string | undefined;
+    vi.spyOn(renderer, "inspectDraftFrames").mockImplementation(
+      async ({ outputDirectory }) => {
+        directory = outputDirectory;
+        temporaryRoots.push(directory);
+        await writeFile(join(directory, "frame-0.png"), "partial");
+        controller.abort();
+        return { issues: [], frames: [] };
+      },
+    );
+    const result = await captureJsonResult(
+      ["inspect", sampleRoot, "--frames", "0", "--json"],
+      { signal: controller.signal },
+    );
+    expect(result.exitCode).toBe(130);
+    expect(result.events).toEqual([
+      expect.objectContaining({
+        command: "inspect",
+        status: "interrupted",
+        artifacts: {},
+        issues: [expect.objectContaining({ code: "COMMAND_INTERRUPTED" })],
+      }),
+    ]);
+    expect(directory).toBeDefined();
+    await expect(
+      readFile(join(directory as string, "frame-0.png")),
+    ).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("uses stable result events for usage, source, and cancellation failures", async () => {

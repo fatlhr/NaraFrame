@@ -46,7 +46,7 @@ const errors = (event: { issues: Array<{ code: string; severity: string }> }) =>
     .map((issue) => issue.code);
 
 describe("recipe trust", () => {
-  it("refuses every preview and production check of untrusted code before rendering", async () => {
+  it("refuses inspection, preview, and production checks of untrusted code before rendering", async () => {
     const root = await project();
     for (const args of [["--draft"], [], ["--draft", "--resolution", "1080"]]) {
       const { exitCode, event } = await run("preview", root, ...args);
@@ -54,6 +54,9 @@ describe("recipe trust", () => {
       expect(event.buildId).toBeNull();
       expect(errors(event)).toEqual(["RECIPE_NOT_TRUSTED"]);
     }
+    const inspected = await run("inspect", root, "--frames", "0");
+    expect(inspected.exitCode).toBe(1);
+    expect(errors(inspected.event)).toEqual(["RECIPE_NOT_TRUSTED"]);
     expect(existsSync(join(root, "preview", "builds"))).toBe(false);
     const validated = await run("validate", root, "--stage", "production");
     expect(errors(validated.event)).toEqual(["RECIPE_NOT_TRUSTED"]);

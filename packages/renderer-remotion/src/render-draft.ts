@@ -26,6 +26,7 @@ import {
   makeCancelSignal,
   openBrowser,
   renderMedia,
+  renderStill,
   selectComposition,
 } from "@remotion/renderer";
 import { VERSION as remotionVersion } from "remotion";
@@ -266,31 +267,11 @@ const preflightFromComposition = (composition: {
   return { draft, report };
 };
 
-export const renderDraft = async ({
-  draft,
-  projectRoot,
-  outputPath = resolve(
-    projectRoot,
-    "preview",
-    draft.scope.type === "scene"
-      ? `dev-preview-${draft.scope.sceneId}.mp4`
-      : "dev-preview.mp4",
-  ),
-  browserExecutable: requestedBrowser,
-  onProgress,
-  signal,
-}: RenderDraftRequest): Promise<RenderedDraft> => {
-  const interrupted = (): Error => {
-    const error = new Error("Draft rendering was interrupted.");
-    error.name = "AbortError";
-    return error;
-  };
-  if (signal?.aborted) {
-    throw interrupted();
-  }
-  const browserExecutable = await resolveBrowserExecutable(requestedBrowser);
-  await mkdir(dirname(outputPath), { recursive: true });
-
+const bundleDraft = async (
+  draft: CompiledDraft,
+  projectRoot: string,
+  onDirectoryCreated?: (directory: string) => void,
+): Promise<string> => {
   const baseEntry = await resolveEntryPoint();
   const packageRoot = fileURLToPath(new URL("../", import.meta.url));
   const recipeEntry = await prepareRecipeEntry(draft, projectRoot, baseEntry);
@@ -301,9 +282,8 @@ export const renderDraft = async ({
       dirname(require.resolve(`${name}/package.json`)),
     ]),
   );
-  let serveUrl: string;
   try {
-    serveUrl = await duringRenderStage("bundle", () =>
+    return await duringRenderStage("bundle", () =>
       bundle({
         entryPoint: recipeEntry?.entry ?? baseEntry,
         // The wrapper registers recipes, then imports the entry that calls
@@ -311,6 +291,7 @@ export const renderDraft = async ({
         ...(recipeEntry ? { ignoreRegisterRootWarning: true } : {}),
         publicDir: resolve(projectRoot),
         rootDir: packageRoot,
+        ...(onDirectoryCreated ? { onDirectoryCreated } : {}),
         webpackOverride: (configuration) => ({
           ...configuration,
           resolve: {
@@ -339,6 +320,169 @@ export const renderDraft = async ({
       await rm(recipeEntry.directory, { recursive: true, force: true });
     }
   }
+};
+
+const selectDraftComposition = (
+  draft: CompiledDraft,
+  serveUrl: string,
+  browserExecutable: string,
+  browser: Awaited<ReturnType<typeof openBrowser>>,
+) =>
+  duringRenderStage("preflight", () =>
+    selectComposition({
+      serveUrl,
+      id: "NaraFrameDraft",
+      inputProps: draft,
+      puppeteerInstance: browser,
+      browserExecutable,
+      logLevel: "warn",
+    }),
+  );
+
+const requireDraftPreflight = async (
+  composition: Awaited<ReturnType<typeof selectDraftComposition>>,
+) => {
+  const preflight = await duringRenderStage("preflight", async () =>
+    preflightFromComposition(composition),
+  );
+  const blockingIssues = preflight.report.issues.filter(
+    (issue) => issue.severity === "error",
+  );
+  if (blockingIssues.length > 0) {
+    throw new VisualPreflightError(blockingIssues);
+  }
+  return preflight;
+};
+
+const interrupted = (): Error => {
+  const error = new Error("Draft rendering was interrupted.");
+  error.name = "AbortError";
+  return error;
+};
+
+const rethrowCaptureFailure = (error: unknown, signal?: AbortSignal): never => {
+  if (signal?.aborted) throw interrupted();
+  const families = fontFailureFrom(error);
+  if (families) {
+    throw new VisualPreflightError([
+      {
+        code: "FONT_NOT_LOADED",
+        severity: "error",
+        responsible: "user",
+        artifact: "profile.lock.json",
+        path: "/assets",
+        message: `The render context could not use the bundled font(s): ${families}.`,
+        suggestion:
+          "Check that each declared font asset is a valid font file whose hash matches, then preview again.",
+      },
+    ]);
+  }
+  if (error instanceof Error && error.name === "AbortError") throw error;
+  throw new RenderFailure("render", error);
+};
+
+export const inspectDraftFrames = async ({
+  draft,
+  projectRoot,
+  frames,
+  outputDirectory,
+  signal,
+}: {
+  draft: CompiledDraft;
+  projectRoot: string;
+  frames: readonly number[];
+  outputDirectory: string;
+  signal?: AbortSignal;
+}): Promise<VisualPreflightReport> => {
+  if (signal?.aborted) throw interrupted();
+  const browserExecutable = await resolveBrowserExecutable();
+  let bundleDirectory: string | undefined;
+  try {
+    const serveUrl = await bundleDraft(draft, projectRoot, (directory) => {
+      bundleDirectory = directory;
+    });
+    if (signal?.aborted) throw interrupted();
+    const browser = await duringRenderStage("browser-launch", () =>
+      openBrowser("chrome", {
+        browserExecutable,
+        forceDeviceScaleFactor: 1,
+        logLevel: "warn",
+      }),
+    );
+    try {
+      if (signal?.aborted) throw interrupted();
+      const composition = await selectDraftComposition(
+        draft,
+        serveUrl,
+        browserExecutable,
+        browser,
+      );
+      const preflight = await requireDraftPreflight(composition);
+      try {
+        for (const frame of frames) {
+          if (signal?.aborted) throw interrupted();
+          const cancellation = makeCancelSignal();
+          signal?.addEventListener("abort", cancellation.cancel, {
+            once: true,
+          });
+          try {
+            const { buffer } = await renderStill({
+              serveUrl,
+              composition,
+              frame,
+              inputProps: preflight.draft,
+              imageFormat: "png",
+              puppeteerInstance: browser,
+              browserExecutable,
+              cancelSignal: cancellation.cancelSignal,
+              logLevel: "warn",
+            });
+            if (signal?.aborted) throw interrupted();
+            if (!buffer) throw new Error("The renderer returned no PNG.");
+            await writeFile(
+              join(outputDirectory, `frame-${frame}.png`),
+              buffer,
+            );
+          } finally {
+            signal?.removeEventListener("abort", cancellation.cancel);
+          }
+        }
+        if (signal?.aborted) throw interrupted();
+        return preflight.report;
+      } catch (error) {
+        return rethrowCaptureFailure(error, signal);
+      }
+    } finally {
+      await releaseBrowser(browser);
+    }
+  } finally {
+    if (bundleDirectory) {
+      await rm(bundleDirectory, { recursive: true, force: true });
+    }
+  }
+};
+
+export const renderDraft = async ({
+  draft,
+  projectRoot,
+  outputPath = resolve(
+    projectRoot,
+    "preview",
+    draft.scope.type === "scene"
+      ? `dev-preview-${draft.scope.sceneId}.mp4`
+      : "dev-preview.mp4",
+  ),
+  browserExecutable: requestedBrowser,
+  onProgress,
+  signal,
+}: RenderDraftRequest): Promise<RenderedDraft> => {
+  if (signal?.aborted) {
+    throw interrupted();
+  }
+  const browserExecutable = await resolveBrowserExecutable(requestedBrowser);
+  await mkdir(dirname(outputPath), { recursive: true });
+
+  const serveUrl = await bundleDraft(draft, projectRoot);
   if (signal?.aborted) {
     throw interrupted();
   }
@@ -350,30 +494,13 @@ export const renderDraft = async ({
       logLevel: "warn",
     }),
   );
-  let composition: Awaited<ReturnType<typeof selectComposition>>;
-  try {
-    composition = await duringRenderStage("preflight", () =>
-      selectComposition({
-        serveUrl,
-        id: "NaraFrameDraft",
-        inputProps: draft,
-        puppeteerInstance: selectBrowser,
-        browserExecutable,
-        logLevel: "warn",
-      }),
-    );
-  } finally {
-    await releaseBrowser(selectBrowser);
-  }
-  const preflight = await duringRenderStage("preflight", async () =>
-    preflightFromComposition(composition),
-  );
-  const blockingIssues = preflight.report.issues.filter(
-    (issue) => issue.severity === "error",
-  );
-  if (blockingIssues.length > 0) {
-    throw new VisualPreflightError(blockingIssues);
-  }
+  const composition = await selectDraftComposition(
+    draft,
+    serveUrl,
+    browserExecutable,
+    selectBrowser,
+  ).finally(() => releaseBrowser(selectBrowser));
+  const preflight = await requireDraftPreflight(composition);
 
   if (signal?.aborted) {
     throw interrupted();
@@ -430,29 +557,7 @@ export const renderDraft = async ({
         await rename(join(audioRenderDirectory, "render.mkv"), outputPath);
       }
     } catch (error) {
-      if (signal?.aborted) {
-        throw interrupted();
-      }
-      const families = fontFailureFrom(error);
-      if (families) {
-        // A face that never became usable in the frame context is a source
-        // problem with a fix the author can act on, not an opaque renderer
-        // fault, so it is reported as one instead of a redacted system error.
-        throw new VisualPreflightError([
-          {
-            code: "FONT_NOT_LOADED",
-            severity: "error",
-            responsible: "user",
-            artifact: "profile.lock.json",
-            path: "/assets",
-            message: `The render context could not use the bundled font(s): ${families}.`,
-            suggestion:
-              "Check that each declared font asset is a valid font file whose hash matches, then preview again.",
-          },
-        ]);
-      }
-      if (error instanceof Error && error.name === "AbortError") throw error;
-      throw new RenderFailure("render", error);
+      rethrowCaptureFailure(error, signal);
     } finally {
       signal?.removeEventListener("abort", onAbort);
       if (audioRenderDirectory) {

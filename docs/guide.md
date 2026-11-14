@@ -379,6 +379,14 @@ Replace `SCENE_ID` with an ID from `scenes.json`. Previews default to 540×960. 
 
 Use `--draft` while some production requirements are incomplete. Audio conflicts, invalid source, and untrusted recipes still block preview.
 
+A source build with `inspect` can capture selected frames before you render a video:
+
+```sh
+pnpm naraframe inspect ../my-videos/new-video --frames 0,30,59 --json
+```
+
+Pass 1–12 distinct, zero-based frame indices from the compiled project timeline. The result reports the source revision and FPS, plus the scene ID and temporary PNG path for each requested frame in order. Copy any PNGs you want to keep. This is useful for checking a pose, prop contact, or both sides of a cut. Use the full preview for playback, audio and export approval.
+
 A single-scene preview starts at time zero. It includes that scene's SFX but omits the project's music bed. For final approval, review the full preview with the actual audio. Keep an eye on source image resolution too: a 1080 render cannot add detail to a small photo.
 
 ## 5. Revisions, undo, and profile switching
@@ -487,6 +495,7 @@ When moving a project, include its source, profile lock, media, recipes, and req
 | `validate … --stage production` | Check production readiness; does not review frames |
 | `preview … [--draft] [--scene …] [--resolution 540\|1080]` | Run preflight and create a review video |
 | `preview … --rerender` | Render fresh frames instead of reusing a preview |
+| `inspect … --frames 0,30,59` | Capture selected project frames as temporary PNGs for visual QA |
 | `outline … [--scene …]` | Read-only map of scene, layer, beat and narration ids with timings and the current revision; one scene in full with `--scene` |
 | `status …` | Read source, freshness, pointers, artifacts, and production needs |
 | `edit … --from … --expect …` / `undo …` | Record revisions and restore the previous revision |
