@@ -1914,6 +1914,12 @@ naraframe inspect PROJECT --frames 101,102,114,117,121,188,189 --json
 
 The [frame strip](/Users/fatih/.codex/visualizations/2026/11/05/01a1ac90-1f4e-7611-8999-fc5db593b215/v7-inspection/review.png) and [timings](/Users/fatih/.codex/visualizations/2026/11/05/01a1ac90-1f4e-7611-8999-fc5db593b215/v7-inspection/timings.json) retain the manual review. CLI coverage exercises order, frame bounds, cancellation, preview and approval isolation, and recipe trust. `pnpm verify` passed with 415 unit and 625 integration tests using a prebuilt local archive after the initial package hook timed out. The native-resolution E2E passed preview at 540p and 1080p and export from the reviewed build. A clean offline install of the same archive captured three PNGs. These checks cover the source build and local archive. npm publication is a separate release step.
 
+### The Spare Boot pilot acceptance
+
+Fatih approved the revised two-arm Story pilot on 2026-11-14. After review exposed a missing arm in both wide shots, the revision added a second shoulder and elbow behind the jacket. The added arm counterbalances the reach, follows the recoil, and carries its pose across the door close-up before relaxing as the kitten arrives. The pilot is a local authoring reference.
+
+Source revision `715a4a8b747b70647f60595e099329a723b0fc9f00f28423ba8450f4b0898ae0` produced draft build `e272a975e6f4-96af80a3-56f`. The 11-second silent video is 540×960 at 30 fps and passed frame integrity over all 330 frames. The editable project and review frames are retained with the local pilot. The V7 timing above remains tied to the earlier source revision.
+
 ## 9. NaraFrame 0.4.0 — character story motion
 
 Fatih asked on 2026-11-09 to turn the coverable findings from the Bang Nalar raster-dot story test into a plan for the next version. The [findings and source check](refine-spec.md#12-character-story-motion-findings--2026-11-09) explain each decision. Every engine task below is a V7 subtask: it opens only with its reproducer, a separate scope approval and the milestone gate in `AGENTS.md`. S5 also needs an explicit decision to reopen part of the CLOSED_NOT_PLANNED repeater item.
