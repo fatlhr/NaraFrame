@@ -45,7 +45,7 @@ Bedah 2.5D uses illustrated parts in a fixed projection and a predetermined sequ
 
 For a new episode, the authoring skill uses the explicitly selected profile or an established series profile. A plain brief defaults to `general-explainer`. Ordinary revisions use the episode's pinned profile. Switching the profile uses an explicit profile revision. CLI users select profiles with `--profile`. The proposed Studio picker reads installed profiles from `profile list --json`. Character wrappers and Studio use the same packaged profile and catalog versions.
 
-Studio is a proposed browser-local add-on for the independently installable engine. Both surfaces use the same project files, CLI operations, revisions, trust checks, and preview approval. Studio V1 covers a profile picker, a scene list, simple parameter edits, playback of engine-generated MP4s, and reviewed export. Its boundary and acceptance cases are in the [Studio roadmap](plan.md#optional-studio-roadmap).
+Studio is a proposed browser-local add-on for the independently installable engine. Both surfaces use the same project files, CLI operations, revisions, trust checks, and preview approval. The first Studio release plans a profile picker, a storyboard for scene review and guarded text edits, and checkpoint navigation in engine-generated MP4s. Reviewed export uses the matching full preview. The separate frame inspection proposal provides stills for authoring QA. Its acceptance belongs to [V7](plan.md#v7-frame-inspection-experiment), and Studio's acceptance belongs to the [Studio roadmap](plan.md#optional-studio-roadmap).
 
 ### Product principles
 
