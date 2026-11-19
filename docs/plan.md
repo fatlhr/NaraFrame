@@ -2122,3 +2122,16 @@ The [reference study](refine-spec.md#13-visual-proof-in-motion-explainer) adds a
 - [x] Verify the packed engine ships both editable examples and validates them outside the checkout. `pnpm verify` passed Biome, typecheck, build, 415 unit and 620 integration tests.
 
 Fatih approved the visual trial in chat on 2026-11-13 for integration through [PR #106](https://github.com/fatlhr/NaraFrame/pull/106). Local review evidence is in the `explainer-visual-proof` folder.
+
+### Next development candidates — 2026-11-19 (proposed, pending scope decision)
+
+Recorded from the 2026-11-19 code audit. Each is a V7-subtask candidate: it opens only with its reproducer, a separate scope approval, and the milestone gate in `AGENTS.md`. None is started or authorized by this entry.
+
+| Task | Reason | Priority | Complexity | Acceptance |
+|---|---|---|---|---|
+| **D1 · Reject non-audio media in audio roles** | A ready non-PNG asset is treated as usable audio by the soundtrack compiler (`soundtrack.ts`) and by the narration/soundtrack audio preflights, so an SVG (or font) can pass plan and production validation as music or narration and only fail at the export media-stream check. Adopts the refine-spec §11 "Separate validation finding". | HIGH | LOW | A ready SVG named as `soundtrack.music.assetId`, as a narration block's audio, or in a `prepared` receipt is refused by `validate --stage plan` and `--stage production` with a directed code (e.g. `AUDIO_KIND_INVALID`), never reaching export. The existing export media-stream check is unchanged. |
+| **D2 · Explicit `--staging-dir` for `library stage` and `audio stage`** | Both commands stage into the system temp folder today; an agent or sandbox that forbids `/tmp` cannot use them. The G1 finding recorded this as a small option. | LOW | LOW | `--staging-dir <dir>` writes staging there; `edit --from` still reads the returned path; the default stays the system temp folder; regression. |
+| **D3 · Disk-headroom signal in `doctor`** | Disk pressure was an observed constraint in several recorded runs; `doctor` checks writability but not free space. | LOW | LOW | `doctor --json` reports free space and warns below a small threshold (non-blocking); no hard gate changes. |
+| **D4 · Schema subset for agents** | Agents still load the full `schema --json` dump (B7 noted the starter does not reliably replace the read); the capability registry already exists and only needs a separate output path. | LOW | LOW | A subset flag (e.g. `schema --json --subset capabilities`) returns the registry without the full schema; default output unchanged; contract test. |
+
+**Out of scope / not proposed.** N1's root-cause investigation is already a recorded candidate in this section. Renderer micro-optimizations stay closed under the C2/V6 owner disposition. Asset re-reads on load are integrity checks, not removable overhead. A generation-key model/seed dimension waits for an authorized external TTS provider. Cross-platform (Windows/Linux) support is a separate owner decision with real platform runs.
