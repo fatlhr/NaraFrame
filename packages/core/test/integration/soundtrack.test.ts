@@ -30,6 +30,22 @@ const withSoundtrack = (
             }
           : audioAsset("bed", "c".repeat(64)),
         audioAsset("whoosh", "d".repeat(64)),
+        {
+          id: "logo",
+          status: "ready",
+          kind: "svg",
+          path: "assets/logo.svg",
+          sha256: "e".repeat(64),
+          origin: { type: "user" },
+        },
+        {
+          id: "frame",
+          status: "ready",
+          kind: "png",
+          path: "images/frame.png",
+          sha256: "f".repeat(64),
+          origin: { type: "user" },
+        },
       ] as PlanSource["assets"]["assets"],
     },
   };
@@ -176,6 +192,34 @@ describe("soundtrack validation", () => {
   it("accepts a valid soundtrack", () => {
     expect(validate(soundtrack).ok).toBe(true);
   });
+
+  it.each([
+    { kind: "svg", assetId: "logo", role: "music" },
+    { kind: "png", assetId: "frame", role: "music" },
+    { kind: "svg", assetId: "logo", role: "sfx" },
+    { kind: "png", assetId: "frame", role: "sfx" },
+  ])(
+    "rejects $kind used as $role with the existing error code",
+    ({ assetId, role }) => {
+      const result = validate(
+        role === "music"
+          ? { music: { assetId }, sfx: [] }
+          : { sfx: [{ id: "a", assetId, sceneId: "s1" }] },
+      );
+      expect(result.ok).toBe(false);
+      expect(result.issues).toContainEqual(
+        expect.objectContaining({
+          code: "SOUNDTRACK_ASSET_NOT_AUDIO",
+          severity: "error",
+          artifact: "naraframe.json",
+          path:
+            role === "music"
+              ? "/soundtrack/music/assetId"
+              : "/soundtrack/sfx/0/assetId",
+        }),
+      );
+    },
+  );
 
   it("rejects undeclared assets, unknown scenes, narration audio, and duplicate ids at the schema", () => {
     const codes = (input: unknown) =>

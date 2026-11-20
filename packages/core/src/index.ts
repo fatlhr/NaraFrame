@@ -254,6 +254,7 @@ export type { Asset, AssetManifest } from "./schema/asset.js";
 export {
   AssetManifestSchema,
   AssetSchema,
+  isAudioKind,
 } from "./schema/asset.js";
 export type {
   CaptionCorrection,

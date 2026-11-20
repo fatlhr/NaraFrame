@@ -8,7 +8,11 @@ import {
   sortIssues,
 } from "../model/issue.js";
 import { applyProjectOverrides } from "../profile/overrides.js";
-import { type AssetManifest, AssetManifestSchema } from "./asset.js";
+import {
+  type AssetManifest,
+  AssetManifestSchema,
+  isAudioKind,
+} from "./asset.js";
 import { type Captions, CaptionsSchema } from "./captions.js";
 import { CompiledDraftSchema } from "./compiled.js";
 import { LibraryCatalogSchema } from "./library.js";
@@ -232,6 +236,9 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
   }
 
   const assetIds = new Set(assets.assets.map((asset) => asset.id));
+  const assetKinds = new Map(
+    assets.assets.map((asset) => [asset.id, asset.kind]),
+  );
   referencedAssets(scenes).forEach((reference) => {
     if (!assetIds.has(reference.assetId)) {
       issues.push(
@@ -256,6 +263,15 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
               "narration.json",
               `/blocks/${blockIndex}/audioAssetId`,
               `Audio asset ${block.audioAssetId} is not declared in the asset manifest.`,
+            ),
+          );
+        } else if (!isAudioKind(assetKinds.get(block.audioAssetId)!)) {
+          issues.push(
+            customIssue(
+              "AUDIO_KIND_INVALID",
+              "narration.json",
+              `/blocks/${blockIndex}/audioAssetId`,
+              `Asset ${block.audioAssetId} is not audio and cannot back narration.`,
             ),
           );
         }
@@ -297,7 +313,6 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
   }
 
   if (project.soundtrack) {
-    const kinds = new Map(assets.assets.map((asset) => [asset.id, asset.kind]));
     const narrationAudio = new Set(
       (narration?.blocks ?? []).flatMap((block) =>
         "audioAssetId" in block ? [block.audioAssetId] : [],
@@ -305,7 +320,7 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
     );
     const sceneIds = new Set(scenes.scenes.map((scene) => scene.id));
     const check = (assetId: string, path: string) => {
-      const kind = kinds.get(assetId);
+      const kind = assetKinds.get(assetId);
       if (kind === undefined) {
         issues.push(
           customIssue(
@@ -315,13 +330,13 @@ export const validatePlanSource = (input: unknown): Result<PlanSource> => {
             `Audio asset ${assetId} is not declared in the asset manifest.`,
           ),
         );
-      } else if (kind === "png") {
+      } else if (!isAudioKind(kind)) {
         issues.push(
           customIssue(
             "SOUNDTRACK_ASSET_NOT_AUDIO",
             artifacts.project,
             path,
-            `Asset ${assetId} is an image, not audio.`,
+            `Asset ${assetId} is not audio and cannot be music or an effect.`,
           ),
         );
       } else if (narrationAudio.has(assetId)) {

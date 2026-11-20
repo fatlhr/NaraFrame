@@ -11,12 +11,13 @@ import {
 } from "node:fs/promises";
 import { arch, platform, release } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import type {
-  Approval,
-  CompiledDraft,
-  CostReport,
-  Issue,
-  ResolvedAudioMode,
+import {
+  type Approval,
+  type CompiledDraft,
+  type CostReport,
+  type Issue,
+  isAudioKind,
+  type ResolvedAudioMode,
 } from "@naraframe/core";
 import { type RenderedDraft, renderDraft } from "@naraframe/renderer-remotion";
 import {
@@ -468,7 +469,7 @@ export const preflightNarrationAudio = async (
   const issues: Issue[] = [];
   for (const [index, clip] of (draft.narration?.clips ?? []).entries()) {
     const asset = draft.assets[clip.assetId];
-    if (!asset || asset.kind === "png" || asset.kind === "placeholder")
+    if (!asset || asset.kind === "placeholder" || !isAudioKind(asset.kind))
       continue;
     const path = `/narration/clips/${index}`;
     let actual: number;
@@ -579,7 +580,7 @@ export const preflightSoundtrackAudio = async (
   ];
   for (const entry of entries) {
     const asset = draft.assets[entry.assetId];
-    if (!asset || asset.kind === "png" || asset.kind === "placeholder")
+    if (!asset || asset.kind === "placeholder" || !isAudioKind(asset.kind))
       continue;
     let actual: number;
     try {
@@ -624,8 +625,8 @@ export const preflightSoundtrackAudio = async (
   if (
     music &&
     musicAsset &&
-    musicAsset.kind !== "png" &&
-    musicAsset.kind !== "placeholder"
+    musicAsset.kind !== "placeholder" &&
+    isAudioKind(musicAsset.kind)
   ) {
     const bed = await measureLevel(join(projectRoot, musicAsset.publicPath));
     if (bed !== null) {
@@ -636,7 +637,7 @@ export const preflightSoundtrackAudio = async (
       const speech: number[] = [];
       for (const clip of draft.narration?.clips ?? []) {
         const asset = draft.assets[clip.assetId];
-        if (!asset || asset.kind === "png" || asset.kind === "placeholder")
+        if (!asset || asset.kind === "placeholder" || !isAudioKind(asset.kind))
           continue;
         const level = await measureLevel(join(projectRoot, asset.publicPath));
         if (level !== null) speech.push(level);

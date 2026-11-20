@@ -164,3 +164,11 @@ export const AssetManifestSchema = z
 
 export type Asset = z.infer<typeof AssetSchema>;
 export type AssetManifest = z.infer<typeof AssetManifestSchema>;
+
+const AUDIO_KINDS = new Set<string>(["mp3", "wav", "m4a"]);
+
+export type AudioKind = "mp3" | "wav" | "m4a";
+
+/** Whether an asset kind can back narration, music, or an effect. */
+export const isAudioKind = (kind: string): kind is AudioKind =>
+  AUDIO_KINDS.has(kind);
