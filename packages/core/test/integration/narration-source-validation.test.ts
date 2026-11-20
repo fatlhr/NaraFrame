@@ -1,4 +1,10 @@
-import { AssetManifestSchema, validatePlanSource } from "@naraframe/core";
+import type { PlanSource } from "@naraframe/core";
+import {
+  AssetManifestSchema,
+  narrationTextHash,
+  preparedTimingHash,
+  validatePlanSource,
+} from "@naraframe/core";
 import { describe, expect, it } from "vitest";
 import {
   audioAsset,
@@ -42,6 +48,64 @@ describe("validatePlanSource with narration", () => {
       path: "/blocks/0/audioAssetId",
     });
   });
+
+  it.each([false, true])(
+    "rejects non-audio narration with prepared=%s",
+    (prepared) => {
+      const source = narratedSource();
+      const narration = source.narration;
+      const block = narration?.blocks[0];
+      if (!narration || !block || !("audioAssetId" in block))
+        throw new Error("Missing ready fixture block");
+      if (prepared) {
+        block.prepared = {
+          schemaVersion: 1,
+          units: "milliseconds",
+          audioSha256: "a".repeat(64),
+          textSha256: narrationTextHash(block.text),
+          timingSha256: preparedTimingHash(block),
+          audioDurationMs: block.audioDurationMs,
+          alignment: {
+            method: "manual",
+            source: "Synthetic regression fixture",
+          },
+          uncertainties: [],
+          verification: { state: "pending" },
+        };
+      }
+      expect(validatePlanSource(source).ok).toBe(true);
+      const result = validatePlanSource({
+        ...source,
+        assets: {
+          ...source.assets,
+          assets: [
+            ...source.assets.assets,
+            {
+              id: "logo",
+              status: "ready",
+              kind: "svg",
+              path: "assets/logo.svg",
+              sha256: "e".repeat(64),
+              origin: { type: "user" },
+            },
+          ] as PlanSource["assets"]["assets"],
+        },
+        narration: {
+          ...narration,
+          blocks: narration.blocks.map((block) =>
+            block.id === "context" ? { ...block, audioAssetId: "logo" } : block,
+          ),
+        },
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      const issue = result.issues.find((i) => i.code === "AUDIO_KIND_INVALID");
+      expect(issue).toMatchObject({
+        artifact: "narration.json",
+        path: "/blocks/0/audioAssetId",
+      });
+    },
+  );
 
   it("rejects a scene that names an unknown block or phrase", () => {
     const badBlock = validatePlanSource(

@@ -1,5 +1,5 @@
 import type { Issue } from "../model/issue.js";
-import type { AssetManifest } from "../schema/asset.js";
+import { type AssetManifest, isAudioKind } from "../schema/asset.js";
 import type { CompiledSoundtrack } from "../schema/compiled.js";
 import type { ProjectConfig } from "../schema/project.js";
 
@@ -52,7 +52,7 @@ export const compileSoundtrack = (
   const issues: Issue[] = [];
   const ready = new Set(
     input.assets.assets.flatMap((asset) =>
-      asset.status === "ready" && asset.kind !== "png" ? [asset.id] : [],
+      asset.status === "ready" && isAudioKind(asset.kind) ? [asset.id] : [],
     ),
   );
   const usable = (assetId: string, path: string): boolean => {
