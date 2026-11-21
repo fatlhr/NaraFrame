@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 145 485"><title>Door</title>
+<defs><linearGradient id="paint"><stop stop-color="#638B8B"/><stop offset="1" stop-color="#345761"/></linearGradient></defs>
+<path d="M2 12 143 0v468L2 483Z" fill="url(#paint)" stroke="#233849" stroke-width="4"/>
+<path d="M15 21 126 13v194L15 216Zm0 212 111-10v190L15 427Z" fill="#365E65" stroke="#7E9E95" stroke-width="3"/>
+<path d="M25 35 113 29v163l-88 7Zm0 215 88-8v157l-88 11Z" fill="#537F81"/>
+<path d="M16 13v465" stroke="#A8B59A" opacity=".45" stroke-width="3"/>
+<circle cx="28" cy="243" r="8" fill="#C38256" stroke="#27384C" stroke-width="3"/>
+<circle cx="26" cy="241" r="2" fill="#F9D89D"/>
+</svg>
