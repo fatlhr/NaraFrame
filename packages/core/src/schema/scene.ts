@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ImageCropSchema } from "../asset/image-placement.js";
+import { easingPresets } from "../motion-easing.js";
 import {
   ColorSchema,
   ColorValueSchema,
@@ -383,7 +384,7 @@ const BeatBaseShape = {
   repeat: BeatRepeatSchema.optional(),
 };
 
-const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);
+const EasingPresetSchema = z.enum(easingPresets);
 
 const RevealBeatSchema = z
   .object({

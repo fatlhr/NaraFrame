@@ -1568,3 +1568,41 @@ describe("profile composition quality", () => {
     ).toBe(500);
   });
 });
+
+it("catches text that exits the canvas only at the spring's first rebound", () => {
+  const draft = draftWithScene(
+    [
+      text({
+        id: "label",
+        text: "A",
+        frame: { x: 370, y: 200, width: 40, height: 80 },
+      }),
+    ],
+    [
+      {
+        id: "slide",
+        action: "transform",
+        targetId: "label",
+        startFrame: 3,
+        durationInFrames: 38,
+        params: { to: { x: 125 }, easingPreset: "spring" },
+      },
+    ],
+  );
+  const control = structuredClone(draft);
+  const beat = control.scenes[0]?.beats[0];
+  if (beat?.action !== "transform") throw new Error("missing spring probe");
+  beat.params.easingPreset = "smooth";
+  expect(
+    resolveVisualPreflight(control).report.issues.map((i) => i.code),
+  ).not.toContain("TEXT_OUTSIDE_CANVAS");
+  const { report } = resolveVisualPreflight(draft);
+  const turningFrames = report.frames
+    .filter((f) => f.reasons.includes("beat-extremum:slide"))
+    .map((f) => f.frame)
+    .sort((a, b) => a - b);
+  expect(turningFrames).toEqual([12, 13, 22, 31, 32]);
+  expect(
+    report.issues.some((issue) => issue.code === "TEXT_OUTSIDE_CANVAS"),
+  ).toBe(true);
+});

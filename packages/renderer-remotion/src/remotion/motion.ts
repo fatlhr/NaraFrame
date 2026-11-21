@@ -9,6 +9,14 @@ export { transitionWindows as sceneTransitionWindowsFor } from "@naraframe/core/
 
 import { formatCount } from "@naraframe/core/count-format";
 import {
+  cameraPoseAtProgress,
+  type EasingPreset,
+  easingExtrema,
+  expressiveProgress,
+  extremumFrames,
+  isExpressive,
+} from "@naraframe/core/motion-easing";
+import {
   cutPath,
   getLength,
   getPointAtLength,
@@ -99,7 +107,10 @@ export const drawProgressFor = (
     if (localFrame < beat.startFrame) break;
     const from = beat.params.from ?? value;
     const to = beat.params.to ?? 1;
-    value = from + (to - from) * beatProgress(beat, localFrame);
+    value = Math.max(
+      0,
+      Math.min(1, from + (to - from) * beatProgress(beat, localFrame)),
+    );
   }
   return value;
 };
@@ -134,9 +145,8 @@ export const countedTextFor = (
 };
 
 /**
- * The start and end text of every count beat on a layer, for measurement.
- * Intermediate values are not listed: a count whose middle values are wider
- * than both its endpoints is not caught.
+ * Endpoint and overshoot values for text measurement. Other intermediate
+ * digit combinations can still be wider in a proportional font.
  */
 export const countedTextVariants = (scene: Scene, layerId: string): string[] =>
   scene.beats.flatMap((beat) =>
@@ -144,6 +154,17 @@ export const countedTextVariants = (scene: Scene, layerId: string): string[] =>
       ? [
           formatCount(beat.params.from, beat.params),
           formatCount(beat.params.to, beat.params),
+          ...extremumFrames(
+            beat.params.easingPreset,
+            beat.startFrame,
+            beat.durationInFrames,
+          ).map((frame) =>
+            formatCount(
+              beat.params.from +
+                (beat.params.to - beat.params.from) * beatProgress(beat, frame),
+              beat.params,
+            ),
+          ),
         ]
       : [],
   );
@@ -154,7 +175,7 @@ const clamp = {
 };
 
 const easingFor = (
-  preset: "linear" | "smooth" | "snappy" | undefined,
+  preset: EasingPreset | undefined,
   action:
     | "reveal"
     | "exit"
@@ -166,6 +187,7 @@ const easingFor = (
     | "count"
     | "camera",
 ) => {
+  if (isExpressive(preset)) return (t: number) => expressiveProgress(preset, t);
   if (preset === "linear") return Easing.linear;
   if (preset === "smooth") return Easing.inOut(Easing.cubic);
   if (preset === "snappy") return Easing.out(Easing.cubic);
@@ -271,6 +293,7 @@ export const visibilityFor = (
       beat.action === "reveal"
         ? from + (1 - from) * progress
         : from * (1 - progress);
+    opacity = Math.max(0, Math.min(1, opacity));
     travel = { beat, from, progress };
   }
 
@@ -358,12 +381,19 @@ const motionStateAt = (
     const from = beat.params.from ?? 0;
     const to = beat.params.to ?? 1;
     const point = pointAlongPath(path, from + (to - from) * progress);
+    let reversed = to < from;
+    if (beat.params.orient && isExpressive(beat.params.easingPreset)) {
+      const time = (localFrame - beat.startFrame) / beat.durationInFrames;
+      if (beat.params.easingPreset === "anticipate") reversed = !reversed;
+      for (const turn of easingExtrema(beat.params.easingPreset))
+        if (time > turn) reversed = !reversed;
+    }
     return {
       x: point.x - (target.frame.x + target.frame.width / 2),
       y: point.y - (target.frame.y + target.frame.height / 2),
       // Faces the way it travels, so a follower going back down its path
       // turns around rather than reversing.
-      rotationDeg: point.angleDeg + (to < from ? 180 : 0),
+      rotationDeg: point.angleDeg + (reversed ? 180 : 0),
     };
   };
   const positionBeats = scene.beats
@@ -396,33 +426,24 @@ const motionStateAt = (
       };
     }
     if (beat.action !== "transform") return pose;
-    const progress = interpolate(
-      localFrame,
-      [beat.startFrame, beat.startFrame + beat.durationInFrames],
-      [0, 1],
-      {
-        ...clamp,
-        easing: easingFor(beat.params.easingPreset, beat.action),
-      },
-    );
+    const progress = beatProgress(beat, localFrame);
+    const expressive = isExpressive(beat.params.easingPreset);
+    const mix = (from: number, to: number | undefined) =>
+      to === undefined
+        ? from
+        : expressive && progress === 1
+          ? to
+          : from + (to - from) * progress;
+    const to = beat.params.to;
+    const scale = mix(pose.scale, to.scale);
     return {
-      x:
-        beat.params.to.x === undefined
-          ? pose.x
-          : pose.x + (beat.params.to.x - pose.x) * progress,
-      y:
-        beat.params.to.y === undefined
-          ? pose.y
-          : pose.y + (beat.params.to.y - pose.y) * progress,
+      x: mix(pose.x, to.x),
+      y: mix(pose.y, to.y),
       scale:
-        beat.params.to.scale === undefined
-          ? pose.scale
-          : pose.scale + (beat.params.to.scale - pose.scale) * progress,
-      rotationDeg:
-        beat.params.to.rotationDeg === undefined
-          ? pose.rotationDeg
-          : pose.rotationDeg +
-            (beat.params.to.rotationDeg - pose.rotationDeg) * progress,
+        expressive && to.scale !== undefined
+          ? Math.max(Math.min(0.001, pose.scale, to.scale), scale)
+          : scale,
+      rotationDeg: mix(pose.rotationDeg, to.rotationDeg),
     };
   }, initialPose);
   state.translateX = transformPose.x;
@@ -445,7 +466,10 @@ const motionStateAt = (
     );
 
     if (beat.action === "emphasize") {
-      state.scale *= 1 + Math.sin(progress * Math.PI) * (beat.params.scale - 1);
+      state.scale *=
+        1 +
+        Math.sin(Math.max(0, Math.min(1, progress)) * Math.PI) *
+          (beat.params.scale - 1);
     }
 
     if (beat.action === "focus") {
@@ -525,12 +549,14 @@ export const cameraStateFor = (
         easing: easingFor(move.easingPreset, "camera"),
       },
     );
-    pose = {
-      x: pose.x + (move.to.x - pose.x) * progress,
-      y: pose.y + (move.to.y - pose.y) * progress,
-      zoom: pose.zoom + (move.to.zoom - pose.zoom) * progress,
-    };
-    if (progress < 1) break;
+    pose = isExpressive(move.easingPreset)
+      ? cameraPoseAtProgress(pose, move.to, progress)
+      : {
+          x: pose.x + (move.to.x - pose.x) * progress,
+          y: pose.y + (move.to.y - pose.y) * progress,
+          zoom: pose.zoom + (move.to.zoom - pose.zoom) * progress,
+        };
+    if (localFrame < move.startFrame + move.durationInFrames) break;
   }
   return pose;
 };

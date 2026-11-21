@@ -67,6 +67,18 @@ describe("contrast check through compileDraft", () => {
     expect(contrastIssues(withPlateAt(1500))).toEqual([]);
   });
 
+  it("includes an overshooting camera in a world plate's swept bounds", () => {
+    const source = withPlateAt(335);
+    const move = source.scenes.scenes[0]?.camera?.moves[0];
+    if (!move) throw new Error("Missing camera probe");
+    move.to.zoom = 1;
+    expect(contrastIssues(source)).toEqual([]);
+    move.easingPreset = "spring";
+    expect(contrastIssues(source).map((i) => i.code)).toContain(
+      "CONTRAST_UNVERIFIED",
+    );
+  });
+
   it("leaves overlay text unverified when the camera brings a plate under it", () => {
     expect(contrastIssues(withPlateAt(300))).toEqual([
       expect.objectContaining({

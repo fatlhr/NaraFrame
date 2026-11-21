@@ -11,6 +11,9 @@ const alias = {
   "@naraframe/core/image-placement": fileURLToPath(
     new URL("./packages/core/src/asset/image-placement.ts", import.meta.url),
   ),
+  "@naraframe/core/motion-easing": fileURLToPath(
+    new URL("./packages/core/src/motion-easing.ts", import.meta.url),
+  ),
   "@naraframe/core/groups": fileURLToPath(
     new URL("./packages/core/src/compiler/groups.ts", import.meta.url),
   ),

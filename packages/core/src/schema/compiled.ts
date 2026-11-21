@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { easingPresets } from "../motion-easing.js";
 import {
   IdSchema,
   NonNegativeIntegerSchema,
@@ -17,7 +18,7 @@ import {
 } from "./profile.js";
 import { FocalPointSchema, LayerSchema } from "./scene.js";
 
-const EasingPresetSchema = z.enum(["linear", "smooth", "snappy"]);
+const EasingPresetSchema = z.enum(easingPresets);
 
 /** A bundled profile font ready to register before measurement/preflight. */
 export const CompiledFontSchema = z

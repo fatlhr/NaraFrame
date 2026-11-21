@@ -149,3 +149,65 @@ describe("layer pivot (S2)", () => {
     });
   });
 });
+
+describe("expressive motion", () => {
+  it.each(["expo-out", "back-out", "anticipate", "spring"] as const)(
+    "%s seeks to the same pose in any order and holds the authored endpoint",
+    (easingPreset) => {
+      const { draft, scene } = draftWith(arm(), [
+        {
+          ...lift,
+          action: "transform",
+          durationInFrames: 40,
+          params: {
+            to: { x: 120, rotationDeg: -40, scale: 0.001 },
+            easingPreset,
+          },
+        },
+      ]);
+      const sample = (f: number) => motionStateFor(draft, scene, "arm", f);
+      const states = Array.from({ length: 43 }, (_, i) => sample(i));
+      for (let i = 0; i < states.length; i++) {
+        for (const f of [42 - i, (i * 17) % 43])
+          expect(sample(f)).toEqual(states[f]);
+        expect(sample(i).scale).toBeGreaterThan(0);
+      }
+      expect(sample(0).translateX).toBe(0);
+      expect(sample(40)).toMatchObject({
+        translateX: 120,
+        rotationDeg: -40,
+        scale: 0.001,
+      });
+      expect(sample(42)).toEqual(sample(40));
+      if (easingPreset === "anticipate")
+        expect(sample(10).translateX).toBeLessThan(0);
+      if (easingPreset === "back-out")
+        expect(sample(24).translateX).toBeGreaterThan(130);
+      if (easingPreset === "spring") {
+        expect(sample(10).translateX).toBeGreaterThan(148);
+        expect(sample(20).translateX).toBeLessThan(120);
+        expect(sample(30).translateX).toBeGreaterThan(120);
+      }
+      if (easingPreset === "expo-out")
+        expect(sample(10).translateX).toBeCloseTo(98.88, 0);
+    },
+  );
+
+  it.each([
+    ["linear", 0.25],
+    ["smooth", 0.0625],
+    ["snappy", 0.578125],
+  ] as const)("retains %s interpolation", (easingPreset, quarter) => {
+    const { draft, scene } = draftWith(arm(), [
+      {
+        ...lift,
+        action: "transform",
+        durationInFrames: 40,
+        params: { to: { x: 100 }, easingPreset },
+      },
+    ]);
+    expect(motionStateFor(draft, scene, "arm", 10).translateX).toBe(
+      quarter * 100,
+    );
+  });
+});

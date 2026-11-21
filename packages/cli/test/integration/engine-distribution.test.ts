@@ -87,7 +87,7 @@ describe("offline engine distribution", () => {
         version: "0.4.0",
         skillApiVersion: 1,
         sourceSchemaVersion: 1,
-        renderEngine: "naraframe-draft/14",
+        renderEngine: "naraframe-draft/15",
         resourceRoot: engine,
       },
     });
