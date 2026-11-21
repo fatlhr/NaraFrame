@@ -1,0 +1,1950 @@
+{
+  "schemaVersion": 1,
+  "id": "story-prop-contact",
+  "version": "0.1.0",
+  "provenance": {
+    "source": "NaraFrame original The Spare Boot, owner-approved motion baseline",
+    "license": "MIT"
+  },
+  "assets": [
+    {
+      "id": "hall",
+      "status": "ready",
+      "kind": "svg",
+      "path": "hall.svg",
+      "sha256": "0542b016a7f1ee1f9f3956d4215991b6d9db3f5ac4fa0afa90740e5d34668b02",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original vector art for the Story pilot"
+      }
+    },
+    {
+      "id": "door",
+      "status": "ready",
+      "kind": "svg",
+      "path": "door.svg",
+      "sha256": "5da0db4af17ab52fbc343da114dfe58023002a71fea5aa65a672d1f09bab61c9",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original vector art for the Story pilot"
+      }
+    },
+    {
+      "id": "jamb",
+      "status": "ready",
+      "kind": "svg",
+      "path": "jamb.svg",
+      "sha256": "653e01db6ec5455ccfa3930e982ce614e127de88ad6866092991353a3f35dab9",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original vector art for the Story pilot"
+      }
+    },
+    {
+      "id": "leaf",
+      "status": "ready",
+      "kind": "svg",
+      "path": "leaf.svg",
+      "sha256": "3b50188e9958f77106b5ff05a55b45155fbcdf8c1eac8da321a4e1c2c3e88a02",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original vector art for the Story pilot"
+      }
+    },
+    {
+      "id": "boot",
+      "status": "ready",
+      "kind": "svg",
+      "path": "boot.svg",
+      "sha256": "ce16adc0c72dc4a09218e67ec701e25ca7ef72efdd7768ab0eb7eae04cb01524",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original vector art for the Story pilot"
+      }
+    },
+    {
+      "id": "kitten-step-a",
+      "status": "ready",
+      "kind": "svg",
+      "path": "kitten-step-a.svg",
+      "sha256": "7316223ac1471107ba76f2a3161e08922a53cd4033586633aa5e319e7bf64eeb",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original vector art for the Story pilot"
+      }
+    },
+    {
+      "id": "kitten-step-b",
+      "status": "ready",
+      "kind": "svg",
+      "path": "kitten-step-b.svg",
+      "sha256": "05875189e3c5c4e6895101c05efbe83a5aa91a0ce2ea856bb5d966902c5dba6a",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original vector art for the Story pilot"
+      }
+    },
+    {
+      "id": "kitten-rest",
+      "status": "ready",
+      "kind": "svg",
+      "path": "kitten-rest.svg",
+      "sha256": "c486a5dd8c1abb71cc0bde3ca0af3597718c15703eea92c2eb536177550f84b3",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original vector art for the Story pilot"
+      }
+    },
+    {
+      "id": "stick-legs",
+      "status": "ready",
+      "kind": "svg",
+      "path": "stick-legs.svg",
+      "sha256": "abb480080445541188b2e20f21268ac0dd542716f28568f90585fa6d990e76e6",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original dressed stick figure for The Spare Boot"
+      }
+    },
+    {
+      "id": "stick-jacket",
+      "status": "ready",
+      "kind": "svg",
+      "path": "stick-jacket.svg",
+      "sha256": "f678bd2c898ced36c4392e8916357040516a68a187a88745f03d2a7580c69e91",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original dressed stick figure for The Spare Boot"
+      }
+    },
+    {
+      "id": "stick-upper-arm",
+      "status": "ready",
+      "kind": "svg",
+      "path": "stick-upper-arm.svg",
+      "sha256": "4286d015916f00e6b19b91bc911ba8384656ba660ce35030ecfec2ef320b68d0",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original dressed stick figure for The Spare Boot"
+      }
+    },
+    {
+      "id": "stick-forearm",
+      "status": "ready",
+      "kind": "svg",
+      "path": "stick-forearm.svg",
+      "sha256": "9a9a69d82faf44313dc3f51dabcd6999cc28d0b3855c667921413e4bf62ca5e8",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original dressed stick figure for The Spare Boot"
+      }
+    },
+    {
+      "id": "stick-face-calm",
+      "status": "ready",
+      "kind": "svg",
+      "path": "stick-face-calm.svg",
+      "sha256": "f56fa43feee958cb6c3afb7bc093b7f39665a83bccbef3743d985edd714de7d3",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original dressed stick figure for The Spare Boot"
+      }
+    },
+    {
+      "id": "stick-face-side",
+      "status": "ready",
+      "kind": "svg",
+      "path": "stick-face-side.svg",
+      "sha256": "e9a911aa465b9b7790bb486504340d5715730551a011b73c116c56ea057ca660",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original dressed stick figure for The Spare Boot"
+      }
+    },
+    {
+      "id": "stick-face-startled",
+      "status": "ready",
+      "kind": "svg",
+      "path": "stick-face-startled.svg",
+      "sha256": "47e46ab48093b2240a440a233772209eac3c39e63e4ee338bf548df8f21d07e9",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original dressed stick figure for The Spare Boot"
+      }
+    },
+    {
+      "id": "stick-face-relief",
+      "status": "ready",
+      "kind": "svg",
+      "path": "stick-face-relief.svg",
+      "sha256": "10bfd0129a2fc4970f0a2290491dcd91713d47d4a58d7e93887c13d61f249f69",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "Original dressed stick figure for The Spare Boot"
+      }
+    },
+    {
+      "id": "crate",
+      "status": "ready",
+      "kind": "svg",
+      "path": "crate.svg",
+      "sha256": "2873e79a3d9ec2f3e367f5bfef0aa140bd22d8c6cf2d9bce9ff7bf9e6ea47b0a",
+      "binding": "neutral",
+      "origin": {
+        "type": "generated",
+        "source": "NaraFrame wooden crate adapted from original Stickman Ink crate",
+        "license": "MIT"
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "id": "place-prop",
+      "version": "0.1.0",
+      "description": "Dressed two-arm character places a prop to stop a door.",
+      "parameters": {
+        "prop": {
+          "type": "asset",
+          "choices": ["boot", "crate"],
+          "pointers": ["/visual/layers/4/assetId"],
+          "description": "Use the same prop in all three shots: boot or crate."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action, consequence and state carried across the cut."
+        }
+      },
+      "template": {
+        "id": "place-prop",
+        "durationMs": 3400,
+        "narrativeRole": "hook",
+        "carriesFactualClaim": false,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "hall-art",
+              "type": "image",
+              "assetId": "hall",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "space": "world"
+            },
+            {
+              "id": "door-leaf",
+              "type": "image",
+              "assetId": "door",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "frame": {
+                "x": 764,
+                "y": 452,
+                "width": 290,
+                "height": 970
+              },
+              "space": "world"
+            },
+            {
+              "id": "actor-shadow",
+              "type": "shape",
+              "shape": "rectangle",
+              "cornerRadius": 13,
+              "fill": "#202238",
+              "opacity": 0.35,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "space": "world",
+              "frame": {
+                "x": 182,
+                "y": 1502,
+                "width": 288,
+                "height": 26
+              }
+            },
+            {
+              "id": "boot-shadow",
+              "type": "shape",
+              "shape": "rectangle",
+              "cornerRadius": 9,
+              "fill": "#28243B",
+              "opacity": 0.35,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "space": "world",
+              "frame": {
+                "x": 336,
+                "y": 1432,
+                "width": 216,
+                "height": 18
+              }
+            },
+            {
+              "id": "shoe",
+              "type": "image",
+              "assetId": "boot",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 9,
+              "frame": {
+                "x": 326,
+                "y": 1270,
+                "width": 250,
+                "height": 172
+              },
+              "space": "world",
+              "pivot": {
+                "x": 0.48,
+                "y": 0.94
+              }
+            },
+            {
+              "id": "foreground",
+              "type": "image",
+              "assetId": "jamb",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "space": "world"
+            },
+            {
+              "id": "draft-leaf",
+              "type": "image",
+              "assetId": "leaf",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 5,
+              "frame": {
+                "x": 792,
+                "y": 878,
+                "width": 62,
+                "height": 56
+              },
+              "space": "world"
+            },
+            {
+              "id": "actor-legs",
+              "type": "image",
+              "assetId": "stick-legs",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "frame": {
+                "x": 194,
+                "y": 1014,
+                "width": 302,
+                "height": 510
+              },
+              "space": "world"
+            },
+            {
+              "id": "jacket",
+              "type": "image",
+              "assetId": "stick-jacket",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "frame": {
+                "x": 194,
+                "y": 1014,
+                "width": 302,
+                "height": 510
+              }
+            },
+            {
+              "id": "head",
+              "type": "image",
+              "assetId": "stick-face-calm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "frame": {
+                "x": 216,
+                "y": 832,
+                "width": 230,
+                "height": 250
+              },
+              "pivot": {
+                "x": 0.5,
+                "y": 0.86
+              }
+            },
+            {
+              "id": "arm-upper-art",
+              "type": "image",
+              "assetId": "stick-upper-arm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "frame": {
+                "x": 348,
+                "y": 1060,
+                "width": 96,
+                "height": 182
+              }
+            },
+            {
+              "id": "arm-fore-art",
+              "type": "image",
+              "assetId": "stick-forearm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "frame": {
+                "x": 346,
+                "y": 1176,
+                "width": 104,
+                "height": 198
+              }
+            },
+            {
+              "id": "arm-elbow",
+              "type": "group",
+              "memberIds": ["arm-fore-art"],
+              "pivot": {
+                "x": 0.4807692307692308,
+                "y": 0.20202020202020202
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -5,
+                "opacity": 1
+              },
+              "zIndex": 2
+            },
+            {
+              "id": "arm-shoulder",
+              "type": "group",
+              "memberIds": ["arm-upper-art", "arm-elbow"],
+              "pivot": {
+                "x": 0.4807692307692308,
+                "y": 0.14012738853503184
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -9,
+                "opacity": 1
+              },
+              "zIndex": 3
+            },
+            {
+              "id": "actor-upper",
+              "type": "group",
+              "memberIds": [
+                "far-arm-shoulder",
+                "jacket",
+                "head",
+                "arm-shoulder"
+              ],
+              "pivot": {
+                "x": 0.46357615894039733,
+                "y": 0.5838150289017341
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 0,
+                "opacity": 1
+              },
+              "zIndex": 7,
+              "space": "world"
+            },
+            {
+              "id": "far-arm-upper-art",
+              "type": "image",
+              "assetId": "stick-upper-arm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "frame": {
+                "x": 256,
+                "y": 1060,
+                "width": 96,
+                "height": 182
+              }
+            },
+            {
+              "id": "far-arm-fore-art",
+              "type": "image",
+              "assetId": "stick-forearm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "frame": {
+                "x": 254,
+                "y": 1176,
+                "width": 104,
+                "height": 198
+              }
+            },
+            {
+              "id": "far-arm-elbow",
+              "type": "group",
+              "memberIds": ["far-arm-fore-art"],
+              "pivot": {
+                "x": 0.4807692307692308,
+                "y": 0.20202020202020202
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 5,
+                "opacity": 1
+              },
+              "zIndex": 2
+            },
+            {
+              "id": "far-arm-shoulder",
+              "type": "group",
+              "memberIds": ["far-arm-upper-art", "far-arm-elbow"],
+              "pivot": {
+                "x": 0.4807692307692308,
+                "y": 0.14012738853503184
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 25,
+                "opacity": 1
+              },
+              "zIndex": 0
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "lean-in",
+            "targetId": "actor-upper",
+            "startMs": 0,
+            "durationMs": 390,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 8
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "extend-shoulder",
+            "targetId": "arm-shoulder",
+            "startMs": 0,
+            "durationMs": 380,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -25
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "extend-elbow",
+            "targetId": "arm-elbow",
+            "startMs": 140,
+            "durationMs": 300,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -14
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-shoulder-1",
+            "targetId": "far-arm-shoulder",
+            "startMs": 140,
+            "durationMs": 540,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 8
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-elbow-1",
+            "targetId": "far-arm-elbow",
+            "startMs": 140,
+            "durationMs": 540,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 1
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "push-shoe",
+            "targetId": "shoe",
+            "startMs": 210,
+            "durationMs": 550,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 198,
+                "y": 0,
+                "rotationDeg": 3
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "shadow-slides",
+            "targetId": "boot-shadow",
+            "startMs": 210,
+            "durationMs": 550,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 198
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "guide-shoulder",
+            "targetId": "arm-shoulder",
+            "startMs": 400,
+            "durationMs": 390,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -43
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "guide-elbow",
+            "targetId": "arm-elbow",
+            "startMs": 460,
+            "durationMs": 325,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -22
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-shoulder-2",
+            "targetId": "far-arm-shoulder",
+            "startMs": 720,
+            "durationMs": 430,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -3
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-elbow-2",
+            "targetId": "far-arm-elbow",
+            "startMs": 720,
+            "durationMs": 430,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "settle-shoe",
+            "targetId": "shoe",
+            "startMs": 760,
+            "durationMs": 240,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": 198,
+                "y": 0,
+                "rotationDeg": 0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "arm-release",
+            "targetId": "arm-shoulder",
+            "startMs": 790,
+            "durationMs": 410,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "elbow-release",
+            "targetId": "arm-elbow",
+            "startMs": 790,
+            "durationMs": 390,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "lean-upright",
+            "targetId": "actor-upper",
+            "startMs": 790,
+            "durationMs": 435,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "glance-toward-door",
+            "targetId": "head",
+            "startMs": 1110,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "stick-face-side"
+            }
+          },
+          {
+            "id": "glance-up",
+            "targetId": "head",
+            "startMs": 1110,
+            "durationMs": 300,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -6
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "wind-arrives",
+            "targetId": "draft-leaf",
+            "startMs": 1670,
+            "durationMs": 100,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "wind-crosses",
+            "targetId": "draft-leaf",
+            "startMs": 1700,
+            "durationMs": 700,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -630,
+                "y": 88,
+                "rotationDeg": -135
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "eyes-widen",
+            "targetId": "head",
+            "startMs": 1900,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "stick-face-startled"
+            }
+          },
+          {
+            "id": "head-startles",
+            "targetId": "head",
+            "startMs": 1900,
+            "durationMs": 200,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -16
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "shoulders-follow",
+            "targetId": "actor-upper",
+            "startMs": 2010,
+            "durationMs": 310,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -10
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "arm-recoils",
+            "targetId": "arm-shoulder",
+            "startMs": 2030,
+            "durationMs": 280,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 25
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-shoulder-3",
+            "targetId": "far-arm-shoulder",
+            "startMs": 2050,
+            "durationMs": 260,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 30
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-elbow-3",
+            "targetId": "far-arm-elbow",
+            "startMs": 2050,
+            "durationMs": 260,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 14
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "elbow-recoils",
+            "targetId": "arm-elbow",
+            "startMs": 2060,
+            "durationMs": 250,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 20
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "door-starts-closing",
+            "targetId": "door-leaf",
+            "startMs": 2150,
+            "durationMs": 650,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -24
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "head-settles",
+            "targetId": "head",
+            "startMs": 2210,
+            "durationMs": 360,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -9
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "body-settles",
+            "targetId": "actor-upper",
+            "startMs": 2340,
+            "durationMs": 330,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -7
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "arm-settles",
+            "targetId": "arm-shoulder",
+            "startMs": 2360,
+            "durationMs": 310,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 22
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "elbow-settles",
+            "targetId": "arm-elbow",
+            "startMs": 2360,
+            "durationMs": 310,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 15
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-shoulder-4",
+            "targetId": "far-arm-shoulder",
+            "startMs": 2370,
+            "durationMs": 380,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 17
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-elbow-4",
+            "targetId": "far-arm-elbow",
+            "startMs": 2370,
+            "durationMs": 380,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 7
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "note": "Open on the hand moving the spare boot into the doorway. A leaf blows inside. Eyes and head react, then the shoulders follow. Cut with the door already moving. The neck rotates about its joint and the shoulder and elbow move inside their parent groups. Feet stay planted. Keep the round face, teal knit cap and coral jacket consistent across shots. The far arm counterbalances the reach, recoils with the shoulder, and relaxes after the kitten crosses.",
+        "camera": {
+          "initial": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1
+          },
+          "moves": [
+            {
+              "id": "closer-on-the-look",
+              "startMs": 1060,
+              "durationMs": 1900,
+              "to": {
+                "x": 32,
+                "y": 66,
+                "zoom": 1.08
+              },
+              "easingPreset": "smooth"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "prop-braces",
+      "version": "0.1.0",
+      "description": "Prop anticipates contact, compresses, rebounds and settles before the reveal.",
+      "parameters": {
+        "prop": {
+          "type": "asset",
+          "choices": ["boot", "crate"],
+          "pointers": ["/visual/layers/3/assetId"],
+          "description": "Use the same prop in all three shots: boot or crate."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action, consequence and state carried across the cut."
+        }
+      },
+      "template": {
+        "id": "prop-braces",
+        "durationMs": 2900,
+        "narrativeRole": "explanation",
+        "carriesFactualClaim": false,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "hall-art",
+              "type": "image",
+              "assetId": "hall",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "space": "world"
+            },
+            {
+              "id": "door-leaf",
+              "type": "image",
+              "assetId": "door",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "frame": {
+                "x": 740,
+                "y": 452,
+                "width": 290,
+                "height": 970
+              },
+              "space": "world"
+            },
+            {
+              "id": "boot-shadow",
+              "type": "shape",
+              "shape": "rectangle",
+              "cornerRadius": 9,
+              "fill": "#28243B",
+              "opacity": 0.35,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "space": "world",
+              "frame": {
+                "x": 534,
+                "y": 1432,
+                "width": 216,
+                "height": 18
+              }
+            },
+            {
+              "id": "shoe",
+              "type": "image",
+              "assetId": "boot",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 9,
+              "frame": {
+                "x": 524,
+                "y": 1270,
+                "width": 250,
+                "height": 172
+              },
+              "space": "world",
+              "pivot": {
+                "x": 0.48,
+                "y": 0.94
+              }
+            },
+            {
+              "id": "foreground",
+              "type": "image",
+              "assetId": "jamb",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "space": "world"
+            },
+            {
+              "id": "kitten-ear",
+              "type": "image",
+              "assetId": "kitten-rest",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "frame": {
+                "x": 554,
+                "y": 1274,
+                "width": 150,
+                "height": 118
+              },
+              "space": "world"
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "contact-approach",
+            "targetId": "door-leaf",
+            "startMs": 0,
+            "durationMs": 467,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -33
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "contact-brace",
+            "targetId": "shoe",
+            "startMs": 300,
+            "durationMs": 167,
+            "action": "transform",
+            "params": {
+              "to": {
+                "scale": 1.02,
+                "rotationDeg": 2
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "contact-compress",
+            "targetId": "shoe",
+            "startMs": 467,
+            "durationMs": 167,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -8,
+                "scale": 0.92,
+                "rotationDeg": -8
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "contact-rebound",
+            "targetId": "door-leaf",
+            "startMs": 467,
+            "durationMs": 133,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -23
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "contact-spring",
+            "targetId": "shoe",
+            "startMs": 633,
+            "durationMs": 133,
+            "action": "transform",
+            "params": {
+              "to": {
+                "scale": 1.05
+              },
+              "easingPreset": "snappy"
+            }
+          },
+          {
+            "id": "contact-return",
+            "targetId": "door-leaf",
+            "startMs": 600,
+            "durationMs": 100,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -31
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "contact-obstacle-settle",
+            "targetId": "door-leaf",
+            "startMs": 700,
+            "durationMs": 167,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -32
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "contact-prop-settle",
+            "targetId": "shoe",
+            "startMs": 767,
+            "durationMs": 100,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -6,
+                "scale": 1,
+                "rotationDeg": 0
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "kitten-appears",
+            "targetId": "kitten-ear",
+            "startMs": 1033,
+            "durationMs": 100,
+            "action": "reveal",
+            "params": {
+              "direction": "up",
+              "distance": 0,
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "kitten-peeks",
+            "targetId": "kitten-ear",
+            "startMs": 1033,
+            "durationMs": 760,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -24
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "note": "Cut to the same boot and left edge of the door. The boot stops the door at contact. A small face peeks through the remaining light.",
+        "camera": {
+          "initial": {
+            "x": 280,
+            "y": 386,
+            "zoom": 1.86
+          },
+          "moves": [
+            {
+              "id": "hold-on-contact",
+              "startMs": 770,
+              "durationMs": 1250,
+              "to": {
+                "x": 282,
+                "y": 398,
+                "zoom": 1.91
+              },
+              "easingPreset": "smooth"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "let-them-in",
+      "version": "0.1.0",
+      "description": "Carry the same prop and character pose into the kitten payoff.",
+      "parameters": {
+        "prop": {
+          "type": "asset",
+          "choices": ["boot", "crate"],
+          "pointers": ["/visual/layers/5/assetId"],
+          "description": "Use the same prop in all three shots: boot or crate."
+        },
+        "note": {
+          "type": "string",
+          "pointers": ["/note"],
+          "description": "Action, consequence and state carried across the cut."
+        }
+      },
+      "template": {
+        "id": "let-them-in",
+        "durationMs": 4700,
+        "narrativeRole": "payoff",
+        "carriesFactualClaim": false,
+        "visual": {
+          "type": "composition",
+          "layers": [
+            {
+              "id": "hall-art",
+              "type": "image",
+              "assetId": "hall",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 0,
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "space": "world"
+            },
+            {
+              "id": "door-leaf",
+              "type": "image",
+              "assetId": "door",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 3,
+              "frame": {
+                "x": 708,
+                "y": 452,
+                "width": 290,
+                "height": 970
+              },
+              "space": "world"
+            },
+            {
+              "id": "cat",
+              "type": "image",
+              "assetId": "kitten-step-a",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 10,
+              "frame": {
+                "x": 570,
+                "y": 1300,
+                "width": 172,
+                "height": 135
+              },
+              "space": "world"
+            },
+            {
+              "id": "actor-shadow",
+              "type": "shape",
+              "shape": "rectangle",
+              "cornerRadius": 13,
+              "fill": "#202238",
+              "opacity": 0.35,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "space": "world",
+              "frame": {
+                "x": 182,
+                "y": 1502,
+                "width": 288,
+                "height": 26
+              }
+            },
+            {
+              "id": "boot-shadow",
+              "type": "shape",
+              "shape": "rectangle",
+              "cornerRadius": 9,
+              "fill": "#28243B",
+              "opacity": 0.35,
+              "rotationDeg": 0,
+              "zIndex": 4,
+              "space": "world",
+              "frame": {
+                "x": 528,
+                "y": 1432,
+                "width": 216,
+                "height": 18
+              }
+            },
+            {
+              "id": "shoe",
+              "type": "image",
+              "assetId": "boot",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 9,
+              "frame": {
+                "x": 518,
+                "y": 1270,
+                "width": 250,
+                "height": 172
+              },
+              "space": "world",
+              "pivot": {
+                "x": 0.48,
+                "y": 0.94
+              }
+            },
+            {
+              "id": "foreground",
+              "type": "image",
+              "assetId": "jamb",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 12,
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 1080,
+                "height": 1920
+              },
+              "space": "world"
+            },
+            {
+              "id": "actor-legs",
+              "type": "image",
+              "assetId": "stick-legs",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 6,
+              "frame": {
+                "x": 194,
+                "y": 1014,
+                "width": 302,
+                "height": 510
+              },
+              "space": "world"
+            },
+            {
+              "id": "jacket",
+              "type": "image",
+              "assetId": "stick-jacket",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "frame": {
+                "x": 194,
+                "y": 1014,
+                "width": 302,
+                "height": 510
+              }
+            },
+            {
+              "id": "head",
+              "type": "image",
+              "assetId": "stick-face-startled",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": -9,
+              "zIndex": 4,
+              "frame": {
+                "x": 216,
+                "y": 832,
+                "width": 230,
+                "height": 250
+              },
+              "pivot": {
+                "x": 0.5,
+                "y": 0.86
+              }
+            },
+            {
+              "id": "arm-upper-art",
+              "type": "image",
+              "assetId": "stick-upper-arm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "frame": {
+                "x": 348,
+                "y": 1060,
+                "width": 96,
+                "height": 182
+              }
+            },
+            {
+              "id": "arm-fore-art",
+              "type": "image",
+              "assetId": "stick-forearm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "frame": {
+                "x": 346,
+                "y": 1176,
+                "width": 104,
+                "height": 198
+              }
+            },
+            {
+              "id": "arm-elbow",
+              "type": "group",
+              "memberIds": ["arm-fore-art"],
+              "pivot": {
+                "x": 0.4807692307692308,
+                "y": 0.20202020202020202
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 15,
+                "opacity": 1
+              },
+              "zIndex": 2
+            },
+            {
+              "id": "arm-shoulder",
+              "type": "group",
+              "memberIds": ["arm-upper-art", "arm-elbow"],
+              "pivot": {
+                "x": 0.4807692307692308,
+                "y": 0.14012738853503184
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 22,
+                "opacity": 1
+              },
+              "zIndex": 3
+            },
+            {
+              "id": "actor-upper",
+              "type": "group",
+              "memberIds": [
+                "far-arm-shoulder",
+                "jacket",
+                "head",
+                "arm-shoulder"
+              ],
+              "pivot": {
+                "x": 0.46357615894039733,
+                "y": 0.5838150289017341
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": -7,
+                "opacity": 1
+              },
+              "zIndex": 7,
+              "space": "world"
+            },
+            {
+              "id": "far-arm-upper-art",
+              "type": "image",
+              "assetId": "stick-upper-arm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 1,
+              "frame": {
+                "x": 256,
+                "y": 1060,
+                "width": 96,
+                "height": 182
+              }
+            },
+            {
+              "id": "far-arm-fore-art",
+              "type": "image",
+              "assetId": "stick-forearm",
+              "fit": "contain",
+              "cornerRadius": 0,
+              "opacity": 1,
+              "rotationDeg": 0,
+              "zIndex": 2,
+              "frame": {
+                "x": 254,
+                "y": 1176,
+                "width": 104,
+                "height": 198
+              }
+            },
+            {
+              "id": "far-arm-elbow",
+              "type": "group",
+              "memberIds": ["far-arm-fore-art"],
+              "pivot": {
+                "x": 0.4807692307692308,
+                "y": 0.20202020202020202
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 12,
+                "opacity": 1
+              },
+              "zIndex": 2
+            },
+            {
+              "id": "far-arm-shoulder",
+              "type": "group",
+              "memberIds": ["far-arm-upper-art", "far-arm-elbow"],
+              "pivot": {
+                "x": 0.4807692307692308,
+                "y": 0.14012738853503184
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rotationDeg": 42,
+                "opacity": 1
+              },
+              "zIndex": 0
+            }
+          ]
+        },
+        "beats": [
+          {
+            "id": "step-out-from-gap",
+            "targetId": "cat",
+            "startMs": 60,
+            "durationMs": 1260,
+            "action": "transform",
+            "params": {
+              "to": {
+                "x": -164,
+                "y": 56
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "paw-two",
+            "targetId": "cat",
+            "startMs": 170,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "kitten-step-b"
+            }
+          },
+          {
+            "id": "paw-three",
+            "targetId": "cat",
+            "startMs": 350,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "kitten-step-a"
+            }
+          },
+          {
+            "id": "far-shoulder-1",
+            "targetId": "far-arm-shoulder",
+            "startMs": 490,
+            "durationMs": 410,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -5
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-elbow-1",
+            "targetId": "far-arm-elbow",
+            "startMs": 490,
+            "durationMs": 410,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -3
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "paw-four",
+            "targetId": "cat",
+            "startMs": 530,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "kitten-step-b"
+            }
+          },
+          {
+            "id": "paw-five",
+            "targetId": "cat",
+            "startMs": 710,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "kitten-step-a"
+            }
+          },
+          {
+            "id": "paw-six",
+            "targetId": "cat",
+            "startMs": 890,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "kitten-step-b"
+            }
+          },
+          {
+            "id": "paw-seven",
+            "targetId": "cat",
+            "startMs": 1070,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "kitten-step-a"
+            }
+          },
+          {
+            "id": "look-down",
+            "targetId": "head",
+            "startMs": 1150,
+            "durationMs": 430,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 23
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "rest-paws",
+            "targetId": "cat",
+            "startMs": 1300,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "kitten-rest"
+            }
+          },
+          {
+            "id": "ease-shoulders",
+            "targetId": "actor-upper",
+            "startMs": 1390,
+            "durationMs": 570,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 11
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "ease-arm",
+            "targetId": "arm-shoulder",
+            "startMs": 1460,
+            "durationMs": 500,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -20
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-shoulder-2",
+            "targetId": "far-arm-shoulder",
+            "startMs": 1460,
+            "durationMs": 650,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -16
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-elbow-2",
+            "targetId": "far-arm-elbow",
+            "startMs": 1460,
+            "durationMs": 650,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -8
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "relief",
+            "targetId": "head",
+            "startMs": 1490,
+            "durationMs": 33,
+            "action": "swap",
+            "params": {
+              "assetId": "stick-face-relief"
+            }
+          },
+          {
+            "id": "ease-elbow",
+            "targetId": "arm-elbow",
+            "startMs": 1500,
+            "durationMs": 480,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -10
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "settle-look",
+            "targetId": "head",
+            "startMs": 1760,
+            "durationMs": 450,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": 20
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-shoulder-3",
+            "targetId": "far-arm-shoulder",
+            "startMs": 2200,
+            "durationMs": 480,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -10
+              },
+              "easingPreset": "smooth"
+            }
+          },
+          {
+            "id": "far-elbow-3",
+            "targetId": "far-arm-elbow",
+            "startMs": 2200,
+            "durationMs": 480,
+            "action": "transform",
+            "params": {
+              "to": {
+                "rotationDeg": -6
+              },
+              "easingPreset": "smooth"
+            }
+          }
+        ],
+        "transition": {
+          "type": "cut"
+        },
+        "note": "Return to the wide. Carry the stopped door, shoe and the character's recoil across the cut. The kitten crosses the threshold and comes toward the character. Hold the relieved face and the rescued kitten. The actor returns in the same pose, looks down, and relaxes at the hips. Keep the round face, teal knit cap and coral jacket consistent across shots. The far arm counterbalances the reach, recoils with the shoulder, and relaxes after the kitten crosses.",
+        "camera": {
+          "initial": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1
+          },
+          "moves": [
+            {
+              "id": "push-toward-the-pair",
+              "startMs": 1400,
+              "durationMs": 2100,
+              "to": {
+                "x": -48,
+                "y": 96,
+                "zoom": 1.12
+              },
+              "easingPreset": "smooth"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
