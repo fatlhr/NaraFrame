@@ -5,6 +5,7 @@ import {
   motionStateFor,
   planeTransformFor,
   sceneTransitionStateFor,
+  visibilityFor,
 } from "../../src/remotion/motion.js";
 
 const baseRender: CompiledDraft["profile"]["render"] = {
@@ -560,4 +561,42 @@ describe("visibility sequence", () => {
     expect(at(80).opacity).toBeCloseTo(0);
     expect(at(80).translateY).toBeCloseTo(20);
   });
+});
+
+it("bounds camera zoom and opacity while travel passes the target and settles", () => {
+  const scene = sceneOf("rebound", 0, 70, { type: "cut" });
+  scene.camera = {
+    initial: { x: 0, y: 0, zoom: 4 },
+    moves: [
+      {
+        id: "pull",
+        startFrame: 0,
+        durationInFrames: 40,
+        to: { x: 100, y: 0, zoom: 0.25 },
+        easingPreset: "spring",
+      },
+    ],
+  };
+  scene.beats = [
+    {
+      id: "entry",
+      targetId: "label",
+      action: "reveal",
+      startFrame: 0,
+      durationInFrames: 40,
+      params: { direction: "right", distance: 100, easingPreset: "spring" },
+    },
+  ];
+  expect(cameraStateFor(scene, 10)).toMatchObject({ zoom: 0.25 });
+  expect(cameraStateFor(scene, 10).x).toBeGreaterThan(120);
+  expect(visibilityFor(scene.beats, "label", 10).opacity).toBe(1);
+  expect(visibilityFor(scene.beats, "label", 10).translateX).toBeGreaterThan(
+    20,
+  );
+  for (const f of [0, 10, 20, 30, 40, 60]) {
+    const opacity = visibilityFor(scene.beats, "label", f).opacity;
+    expect(opacity).toBeGreaterThanOrEqual(0);
+    expect(opacity).toBeLessThanOrEqual(1);
+  }
+  expect(cameraStateFor(scene, 60)).toEqual({ x: 100, y: 0, zoom: 0.25 });
 });

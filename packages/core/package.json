@@ -14,6 +14,10 @@
       "types": "./dist/compiler/composition-quality.d.ts",
       "import": "./dist/compiler/composition-quality.js"
     },
+    "./motion-easing": {
+      "types": "./dist/motion-easing.d.ts",
+      "import": "./dist/motion-easing.js"
+    },
     "./count-format": {
       "types": "./dist/count-format.d.ts",
       "import": "./dist/count-format.js"

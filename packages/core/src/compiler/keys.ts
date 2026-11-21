@@ -22,7 +22,7 @@ import { narrationTextHash } from "./voice-binding.js";
 //     frames grabbed before they finished painting and are not reused.
 // 14: reveals and exits play as one ordered sequence, so a layer revealed
 //     after an exit, or revealed twice, now shows instead of staying hidden.
-export const RENDER_ENGINE = "naraframe-draft/14";
+export const RENDER_ENGINE = "naraframe-draft/15";
 
 /**
  * Version of the text checks the visual preflight applies to a scene's text

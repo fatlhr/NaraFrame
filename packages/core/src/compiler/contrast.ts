@@ -1,4 +1,10 @@
 import type { Issue } from "../model/issue.js";
+import {
+  cameraPoseAtProgress,
+  easingExtrema,
+  expressiveProgress,
+  isExpressive,
+} from "../motion-easing.js";
 import type { RenderTokens } from "../schema/profile.js";
 import type { Beat, Layer, Scene } from "../schema/scene.js";
 import { ancestorsOf, groupTree, leafMembersOf } from "./groups.js";
@@ -21,8 +27,7 @@ import type { VarietyScene } from "./variety.js";
  * camera depth that the camera brings under the text.
  *
  * Geometry is bounding boxes in design pixels, never glyphs. Moving layers
- * are bounded by the boxes they can reach: transform poses (cubic easing
- * never overshoots; a turning step is bounded by the disk it sweeps), follow
+ * are bounded by the boxes they can reach: transform poses (including curve extrema and the disk swept by a turn), follow
  * paths, and camera moves with the renderer's plane rule
  * screen = C + zoom^depth · (P − C) − depth · (x, y). The text's own fades,
  * reveal and exit drift and emphasize scale are transitions and not judged.
@@ -295,6 +300,8 @@ const visibilityOf = (
     if (!ids.includes(beat.targetId)) return;
     if (beat.action !== "reveal" && beat.action !== "exit") return;
     visibility.animated = true;
+    if (easingExtrema(beat.params.easingPreset).length)
+      visibility.timed = false;
     visibility.beatIds += `${beat.id}\n`;
     const count = seen.get(beat.targetId) ?? { reveals: 0, exits: 0 };
     if (beat.action === "reveal") count.reveals += 1;
@@ -342,8 +349,7 @@ const groupIsDisplaced = (group: GroupLayer): boolean => {
  * The boxes a layer's pose can reach, one per step, in its group's frame when
  * `withinGroup` (the group's own motion is shared and cancels out) or in its
  * plane otherwise. The renderer adds the pose rotation to the layer's own
- * rotation and eases every property with a cubic curve, which never
- * overshoots. The centre is tracked as a region: a point while the pose is
+ * rotation. Expressive transforms additionally sweep through their extrema. The centre is tracked as a region: a point while the pose is
  * known, the path's frame after a follow, and a band after a transform that
  * sets only one axis of a pose that was on a path.
  * - a transform that keeps the rotation from a known pose moves each edge
@@ -453,7 +459,40 @@ const reachFor = (
       const turns =
         !rotationKnown ||
         (to.rotationDeg !== undefined && to.rotationDeg !== pose.rotationDeg);
-      if (!known || turns) {
+      const preset = beat.params.easingPreset;
+      if (isExpressive(preset) && easingExtrema(preset).length) {
+        if (!known)
+          return {
+            unbounded: `the starting position of overshooting layer ${layer.id} depends on its path`,
+          };
+        const values = [
+          0,
+          ...easingExtrema(preset).map((t) => expressiveProgress(preset, t)),
+          1,
+        ];
+        const largestScale = Math.max(
+          pose.scale,
+          next.scale,
+          ...values.map((k) => pose.scale + (next.scale - pose.scale) * k),
+        );
+        boxes.push(
+          union(
+            values.map((k) => {
+              const x = centre.x + (target.x - centre.x) * k;
+              const y = centre.y + (target.y - centre.y) * k;
+              if (turns)
+                return grow(pointBox(x, y), halfDiagonal * largestScale);
+              // Bound scale independently of translation, including a clamped shrink.
+              return posedBox(frame, {
+                x: x - centreX,
+                y: y - centreY,
+                scale: largestScale,
+                rotationDeg: base + pose.rotationDeg,
+              });
+            }),
+          ),
+        );
+      } else if (!known || turns) {
         const radius = halfDiagonal * Math.max(pose.scale, next.scale);
         boxes.push(union([grow(centre, radius), grow(target, radius)]));
       } else {
@@ -598,16 +637,36 @@ const placementsFor = (
   return placements;
 };
 
-/** The camera's poses in order: the initial pose, then where each move ends. */
+/** Include every turn and zoom clamp boundary so rangeOver sees linear segments. */
 const cameraPoses = (scene: Scene): Pose[] => {
   const camera = scene.camera;
   if (!camera) return [{ x: 0, y: 0, zoom: 1 }];
-  return [camera.initial, ...camera.moves.map((move) => move.to)];
-};
-
-const cameraMovesIn = (scene: Scene): boolean => {
-  const poses = cameraPoses(scene);
-  return poses.some((pose) => pose.x !== 0 || pose.y !== 0 || pose.zoom !== 1);
+  const poses = [camera.initial];
+  let from = camera.initial;
+  for (const move of camera.moves) {
+    const preset = move.easingPreset;
+    if (isExpressive(preset) && easingExtrema(preset).length) {
+      const turns = easingExtrema(preset).map((t) =>
+        expressiveProgress(preset, t),
+      );
+      // The swept region depends on the progress range, not traversal order.
+      const low = Math.min(0, ...turns);
+      const high = Math.max(1, ...turns);
+      const dz = move.to.zoom - from.zoom;
+      const clamps =
+        dz === 0
+          ? []
+          : [0.25, 4]
+              .map((z) => (z - from.zoom) / dz)
+              .filter((k) => low < k && k < high);
+      for (const k of [low, ...clamps.sort((a, b) => a - b), high]) {
+        poses.push(cameraPoseAtProgress(from, move.to, k));
+      }
+    }
+    poses.push(move.to);
+    from = move.to;
+  }
+  return poses;
 };
 
 /**
@@ -1044,11 +1103,14 @@ export const checkContrast = (
 ): Issue[] => {
   const issues: Issue[] = [];
   entries.forEach(({ scene, sceneIndex, resolvedLayers, beatStartsMs }) => {
+    const poses = cameraPoses(scene);
     const geometry: SceneGeometry = {
       keys: paintKeys(resolvedLayers),
       placements: placementsFor(resolvedLayers, scene.beats, beatStartsMs),
-      poses: cameraPoses(scene),
-      cameraMoves: cameraMovesIn(scene),
+      poses,
+      cameraMoves: poses.some(
+        (pose) => pose.x !== 0 || pose.y !== 0 || pose.zoom !== 1,
+      ),
       canvas,
     };
     resolvedLayers.forEach((layer, layerIndex) => {

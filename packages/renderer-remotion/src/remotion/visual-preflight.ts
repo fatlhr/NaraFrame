@@ -8,6 +8,7 @@ import {
   rootGroupOf,
 } from "@naraframe/core/groups";
 import { imagePlacement } from "@naraframe/core/image-placement";
+import { easingExtrema, extremumFrames } from "@naraframe/core/motion-easing";
 import { measureText } from "@remotion/layout-utils";
 import { captionLayoutFor } from "./captions.js";
 import type { CompositionPaint } from "./composition-paint.js";
@@ -525,6 +526,23 @@ const framesForScene = (
   );
   add(duration - 1, "scene-final");
   scene.beats.forEach((beat) => {
+    if (
+      beat.action !== "swap" &&
+      easingExtrema(beat.params.easingPreset).length
+    ) {
+      const step = scene.layers.find(
+        (layer) => layer.id === beat.targetId,
+      )?.stepFps;
+      const followsExposure = beat.action !== "draw" && beat.action !== "count";
+      const hold = followsExposure && step ? Math.max(1, draft.fps / step) : 1;
+      for (const frame of extremumFrames(
+        beat.params.easingPreset,
+        beat.startFrame,
+        beat.durationInFrames,
+        hold,
+      ))
+        add(frame, `beat-extremum:${beat.id}`);
+    }
     add(beat.startFrame, `beat-start:${beat.id}`);
     add(
       beat.startFrame + Math.floor(beat.durationInFrames / 2),
@@ -538,6 +556,12 @@ const framesForScene = (
     );
   });
   scene.camera?.moves.forEach((move) => {
+    for (const frame of extremumFrames(
+      move.easingPreset,
+      move.startFrame,
+      move.durationInFrames,
+    ))
+      add(frame, `camera-extremum:${move.id}`);
     add(move.startFrame, `camera-start:${move.id}`);
     add(
       move.startFrame + Math.floor(move.durationInFrames / 2),
@@ -876,8 +900,7 @@ export const resolveVisualPreflight = (
         return;
       }
 
-      // A counted layer is measured at each count's start and end text as
-      // well as its settled text. Intermediate values are not measured.
+      // Measure settled text, endpoints and displayed values around curve extrema.
       const settled = fitText(draft, layer);
       const metrics =
         countedTextVariants(scene, layer.id)

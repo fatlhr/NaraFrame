@@ -204,6 +204,17 @@ describe("follow beats", () => {
     expect(state.rotationDeg).toBeCloseTo(180);
   });
 
+  it("turns an oriented follower as the spring rebounds along its path", () => {
+    const beat = sail(0.1, 0.7);
+    if (beat.action !== "follow") throw new Error("missing follow");
+    beat.params.easingPreset = "spring";
+    const draft = draftWith([beat]);
+    const angle = (frame: number) =>
+      motionStateFor(draft, sceneOf(draft), "ship", frame).rotationDeg;
+    expect([angle(34), angle(42), angle(49), angle(58), angle(75)]).toEqual([
+      0, 180, 0, 180, 180,
+    ]);
+  });
   it("hands the pose on to a later transform", () => {
     const draft = draftWith([
       sail(0, 1),
